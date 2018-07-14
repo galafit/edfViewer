@@ -3,8 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.chart.config.ScrollableChartConfig;
 import com.biorecorder.basechart.chart.config.Theme;
 import com.biorecorder.basechart.chart.config.traces.TraceConfig;
-import com.biorecorder.basechart.data.BaseData;
-import com.biorecorder.basechart.data.Data;
+import com.biorecorder.basechart.data.DataSeries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +15,8 @@ public class ChartConfig extends ScrollableChartConfig {
     private boolean isDataCropEnable = true;
     private boolean isGroupingEnable = true;
     private ArrayList<Float> previewGroupingIntervals = new ArrayList<Float>();
-    private List<BaseData> chartData = new ArrayList<BaseData>();
-    private List<BaseData> previewData = new ArrayList<BaseData>();
+    private List<DataSeries> chartData = new ArrayList<>();
+    private List<DataSeries> previewData = new ArrayList<>();
     // true for pc and false for phone
     private boolean isChartGroupedDatCachingEnable = true;
 
@@ -88,11 +87,11 @@ public class ChartConfig extends ScrollableChartConfig {
         this.isGroupingEnable = isGroupingEnable;
     }
 
-    public List<BaseData> getChartData() {
+    public List<DataSeries> getChartData() {
         return chartData;
     }
 
-    public List<BaseData> getPreviewData() {
+    public List<DataSeries> getPreviewData() {
         return previewData;
     }
 
@@ -103,15 +102,15 @@ public class ChartConfig extends ScrollableChartConfig {
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData, String name, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        chartData.add(traceData.getDataSet());
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        chartData.add(traceData);
         getChartConfig().addTrace(traceConfig, chartData.size() - 1, name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
 
         int traceYIndex = getChartConfig().getTraceYIndex(getChartConfig().getTraceCount() - 1);
@@ -121,28 +120,28 @@ public class ChartConfig extends ScrollableChartConfig {
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addTrace(traceConfig, traceData, null, isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData, String name, String dataUnits) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits) {
         addTrace(traceConfig, traceData, name, dataUnits, false, false);
     }
 
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData, String name) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name) {
         addTrace(traceConfig, traceData, name, false, false);
     }
 
     /**
      * add trace to the last chart stack
      */
-    public void addTrace(TraceConfig traceConfig, Data traceData) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData) {
         addTrace(traceConfig, traceData, null, false, false);
     }
 
@@ -156,15 +155,15 @@ public class ChartConfig extends ScrollableChartConfig {
     /**
      * add trace to the last preview stack
      */
-    public void addPreviewTrace(TraceConfig traceConfig, Data traceData, String name,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        previewData.add(traceData.getDataSet());
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        previewData.add(traceData);
         getPreviewConfig().addTrace(traceConfig, previewData.size() - 1, name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
      * add trace to the last preview stack
      */
-    public void addPreviewTrace(TraceConfig traceConfig, Data traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addPreviewTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
 
         int traceYIndex = getPreviewConfig().getTraceYIndex(getPreviewConfig().getTraceCount() - 1);
@@ -174,7 +173,7 @@ public class ChartConfig extends ScrollableChartConfig {
     /**
      * add trace to the last preview stack
      */
-    public void addPreviewTrace(TraceConfig traceConfig, Data traceData, String name, String dataUnits) {
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits) {
         addPreviewTrace(traceConfig, traceData, name, dataUnits, false, false);
     }
 
@@ -182,14 +181,14 @@ public class ChartConfig extends ScrollableChartConfig {
     /**
      * add trace to the last preview stack
      */
-    public void addPreviewTrace(TraceConfig traceConfig, Data data, String name) {
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries data, String name) {
         addPreviewTrace(traceConfig, data, name, false, false);
     }
 
     /**
      * add trace to the last preview stack
      */
-    public void addPreviewTrace(TraceConfig traceConfig, Data data) {
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries data) {
         addPreviewTrace(traceConfig, data, null, false, false);
     }
 }

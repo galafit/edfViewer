@@ -6,36 +6,36 @@ import java.text.MessageFormat;
  * Created by galafit on 8/1/18.
  */
 public class RangeInt {
-    private int min;
-    private int max;
+    private int start;
+    private int end;
 
-    public RangeInt(int min, int max) {
-        this.min = min;
-        this.max = max;
-        if (min > max){
-            String errorMessage = "Error during creating Range. Expected Start <= End. Start = {0}, End = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, min, max);
+    public RangeInt(int start, int end) {
+        if (start > end){
+            String errorMessage = "Range error. Expected Start <= End. Start = {0}, End = {1}.";
+            String formattedError = MessageFormat.format(errorMessage, start, end);
             throw new IllegalArgumentException(formattedError);
         }
+        this.start = start;
+        this.end = end;
     }
 
     public boolean contains(int value) {
-        if(value >= min && value <= max) {
+        if(value >= start && value <= end) {
             return true;
         }
         return false;
     }
 
-    public int getMin() {
-        return min;
+    public int getStart() {
+        return start;
     }
 
-    public int getMax() {
-        return max;
+    public int getEnd() {
+        return end;
     }
 
     public int length() {
-        return max - min;
+        return end - start;
     }
 
     public static RangeInt max(RangeInt range1, RangeInt range2) {
@@ -45,6 +45,6 @@ public class RangeInt {
         if(range2 == null) {
             return range1;
         }
-        return new RangeInt(Math.min(range1.min, range2.min), Math.max(range1.max, range2.max));
+        return new RangeInt(Math.min(range1.start, range2.start), Math.max(range1.end, range2.end));
     }
 }

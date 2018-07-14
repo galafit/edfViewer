@@ -3,9 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.chart.Range;
 import com.biorecorder.basechart.chart.config.traces.BooleanTraceConfig;
 import com.biorecorder.basechart.chart.config.traces.LineTraceConfig;
-import com.biorecorder.basechart.data.GroupingType;
 import com.biorecorder.basechart.data.IntArrayList;
-import com.biorecorder.basechart.data.XYData;
 import com.biorecorder.basechart.data.FloatArrayList;
 
 import javax.swing.*;
@@ -23,7 +21,7 @@ public class MainFrame extends JFrame {
     FloatArrayList xData;
     ChartPanel chartPanel;
 
-    public MainFrame() throws HeadlessException {
+ /*   public MainFrame() throws HeadlessException {
         int width = 500;
         int height = 500;
 
@@ -47,6 +45,8 @@ public class MainFrame extends JFrame {
 
         IntArrayList bandYData = new IntArrayList();
         int counter = 0;
+
+        */
      /*   for (int i = 0; i < 1600; i++) {
             if(counter < 100) {
                bandYData.add(1);
@@ -60,7 +60,7 @@ public class MainFrame extends JFrame {
         }*/
 
 
-        XYData xyData1 = new XYData();
+      /*  XYData xyData1 = new XYData();
         xyData1.setYData(yData1);
 
         XYData xyData2 = new XYData();
@@ -155,5 +155,5 @@ public class MainFrame extends JFrame {
         timer.setInitialDelay(0);
         timer.start();
 
-    }
+    }*/
 }

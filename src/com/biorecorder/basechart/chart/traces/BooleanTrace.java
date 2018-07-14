@@ -3,6 +3,7 @@ package com.biorecorder.basechart.chart.traces;
 import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.chart.config.traces.BooleanTraceConfig;
 import com.biorecorder.basechart.chart.InfoItem;
+import com.biorecorder.basechart.data.DataSeries;
 
 /**
  * Created by galafit on 28/1/18.
@@ -16,7 +17,7 @@ public class BooleanTrace extends Trace {
     }
 
     @Override
-    public void setData(DataSet dataSet) {
+    public void setData(DataSeries dataSet) {
         super.setData(dataSet);
         xyData = new XYViewer();
         xyData.setData(dataSet);

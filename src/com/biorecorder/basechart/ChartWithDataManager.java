@@ -2,9 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.chart.config.SimpleChartConfig;
-import com.biorecorder.basechart.data.BaseData;
-import com.biorecorder.basechart.data.GroupingType;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +9,7 @@ import java.util.List;
  * Created by galafit on 26/11/17.
  */
 public class ChartWithDataManager {
-    private ChartConfig config;
+/*    private ChartConfig config;
     private int minPixelsPerDataItem = 1;
     private float currentPreviewGroupingInterval = 0;
 
@@ -102,7 +99,7 @@ public class ChartWithDataManager {
                 for (int i = 0; i < config.getChartConfig().getXAxisCount(); i++) {
                     Double scrollExtent = config.getScrollExtent(i);
                     if (scrollExtent != null) {
-                        cropChartData(i, new Range(previewMinMax.getMin(), previewMinMax.getMin() + scrollExtent));
+                        cropChartData(i, new Range(previewMinMax.getStart(), previewMinMax.getStart() + scrollExtent));
                     }
                 }
             }
@@ -135,7 +132,7 @@ public class ChartWithDataManager {
     }
 
     private boolean isScrollAtTheEnd(int xAxisIndex) {
-        double dataMax = getChartDataMinMax().getMax();
+        double dataMax = getChartDataMinMax().getEnd();
         double scrollEnd = scrollableChart.getScrollValue(xAxisIndex) + scrollableChart.getScrollExtent(xAxisIndex);
         if (dataMax - scrollEnd > 0) {
             return false;
@@ -163,16 +160,14 @@ public class ChartWithDataManager {
         return scrollableChart;
     }
 
-    /**
-     * Prepare and crop com.biorecorder.basechart basedata
-     */
+
     private void cropChartData(int xAxisIndex, Range scrollExtremes) {
         SimpleChartConfig chartConfig = config.getChartConfig();
         for (int traceIndex = 0; traceIndex < chartConfig.getTraceCount(); traceIndex++) {
             int traceDataIndex = chartConfig.getTraceDataIndex(traceIndex);
             if (chartConfig.getTraceXIndex(traceIndex) == xAxisIndex) {
                 BaseData traceDataSet = chartProcessedData.get(traceDataIndex);
-                BaseData subset = traceDataSet.getSubset(scrollExtremes.getMin(), scrollExtremes.getMax());
+                BaseData subset = traceDataSet.getSubset(scrollExtremes.getStart(), scrollExtremes.getEnd());
                 chartProcessedData.set(traceDataIndex, subset);
             }
         }
@@ -258,7 +253,7 @@ public class ChartWithDataManager {
                 previewExtent = Math.max(previewExtent, groupingInterval * area.width / minPixelsPerDataItem);
             }
 
-            double min = chartFullMinMax.getMin();
+            double min = chartFullMinMax.getStart();
             double maxLength = Math.max(previewExtent, chartFullMinMax.length());
             chartFullMinMax = new Range(min, min + maxLength);
         }
@@ -316,6 +311,6 @@ public class ChartWithDataManager {
         for (Integer xAxisIndex : scrollableChart.getXAxisWithScroll()) {
             minExtent = (minExtent == 0) ? scrollableChart.getScrollExtent(xAxisIndex) : Math.min(minExtent, scrollableChart.getScrollExtent(xAxisIndex));
         }
-        return scrollableChart.setScrollsValue(dataMinMax.getMax() - minExtent);
-    }
+        return scrollableChart.setScrollsValue(dataMinMax.getEnd() - minExtent);
+    } */
 }

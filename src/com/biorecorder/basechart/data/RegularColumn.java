@@ -6,72 +6,164 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
 /**
  * Created by galafit on 1/11/17.
  */
-public class RegularColumn implements NumberColumn {
-    private double startValue;
-    private double dataInterval;
+public class RegularColumn extends NumberColumn {
+    private SeriesViewer series;
 
     public RegularColumn(double startValue, double dataInterval) {
-        this.startValue = startValue;
-        this.dataInterval = dataInterval;
-    }
-
-    public double getStartValue() {
-        return startValue;
-    }
-
-    public double getDataInterval() {
-        return dataInterval;
+        series = new SeriesViewer(new RegularSeries(startValue, dataInterval));
     }
 
     public RegularColumn() {
         this(0, 1);
     }
 
+    public double getDataInterval() {
+        return series.getDataInterval();
+    }
+
     @Override
     public long size() {
-        return Integer.MAX_VALUE;
+        return series.size();
     }
 
     @Override
     public double value(long index) {
-        return startValue + dataInterval * index;
+        return series.get(index);
     }
 
     @Override
-    public Range extremes(long from, int length) {
-        double min = startValue;
-        double max = startValue + (size() - 1) * dataInterval;
-        return new Range(min, max);
-    }
-
-    @Override
-    public long lowerBound(double value, long from, int length) {
-        return (long) ((value - startValue) / dataInterval);
-    }
-
-
-    @Override
-    public long upperBound(double value, long from, int length) {
-        long lowerBound = lowerBound(value, from, length);
-        if(value == value(lowerBound)) {
-            return lowerBound;
+    public Range extremes(long length) {
+        if(series.size() > 0) {
+            return new Range(series.get(0), series.get(series.size() - 1));
         }
-        return lowerBound + 1;
+        return null;
     }
 
     @Override
-    public void setGroupingType(GroupingType groupingType) {
-        // DO NOTHING!!!
+    public long upperBound(double value, long length) {
+       return series.upperBound(value);
     }
 
     @Override
-    public void groupByNumber(int numberOfElementsInGroup, boolean isCachingEnable) {
-        dataInterval = dataInterval * numberOfElementsInGroup;
-        //startValue += dataInterval * (numberOfElementsInGroup - 1) / 2;
+    public long lowerBound(double value, long length) {
+        return series.lowerBound(value);
+    }
+
+    @Override
+    public void setCachingEnabled(boolean isCachingEnabled) {
+        // do nothing
+    }
+
+    @Override
+    public boolean isCachingEnabled() {
+        return false;
+    }
+
+    @Override
+    public NumberColumn[] group(LongSeries groupIndexes) {
+        return new NumberColumn[0];
+    }
+
+    @Override
+    public void setViewRange(long from, long length) {
+        series.setViewRange(from, length);
     }
 
     @Override
     public NumberColumn copy() {
-        return new RegularColumn(startValue, dataInterval);
+        return new RegularColumn(series.getStartValue(), series.getDataInterval());
     }
+
+    class RegularSeries implements DoubleSeries {
+        private double startValue;
+        private double dataInterval;
+
+        public RegularSeries(double startValue, double dataInterval) {
+            this.startValue = startValue;
+            this.dataInterval = dataInterval;
+        }
+
+        public double getStartValue() {
+            return startValue;
+        }
+
+        public double getDataInterval() {
+            return dataInterval;
+        }
+
+        @Override
+        public long size() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public double get(long index) {
+            return startValue + dataInterval * index;
+        }
+
+        public long upperBound(double value) {
+            long lowerBoundIndex = lowerBound(value);
+            if(value == get(lowerBoundIndex)) {
+                return lowerBoundIndex;
+            }
+            return lowerBoundIndex + 1;
+        }
+
+        public long lowerBound(double value) {
+            long lowerBoundIndex = (long) ((value - startValue) / dataInterval);
+            if(lowerBoundIndex < 0) {
+                lowerBoundIndex = 0;
+            }
+            return lowerBoundIndex;
+        }
+    }
+
+    class SeriesViewer implements DoubleSeriesRangeViewer {
+        private RegularSeries series;
+        private long startIndex = 0;
+        private long length = -1;
+
+
+        public SeriesViewer(RegularSeries series) {
+            this.series = series;
+        }
+
+        @Override
+        public void setViewRange(long startIndex, long length) {
+            this.startIndex = startIndex;
+            this.length = length;
+        }
+
+        @Override
+        public long size() {
+            if(length < 0) {
+                return series.size();
+            }
+            return length;
+        }
+
+        @Override
+        public double get(long index) {
+            return series.get(index - startIndex);
+        }
+
+        public double getStartValue() {
+            return series.getStartValue();
+        }
+
+        public double getDataInterval() {
+            return series.getDataInterval();
+        }
+
+        public long upperBound(double value) {
+           return series.upperBound(value) - startIndex;
+        }
+
+
+        public long lowerBound(double value) {
+            return series.lowerBound(value) - startIndex;
+        }
+    }
+
+
 }

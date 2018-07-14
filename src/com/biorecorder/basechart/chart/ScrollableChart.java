@@ -29,10 +29,10 @@ public class ScrollableChart {
         Set<Integer> scrollableAxis = config.getXAxisWithScroll();
         calculateAreas(area);
         if (config.getScrollsExtents().length == 0) { // Chart without preview
-            chart = new SimpleChart(chartConfig,chartData, chartArea, traceFactory);
+           // chart = new SimpleChart(chartConfig,chartData, chartArea, traceFactory);
         } else {
             SimpleChartConfig previewConfig = config.getPreviewConfig();
-            chart = new SimpleChart(chartConfig, chartData, chartArea, traceFactory);
+          //  chart = new SimpleChart(chartConfig, chartData, chartArea, traceFactory);
             if(config.getPreviewMinMax() == null) {
                 Range previewMinMax = null;
                 for (Integer xAxisIndex : scrollableAxis) {
@@ -40,7 +40,7 @@ public class ScrollableChart {
                 }
             }
 
-            preview = new SimpleChart(previewConfig, previewData, previewArea, traceFactory);
+            //preview = new SimpleChart(previewConfig, previewData, previewArea, traceFactory);
 
             for (Integer xAxisIndex : scrollableAxis) {
                 Scroll scroll = new Scroll(config.getScrollExtent(xAxisIndex), config.getScrollConfig(), preview.getXAxisScale(0));
@@ -133,9 +133,6 @@ public class ScrollableChart {
        return chartArea.contains(x, y);
     }
 
-    public void setChartData(List<DataSet> data) {
-        chart.setData(data);
-    }
 
     public int getChartSelectedTraceIndex() {
         return chart.getSelectedTraceIndex();
@@ -232,11 +229,6 @@ public class ScrollableChart {
     /**
      * =======================Base methods to interact with preview==========================
      **/
-
-
-    public void setPreviewData(List<DataSet> data) {
-        preview.setData(data);
-    }
 
     public boolean selectPreviewTrace(int x, int y) {
         return preview.selectTrace(x, y);

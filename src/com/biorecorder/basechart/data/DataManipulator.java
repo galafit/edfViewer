@@ -39,7 +39,7 @@ public class DataManipulator {
     /******************************************************************
      *                         DATA GROUPING OR BINNING
      ******************************************************************/
-    public static LongArrayList getGroupIndexes(IntSeries data, long from, int length, int groupInterval){
+    public static LongArrayList getGroupsIndexes(IntSeries data, long from, int length, int groupInterval){
         LongArrayList groupIndexes = new LongArrayList();
         // first index always "from";
         groupIndexes.add(from);

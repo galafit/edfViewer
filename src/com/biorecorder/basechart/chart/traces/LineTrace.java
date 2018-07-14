@@ -4,6 +4,7 @@ package com.biorecorder.basechart.chart.traces;
 import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.chart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.chart.InfoItem;
+import com.biorecorder.basechart.data.DataSeries;
 
 /**
  * Created by galafit on 11/10/17.
@@ -17,10 +18,10 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    public void setData(DataSet dataSet) {
-        super.setData(dataSet);
+    public void setData(DataSeries dataSeries) {
+        super.setData(dataSeries);
         xyData = new XYViewer();
-        xyData.setData(dataSet);
+        xyData.setData(dataSeries);
     }
 
     @Override

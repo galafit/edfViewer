@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by hdablin on 23.06.17.
  */
-public class ChartPanel extends JPanel implements KeyListener {
+public class ChartPanel { //extends JPanel implements KeyListener {
     int scrollPointsPerRotation = 10;
     // во сколько раз растягивается или сжимается ось при автозуме
     private float defaultZoom = 2;
@@ -24,7 +24,7 @@ public class ChartPanel extends JPanel implements KeyListener {
     private List<Integer> yAxisListPreview = new ArrayList<>();
     private ChartWithDataManager chartDataManager;
 
-    public ChartPanel(ChartConfig config) {
+/*    public ChartPanel(ChartConfig config) {
         BColor bg = config.getChartConfig().getMarginColor();
         setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
         addMouseMotionListener(new MouseMotionAdapter() {
@@ -334,5 +334,5 @@ public class ChartPanel extends JPanel implements KeyListener {
     public void update() {
         chartDataManager.update();
         repaint();
-    }
+    } */
 }

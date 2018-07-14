@@ -6,70 +6,56 @@ import java.text.MessageFormat;
  * Created by galafit on 11/7/17.
  */
 public class Range {
-    private Double min;
-    private Double max;
+    private double start;
+    private double end;
 
-    public Range(Double min, Double max) {
-        this.min = min;
-        this.max = max;
-        if (max != null && min != null & min > max){
-            String errorMessage = "Error during creating Range. Expected Start <= End. Start = {0}, End = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, min, max);
+    public Range(double start, double end) {
+        if (start > end){
+            String errorMessage = "Range Error. Expected Start <= End. Start = {0}, End = {1}.";
+            String formattedError = MessageFormat.format(errorMessage, start, end);
             throw new IllegalArgumentException(formattedError);
         }
+        this.start = start;
+        this.end = end;
     }
 
     public boolean contains(double value) {
-        if(max == null || min == null) {
-            return false;
-        }
-        if(value >= min && value <= max) {
+        if(value >= start && value <= end) {
             return true;
         }
         return false;
     }
 
-    public  Double getMin() {
-        return min;
+    public  double getStart() {
+        return start;
     }
 
-    public Double getMax() {
-        return max;
+    public double getEnd() {
+        return end;
     }
 
     public double length() {
-        if(max != null && min != null) {
-            return max - min;
-        }
-        return 0;
+        return end - start;
     }
 
     public static Range max(Range range1, Range range2) {
         if(range1 == null && range2 == null) {
             return null;
         }
-        Double min = null;
-        Double max = null;
-        if(range1 != null && range1.min != null) {
-            min = range1.min;
+        if(range1 != null && range2 == null) {
+           return range1;
         }
-        if(range2 != null && range2.min != null) {
-            min = (min == null) ? range2.min : Math.min(min, range2.min);
+        if(range2 != null && range1 == null) {
+            return range2;
         }
-        if(range1 != null && range1.max != null) {
-            max = range1.max;
-        }
-        if(range2 != null && range2.max != null) {
-            max = (max == null) ? range2.max : Math.max(max, range2.max);
-        }
-        return new Range(min, max);
+        return new Range(Math.min(range1.start, range2.start), Math.max(range1.end, range2.end));
     }
 
     @Override
     public String toString() {
         return "Range{" +
-                "getMin=" + min +
-                ", max=" + max +
+                "getStart=" + start +
+                ", end=" + end +
                 '}';
     }
 }

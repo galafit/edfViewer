@@ -14,11 +14,7 @@ public class DataSeries {
     ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
     NumberColumn xColumn = new RegularColumn();
     StringColumn annotationColumn;
-
-    // for subsets
-    long startIndex = 0;
-    long length = -1;
-
+    int length;
 
     public boolean isOrdered() {
         if (isOrdered || xColumn instanceof RegularColumn) {
@@ -35,17 +31,17 @@ public class DataSeries {
         xColumn = new IntColumn(series);
     }
 
-    public void setXData(FloatSeries series) {
+  /*  public void setXData(FloatSeries series) {
         xColumn = new FloatColumn(series);
-    }
+    }*/
 
     public void addYData(IntSeries series) {
         yColumns.add(new IntColumn(series));
     }
 
-    public void addYData(FloatSeries series) {
+  /*  public void addYData(FloatSeries series) {
         yColumns.add(new FloatColumn(series));
-    }
+    }*/
 
     public void setAnnotations(StringSeries series) {
         annotationColumn = new StringColumn(series);
@@ -60,11 +56,11 @@ public class DataSeries {
     }
 
     public double getYValue(long index, int columnNumber) {
-        return yColumns.get(columnNumber).value(index + startIndex);
+        return yColumns.get(columnNumber).value(index);
     }
 
     public double getXValue(long index) {
-        return xColumn.value(index + startIndex);
+        return xColumn.value(index);
     }
 
     public String getAnnotation(long index) {
@@ -75,50 +71,29 @@ public class DataSeries {
     }
 
     public Range getXExtremes() {
-        if (size() == 0) {
-            if(xColumn instanceof RegularColumn){
-               double startValue =  ((RegularColumn) xColumn).getStartValue();
-               return new Range(startValue, startValue);
-            }
+        long size = size();
+        if (size == 0) {
             return null;
         }
         if (isOrdered()) {
-            double min = xColumn.value(startIndex);
-            double max = xColumn.value(startIndex + size() - 1);
+            double min = xColumn.value(0);
+            double max = xColumn.value(size() - 1);
             return new Range(min, max);
         }
-        long size = size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Error. Size must be integer during calculating X extremes for non ordered series. Size = {0}, Integer.MAX_VALUE = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, size, Integer.MAX_VALUE);
-            throw new IllegalArgumentException(formattedError);
-        }
-        return xColumn.extremes(startIndex, (int) size);
+
+        return xColumn.extremes(size);
 
     }
 
     public Range getYExtremes(int yColumnNumber) {
-        if (size() == 0) {
+        long size = size();
+        if (size == 0) {
             return null;
         }
-        long size = size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Error. Size must be integer during calculating Y extremes. Size = {0}, Integer.MAX_VALUE = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, size, Integer.MAX_VALUE);
-            throw new IllegalArgumentException(formattedError);
-        }
-        return yColumns.get(yColumnNumber).extremes(startIndex, (int) size);
+        return yColumns.get(yColumnNumber).extremes(size);
     }
 
     public long size() {
-        if (length < 0) {
-            return fullSize();
-        }
-        return length;
-
-    }
-
-    private long fullSize() {
         if (yColumns.size() == 0 && annotationColumn == null) {
             return 0;
         }
@@ -133,20 +108,14 @@ public class DataSeries {
         return size;
     }
 
-
     /**
      * @param xValue
-     * @return index of nearest com.biorecorder.basechart.data item
+     * @return index of nearest data item
      */
     public long findNearestData(double xValue) {
         long size = size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Error. Size must be integer during finding nearest com.biorecorder.basechart.data. Size = {0}, Integer.MAX_VALUE = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, size, Integer.MAX_VALUE);
-            throw new IllegalArgumentException(formattedError);
-        }
-        long lowerBoundIndex = xColumn.lowerBound(xValue, startIndex, (int) size);
-        lowerBoundIndex -= startIndex;
+
+        long lowerBoundIndex = xColumn.lowerBound(xValue, size);
         if (lowerBoundIndex < 0) {
             return 0;
         }
@@ -159,54 +128,51 @@ public class DataSeries {
         return nearestIndex;
     }
 
-    public DataSeries getSubset(double startXValue, double endXValue, int shoulder) {
+    public void setCachingEnabled(boolean isCachingEnabled) {
+        xColumn.setCachingEnabled(isCachingEnabled);
+        for (NumberColumn yColumn : yColumns) {
+           yColumn.setCachingEnabled(isCachingEnabled);
+        }
+    }
+
+    public void setViewRange(long startIndex, int length) {
+        xColumn.setViewRange(startIndex, length);
+        for (NumberColumn yColumn : yColumns) {
+            yColumn.setViewRange(startIndex, length);
+        }
+    }
+
+    public DataRange getSubsetRange(double startXValue, double endXValue) {
+        if (!isOrdered()) {
+            return null;
+        }
         if (endXValue < startXValue) {
-            String errorMessage = "Error during creating subset. Expected StartValue <= EndValue. StartValue = {0}, EndValue = {1}.";
+            String errorMessage = "Range error. Expected: StartValue <= EndValue. StartValue = {0}, EndValue = {1}.";
             String formattedError = MessageFormat.format(errorMessage, startXValue, endXValue);
             throw new IllegalArgumentException(formattedError);
         }
 
-        DataSeries subset = new DataSeries();
-        subset.annotationColumn = annotationColumn;
-        subset.xColumn = xColumn;
-        subset.yColumns = yColumns;
-
-
-        long fullSize = fullSize();
-        if(fullSize == 0 || (startXValue <= xColumn.value(0) && endXValue >= xColumn.value(fullSize -1))) {
-            return subset;
+        long size = size();
+        if (size == 0 || (startXValue > xColumn.value(size - 1) || endXValue < xColumn.value(0))) {
+            return new DataRange(0, 0);
+        }
+        if (startXValue <= xColumn.value(0) && endXValue >= xColumn.value(size - 1)) {
+            return new DataRange(0, size);
         }
 
-        if((startXValue > xColumn.value(fullSize - 1) || endXValue < xColumn.value(0))) {
-            subset.length = 0;
-            return subset;
+        long startIndex = xColumn.upperBound(startXValue, size);
+        long endIndex = xColumn.lowerBound(endXValue, size);
+        long length;
+
+        if (startIndex < 0) {
+            startIndex = 0;
         }
-
-        if (!(xColumn instanceof RegularColumn) && fullSize > Integer.MAX_VALUE) {
-            String errorMessage = "Error during creating subset. Full size must be integer for no regular data sets. Full size = {0}, Integer.MAX_VALUE = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, fullSize, Integer.MAX_VALUE);
-            throw new RuntimeException(formattedError);
+        if (endIndex >= size) {
+            endIndex = size - 1;
         }
+        length = endIndex - startIndex + 1;
 
-        if (isOrdered()) {
-            subset.startIndex = xColumn.lowerBound(startXValue, 0, (int)fullSize);
-            long subsetEndIndex = xColumn.upperBound(endXValue, 0, (int)fullSize);
-            subset.startIndex -= shoulder;
-            subsetEndIndex += shoulder;
-
-            if (subset.startIndex < 0) {
-                subset.startIndex = 0;
-            }
-            if (subsetEndIndex >= fullSize) {
-                subsetEndIndex = fullSize - 1;
-            }
-            subset.length = subsetEndIndex - subset.startIndex + 1;
-            if (subset.startIndex >= fullSize || subsetEndIndex < 0) {
-                subset.length = 0;
-            }
-        }
-
-        return subset;
+        return new DataRange(startIndex, (int) length);
     }
 
     public double getAverageDataInterval() {
@@ -227,7 +193,7 @@ public class DataSeries {
         xColumn = new IntColumn(data);
     }
 
-    public void setXData(float[] data) {
+  /*  public void setXData(float[] data) {
         xColumn = new FloatColumn(data);
     }
 
@@ -237,13 +203,13 @@ public class DataSeries {
         } else {
             xColumn = new FloatColumn((List<Float>) data);
         }
-    }
+    }*/
 
     public void addYData(int[] data) {
         yColumns.add(new IntColumn(data));
     }
 
-    public void addYData(float[] data) {
+  /*  public void addYData(float[] data) {
         yColumns.add(new FloatColumn(data));
     }
 
@@ -253,5 +219,5 @@ public class DataSeries {
         } else {
             yColumns.add(new FloatColumn((List<Float>) data));
         }
-    }
+    }*/
 }

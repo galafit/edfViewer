@@ -5,17 +5,16 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
 import com.biorecorder.basechart.data.grouping.IntGroupingAvg;
 import com.biorecorder.basechart.data.grouping.IntGroupingFunction;
 
-import java.text.MessageFormat;
 import java.util.List;
 
 /**
  * Created by galafit on 27/9/17.
  */
-class IntColumn implements NumberColumn {
-    private IntSeries series;
+class IntColumn extends NumberColumn {
+    private IntSeriesRangeViewer series;
 
     public IntColumn(IntSeries series) {
-        this.series = series;
+        this.series = new SeriesViewer(series);
     }
 
     public IntColumn(int[] data) {
@@ -27,12 +26,6 @@ class IntColumn implements NumberColumn {
 
             @Override
             public int get(long index) {
-                if(index > Integer.MAX_VALUE) {
-                    String errorMessage = "Error. Expected index <= {0}, index = {1}.";
-                    String formattedError = MessageFormat.format(errorMessage,Integer.MAX_VALUE,index);
-                    throw new IllegalArgumentException(formattedError);
-
-                }
                 return data[(int)index];
             }
         });
@@ -47,14 +40,32 @@ class IntColumn implements NumberColumn {
 
             @Override
             public int get(long index) {
-                if(index > Integer.MAX_VALUE) {
-                    String errorMessage = "Error. Expected: index is integer. Index = {0}, Integer.MAX_VALUE = {1}.";
-                    String formattedError = MessageFormat.format(errorMessage, index, Integer.MAX_VALUE);
-                    throw new IllegalArgumentException(formattedError);
-                }
                 return data.get((int)index);
             }
         });
+    }
+
+    @Override
+    public void setCachingEnabled(boolean isCachingEnabled) {
+          if( series instanceof CachedSeries) {
+              if(!isCachingEnabled) {
+                  series = ((CachedSeries) series).getCachedSeries();
+              }
+          } else {
+              if(isCachingEnabled) {
+                  series = new CachedSeries(series);
+              }
+          }
+    }
+
+    @Override
+    public boolean isCachingEnabled() {
+        return series instanceof CachedSeries;
+    }
+
+    @Override
+    public void setViewRange(long from, long length) {
+        series.setViewRange(from, length);
     }
 
     @Override
@@ -68,23 +79,34 @@ class IntColumn implements NumberColumn {
     }
 
     @Override
-    public Range extremes(long from, int length) {
-        return DataManipulator.minMaxRange(series, from, length);
-    }
-
-
-    @Override
-    public long upperBound(double value, long from, int length) {
-        return DataManipulator.upperBound(series, value, from, length);
-    }
-
-    @Override
-    public long lowerBound(double value, long from, int length) {
-        return DataManipulator.lowerBound(series, value, from, length);
+    public Range extremes(long length) {
+        if (length > Integer.MAX_VALUE) {
+            String errorMessage = "Extremes can not be find if data size > Integer.MAX_VALUE. Size = " + length;
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return DataManipulator.minMaxRange(series, 0, (int)length);
     }
 
     @Override
-    public NumberColumn[] group(GroupingType groupingType, LongSeries groupIndexes) {
+    public long upperBound(double value, long length) {
+        if (length > Integer.MAX_VALUE) {
+            String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return DataManipulator.upperBound(series, value, 0, (int)length);
+    }
+
+    @Override
+    public long lowerBound(double value,  long length) {
+        if (length > Integer.MAX_VALUE) {
+            String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return DataManipulator.lowerBound(series, value, 0, (int)length);
+    }
+
+    @Override
+    public NumberColumn[] group(LongSeries groupIndexes) {
         IntSeries[] groupedSeries = new GroupingManager(groupingType, groupIndexes).getGroupedSeries();
         NumberColumn[] columns = new NumberColumn[groupedSeries.length];
         for (int i = 0; i < columns.length; i++) {
@@ -96,6 +118,8 @@ class IntColumn implements NumberColumn {
     @Override
     public NumberColumn copy() {
         IntColumn newColumn = new IntColumn(series);
+        newColumn.name = name;
+        newColumn.groupingType = groupingType;
         return newColumn;
     }
 
@@ -113,7 +137,7 @@ class IntColumn implements NumberColumn {
             groupingFunction = new IntGroupingAvg();
         }
 
-        public long groupCount() {
+        public long groupsCount() {
             return  groupIndexes.size();
         }
 
@@ -141,7 +165,7 @@ class IntColumn implements NumberColumn {
                 groupedSeries[seriesNumber] = new IntSeries() {
                     @Override
                     public long size() {
-                        return groupCount();
+                        return groupsCount();
                     }
 
                     @Override
@@ -151,6 +175,69 @@ class IntColumn implements NumberColumn {
                 };
             }
             return groupedSeries;
+        }
+    }
+
+    class CachedSeries implements IntSeriesRangeViewer {
+        private IntSeriesRangeViewer series;
+        private IntArrayList cache;
+
+        public CachedSeries(IntSeriesRangeViewer series) {
+            this.series = series;
+        }
+
+        @Override
+        public long size() {
+            return series.size();
+        }
+
+        @Override
+        public int get(long index) {
+            if(index >= cache.size()) {
+                for (long i = cache.size(); i <= index; i++) {
+                   cache.add(series.get(i));
+                }
+            }
+            return cache.get(index);
+        }
+
+        public IntSeriesRangeViewer getCachedSeries() {
+            return series;
+        }
+
+        @Override
+        public void setViewRange(long startIndex, long length) {
+            series.setViewRange(startIndex, length);
+            cache.clear();
+        }
+    }
+
+    class SeriesViewer implements IntSeriesRangeViewer {
+        private IntSeries series;
+        private long startIndex = 0;
+        private long length = -1;
+
+        public SeriesViewer(IntSeries series) {
+            this.series = series;
+        }
+
+        @Override
+        public void setViewRange(long startIndex, long length) {
+            this.startIndex = startIndex;
+            this.length = length;
+        }
+
+        @Override
+        public long size() {
+            if(length < 0) {
+                return series.size();
+            }
+            return length;
+        }
+
+        @Override
+        public int get(long index) {
+            return series.get(index - startIndex);
         }
     }
 

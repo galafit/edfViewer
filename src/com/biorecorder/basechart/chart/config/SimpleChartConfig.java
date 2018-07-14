@@ -35,8 +35,10 @@ public class SimpleChartConfig {
      **/
     private ArrayList<AxisConfig> xAxisConfigs = new ArrayList<AxisConfig>();
     private ArrayList<AxisConfig> yAxisConfigs = new ArrayList<AxisConfig>();
-    private Map<Integer, Range> xAxisExtremes = new HashMap<Integer, Range>();
-    private Map<Integer, Range> yAxisExtremes = new HashMap<Integer, Range>();
+    private Map<Integer, Double> xAxisMins = new HashMap<Integer, Double>();
+    private Map<Integer, Double> xAxisMaxs = new HashMap<Integer, Double>();
+    private Map<Integer, Double> yAxisMins = new HashMap<Integer, Double>();
+    private Map<Integer, Double> yAxisMaxs = new HashMap<Integer, Double>();
     private AxisConfig leftAxisConfig = new AxisConfig(AxisOrientation.LEFT);
     private AxisConfig rightAxisConfig = new AxisConfig(AxisOrientation.RIGHT);;
     private boolean isLeftAxisPrimary = true;
@@ -93,19 +95,23 @@ public class SimpleChartConfig {
         addStack(DEFAULT_WEIGHT);
     }
 
-    public void addStack(Range yMinMax) {
-        addStack(DEFAULT_WEIGHT, yMinMax);
+    public void addStack(Double yMin, Double yMax) {
+        addStack(DEFAULT_WEIGHT, yMin, yMax);
     }
 
     /**
      * Set Min and Max of both Y axis of the last stack
-     * @param yMinMax  - min and max values. Can be null. If min == null
-     *  only max will be set and vise versa
      */
-    public void addStack(int weight, Range yMinMax) {
+    public void addStack(int weight, Double yMin, Double yMax) {
         addStack(weight);
-        setYMinMax(yAxisConfigs.size() - 1, yMinMax);
-        setYMinMax(yAxisConfigs.size() - 2, yMinMax);
+        if(yMin != null) {
+            setYMin(yAxisConfigs.size() - 1, yMin);
+            setYMin(yAxisConfigs.size() - 2, yMin);
+        }
+        if(yMax != null) {
+            setYMax(yAxisConfigs.size() - 1, yMax);
+            setYMax(yAxisConfigs.size() - 2, yMax);
+        }
     }
 
     public void addStack(int weight) {
@@ -223,20 +229,34 @@ public class SimpleChartConfig {
         return yAxisConfigs.get(axisIndex);
     }
 
-    public void setXMinMax(int xAxisIndex, Range minMax) {
-        xAxisExtremes.put(xAxisIndex, minMax);
+    public void setXMin(int xAxisIndex, double min) {
+        xAxisMins.put(xAxisIndex,min);
+    }
+    public void setXMax(int xAxisIndex, double max) {
+        xAxisMaxs.put(xAxisIndex,max);
     }
 
-    public void setYMinMax(int yAxisIndex, Range minMax) {
-        yAxisExtremes.put(yAxisIndex, minMax);
+    public void setYMin(int yAxisIndex, double min) {
+        yAxisMins.put(yAxisIndex,min);
+    }
+    public void setYMax(int yAxisIndex, double max) {
+        yAxisMaxs.put(yAxisIndex,max);
     }
 
-    public Range getXMinMax(int xAxisIndex) {
-        return xAxisExtremes.get(xAxisIndex);
+    public Double getXMin(int xAxisIndex) {
+        return xAxisMins.get(xAxisIndex);
     }
 
-    public Range getYMinMax(int xAxisIndex) {
-        return yAxisExtremes.get(xAxisIndex);
+    public Double getXMax(int xAxisIndex) {
+        return xAxisMaxs.get(xAxisIndex);
+    }
+
+    public Double getYMin(int yAxisIndex) {
+        return yAxisMins.get(yAxisIndex);
+    }
+
+    public Double getYMax(int yAxisIndex) {
+        return yAxisMaxs.get(yAxisIndex);
     }
 
     public TraceConfig getTraceConfig(int index) {

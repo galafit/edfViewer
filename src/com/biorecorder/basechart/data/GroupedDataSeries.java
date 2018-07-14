@@ -18,7 +18,7 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
  * It may be the number of element in the bin (for histogram)
  * or the midpoint of the bin interval (avg) and so on.
  * How we will calculate the "value" of each bin is specified by the grouping function
- * (sum, average, count, getMin, max, first, last, center...)
+ * (sum, average, count, getStart, max, first, last, center...)
  * <p>
  * The most common "default" methods to divide data into bins:
  * <ol>
@@ -63,13 +63,13 @@ public class GroupedDataSeries extends DataSeries {
         };
 
         for (int i = 0; i < inDataSeries.getYColumnsCount(); i++) {
-            NumberColumn[] groupedColumns = inDataSeries.yColumns.get(i).group(groupingType, groupIndexes);
+            NumberColumn[] groupedColumns = inDataSeries.yColumns.get(i).group(groupIndexes);
             for (NumberColumn column : groupedColumns) {
                 yColumns.add(column);
             }
         }
 
-        NumberColumn[] groupedColumns = inDataSeries.xColumn.group(GroupingType.FIRST, groupIndexes);
+        NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupIndexes);
         xColumn = groupedColumns[0];
     }
 }

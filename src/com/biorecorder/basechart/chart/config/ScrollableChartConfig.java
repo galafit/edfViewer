@@ -150,7 +150,8 @@ public class ScrollableChartConfig {
     public void setPreviewMinMax(Range minMax) {
       previewMinMax = minMax;
         for (int i = 0; i < previewConfig.getXAxisCount(); i++) {
-            previewConfig.setXMinMax(i, minMax);
+            previewConfig.setXMin(i, minMax.getStart());
+            previewConfig.setXMax(i, minMax.getEnd());
         }
     }
 
@@ -184,12 +185,12 @@ public class ScrollableChartConfig {
         return scrollExtents.keySet();
     }
 
-    public void addChartStack(int weight, Range yMinMax) {
-        chartConfig.addStack(weight, yMinMax);
+    public void addChartStack(int weight, double min, double max) {
+        chartConfig.addStack(weight, min, max);
     }
 
-    public void addChartStack(Range yMinMax) {
-        chartConfig.addStack(yMinMax);
+    public void addChartStack(double min, double max) {
+        chartConfig.addStack(min, max);
     }
 
     public void addChartStack(int weight) {
@@ -201,12 +202,12 @@ public class ScrollableChartConfig {
         chartConfig.addStack();
     }
 
-    public void addPreviewStack(int weight, Range yMinMax) {
-        previewConfig.addStack(weight, yMinMax);
+    public void addPreviewStack(int weight, double min, double max) {
+        previewConfig.addStack(weight, min, max);
     }
 
-    public void addPreviewStack(Range yMinMax) {
-        previewConfig.addStack(yMinMax);
+    public void addPreviewStack(double min, double max) {
+        previewConfig.addStack(min, max);
     }
 
 

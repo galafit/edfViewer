@@ -1,14 +1,22 @@
 package com.biorecorder.basechart.data;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-
 /**
- * Created by galafit on 1/1/18.
+ * based on openjdk ArrayList.java -
+ * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayList.java
+ * <br>
+ * and trove ArrayListTemplate -
+ * https://bitbucket.org/trove4j/trove/src/24dd57f48bf385fa41a878f8fad7ac44d8b1d53a/core/src/main/templates/gnu/trove/list/array/_E_ArrayList.template?at=master&fileviewer=file-view-default
  */
 public class FloatArrayList implements FloatSeries {
     private float[] data;
     private int size;
+    /**
+     * The maximum size of array to allocate.
+     * Some VMs reserve some header words in an array.
+     * Attempts to allocate larger arrays may result in
+     * OutOfMemoryError: Requested array size exceeds VM limit
+     */
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     public FloatArrayList(int initialCapacity) {
         if (initialCapacity < 0) {
@@ -34,14 +42,7 @@ public class FloatArrayList implements FloatSeries {
 
     @Override
     public float get(long index) {
-        if(index > Integer.MAX_VALUE) {
-            String errorMessage = "Error. Expected: index is integer. Index = {0}, Integer.MAX_VALUE = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, index, Integer.MAX_VALUE);
-            throw new IllegalArgumentException(formattedError);
-        }
-        if (index >= size) {
-            throw new ArrayIndexOutOfBoundsException((int)index);
-        }
+        rangeCheck(index);
         return data[(int)index];
     }
 
@@ -49,22 +50,38 @@ public class FloatArrayList implements FloatSeries {
      * Remove an element from the specified index
      */
     public float remove(int index) {
-        if (index < 0 || index >= size) {
-            throw new ArrayIndexOutOfBoundsException(index);
+        float old = data[index];
+        remove(index, 1);
+        return old;
+    }
+
+
+    public void remove(int from, int length ) {
+        if ( length == 0 ) return;
+        rangeCheck(from);
+        if ( from == 0 ) {
+            // data at the front
+            System.arraycopy( data, length, data, 0, size - length );
         }
-        float entry = data[index];
-//    int[] outgoing = new int[count - 1];
-//    System.arraycopy(com.biorecorder.basechart.data, 0, outgoing, 0, index);
-//    count--;
-//    System.arraycopy(com.biorecorder.basechart.data, index + 1, outgoing, 0, count - index);
-//    com.biorecorder.basechart.data = outgoing;
-        // For most cases, this actually appears to be faster
-        // than arraycopy() on an array copying into itself.
-        for (int i = index; i < size-1; i++) {
-            data[i] = data[i+1];
+        else if ( size - length == from ) {
+            // no copy to make, decrementing pos "deletes" values at
+            // the end
         }
-        size--;
-        return entry;
+        else {
+            // data in the middle
+            System.arraycopy( data, from + length, data, from,
+                    size - ( from + length ) );
+        }
+        size -= length;
+    }
+
+    public void clear() {
+        size = 0;
+    }
+
+    public void set(int index, float value) {
+        rangeCheck(index);
+        data[index] = value;
     }
 
     /**
@@ -84,16 +101,52 @@ public class FloatArrayList implements FloatSeries {
         size += numNew;
     }
 
-    public void ensureCapacity(int minCapacity) {
-        int oldCapacity = data.length;
-        if (minCapacity > oldCapacity) {
-            int newCapacity = (oldCapacity * 3)/2 + 1;
-            if (newCapacity < minCapacity) {
-                newCapacity = minCapacity;
-            }
-            // minCapacity is usually close to size, so this is a win:
-            data = Arrays.copyOf(data, newCapacity);
+    /**
+
+     * Trims the capacity of this array list instance to be the
+     * list's current size.
+     */
+    public void trimToSize() {
+        if ( data.length > size ) {
+            float[] tmp = new float[size];
+            System.arraycopy( data, 0, tmp, 0, size );
+            data = tmp;
         }
     }
 
+    public void ensureCapacity(int minCapacity) {
+        int oldCapacity = data.length;
+        if (minCapacity > oldCapacity) {
+            int newCapacity = oldCapacity + (oldCapacity >> 1); // oldCapacity + 1/2 * oldCapacity
+
+            if (newCapacity - minCapacity < 0)
+                newCapacity = minCapacity;
+
+            if (newCapacity - MAX_ARRAY_SIZE > 0)
+
+                newCapacity = hugeCapacity(minCapacity);
+
+            // minCapacity is usually close to size, so this is a win:
+            float[] tmp = new float[newCapacity];
+            System.arraycopy( data, 0, tmp, 0, data.length );
+            data = tmp;
+        }
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // overflow
+            throw new OutOfMemoryError();
+        return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
+    }
+
+
+
+    private void rangeCheck(long index) {
+        if (index >= size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+    private String outOfBoundsMsg(long index) {
+        return "Index: "+index+", Size: "+size;
+    }
 }
