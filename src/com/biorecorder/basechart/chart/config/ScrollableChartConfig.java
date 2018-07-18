@@ -150,8 +150,8 @@ public class ScrollableChartConfig {
     public void setPreviewMinMax(Range minMax) {
       previewMinMax = minMax;
         for (int i = 0; i < previewConfig.getXAxisCount(); i++) {
-            previewConfig.setXMin(i, minMax.getStart());
-            previewConfig.setXMax(i, minMax.getEnd());
+            previewConfig.setXMin(i, minMax.getMin());
+            previewConfig.setXMax(i, minMax.getMax());
         }
     }
 

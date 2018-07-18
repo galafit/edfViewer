@@ -7,5 +7,6 @@ import com.biorecorder.basechart.chart.traces.Trace;
  * Created by galafit on 28/1/18.
  */
 public interface TraceFactory {
-    public Trace getTrace(TraceConfig config);
+    public Trace getTrace(TraceConfig traceConfig);
 }
+

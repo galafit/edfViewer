@@ -21,6 +21,10 @@ public class RegularColumn extends NumberColumn {
         return series.getDataInterval();
     }
 
+    public double getStartValue() {
+        return series.getStartValue();
+    }
+
     @Override
     public long size() {
         return series.size();
@@ -62,6 +66,10 @@ public class RegularColumn extends NumberColumn {
     @Override
     public NumberColumn[] group(LongSeries groupIndexes) {
         return new NumberColumn[0];
+    }
+
+    @Override
+    public void getGroupIndexes(LongArrayList buffer, double groupInterval, long from, long length) {
     }
 
     @Override

@@ -4,11 +4,11 @@ package com.biorecorder.basechart.data;
 /**
  * Created by galafit on 13/7/18.
  */
-public class DataRange {
+public class SubsetRange {
     private long startIndex;
     private long length;
 
-    public DataRange(long startIndex, long length) {
+    public SubsetRange(long startIndex, long length) {
         this.startIndex = startIndex;
         this.length = length;
     }

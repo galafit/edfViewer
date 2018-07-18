@@ -43,7 +43,7 @@ public class ChartWithDataManager {
         chartProcessedData = new ArrayList<BaseData>();
         for (BaseData data : chartOriginalData) {
             if (!config.isChartGroupedDatCachingEnable()) {
-                for (int i = 0; i < data.getYColumnsCount(); i++) {
+                for (int i = 0; i < data.YColumnsCount(); i++) {
                     data.setYGroupingType(GroupingType.FIRST, i);
                 }
             }
@@ -99,7 +99,7 @@ public class ChartWithDataManager {
                 for (int i = 0; i < config.getChartConfig().getXAxisCount(); i++) {
                     Double scrollExtent = config.getScrollExtent(i);
                     if (scrollExtent != null) {
-                        cropChartData(i, new Range(previewMinMax.getStart(), previewMinMax.getStart() + scrollExtent));
+                        cropChartData(i, new Range(previewMinMax.getMin(), previewMinMax.getMin() + scrollExtent));
                     }
                 }
             }
@@ -132,7 +132,7 @@ public class ChartWithDataManager {
     }
 
     private boolean isScrollAtTheEnd(int xAxisIndex) {
-        double dataMax = getChartDataMinMax().getEnd();
+        double dataMax = getChartDataMinMax().getMax();
         double scrollEnd = scrollableChart.getScrollValue(xAxisIndex) + scrollableChart.getScrollExtent(xAxisIndex);
         if (dataMax - scrollEnd > 0) {
             return false;
@@ -167,7 +167,7 @@ public class ChartWithDataManager {
             int traceDataIndex = chartConfig.getTraceDataIndex(traceIndex);
             if (chartConfig.getTraceXIndex(traceIndex) == xAxisIndex) {
                 BaseData traceDataSet = chartProcessedData.get(traceDataIndex);
-                BaseData subset = traceDataSet.getSubset(scrollExtremes.getStart(), scrollExtremes.getEnd());
+                BaseData subset = traceDataSet.getSubset(scrollExtremes.getMin(), scrollExtremes.getMax());
                 chartProcessedData.set(traceDataIndex, subset);
             }
         }
@@ -253,7 +253,7 @@ public class ChartWithDataManager {
                 previewExtent = Math.max(previewExtent, groupingInterval * area.width / minPixelsPerDataItem);
             }
 
-            double min = chartFullMinMax.getStart();
+            double min = chartFullMinMax.getMin();
             double maxLength = Math.max(previewExtent, chartFullMinMax.length());
             chartFullMinMax = new Range(min, min + maxLength);
         }
@@ -311,6 +311,6 @@ public class ChartWithDataManager {
         for (Integer xAxisIndex : scrollableChart.getXAxisWithScroll()) {
             minExtent = (minExtent == 0) ? scrollableChart.getScrollExtent(xAxisIndex) : Math.min(minExtent, scrollableChart.getScrollExtent(xAxisIndex));
         }
-        return scrollableChart.setScrollsValue(dataMinMax.getEnd() - minExtent);
+        return scrollableChart.setScrollsValue(dataMinMax.getMax() - minExtent);
     } */
 }

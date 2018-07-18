@@ -11,11 +11,11 @@ public class LineTraceConfig implements TraceConfig {
     public static final int STEP = 1;
     public static final int VERTICAL_LINES = 2;
 
-    private int markSize = 0; // point size
     private BStroke lineStroke = new BStroke();
-    private BColor color;
     private int mode;
     private boolean isFilled = false;
+    private int markSize = 0; // point size
+    private BColor color;
 
     public LineTraceConfig() {
         this(LINEAR, false);
@@ -44,6 +44,15 @@ public class LineTraceConfig implements TraceConfig {
         this.color = color;
     }
 
+    @Override
+    public int getMarkSize() {
+        return markSize;
+    }
+
+    public void setMarkSize(int markSize) {
+        this.markSize = markSize;
+    }
+
     public int getMode() {
         return mode;
     }
@@ -58,13 +67,5 @@ public class LineTraceConfig implements TraceConfig {
 
     public void setLineStroke(BStroke lineStroke) {
         this.lineStroke = lineStroke;
-    }
-
-    public int getMarkSize() {
-        return markSize;
-    }
-
-    public void setMarkSize(int markSize) {
-        this.markSize = markSize;
     }
 }

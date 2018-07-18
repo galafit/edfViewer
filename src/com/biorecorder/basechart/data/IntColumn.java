@@ -64,6 +64,13 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
+    public void clearCache() {
+        if(series instanceof CachedSeries) {
+            ((CachedSeries) series).clearCache();
+        }
+    }
+
+    @Override
     public void setViewRange(long from, long length) {
         series.setViewRange(from, length);
     }
@@ -103,6 +110,26 @@ class IntColumn extends NumberColumn {
             throw new IllegalArgumentException(errorMessage);
         }
         return DataManipulator.lowerBound(series, value, 0, (int)length);
+    }
+
+
+    @Override
+    public void getGroupIndexes(LongArrayList groupIndexes, double groupInterval, long from, long length) {
+        // first index always "from";
+        groupIndexes.add(from);
+        int intGroupInterval = (int) groupInterval;
+        if(intGroupInterval <= 0) {
+            groupInterval = 1;
+        }
+
+        int intervalsCount = (series.get(from) / intGroupInterval) * intGroupInterval;
+        long till = from + length;
+        for (long i = from + 1;  i < till; i++) {
+            if (series.get(i) >= intervalsCount + groupInterval) {
+                groupIndexes.add(i);
+                intervalsCount = (series.get(i) / intGroupInterval) * intGroupInterval;
+            }
+        }
     }
 
     @Override
@@ -205,14 +232,19 @@ class IntColumn extends NumberColumn {
             return series;
         }
 
+
         @Override
         public void setViewRange(long startIndex, long length) {
             series.setViewRange(startIndex, length);
             cache.clear();
         }
+
+        public void clearCache() {
+            cache.clear();
+        }
     }
 
-    class SeriesViewer implements IntSeriesRangeViewer {
+    class SeriesViewer implements IntSeriesRangeViewer{
         private IntSeries series;
         private long startIndex = 0;
         private long length = -1;
@@ -239,6 +271,7 @@ class IntColumn extends NumberColumn {
         public int get(long index) {
             return series.get(index - startIndex);
         }
+
     }
 
 }

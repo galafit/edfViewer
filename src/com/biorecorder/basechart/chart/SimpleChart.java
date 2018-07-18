@@ -44,8 +44,6 @@ public class SimpleChart {
     private int hoverPointIndex = -1;
     private int hoverTraceIndex = -1;
 
-    private List<DataSeries> data;
-
     public SimpleChart(SimpleChartConfig chartConfig, List<DataSeries> data, BRectangle area) {
         this(chartConfig, data, area, new DefaultTraceFactory());
     }
@@ -135,21 +133,21 @@ public class SimpleChart {
 
         if(tracesMinMax != null) {
             if(min == null && max != null) {
-                min = tracesMinMax.getStart();
+                min = tracesMinMax.getMin();
                 if(min >= max) {
                     min = max - 1;
                 }
 
             }
             if(max == null && min != null) {
-                max = tracesMinMax.getEnd();
+                max = tracesMinMax.getMax();
                 if(min >= max) {
                     max = min + 1;
                 }
             }
             if(max == null && min == null) {
-                min = tracesMinMax.getStart();
-                max = tracesMinMax.getEnd();
+                min = tracesMinMax.getMin();
+                max = tracesMinMax.getMax();
                 if(min == max) {
                     max = min + 1;
                 }
@@ -184,21 +182,21 @@ public class SimpleChart {
 
         if(tracesMinMax != null) {
             if(min == null && max != null) {
-                min = tracesMinMax.getStart();
+                min = tracesMinMax.getMin();
                 if(min >= max) {
                     min = max - 1;
                 }
 
             }
             if(max == null && min != null) {
-                max = tracesMinMax.getEnd();
+                max = tracesMinMax.getMax();
                 if(min >= max) {
                     max = min + 1;
                 }
             }
             if(max == null && min == null) {
-                min = tracesMinMax.getStart();
-                max = tracesMinMax.getEnd();
+                min = tracesMinMax.getMin();
+                max = tracesMinMax.getMax();
                 if(min == max) {
                     max = min + 1;
                 }
@@ -222,7 +220,7 @@ public class SimpleChart {
 
     private DataSeries cropTraceData(DataSeries traceData, Range xAxisRange) {
         if(chartConfig.isDataCropEnable()) {
-           // traceData = traceData.getSubset(xAxisRange.getStart(), xAxisRange.getEnd(), 0);
+           // traceData = traceData.getSubset(xAxisRange.getMin(), xAxisRange.getMax(), 0);
         }
         return traceData;
     }

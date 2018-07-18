@@ -1,7 +1,5 @@
 package com.biorecorder.basechart.data;
 
-import com.biorecorder.basechart.data.grouping.GroupingType;
-
 /**
  * This class potentially permits for every grouped point (bin)
  * take its start, end and all original points the group includes (if we will need it)
@@ -18,7 +16,7 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
  * It may be the number of element in the bin (for histogram)
  * or the midpoint of the bin interval (avg) and so on.
  * How we will calculate the "value" of each bin is specified by the grouping function
- * (sum, average, count, getStart, max, first, last, center...)
+ * (sum, average, count, getMin, max, first, last, center...)
  * <p>
  * The most common "default" methods to divide data into bins:
  * <ol>
@@ -42,34 +40,75 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
 public class GroupedDataSeries extends DataSeries {
     private DataSeries inDataSeries;
     private LongSeries groupIndexes;
-    private GroupingType groupingType;
-    int numberOfPointsInEachGroup;
+    double groupingInterval;
 
-    public GroupedDataSeries(DataSeries inDataSeries, GroupingType groupingType, int numberOfPointsInEachGroup) {
+    public GroupedDataSeries(DataSeries inDataSeries, double groupingInterval) {
         this.inDataSeries = inDataSeries;
-        this.groupingType = groupingType;
-        this.numberOfPointsInEachGroup = numberOfPointsInEachGroup;
+        this.groupingInterval = groupingInterval;
 
-        groupIndexes = new LongSeries() {
-            @Override
-            public long size() {
-                return inDataSeries.size() / numberOfPointsInEachGroup;
+        if(inDataSeries.xColumn instanceof RegularColumn) {
+            double dataInterval = ((RegularColumn)inDataSeries.xColumn).getDataInterval();
+            double startValue = ((RegularColumn)inDataSeries.xColumn).getStartValue();
+            int numberOfPointsToGroup = (int)(groupingInterval / dataInterval);
+            if(numberOfPointsToGroup < 1) {
+                numberOfPointsToGroup = 1;
             }
+            final int groupPointsNumber = numberOfPointsToGroup;
+            groupIndexes = new LongSeries() {
+                @Override
+                public long size() {
+                    return inDataSeries.size() / groupPointsNumber;
+                }
 
-            @Override
-            public long get(long index) {
-                return index * numberOfPointsInEachGroup;
-            }
-        };
+                @Override
+                public long get(long index) {
+                    return index * groupPointsNumber;
+                }
+            };
+            xColumn = new RegularColumn(startValue, dataInterval);
+        } else {
+            groupIndexes = new LongArrayList();
+            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, 0, inDataSeries.size());
+            NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupIndexes);
+            xColumn = groupedColumns[0];
+        }
 
-        for (int i = 0; i < inDataSeries.getYColumnsCount(); i++) {
+        for (int i = 0; i < inDataSeries.yColumns.size(); i++) {
             NumberColumn[] groupedColumns = inDataSeries.yColumns.get(i).group(groupIndexes);
             for (NumberColumn column : groupedColumns) {
                 yColumns.add(column);
             }
         }
-
-        NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupIndexes);
-        xColumn = groupedColumns[0];
     }
+
+    public double getGroupingInterval() {
+        return groupingInterval;
+    }
+
+    public int getNumberOfPointsInGroup() {
+        int number = (int)Math.round(inDataSeries.getXExtremes().length() / groupingInterval);
+        return number;
+    }
+
+    @Override
+    public long size() {
+        // update bins
+        if(! (inDataSeries.xColumn instanceof RegularColumn)) {
+            long from = groupIndexes.get(groupIndexes.size() - 1);
+            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, from, inDataSeries.size());
+        }
+        return super.size();
+    }
+
+    public void updateGroups() {
+        if(! (inDataSeries.xColumn instanceof RegularColumn)) {
+            ((LongArrayList)groupIndexes).clear();
+            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, 0, inDataSeries.size());
+        }
+        xColumn.clearCache();
+        for (NumberColumn yColumn : yColumns) {
+            yColumn.clearCache();
+        }
+    }
+
 }

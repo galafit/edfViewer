@@ -8,4 +8,5 @@ import com.biorecorder.basechart.chart.BColor;
 public interface TraceConfig {
     public BColor getColor();
     public void setColor(BColor color);
- }
+    public int getMarkSize();
+}

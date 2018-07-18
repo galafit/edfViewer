@@ -17,4 +17,9 @@ public class BooleanTraceConfig implements TraceConfig {
     public void setColor(BColor color) {
         this.color = color;
     }
+
+    @Override
+    public int getMarkSize() {
+        return 0;
+    }
 }

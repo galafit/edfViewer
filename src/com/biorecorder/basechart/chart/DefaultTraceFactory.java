@@ -12,12 +12,12 @@ import com.biorecorder.basechart.chart.traces.Trace;
  */
 public class DefaultTraceFactory implements TraceFactory {
     @Override
-    public Trace getTrace(TraceConfig config) {
-        if(config instanceof  LineTraceConfig) {
-            return new LineTrace((LineTraceConfig) config);
+    public Trace getTrace(TraceConfig traceConfig) {
+        if(traceConfig instanceof  LineTraceConfig) {
+            return new LineTrace((LineTraceConfig) traceConfig);
         }
-        if(config instanceof BooleanTraceConfig) {
-            return new BooleanTrace((BooleanTraceConfig) config);
+        if(traceConfig instanceof BooleanTraceConfig) {
+            return new BooleanTrace((BooleanTraceConfig) traceConfig);
         }
         return null;
     }

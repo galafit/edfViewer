@@ -36,8 +36,9 @@ public abstract class NumberColumn {
     public abstract long lowerBound(double value, long length);
     public abstract void setCachingEnabled(boolean isCachingEnabled);
     public abstract boolean isCachingEnabled();
+    public abstract void clearCache();
 
-    public abstract void getGroupsIndexes();
+    public abstract void getGroupIndexes(LongArrayList buffer, double groupInterval, long from, long length);
     public abstract NumberColumn[] group(LongSeries groupIndexes);
 
     public abstract NumberColumn copy();

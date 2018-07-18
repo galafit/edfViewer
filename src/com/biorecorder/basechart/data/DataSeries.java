@@ -4,12 +4,11 @@ import com.biorecorder.basechart.chart.Range;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by galafit on 19/9/17.
  */
-public class DataSeries {
+public class DataSeries  {
     boolean isOrdered = true;
     ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
     NumberColumn xColumn = new RegularColumn();
@@ -51,7 +50,7 @@ public class DataSeries {
         yColumns.remove(columnNumber);
     }
 
-    public int getYColumnsCount() {
+    public int YColumnsCount() {
         return yColumns.size();
     }
 
@@ -128,6 +127,8 @@ public class DataSeries {
         return nearestIndex;
     }
 
+
+
     public void setCachingEnabled(boolean isCachingEnabled) {
         xColumn.setCachingEnabled(isCachingEnabled);
         for (NumberColumn yColumn : yColumns) {
@@ -135,14 +136,14 @@ public class DataSeries {
         }
     }
 
-    public void setViewRange(long startIndex, int length) {
-        xColumn.setViewRange(startIndex, length);
+    public void setViewRange(SubsetRange subsetRange) {
+        xColumn.setViewRange(subsetRange.getStartIndex(), subsetRange.getLength());
         for (NumberColumn yColumn : yColumns) {
-            yColumn.setViewRange(startIndex, length);
+            yColumn.setViewRange(subsetRange.getStartIndex(), subsetRange.getLength());
         }
     }
 
-    public DataRange getSubsetRange(double startXValue, double endXValue) {
+    public SubsetRange getSubsetRange(double startXValue, double endXValue) {
         if (!isOrdered()) {
             return null;
         }
@@ -154,10 +155,10 @@ public class DataSeries {
 
         long size = size();
         if (size == 0 || (startXValue > xColumn.value(size - 1) || endXValue < xColumn.value(0))) {
-            return new DataRange(0, 0);
+            return new SubsetRange(0, 0);
         }
         if (startXValue <= xColumn.value(0) && endXValue >= xColumn.value(size - 1)) {
-            return new DataRange(0, size);
+            return new SubsetRange(0, size);
         }
 
         long startIndex = xColumn.upperBound(startXValue, size);
@@ -172,7 +173,16 @@ public class DataSeries {
         }
         length = endIndex - startIndex + 1;
 
-        return new DataRange(startIndex, (int) length);
+        return new SubsetRange(startIndex, (int) length);
+    }
+
+    public DataSeries copy() {
+        DataSeries copySeries = new DataSeries();
+        copySeries.xColumn = xColumn.copy();
+        for (NumberColumn yColumn : yColumns) {
+            copySeries.yColumns.add(yColumn.copy());
+        }
+        return copySeries;
     }
 
     public double getAverageDataInterval() {

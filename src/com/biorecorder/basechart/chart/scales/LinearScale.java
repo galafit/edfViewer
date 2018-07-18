@@ -280,7 +280,7 @@ public class LinearScale implements Scale {
             int ticksCount = (int) ((getLowerTick(min).getValue() - getUpperTick(max).getValue()) / tickStep) + 1;
 
         /*
-         * Due to rounding (roundMin < getStart < max < roundMax)
+         * Due to rounding (roundMin < getMin < max < roundMax)
          * sometimes it is possible that the resultant ticksCount may be
          * greater than the maxCount:
          * resultantAmount = maxCount + 1.

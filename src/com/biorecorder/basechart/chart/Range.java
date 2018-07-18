@@ -6,36 +6,36 @@ import java.text.MessageFormat;
  * Created by galafit on 11/7/17.
  */
 public class Range {
-    private double start;
-    private double end;
+    private double min;
+    private double max;
 
-    public Range(double start, double end) {
-        if (start > end){
-            String errorMessage = "Range Error. Expected Start <= End. Start = {0}, End = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, start, end);
+    public Range(double min, double max) {
+        if (min > max){
+            String errorMessage = "Range Error. Expected Min <= Max. Min = {0}, Max = {1}.";
+            String formattedError = MessageFormat.format(errorMessage, min, max);
             throw new IllegalArgumentException(formattedError);
         }
-        this.start = start;
-        this.end = end;
+        this.min = min;
+        this.max = max;
     }
 
     public boolean contains(double value) {
-        if(value >= start && value <= end) {
+        if(value >= min && value <= max) {
             return true;
         }
         return false;
     }
 
-    public  double getStart() {
-        return start;
+    public  double getMin() {
+        return min;
     }
 
-    public double getEnd() {
-        return end;
+    public double getMax() {
+        return max;
     }
 
     public double length() {
-        return end - start;
+        return max - min;
     }
 
     public static Range max(Range range1, Range range2) {
@@ -48,14 +48,14 @@ public class Range {
         if(range2 != null && range1 == null) {
             return range2;
         }
-        return new Range(Math.min(range1.start, range2.start), Math.max(range1.end, range2.end));
+        return new Range(Math.min(range1.min, range2.min), Math.max(range1.max, range2.max));
     }
 
     @Override
     public String toString() {
         return "Range{" +
-                "getStart=" + start +
-                ", end=" + end +
+                "min=" + min +
+                ", max=" + max +
                 '}';
     }
 }

@@ -130,7 +130,7 @@ public class Scroll {
 
     public void draw(BCanvas canvas, BRectangle area) {
         Range scrollRange = getScrollRange();
-        double scrollMin = scrollRange.getStart();
+        double scrollMin = scrollRange.getMin();
 
         BColor scrollColor = scrollConfig.getScrollColor();
         BColor fillColor = new BColor(scrollColor.getRed(), scrollColor.getGreen(), scrollColor.getBlue(), 70);
