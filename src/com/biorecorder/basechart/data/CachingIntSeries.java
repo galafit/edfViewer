@@ -3,8 +3,8 @@ package com.biorecorder.basechart.data;
 import java.text.MessageFormat;
 
 /**
- * Class is designed to store/cache a computed input com.biorecorder.basechart.data and to give quick access to them.
- * Input com.biorecorder.basechart.data could be a filter, function and so on
+ * Class is designed to store/cache a computed input com.biorecorder.basechart.chart.data and to give quick access to them.
+ * Input com.biorecorder.basechart.chart.data could be a filter, function and so on
  */
 
 public class CachingIntSeries implements IntSeries {
@@ -21,7 +21,7 @@ public class CachingIntSeries implements IntSeries {
 
     private void cacheData() {
         if(inputData.size() > Integer.MAX_VALUE) {
-            String errorMessage = "Error during caching com.biorecorder.basechart.data. Expected: inputData.size() is integer. inputData.size = {0}, Integer.MAX_VALUE = {1}.";
+            String errorMessage = "Error during caching com.biorecorder.basechart.chart.data. Expected: inputData.size() is integer. inputData.size = {0}, Integer.MAX_VALUE = {1}.";
             String formattedError = MessageFormat.format(errorMessage, inputData.size(), Integer.MAX_VALUE);
             throw new RuntimeException(formattedError);
 

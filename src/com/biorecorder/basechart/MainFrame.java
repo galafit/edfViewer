@@ -1,15 +1,8 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.chart.Range;
-import com.biorecorder.basechart.chart.config.traces.BooleanTraceConfig;
-import com.biorecorder.basechart.chart.config.traces.LineTraceConfig;
-import com.biorecorder.basechart.data.IntArrayList;
 import com.biorecorder.basechart.data.FloatArrayList;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 
 /**

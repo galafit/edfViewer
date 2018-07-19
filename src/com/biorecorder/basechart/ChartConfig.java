@@ -1,8 +1,8 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.chart.config.ScrollableChartConfig;
-import com.biorecorder.basechart.chart.config.Theme;
-import com.biorecorder.basechart.chart.config.traces.TraceConfig;
+import com.biorecorder.basechart.config.ScrollableChartConfig;
+import com.biorecorder.basechart.config.Theme;
+import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
 
 import java.util.ArrayList;

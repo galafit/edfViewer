@@ -1,11 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.chart.BColor;
-import com.biorecorder.basechart.chart.BRectangle;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 

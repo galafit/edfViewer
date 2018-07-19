@@ -1,9 +1,6 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.chart.*;
-import com.biorecorder.basechart.chart.config.SimpleChartConfig;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by galafit on 26/11/17.

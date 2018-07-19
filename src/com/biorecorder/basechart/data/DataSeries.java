@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.data;
 
-import com.biorecorder.basechart.chart.Range;
+import com.biorecorder.basechart.Range;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -136,29 +136,35 @@ public class DataSeries  {
         }
     }
 
-    public void setViewRange(SubsetRange subsetRange) {
-        xColumn.setViewRange(subsetRange.getStartIndex(), subsetRange.getLength());
+    public void setViewRange(SubRange subRange) {
+        xColumn.setViewRange(subRange.getStartIndex(), subRange.getLength());
         for (NumberColumn yColumn : yColumns) {
-            yColumn.setViewRange(subsetRange.getStartIndex(), subsetRange.getLength());
+            yColumn.setViewRange(subRange.getStartIndex(), subRange.getLength());
         }
     }
 
-    public SubsetRange getSubsetRange(double startXValue, double endXValue) {
-        if (!isOrdered()) {
-            return null;
-        }
-        if (endXValue < startXValue) {
+    public SubRange getSubRange(Double startXValue, Double endXValue) {
+        if (startXValue != null && endXValue != null && endXValue < startXValue) {
             String errorMessage = "Range error. Expected: StartValue <= EndValue. StartValue = {0}, EndValue = {1}.";
             String formattedError = MessageFormat.format(errorMessage, startXValue, endXValue);
             throw new IllegalArgumentException(formattedError);
         }
 
         long size = size();
-        if (size == 0 || (startXValue > xColumn.value(size - 1) || endXValue < xColumn.value(0))) {
-            return new SubsetRange(0, 0);
+        if(size == 0) {
+            return new SubRange(0, 0);
+        }
+        if(startXValue == null) {
+            startXValue = xColumn.value(0);
+        }
+        if(endXValue == null) {
+            endXValue = xColumn.value(size - 1);
+        }
+        if ((startXValue > xColumn.value(size - 1) || endXValue < xColumn.value(0))) {
+            return new SubRange(0, 0);
         }
         if (startXValue <= xColumn.value(0) && endXValue >= xColumn.value(size - 1)) {
-            return new SubsetRange(0, size);
+            return new SubRange(0, size);
         }
 
         long startIndex = xColumn.upperBound(startXValue, size);
@@ -173,7 +179,7 @@ public class DataSeries  {
         }
         length = endIndex - startIndex + 1;
 
-        return new SubsetRange(startIndex, (int) length);
+        return new SubRange(startIndex, (int) length);
     }
 
     public DataSeries copy() {
@@ -198,6 +204,9 @@ public class DataSeries  {
     /**********************************************************************
      *     Helper Methods to add data
      *********************************************************************/
+    void setXData(NumberColumn numberColumn) {
+        xColumn = numberColumn;
+    }
 
     public void setXData(int[] data) {
         xColumn = new IntColumn(data);
@@ -214,6 +223,10 @@ public class DataSeries  {
             xColumn = new FloatColumn((List<Float>) data);
         }
     }*/
+
+    void addYData(NumberColumn numberColumn) {
+        yColumns.add(numberColumn);
+    }
 
     public void addYData(int[] data) {
         yColumns.add(new IntColumn(data));
