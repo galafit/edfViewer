@@ -7,7 +7,11 @@ public class DataProcessingConfig {
     private boolean isCropEnabled = true;
     private boolean isGroupingEnabled = true;
 
-    private boolean isDataExpencive = true;
+    // if X min and max is not specified data will be cropped
+    // to occupy available screen space (with) in best way (without grouping)
+    private boolean  cropToAvailableSpaceEnabled = true;
+
+    private boolean isDataExpensive = true;
 
     // These 2 properties work together.
     // If grouping superposition enabled we can make
@@ -33,12 +37,12 @@ public class DataProcessingConfig {
         isGroupingEnabled = groupingEnabled;
     }
 
-    public boolean isDataExpencive() {
-        return isDataExpencive;
+    public boolean isDataExpensive() {
+        return isDataExpensive;
     }
 
-    public void setDataExpencive(boolean dataExpencive) {
-        isDataExpencive = dataExpencive;
+    public void setDataExpensive(boolean dataExpensive) {
+        isDataExpensive = dataExpensive;
     }
 
     public boolean isGroupingSuperpositionEnabled() {

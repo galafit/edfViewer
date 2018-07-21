@@ -15,7 +15,7 @@ public class DataConfig {
         this.xColumnIndex = xColumnIndex;
     }
 
-    public void setXColumnStartAndInterval(double startValue, double interval) {
+    public void setXStartAndInterval(double startValue, double interval) {
         xStartValue = startValue;
         xInterval = interval;
     }

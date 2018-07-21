@@ -58,9 +58,15 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
+    public void clearCache() {
+        // do nothing
+    }
+
+    @Override
     public boolean isCachingEnabled() {
         return false;
     }
+
 
     @Override
     public NumberColumn[] group(LongSeries groupIndexes) {

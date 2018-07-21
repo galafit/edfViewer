@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.config.traces.BooleanTraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
 
@@ -27,6 +26,11 @@ public class BooleanTrace extends Trace {
     public BColor getColor() {
         return traceConfig.getColor();
      }
+
+    @Override
+    public int getMarkSize() {
+        return traceConfig.getMarkSize();
+    }
 
     @Override
     public InfoItem[] getInfo(int dataIndex){

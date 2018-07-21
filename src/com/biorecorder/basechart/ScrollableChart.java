@@ -1,6 +1,6 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.ScrollableChartConfig;
+import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.config.SimpleChartConfig;
 import com.biorecorder.basechart.data.Data;
 
@@ -16,18 +16,19 @@ public class ScrollableChart {
     private BRectangle chartArea;
     private BRectangle previewArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
-    private ScrollableChartConfig config;
+    private ChartConfig config;
 
-    public ScrollableChart(ScrollableChartConfig config, Data data, BRectangle area) {
+    public ScrollableChart(ChartConfig config, Data data, BRectangle area) {
         this(config, data, area, new DefaultTraceFactory());
     }
 
-    public ScrollableChart(ScrollableChartConfig config, Data data, BRectangle area, TraceFactory traceFactory) {
+    public ScrollableChart(ChartConfig config, Data data, BRectangle area, TraceFactory traceFactory) {
         this.config = config;
         SimpleChartConfig chartConfig = config.getChartConfig();
         Set<Integer> scrollableAxis = config.getXAxisWithScroll();
+
         calculateAreas(area);
-        if (config.getScrollsExtents().length == 0) { // Chart without preview
+        if (! config.isPreviewEnabled()) { // Chart without preview
             chart = new SimpleChart(chartConfig, data, chartArea, traceFactory);
         } else {
             SimpleChartConfig previewConfig = config.getPreviewConfig();

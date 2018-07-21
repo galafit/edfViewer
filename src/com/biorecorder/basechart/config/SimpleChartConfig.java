@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.config;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.RangeInt;
 
@@ -12,10 +11,6 @@ import java.util.*;
  */
 public class SimpleChartConfig {
     private static final int DEFAULT_WEIGHT = 10;
-
-    private boolean isDataCropEnable = true;
-    private boolean isGroupingEnable = true;
-    private int minPixelsPerDataPoint = 1;
 
     private BColor[] defaultTraceColors = {BColor.MAGENTA, BColor.BLUE};
     private String title;
@@ -40,10 +35,12 @@ public class SimpleChartConfig {
     private Map<Integer, Double> xAxisMaxs = new HashMap<Integer, Double>();
     private Map<Integer, Double> yAxisMins = new HashMap<Integer, Double>();
     private Map<Integer, Double> yAxisMaxs = new HashMap<Integer, Double>();
-    private AxisConfig leftAxisConfig = new AxisConfig(AxisOrientation.LEFT);
-    private AxisConfig rightAxisConfig = new AxisConfig(AxisOrientation.RIGHT);;
+    private AxisConfig leftAxisDefaultConfig = new AxisConfig(AxisOrientation.LEFT);
+    private AxisConfig rightAxisDefaultConfig = new AxisConfig(AxisOrientation.RIGHT);;
     private boolean isLeftAxisPrimary = true;
     private boolean isBottomAxisPrimary = true;
+    // if true traces with small number of points will be spread on all available space
+    private boolean tracesSpreadEnabled = true;
 
     private ArrayList<TraceInfo> traces = new ArrayList<TraceInfo>();
 
@@ -52,28 +49,12 @@ public class SimpleChartConfig {
         xAxisConfigs.add(new AxisConfig(AxisOrientation.TOP));
     }
 
-    public boolean isDataCropEnable() {
-        return isDataCropEnable;
+    public boolean isTracesSpreadEnabled() {
+        return tracesSpreadEnabled;
     }
 
-    public int getMinPixelsPerDataPoint() {
-        return minPixelsPerDataPoint;
-    }
-
-    public void setMinPixelsPerDataPoint(int minPixelsPerDataPoint) {
-        this.minPixelsPerDataPoint = minPixelsPerDataPoint;
-    }
-
-    public void setDataCropEnable(boolean dataCropEnable) {
-        isDataCropEnable = dataCropEnable;
-    }
-
-    public boolean isGroupingEnable() {
-        return isGroupingEnable;
-    }
-
-    public void setGroupingEnable(boolean groupingEnable) {
-        isGroupingEnable = groupingEnable;
+    public void setTracesSpreadEnabled(boolean tracesSpreadEnabled) {
+        this.tracesSpreadEnabled = tracesSpreadEnabled;
     }
 
     public void setLeftAxisPrimary(boolean isLeftAxisPrimary) {
@@ -84,12 +65,12 @@ public class SimpleChartConfig {
         this.isBottomAxisPrimary = isBottomAxisPrimary;
     }
 
-    public AxisConfig getLeftAxisConfig() {
-        return leftAxisConfig;
+    public AxisConfig getLeftAxisDefaultConfig() {
+        return leftAxisDefaultConfig;
     }
 
-    public AxisConfig getRightAxisConfig() {
-        return rightAxisConfig;
+    public AxisConfig getRightAxisDefaultConfig() {
+        return rightAxisDefaultConfig;
     }
 
     public void addStack() {
@@ -116,20 +97,20 @@ public class SimpleChartConfig {
     }
 
     public void addStack(int weight) {
-        if (leftAxisConfig == null) {
-            this.leftAxisConfig = new AxisConfig(AxisOrientation.LEFT);
+        if (leftAxisDefaultConfig == null) {
+            this.leftAxisDefaultConfig = new AxisConfig(AxisOrientation.LEFT);
             if (isLeftAxisPrimary) {
-                this.leftAxisConfig.setGridLineStroke(new BStroke(1));
+                this.leftAxisDefaultConfig.setGridLineStroke(new BStroke(1));
             }
         }
-        if (rightAxisConfig == null) {
-            this.rightAxisConfig = new AxisConfig(AxisOrientation.RIGHT);
+        if (rightAxisDefaultConfig == null) {
+            this.rightAxisDefaultConfig = new AxisConfig(AxisOrientation.RIGHT);
             if (!isLeftAxisPrimary) {
-                this.rightAxisConfig.setGridLineStroke(new BStroke(1));
+                this.rightAxisDefaultConfig.setGridLineStroke(new BStroke(1));
             }
         }
-        AxisConfig leftConfig = new AxisConfig(leftAxisConfig);
-        AxisConfig rightConfig = new AxisConfig(rightAxisConfig);
+        AxisConfig leftConfig = new AxisConfig(leftAxisDefaultConfig);
+        AxisConfig rightConfig = new AxisConfig(rightAxisDefaultConfig);
         yAxisConfigs.add(leftConfig);
         yAxisConfigs.add(rightConfig);
         stackWeights.add(weight);

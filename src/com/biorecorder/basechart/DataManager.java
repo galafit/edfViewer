@@ -22,7 +22,11 @@ public class DataManager {
 
     }
 
-    public DataSeries getTraceData(int traceNumber, Double min, Double max) {
-       return traceDataManagers.get(traceNumber).getProcessedData(min, max);
+    public DataSeries getCroppedTraceData(int traceNumber, int width) {
+        return traceDataManagers.get(traceNumber).cropData(width);
+    }
+
+    public DataSeries getProcessedTraceData(int traceNumber, Double min, Double max) {
+       return traceDataManagers.get(traceNumber).processData(min, max);
     }
 }

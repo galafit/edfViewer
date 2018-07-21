@@ -29,12 +29,26 @@ public class TraceDataManager {
         }
     }
 
-    public DataSeries getProcessedData(Double min, Double max) {
+    public DataSeries cropData(int width) {
+        if (croppedSeries == null) {
+            croppedSeries = traceDataSeries.copy();
+        }
+        if (processingConfig.isCropEnabled()) {
+            croppedSeries.setViewRange(0, width);
+        }
+        if(processingConfig.isDataExpensive()) {
+            croppedSeries.setCachingEnabled(true);
+        }
+        return croppedSeries;
+    }
+
+
+    public DataSeries processData(Double min, Double max) {
         if (traceDataSeries.size() == 0) {
             return traceDataSeries;
         }
 
-        if (!processingConfig.isCropEnabled() && processingConfig.isGroupingEnabled()) {
+        if (!processingConfig.isCropEnabled() && !processingConfig.isGroupingEnabled()) {
             return traceDataSeries;
         }
 
@@ -44,7 +58,7 @@ public class TraceDataManager {
             croppedSeries = traceDataSeries.copy();
         }
         if (processingConfig.isCropEnabled()) {
-            croppedSeries.setViewRange(subRange);
+            croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getLength());
         } else {
             isFullGrouping = true;
         }
@@ -64,7 +78,7 @@ public class TraceDataManager {
         // first grouping
         if (groupedSeries == null) {
             groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
-            if (processingConfig.isDataExpencive() || isFullGrouping) {
+            if (processingConfig.isDataExpensive() || isFullGrouping) {
                 groupedSeries.setCachingEnabled(true);
             }
             return groupedSeries;

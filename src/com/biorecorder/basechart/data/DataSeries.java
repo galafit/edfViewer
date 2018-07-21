@@ -22,8 +22,16 @@ public class DataSeries  {
         return false;
     }
 
-    public void setXData(double startXValue, double dataInterval) {
-        xColumn = new RegularColumn(startXValue, dataInterval);
+    NumberColumn getXColumn() {
+        return xColumn;
+    }
+
+    NumberColumn getYColumn(int columnNumber) {
+       return yColumns.get(columnNumber);
+    }
+
+    public void setXData(double xStartValue, double xInterval) {
+        xColumn = new RegularColumn(xStartValue, xInterval);
     }
 
     public void setXData(IntSeries series) {
@@ -136,10 +144,10 @@ public class DataSeries  {
         }
     }
 
-    public void setViewRange(SubRange subRange) {
-        xColumn.setViewRange(subRange.getStartIndex(), subRange.getLength());
+    public void setViewRange(long startIndex, long length) {
+        xColumn.setViewRange(startIndex, length);
         for (NumberColumn yColumn : yColumns) {
-            yColumn.setViewRange(subRange.getStartIndex(), subRange.getLength());
+            yColumn.setViewRange(startIndex, length);
         }
     }
 

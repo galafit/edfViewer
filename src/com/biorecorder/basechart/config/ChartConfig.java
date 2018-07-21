@@ -3,8 +3,11 @@ package com.biorecorder.basechart.config;
 import com.biorecorder.basechart.BStroke;
 import com.biorecorder.basechart.Margin;
 import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.data.Data;
+import com.biorecorder.basechart.data.DataSeries;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +15,9 @@ import java.util.Set;
 /**
  * Created by galafit on 2/12/17.
  */
-public class ScrollableChartConfig {
-    private Data
+public class ChartConfig {
+    private Data data = new Data();
+    private boolean isPreviewEnabled = true;
     private SimpleChartConfig chartConfig;
     private SimpleChartConfig previewConfig;
     private int gapBetweenChartPreview; //px
@@ -22,20 +26,19 @@ public class ScrollableChartConfig {
     private Map<Integer, Double> scrollExtents = new Hashtable<Integer, Double>(2);
     private Range previewMinMax;
 
-    public ScrollableChartConfig() {
-        this(Theme.DARK, true);
-    }
+    private boolean autoScrollEnable = true;
+    private boolean autosSaleEnableDuringScroll = true; // chart Y auto scale during scrolling
+    private ArrayList<Float> previewGroupingIntervals = new ArrayList<Float>();
 
-    public ScrollableChartConfig(boolean isDateTime) {
-        this(Theme.DARK, isDateTime);
-    }
-
-    public ScrollableChartConfig(Theme theme, boolean isDateTime) {
+    public ChartConfig(Theme theme, boolean isDateTime, boolean isPreviewEnabled) {
+        this.isPreviewEnabled = isPreviewEnabled;
         chartConfig = new SimpleChartConfig();
         previewConfig = new SimpleChartConfig();
 
-        AxisConfig leftAxisConfig = chartConfig.getLeftAxisConfig();
-        AxisConfig rightAxisConfig = chartConfig.getRightAxisConfig();
+        previewConfig.getTraceDataConfig()
+
+        AxisConfig leftAxisConfig = chartConfig.getLeftAxisDefaultConfig();
+        AxisConfig rightAxisConfig = chartConfig.getRightAxisDefaultConfig();
         leftAxisConfig.setMinMaxRoundingEnable(true);
         leftAxisConfig.setLabelInside(true);
         leftAxisConfig.setTickMarkInsideSize(3);
@@ -57,8 +60,8 @@ public class ScrollableChartConfig {
         chartConfig.setBottomAxisPrimary(false);
         chartConfig.setLeftAxisPrimary(false);
 
-        leftAxisConfig = previewConfig.getLeftAxisConfig();
-        rightAxisConfig = previewConfig.getRightAxisConfig();
+        leftAxisConfig = previewConfig.getLeftAxisDefaultConfig();
+        rightAxisConfig = previewConfig.getRightAxisDefaultConfig();
         leftAxisConfig.setMinMaxRoundingEnable(true);
         leftAxisConfig.setLabelInside(true);
         leftAxisConfig.setTickMarkInsideSize(3);
@@ -122,6 +125,10 @@ public class ScrollableChartConfig {
         previewConfig.getCrosshairConfig().setLineColor(theme.getCrosshairColor());
 
         scrollConfig.setScrollColor(theme.getScrollColor());
+    }
+
+    public boolean isPreviewEnabled() {
+        return isPreviewEnabled;
     }
 
     public SimpleChartConfig getChartConfig() {
@@ -218,5 +225,100 @@ public class ScrollableChartConfig {
 
     public void addPreviewStack() {
         previewConfig.addStack();
+    }
+
+    /*********************************************
+     *              CHART TRACES
+     *********************************************/
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        chartConfig.addTrace(traceConfig, data.addDataSerie(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+    }
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        addTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
+
+        int traceYIndex = getChartConfig().getTraceYIndex(getChartConfig().getTraceCount() - 1);
+        getChartConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
+    }
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        addTrace(traceConfig, traceData, null, isXAxisOpposite, isYAxisOpposite);
+    }
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits) {
+        addTrace(traceConfig, traceData, name, dataUnits, false, false);
+    }
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name) {
+        addTrace(traceConfig, traceData, name, false, false);
+    }
+
+    /**
+     * add trace to the last chart stack
+     */
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData) {
+        addTrace(traceConfig, traceData, null, false, false);
+    }
+
+
+    /*********************************************
+     *              PREVIEW TRACES
+     *********************************************/
+
+
+
+    /**
+     * add trace to the last preview stack
+     */
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        getPreviewConfig().addTrace(traceConfig, data.addDataSerie(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+    }
+
+    /**
+     * add trace to the last preview stack
+     */
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        addPreviewTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
+
+        int traceYIndex = getPreviewConfig().getTraceYIndex(getPreviewConfig().getTraceCount() - 1);
+        getPreviewConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
+    }
+
+    /**
+     * add trace to the last preview stack
+     */
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits) {
+        addPreviewTrace(traceConfig, traceData, name, dataUnits, false, false);
+    }
+
+
+    /**
+     * add trace to the last preview stack
+     */
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries data, String name) {
+        addPreviewTrace(traceConfig, data, name, false, false);
+    }
+
+    /**
+     * add trace to the last preview stack
+     */
+    public void addPreviewTrace(TraceConfig traceConfig, DataSeries data) {
+        addPreviewTrace(traceConfig, data, null, false, false);
     }
 }

@@ -2,7 +2,6 @@ package com.biorecorder.basechart.traces;
 
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
 
@@ -27,6 +26,11 @@ public class LineTrace extends Trace {
     @Override
     public BColor getColor() {
         return traceConfig.getColor();
+    }
+
+    @Override
+    public int getMarkSize() {
+        return traceConfig.getMarkSize();
     }
 
     BColor getLineColor() {

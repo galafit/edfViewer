@@ -66,7 +66,12 @@ public class SimpleChart {
             dataManager.addTrace(i, chartConfig.getTraceDataConfig(i), traceConfig.getMarkSize());
             Trace trace = traceFactory.getTrace(traceConfig);
             int traceXIndex = chartConfig.getTraceXIndex(i);
-            DataSeries traceData = dataManager.getTraceData(i, chartConfig.getXMin(traceXIndex), chartConfig.getXMax(traceXIndex));
+            DataSeries traceData;
+            if(! chartConfig.isTracesSpreadEnabled()) {
+                traceData = dataManager.getCroppedTraceData(i, area.width);
+            } else {
+                traceData = dataManager.getProcessedTraceData(i, chartConfig.getXMin(traceXIndex), chartConfig.getXMax(traceXIndex));
+            }
             trace.setData(traceData);
             trace.setXAxis(xAxisList.get(chartConfig.getTraceXIndex(i)));
             trace.setYAxis(yAxisList.get(chartConfig.getTraceYIndex(i)));
@@ -109,6 +114,19 @@ public class SimpleChart {
         }
     }
 
+    private Range calculateTraceXMinMax(Trace trace) {
+        int pixelsPerPoint = Math.max(1, trace.getMarkSize());
+        Range xMinMax = trace.getXExtremes();
+        DataSeries traceData = trace.getData();
+        long dataSize = traceData.size();
+        // in the case if data has a small number of points: (data size < area.width)
+        if(chartConfig.isTracesBestScalingEnabled() && dataSize > 1 && dataSize * pixelsPerPoint < (fullArea.width * 2 / 3)) {
+            double avgDataInterval = traceData.getAverageDataInterval();
+            xMinMax = new Range(xMinMax.getMin(), xMinMax.getMin() + avgDataInterval * fullArea.width / pixelsPerPoint);
+        }
+        return xMinMax;
+    }
+
     private void setInitialXExtremes(int xAxisIndex) {
         Double min = chartConfig.getXMin(xAxisIndex);
         Double max = chartConfig.getXMax(xAxisIndex);
@@ -122,7 +140,7 @@ public class SimpleChart {
         for (int i = 0; i < traces.size(); i++) {
             Trace trace = traces.get(i);
             if (trace.getXAxis() == xAxisList.get(xAxisIndex)) {
-                tracesMinMax = Range.max(tracesMinMax, trace.getXExtremes());
+                tracesMinMax = Range.max(tracesMinMax, calculateTraceXMinMax(trace));
             }
         }
 
@@ -271,7 +289,7 @@ public class SimpleChart {
         Axis xAxis = xAxisList.get(xAxisIndex);
         for (int i = 0; i < traces.size(); i++) {
             if(traces.get(i).getXAxis() == xAxis) {
-                traces.get(i).setData(dataManager.getTraceData(i, xAxis.getMin(), xAxis.getMax()));
+                traces.get(i).setData(dataManager.getProcessedTraceData(i, xAxis.getMin(), xAxis.getMax()));
             }
         }
     }

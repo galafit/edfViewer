@@ -1,12 +1,11 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.chart.*;
 
 /**
  * Created by galafit on 26/11/17.
  */
 public class ChartWithDataManager {
-/*    private ChartConfig config;
+    private ChartConfig config;
     private int minPixelsPerDataItem = 1;
     private float currentPreviewGroupingInterval = 0;
 
@@ -309,5 +308,5 @@ public class ChartWithDataManager {
             minExtent = (minExtent == 0) ? scrollableChart.getScrollExtent(xAxisIndex) : Math.min(minExtent, scrollableChart.getScrollExtent(xAxisIndex));
         }
         return scrollableChart.setScrollsValue(dataMinMax.getMax() - minExtent);
-    } */
+    }
 }

@@ -25,7 +25,19 @@ public class Data {
         return dataSeries;
     }
 
-    public void addNumberColumn(NumberColumn numberColumn) {
-        numberColumns.add(numberColumn);
+    public DataConfig addDataSerie(DataSeries dataSeries) {
+        DataConfig dataConfig = new DataConfig();
+        if(dataSeries.getXColumn() instanceof RegularColumn) {
+            RegularColumn xColumn = (RegularColumn) dataSeries.getXColumn();
+            dataConfig.setXStartAndInterval(xColumn.getStartValue(), xColumn.getDataInterval());
+        } else {
+            numberColumns.add(dataSeries.getXColumn());
+            dataConfig.setXColumnIndex(numberColumns.size() - 1);
+        }
+        for (int i = 0; i < dataSeries.YColumnsCount(); i++) {
+            numberColumns.add(dataSeries.getYColumn(i));
+            dataConfig.addYColumn(numberColumns.size() - 1);
+        }
+        return dataConfig;
     }
 }

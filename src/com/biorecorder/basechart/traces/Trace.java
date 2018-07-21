@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.chart.*;
 import com.biorecorder.basechart.data.DataSeries;
 
 
@@ -51,6 +50,8 @@ public abstract class Trace {
     }
 
     public abstract BColor getColor();
+
+    public abstract int getMarkSize();
 
     public abstract Range getYExtremes();
 
