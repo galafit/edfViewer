@@ -5,12 +5,17 @@ package com.biorecorder.basechart.data.grouping;
  */
 public class IntGroupingAvg implements IntGroupingFunction {
     private long sum;
-    protected int count;
+    private int count;
 
     @Override
     public void add(int value) {
         sum += value;
         count++;
+    }
+
+    @Override
+    public int elementCount() {
+        return count;
     }
 
     @Override

@@ -8,7 +8,7 @@ import com.biorecorder.basechart.data.grouping.GroupingType;
  */
 public abstract class NumberColumn {
     protected String name;
-    protected GroupingType groupingType;
+    protected GroupingType groupingType = GroupingType.AVG;
 
     public String getName() {
         return name;

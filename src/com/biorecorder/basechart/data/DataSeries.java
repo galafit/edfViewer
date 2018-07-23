@@ -13,7 +13,6 @@ public class DataSeries  {
     ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
     NumberColumn xColumn = new RegularColumn();
     StringColumn annotationColumn;
-    int length;
 
     public boolean isOrdered() {
         if (isOrdered || xColumn instanceof RegularColumn) {
@@ -134,8 +133,6 @@ public class DataSeries  {
         long nearestIndex = (distance1 <= distance2) ? lowerBoundIndex : lowerBoundIndex + 1;
         return nearestIndex;
     }
-
-
 
     public void setCachingEnabled(boolean isCachingEnabled) {
         xColumn.setCachingEnabled(isCachingEnabled);

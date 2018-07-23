@@ -5,6 +5,7 @@ package com.biorecorder.basechart.data.grouping;
  */
 public class IntGroupingMinMax implements IntGroupingFunction{
     private int[] minMax = new int[0];
+    private int count;
 
     @Override
     public void add(int value) {
@@ -20,7 +21,14 @@ public class IntGroupingMinMax implements IntGroupingFunction{
                 minMax[1] = value;
             }
         }
+        count++;
     }
+
+    @Override
+    public int elementCount() {
+        return count;
+    }
+
 
     @Override
     public int[] getGrouped() {
@@ -30,5 +38,6 @@ public class IntGroupingMinMax implements IntGroupingFunction{
     @Override
     public void reset() {
         minMax = new int[0];
+        count = 0;
     }
 }

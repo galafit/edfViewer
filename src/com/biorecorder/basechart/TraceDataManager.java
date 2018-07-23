@@ -16,34 +16,26 @@ public class TraceDataManager {
     private ArrayList<GroupedDataSeries> fullyGroupedSeries = new ArrayList<>(0);
     private DataProcessingConfig processingConfig;
     private int pixelsInDataPoint = 1;
-    private int width = 1500;
+    private int width = 500;
 
     private DataSeries croppedSeries;
     private GroupedDataSeries groupedSeries;
 
-    public TraceDataManager(DataSeries traceDataSeries, int pixelsInDataPoint) {
+    public TraceDataManager(DataSeries traceDataSeries, DataProcessingConfig processingConfig, int pixelsInDataPoint) {
         this.traceDataSeries = traceDataSeries;
         this.pixelsInDataPoint = pixelsInDataPoint;
+        this.processingConfig = processingConfig;
         if(this.pixelsInDataPoint <= 0) {
             this.pixelsInDataPoint = 1;
         }
     }
 
-    public DataSeries cropData(int width) {
-        if (croppedSeries == null) {
-            croppedSeries = traceDataSeries.copy();
-        }
-        if (processingConfig.isCropEnabled()) {
-            croppedSeries.setViewRange(0, width);
-        }
-        if(processingConfig.isDataExpensive()) {
-            croppedSeries.setCachingEnabled(true);
-        }
-        return croppedSeries;
+    public DataSeries getOriginalData() {
+        return traceDataSeries;
     }
 
 
-    public DataSeries processData(Double min, Double max) {
+    public DataSeries getProcessData(Double min, Double max) {
         if (traceDataSeries.size() == 0) {
             return traceDataSeries;
         }
@@ -51,8 +43,12 @@ public class TraceDataManager {
         if (!processingConfig.isCropEnabled() && !processingConfig.isGroupingEnabled()) {
             return traceDataSeries;
         }
-
         SubRange subRange = traceDataSeries.getSubRange(min, max);
+        if(processingConfig.isCropToAvailableSpaceEnabled()) {
+            if(min == null || max == null) {
+                subRange = new SubRange(subRange.getStartIndex(), width);
+            }
+        }
         boolean isFullGrouping = false;
         if (croppedSeries == null) {
             croppedSeries = traceDataSeries.copy();
@@ -68,7 +64,7 @@ public class TraceDataManager {
         }
 
         // calculate best avg number of points in each group
-        int pointsInGroup = (int) Math.round((double) (subRange.getLength()) / (width * pixelsInDataPoint));
+        int pointsInGroup = (int) Math.round((double) (subRange.getLength() * pixelsInDataPoint) / width);
         double groupingInterval = getGroupingInterval(pointsInGroup);
         if (pointsInGroup < 2) { // no grouping
             groupedSeries = null;

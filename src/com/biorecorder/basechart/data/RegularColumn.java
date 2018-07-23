@@ -157,11 +157,11 @@ public class RegularColumn extends NumberColumn {
 
         @Override
         public double get(long index) {
-            return series.get(index - startIndex);
+            return series.get(index + startIndex);
         }
 
         public double getStartValue() {
-            return series.getStartValue();
+            return get(0);
         }
 
         public double getDataInterval() {

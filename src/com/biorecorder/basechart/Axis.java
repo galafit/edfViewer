@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.config.AxisConfig;
 import com.biorecorder.basechart.config.AxisType;
-import com.biorecorder.basechart.chart.scales.*;
 import com.biorecorder.basechart.scales.*;
 
 import java.text.MessageFormat;
@@ -71,6 +70,9 @@ public class Axis {
     }
 
     public void setMinMax(Double min, Double max) {
+        if(min == null && max == null) {
+            return;
+        }
         if (min!= null && max != null && min > max){
             String errorMessage = "Expected Min < Max. Min = {0}, Max = {1}.";
             String formattedError = MessageFormat.format(errorMessage,min,max);
@@ -88,6 +90,7 @@ public class Axis {
                 max = min + 1;
             }
         }
+
         scale.setDomain(min, max);
         rowMinMax = new Range(getMin(), getMax());
         ticks = null;

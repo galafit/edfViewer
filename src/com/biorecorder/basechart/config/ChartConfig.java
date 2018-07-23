@@ -2,7 +2,6 @@ package com.biorecorder.basechart.config;
 
 import com.biorecorder.basechart.BStroke;
 import com.biorecorder.basechart.Margin;
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.data.Data;
 import com.biorecorder.basechart.data.DataSeries;
@@ -24,18 +23,28 @@ public class ChartConfig {
     private Margin margin;
     private ScrollConfig scrollConfig = new ScrollConfig();
     private Map<Integer, Double> scrollExtents = new Hashtable<Integer, Double>(2);
-    private Range previewMinMax;
 
     private boolean autoScrollEnable = true;
-    private boolean autosSaleEnableDuringScroll = true; // chart Y auto scale during scrolling
+    private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
+
     private ArrayList<Float> previewGroupingIntervals = new ArrayList<Float>();
+
+    public ChartConfig(boolean isDateTime, boolean isPreviewEnabled) {
+        this(Theme.DARK, isDateTime, isPreviewEnabled);
+    }
 
     public ChartConfig(Theme theme, boolean isDateTime, boolean isPreviewEnabled) {
         this.isPreviewEnabled = isPreviewEnabled;
         chartConfig = new SimpleChartConfig();
         previewConfig = new SimpleChartConfig();
-
-        previewConfig.getTraceDataConfig()
+        if(isPreviewEnabled) {
+            chartConfig.setTracesSpreadEnabled(false);
+            chartConfig.getDataProcessingConfig().setCropToAvailableSpaceEnabled(true);
+            previewConfig.addStack();
+            previewConfig.getXConfig(0).setVisible(true);
+            previewConfig.setTracesSpreadEnabled(false);
+            previewConfig.getDataProcessingConfig().setCropToAvailableSpaceEnabled(false);
+        }
 
         AxisConfig leftAxisConfig = chartConfig.getLeftAxisDefaultConfig();
         AxisConfig rightAxisConfig = chartConfig.getRightAxisDefaultConfig();
@@ -127,11 +136,31 @@ public class ChartConfig {
         scrollConfig.setScrollColor(theme.getScrollColor());
     }
 
+    public Data getData() {
+        return data;
+    }
+
+    public boolean isAutoScrollEnable() {
+        return autoScrollEnable;
+    }
+
+    public void setAutoScrollEnable(boolean autoScrollEnable) {
+        this.autoScrollEnable = autoScrollEnable;
+    }
+
+    public boolean isAutoScaleEnableDuringScroll() {
+        return autoScaleEnableDuringScroll;
+    }
+
+    public void setAutoScaleEnableDuringScroll(boolean autoScaleEnableDuringScroll) {
+        this.autoScaleEnableDuringScroll = autoScaleEnableDuringScroll;
+    }
+
     public boolean isPreviewEnabled() {
         return isPreviewEnabled;
     }
 
-    public SimpleChartConfig getChartConfig() {
+    public SimpleChartConfig getBaseChartConfig() {
         return chartConfig;
     }
 
@@ -155,18 +184,6 @@ public class ChartConfig {
         this.margin = margin;
     }
 
-    public void setPreviewMinMax(Range minMax) {
-      previewMinMax = minMax;
-        for (int i = 0; i < previewConfig.getXAxisCount(); i++) {
-            previewConfig.setXMin(i, minMax.getMin());
-            previewConfig.setXMax(i, minMax.getMax());
-        }
-    }
-
-    public Range getPreviewMinMax() {
-        return previewMinMax;
-    }
-
     public ScrollConfig getScrollConfig() {
         return scrollConfig;
     }
@@ -175,23 +192,10 @@ public class ChartConfig {
         return scrollExtents.get(xAxisIndex);
     }
 
-    public double[] getScrollsExtents() {
-        double[] extents = new double[scrollExtents.keySet().size()];
-        int i = 0;
-        for (Integer xAxisIndex : scrollExtents.keySet()) {
-            extents[i] = scrollExtents.get(xAxisIndex);
-            i++;
-        }
-        return extents;
-    }
-
     public void addScroll(int xAxisIndex, double extent) {
         scrollExtents.put(xAxisIndex, extent);
     }
 
-    public Set<Integer> getXAxisWithScroll() {
-        return scrollExtents.keySet();
-    }
 
     public void addChartStack(int weight, double min, double max) {
         chartConfig.addStack(weight, min, max);
@@ -203,7 +207,6 @@ public class ChartConfig {
 
     public void addChartStack(int weight) {
         chartConfig.addStack(weight);
-
     }
 
     public void addChartStack() {
@@ -244,8 +247,8 @@ public class ChartConfig {
     public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
 
-        int traceYIndex = getChartConfig().getTraceYIndex(getChartConfig().getTraceCount() - 1);
-        getChartConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
+        int traceYIndex = getBaseChartConfig().getTraceYIndex(getBaseChartConfig().getTraceCount() - 1);
+        getBaseChartConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
     }
 
     /**

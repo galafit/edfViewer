@@ -51,7 +51,7 @@ public class SimpleChart {
 
 
     public SimpleChart(SimpleChartConfig chartConfig, Data data, BRectangle area, TraceFactory traceFactory) {
-        dataManager = new DataManager(data);
+        dataManager = new DataManager(data, chartConfig.getDataProcessingConfig());
         this.chartConfig = chartConfig;
         this.fullArea = area;
         for (int i = 0; i < chartConfig.getXAxisCount(); i++) {
@@ -67,11 +67,7 @@ public class SimpleChart {
             Trace trace = traceFactory.getTrace(traceConfig);
             int traceXIndex = chartConfig.getTraceXIndex(i);
             DataSeries traceData;
-            if(! chartConfig.isTracesSpreadEnabled()) {
-                traceData = dataManager.getCroppedTraceData(i, area.width);
-            } else {
-                traceData = dataManager.getProcessedTraceData(i, chartConfig.getXMin(traceXIndex), chartConfig.getXMax(traceXIndex));
-            }
+            traceData = dataManager.getProcessedTraceData(i, chartConfig.getXMin(traceXIndex), chartConfig.getXMax(traceXIndex));
             trace.setData(traceData);
             trace.setXAxis(xAxisList.get(chartConfig.getTraceXIndex(i)));
             trace.setYAxis(yAxisList.get(chartConfig.getTraceYIndex(i)));
@@ -120,7 +116,7 @@ public class SimpleChart {
         DataSeries traceData = trace.getData();
         long dataSize = traceData.size();
         // in the case if data has a small number of points: (data size < area.width)
-        if(chartConfig.isTracesBestScalingEnabled() && dataSize > 1 && dataSize * pixelsPerPoint < (fullArea.width * 2 / 3)) {
+        if(!chartConfig.isTracesSpreadEnabled() && dataSize > 1 && dataSize * pixelsPerPoint < fullArea.width / 2) {
             double avgDataInterval = traceData.getAverageDataInterval();
             xMinMax = new Range(xMinMax.getMin(), xMinMax.getMin() + avgDataInterval * fullArea.width / pixelsPerPoint);
         }
@@ -145,6 +141,10 @@ public class SimpleChart {
         }
 
         if(tracesMinMax != null) {
+            if(min == null && max == null) {
+                min = tracesMinMax.getMin();
+                max = tracesMinMax.getMax();
+            }
             if(min == null && max != null) {
                 min = tracesMinMax.getMin();
                 if(min >= max) {
@@ -180,6 +180,10 @@ public class SimpleChart {
         }
 
         if(tracesMinMax != null) {
+            if(min == null && max == null) {
+                min = tracesMinMax.getMin();
+                max = tracesMinMax.getMax();
+            }
             if(min == null && max != null) {
                 min = tracesMinMax.getMin();
                 if(min >= max) {
@@ -294,6 +298,25 @@ public class SimpleChart {
         }
     }
 
+    Range getOriginalDataMinMax() {
+        Range minMax = null;
+        for (int i = 0; i < traces.size(); i++) {
+            Range traceMinMax = dataManager.getOriginalTraceData(i).getXExtremes();
+            minMax = Range.max(minMax, traceMinMax);
+        }
+        return minMax;
+    }
+
+    boolean isXAxisUsed(int xAxisIndex) {
+       Axis xAxis = xAxisList.get(xAxisIndex);
+        for (Trace trace : traces) {
+           if(trace.getXAxis() == xAxis) {
+               return true;
+           }
+        }
+        return false;
+    }
+
 
     public void draw(BCanvas canvas) {
         if (areasDirty) {
@@ -362,7 +385,7 @@ public class SimpleChart {
         areasDirty = true;
     }
 
-    public int getTraceCounter() {
+    public int traceCount() {
         return traces.size();
     }
 
@@ -388,13 +411,14 @@ public class SimpleChart {
     }
 
 
-    public int getXAxisCounter() {
+    public int xAxisCount() {
         return xAxisList.size();
     }
 
-    public int getYAxisCounter() {
+    public int yAxisCount() {
         return yAxisList.size();
     }
+
 
     public void setXMinMax(int xAxisIndex, double min, double max) {
         xAxisList.get(xAxisIndex).setMinMax(min, max);

@@ -26,6 +26,13 @@ public class Range {
         return false;
     }
 
+    public boolean contains(Range range) {
+        if(min <= range.getMin() && max >= range.getMax()) {
+            return true;
+        }
+        return false;
+    }
+
     public  double getMin() {
         return min;
     }

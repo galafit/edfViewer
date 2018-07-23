@@ -1,45 +1,52 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.config.ChartConfig;
+import com.biorecorder.basechart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.data.FloatArrayList;
+import com.biorecorder.basechart.data.IntArrayList;
+import com.biorecorder.basechart.data.XYData;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 /**
  * Created by hdablin on 24.03.17.
  */
 public class MainFrame extends JFrame {
-    FloatArrayList yData1;
-    FloatArrayList yData2;
-    FloatArrayList xData;
+    IntArrayList yData1;
+    IntArrayList yData2;
+    IntArrayList xData;
     ChartPanel chartPanel;
 
- /*   public MainFrame() throws HeadlessException {
+    public MainFrame()  {
         int width = 500;
         int height = 500;
 
         setTitle("Test chart");
 
-        yData1 = new FloatArrayList();
-        yData2 = new FloatArrayList();
-        xData = new FloatArrayList();
+        yData1 = new IntArrayList();
+        yData2 = new IntArrayList();
+        xData = new IntArrayList();
 
-        for (int i = 0; i < 160000; i++) {
+        for (int i = 0; i < 16000; i++) {
             //yData1.add((float) Math.sin(i));
             yData1.add(i);
         }
 
-        for (int i = 0; i < 160000; i++) {
-            yData2.add(i + 100);
+        for (int i = 0; i < 16000; i++) {
+            yData2.add(i + 1000);
         }
-        for (int i = 0; i < 160000; i++) {
+        for (int i = 0; i < 16000; i++) {
             xData.add(i);
         }
 
         IntArrayList bandYData = new IntArrayList();
         int counter = 0;
 
-        */
+
      /*   for (int i = 0; i < 1600; i++) {
             if(counter < 100) {
                bandYData.add(1);
@@ -53,7 +60,7 @@ public class MainFrame extends JFrame {
         }*/
 
 
-      /*  XYData xyData1 = new XYData();
+        XYData xyData1 = new XYData();
         xyData1.setYData(yData1);
 
         XYData xyData2 = new XYData();
@@ -62,42 +69,41 @@ public class MainFrame extends JFrame {
 
         XYData xyData3 = new XYData();
         xyData3.setYData(yData2);
-        xyData3.setYGroupingType(GroupingType.MAX);
+       // xyData3.setYGroupingType(GroupingType.MAX);
 
         XYData bandData = new XYData();
         bandData.setYData(bandYData);
 
-        ChartConfig config = new ChartConfig(false);
+        ChartConfig config = new ChartConfig(false, true);
 
         config.addTrace(new LineTraceConfig(false), xyData1);
         //config.addChartStack(5);
        // config.addTrace(new BooleanTraceConfig(), bandData, "Band");
 
         config.addChartStack(5);
-        config.addTrace(new LineTraceConfig(false), xyData1);
-        config.addTrace(new LineTraceConfig(true), xyData2, "EEG", "uVolts");
+       // config.addTrace(new LineTraceConfig(true), xyData1, "EEG1", "uVolts");
+        config.addTrace(new LineTraceConfig(false), xyData2);
 
 
         config.addChartStack(5);
+        config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
+     //   config.addTrace(new LineTraceConfig(false), xyData1);
+
+    /*    config.addChartStack(5, new Range(-500, 100));
         config.addTrace(new LineTraceConfig(false), xyData1);
-        config.addTrace(new LineTraceConfig(true), xyData2, "EEG", "uVolts");
+        config.addTrace(new LineTraceConfig(true), xyData2, "EEG3", "uVolts");
 
         config.addChartStack(5, new Range(-500.0, null));
         config.addTrace(new LineTraceConfig(false), xyData1);
-        config.addTrace(new LineTraceConfig(true), xyData2, "EEG", "uVolts");
+        config.addTrace(new LineTraceConfig(true), xyData2, "EEG4", "uVolts");*/
 
-        config.addChartStack(5, new Range(-500.0, null));
-        config.addTrace(new LineTraceConfig(false), xyData1);
-        config.addTrace(new LineTraceConfig(true), xyData2, "EEG", "uVolts");
-
-
-        // config.setPreviewMinMax(new Range(0, 1000));
+        // config.updatePreviewMinMax(new Range(0, 1000));
         // config.addScroll(0, 100);
-        config.addPreviewTrace(new LineTraceConfig(), xyData3, "PREV", "kg");
-        config.addPreviewTrace(new LineTraceConfig(), xyData2);
-        config.addPreviewTrace(new LineTraceConfig(), xyData1);
+      //  config.addPreviewTrace(new LineTraceConfig(), xyData3, "PREV", "kg");
+       // config.addPreviewTrace(new LineTraceConfig(), xyData2);
+       // config.addPreviewTrace(new LineTraceConfig(), xyData1);
 
-        config.addPreviewGroupingInterval(1000);
+        //config.addPreviewGroupingInterval(1000);
 
 
         chartPanel = new ChartPanel(config);
@@ -113,12 +119,12 @@ public class MainFrame extends JFrame {
 
     public void update() {
         for (int i = 1; i <= 80; i++) {
-            yData1.add((float) Math.sin(i));
+            yData1.add(100);
         }
 
 
         for (int i = 1; i <= 80; i++) {
-            float lastValue = 0;
+            int lastValue = 0;
             if (xData.size() > 0) {
                 lastValue = xData.get(xData.size() - 1);
             }
@@ -146,7 +152,7 @@ public class MainFrame extends JFrame {
             }
         });
         timer.setInitialDelay(0);
-        timer.start();
+      //  timer.start();
 
-    }*/
+    }
 }

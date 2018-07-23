@@ -65,7 +65,7 @@ public class GroupedDataSeries extends DataSeries {
                     return index * groupPointsNumber;
                 }
             };
-            xColumn = new RegularColumn(startValue, dataInterval);
+            xColumn = new RegularColumn(startValue, dataInterval * groupPointsNumber);
         } else {
             groupIndexes = new LongArrayList();
             inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, 0, inDataSeries.size());
@@ -94,8 +94,20 @@ public class GroupedDataSeries extends DataSeries {
     public long size() {
         // update bins
         if(! (inDataSeries.xColumn instanceof RegularColumn)) {
-            long from = groupIndexes.get(groupIndexes.size() - 1);
-            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, from, inDataSeries.size());
+            LongArrayList groupIndexesList = (LongArrayList)groupIndexes;
+            long from = 0;
+            if(groupIndexesList.size() > 0) {
+                from = groupIndexesList.get(groupIndexesList.size() - 1);
+            }
+            long length = inDataSeries.size() - from;
+            if(length > 0) {
+                if(from > 0) {
+                    // delete last closing group
+                    groupIndexesList.remove((int)groupIndexesList.size() - 1);
+                    from = groupIndexesList.get(groupIndexesList.size() - 1);
+                }
+                inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, from, length);
+            }
         }
         return super.size();
     }

@@ -5,6 +5,7 @@ package com.biorecorder.basechart.data.grouping;
  */
 public interface IntGroupingFunction {
     void add(int value);
+    int elementCount();
     int[] getGrouped();
     void reset();
 }

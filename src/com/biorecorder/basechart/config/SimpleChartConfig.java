@@ -41,12 +41,17 @@ public class SimpleChartConfig {
     private boolean isBottomAxisPrimary = true;
     // if true traces with small number of points will be spread on all available space
     private boolean tracesSpreadEnabled = true;
+    private DataProcessingConfig dataProcessingConfig = new DataProcessingConfig();
 
     private ArrayList<TraceInfo> traces = new ArrayList<TraceInfo>();
 
     public SimpleChartConfig() {
         xAxisConfigs.add(new AxisConfig(AxisOrientation.BOTTOM));
         xAxisConfigs.add(new AxisConfig(AxisOrientation.TOP));
+    }
+
+    public DataProcessingConfig getDataProcessingConfig() {
+        return dataProcessingConfig;
     }
 
     public boolean isTracesSpreadEnabled() {

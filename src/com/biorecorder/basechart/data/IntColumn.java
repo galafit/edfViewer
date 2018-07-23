@@ -115,8 +115,9 @@ class IntColumn extends NumberColumn {
 
     @Override
     public void getGroupIndexes(LongArrayList groupIndexes, double groupInterval, long from, long length) {
-        // first index always "from";
-        groupIndexes.add(from);
+        if(from == 0) {
+            groupIndexes.add(from);
+        }
         int intGroupInterval = (int) groupInterval;
         if(intGroupInterval <= 0) {
             groupInterval = 1;
@@ -124,12 +125,14 @@ class IntColumn extends NumberColumn {
 
         int intervalsCount = (series.get(from) / intGroupInterval) * intGroupInterval;
         long till = from + length;
-        for (long i = from + 1;  i < till; i++) {
+        for (long i = from;  i < till; i++) {
             if (series.get(i) >= intervalsCount + groupInterval) {
                 groupIndexes.add(i);
                 intervalsCount = (series.get(i) / intGroupInterval) * intGroupInterval;
             }
         }
+        // last closing bin
+        groupIndexes.add(till);
     }
 
     @Override
@@ -155,7 +158,6 @@ class IntColumn extends NumberColumn {
         private LongSeries groupIndexes;
 
         private long groupIndex = -1;
-        private int[] groupValues;
         private IntGroupingFunction groupingFunction;
 
         public GroupingManager(GroupingType groupingType, LongSeries groupIndexes) {
@@ -170,15 +172,13 @@ class IntColumn extends NumberColumn {
 
         public int[] getGroupValues(long groupIndex) {
             if(groupIndex != this.groupIndex) {
-                groupValues = group(groupIndex);
+                groupingFunction.reset();
+                this.groupIndex = groupIndex;
             }
-            return groupValues;
-        }
 
-        private int[] group(long groupIndex) {
-            groupingFunction.reset();
-            long groupStart = groupIndexes.get(groupIndex);
+            long groupStart = groupIndexes.get(groupIndex) + groupingFunction.elementCount();
             long groupEnd = groupIndexes.get(groupIndex+1);
+
             for (long j = groupStart; j < groupEnd; j++) {
                 groupingFunction.add(series.get(j));
             }
@@ -192,7 +192,7 @@ class IntColumn extends NumberColumn {
                 groupedSeries[seriesNumber] = new IntSeries() {
                     @Override
                     public long size() {
-                        return groupsCount();
+                        return groupsCount() - 1;
                     }
 
                     @Override
@@ -211,6 +211,7 @@ class IntColumn extends NumberColumn {
 
         public CachedSeries(IntSeriesRangeViewer series) {
             this.series = series;
+            cache = new IntArrayList((int)series.size());
         }
 
         @Override
@@ -254,9 +255,19 @@ class IntColumn extends NumberColumn {
         }
 
         @Override
-        public void setViewRange(long startIndex, long length) {
-            this.startIndex = startIndex;
-            this.length = length;
+        public void setViewRange(long startIndex1, long length1) {
+            startIndex = startIndex1;
+            length = length1;
+            if(startIndex < 0) {
+                startIndex = 0;
+            }
+            if(startIndex >= series.size()) {
+                startIndex = 0;
+                length = 0;
+            }
+            if(length > series.size() - startIndex) {
+                length = series.size() - startIndex;
+            }
         }
 
         @Override
@@ -269,7 +280,7 @@ class IntColumn extends NumberColumn {
 
         @Override
         public int get(long index) {
-            return series.get(index - startIndex);
+            return series.get(index + startIndex);
         }
 
     }

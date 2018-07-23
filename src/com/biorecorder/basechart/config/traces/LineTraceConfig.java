@@ -14,7 +14,7 @@ public class LineTraceConfig implements TraceConfig {
     private BStroke lineStroke = new BStroke();
     private int mode;
     private boolean isFilled = false;
-    private int markSize = 0; // point size
+    private int markSize = 10; // point size
     private BColor color;
 
     public LineTraceConfig() {
