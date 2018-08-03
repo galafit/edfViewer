@@ -48,33 +48,18 @@ public class GroupedDataSeries extends DataSeries {
 
         if(inDataSeries.xColumn instanceof RegularColumn) {
             double dataInterval = ((RegularColumn)inDataSeries.xColumn).getDataInterval();
-            double startValue = ((RegularColumn)inDataSeries.xColumn).getStartValue();
             int numberOfPointsToGroup = (int)(groupingInterval / dataInterval);
             if(numberOfPointsToGroup < 1) {
                 numberOfPointsToGroup = 1;
             }
-            final int groupPointsNumber = numberOfPointsToGroup;
-            groupIndexes = new LongSeries() {
-                @Override
-                public long size() {
-                    return inDataSeries.size() / groupPointsNumber;
-                }
-
-                @Override
-                public long get(long index) {
-                    return index * groupPointsNumber;
-                }
-            };
-            xColumn = new RegularColumn(startValue, dataInterval * groupPointsNumber);
+            groupIndexes = new RegularGroupIndexes(numberOfPointsToGroup);
         } else {
-            groupIndexes = new LongArrayList();
-            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, 0, inDataSeries.size());
-            NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupIndexes);
-            xColumn = groupedColumns[0];
+            groupIndexes = new IrregularGroupIndexes();
         }
-
+        NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupIndexes);
+        xColumn = groupedColumns[0];
         for (int i = 0; i < inDataSeries.yColumns.size(); i++) {
-            NumberColumn[] groupedColumns = inDataSeries.yColumns.get(i).group(groupIndexes);
+            groupedColumns = inDataSeries.yColumns.get(i).group(groupIndexes);
             for (NumberColumn column : groupedColumns) {
                 yColumns.add(column);
             }
@@ -90,32 +75,9 @@ public class GroupedDataSeries extends DataSeries {
         return number;
     }
 
-    @Override
-    public long size() {
-        // update bins
-        if(! (inDataSeries.xColumn instanceof RegularColumn)) {
-            LongArrayList groupIndexesList = (LongArrayList)groupIndexes;
-            long from = 0;
-            if(groupIndexesList.size() > 0) {
-                from = groupIndexesList.get(groupIndexesList.size() - 1);
-            }
-            long length = inDataSeries.size() - from;
-            if(length > 0) {
-                if(from > 0) {
-                    // delete last closing group
-                    groupIndexesList.remove((int)groupIndexesList.size() - 1);
-                    from = groupIndexesList.get(groupIndexesList.size() - 1);
-                }
-                inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, from, length);
-            }
-        }
-        return super.size();
-    }
-
     public void updateGroups() {
-        if(! (inDataSeries.xColumn instanceof RegularColumn)) {
-            ((LongArrayList)groupIndexes).clear();
-            inDataSeries.xColumn.getGroupIndexes((LongArrayList)groupIndexes, groupingInterval, 0, inDataSeries.size());
+        if(groupIndexes instanceof  IrregularGroupIndexes) {
+            ((IrregularGroupIndexes)groupIndexes).clear();
         }
         xColumn.clearCache();
         for (NumberColumn yColumn : yColumns) {
@@ -123,4 +85,78 @@ public class GroupedDataSeries extends DataSeries {
         }
     }
 
+
+    class RegularGroupIndexes implements LongSeries {
+        private int groupPointsNumber;
+
+        public RegularGroupIndexes(int groupPointsNumber) {
+            this.groupPointsNumber = groupPointsNumber;
+        }
+
+        @Override
+        public long size() {
+            long inDataSize = inDataSeries.size();
+            if(inDataSize % groupPointsNumber == 0) {
+                return inDataSize / groupPointsNumber + 1;
+            } else {
+                return inDataSize / groupPointsNumber + 2;
+            }
+        }
+
+        @Override
+        public long get(long index) {
+            return Math.min(index * groupPointsNumber, inDataSeries.size());
+        }
+    }
+
+
+    class IrregularGroupIndexes implements LongSeries {
+        LongArrayList groupIndexesList;
+
+        public IrregularGroupIndexes() {
+            LongArrayList groupIndexesList = new LongArrayList();
+            groupIndexesList.add(0);
+        }
+
+        public void clear() {
+            groupIndexesList.clear();
+        }
+
+        @Override
+        public long get(long index) {
+            return groupIndexesList.get(index);
+        }
+
+        @Override
+        public long size() {
+            long size = inDataSeries.size();
+            long from = groupIndexesList.get(groupIndexesList.size() - 1);
+
+            if(size > from) {
+                if(from > 0) {
+                    // delete last "closing" group
+                    groupIndexesList.remove((int)groupIndexesList.size() - 1);
+                    from = groupIndexesList.get(groupIndexesList.size() - 1);
+                }
+
+                double groupStart = (int)((inDataSeries.xColumn.value(from) / groupingInterval)) * groupingInterval;
+                groupStart += groupingInterval;
+                for (long i = from;  i < size; i++) {
+                    if (inDataSeries.xColumn.value(i) >= groupStart) {
+                        groupIndexesList.add(i);
+                        groupStart += groupingInterval; // often situation
+
+                        if(inDataSeries.xColumn.value(i) > groupStart) { // rare situation
+                            groupStart = (int)((inDataSeries.xColumn.value(from) / groupingInterval)) * groupingInterval;
+                            groupStart += groupingInterval;
+                        }
+                    }
+                }
+                // add last "closing" group
+                groupIndexesList.add(size);
+            }
+            return groupIndexesList.size();
+        }
+
+    }
 }

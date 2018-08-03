@@ -29,17 +29,17 @@ public abstract class NumberColumn {
     public abstract long size();
     public abstract double value(long index);
 
+    // if length == -1 real size will be used
     public abstract void setViewRange(long from, long length);
 
     public abstract Range extremes(long length);
     public abstract long upperBound(double value, long length);
     public abstract long lowerBound(double value, long length);
-    public abstract void setCachingEnabled(boolean isCachingEnabled);
-    public abstract boolean isCachingEnabled();
+    public abstract void enableCaching(boolean isLastElementCacheable);
+    public abstract void disableCaching();
     public abstract void clearCache();
 
-    public abstract void getGroupIndexes(LongArrayList buffer, double groupInterval, long from, long length);
-    public abstract NumberColumn[] group(LongSeries groupIndexes);
+    public abstract ColumnGroupingManager groupingManager();
 
     public abstract NumberColumn copy();
 

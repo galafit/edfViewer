@@ -103,7 +103,11 @@ public class DataSeries  {
         if (yColumns.size() == 0 && annotationColumn == null) {
             return 0;
         }
-        long size = xColumn.size();
+        long size = 0;
+        if(xColumn instanceof RegularColumn) {
+           size = xColumn.size();
+        }
+
         for (NumberColumn column : yColumns) {
             size = Math.min(size, column.size());
         }

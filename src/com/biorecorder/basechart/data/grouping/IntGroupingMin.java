@@ -1,13 +1,14 @@
 package com.biorecorder.basechart.data.grouping;
 
-
 import com.biorecorder.basechart.data.IntSeries;
 
-public class IntGroupingAvg implements IntGroupingFunction {
+/**
+ * Created by galafit on 3/8/18.
+ */
+public class IntGroupingMin implements IntGroupingFunction {
     long lastFrom = -1;
     long lastLength;
-    long sum;
-    int[] avg = new int[1];
+    int[] min = new int[1];
 
     @Override
     public int[] group(IntSeries series, long from, long length) {
@@ -20,16 +21,15 @@ public class IntGroupingAvg implements IntGroupingFunction {
             start = from + lastLength;
             end = from + length;
         } else {
-            sum = series.get(from);
+            avg[0] = series.get(from);
             start = from + 1;
             end = from + length;
         }
         for (long i = start; i < end; i++) {
-            sum += series.get(i);
+           avg[0] = Math.min(series.get(i), avg[0]);
         }
         lastFrom = from;
         lastLength = length;
-        avg[0] = (int) (sum / length);
         return avg;
     }
 

@@ -1,43 +1,43 @@
 package com.biorecorder.basechart.data.grouping;
 
+import com.biorecorder.basechart.data.IntSeries;
+
 /**
  * Created by galafit on 6/7/18.
  */
-public class IntGroupingMinMax implements IntGroupingFunction{
-    private int[] minMax = new int[0];
-    private int count;
+public class IntGroupingMinMax implements IntGroupingFunction {
+    long lastFrom = -1;
+    long lastLength;
+    int[] minMax = new int[2];
 
     @Override
-    public void add(int value) {
-        if(minMax.length == 0) {
-            minMax = new int[2];
-            minMax[0] = value;
-            minMax[1] = value;
-        } else {
-            if(minMax[0] > value) {
-                minMax[0] = value;
-            }
-            if(minMax[1] < value) {
-                minMax[1] = value;
-            }
+    public int[] group(IntSeries series, long from, long length) {
+        if(length == 0) {
+            throw new IllegalArgumentException("Number of grouping elements: "+length);
         }
-        count++;
-    }
-
-    @Override
-    public int elementCount() {
-        return count;
-    }
-
-
-    @Override
-    public int[] getGrouped() {
+        long start;
+        long end;
+        if(from == lastFrom) {
+            start = from + lastLength;
+            end = from + length;
+        } else {
+            minMax[0] = series.get(from);
+            minMax[1] = series.get(from);
+            start = from + 1;
+            end = from + length;
+        }
+        for (long i = start; i < end; i++) {
+            minMax[0] = Math.min(series.get(i), minMax[0]);
+            minMax[1] = Math.max(series.get(i), minMax[1]);
+        }
+        lastFrom = from;
+        lastLength = length;
         return minMax;
     }
 
     @Override
     public void reset() {
-        minMax = new int[0];
-        count = 0;
+        lastFrom = -1;
     }
 }
+

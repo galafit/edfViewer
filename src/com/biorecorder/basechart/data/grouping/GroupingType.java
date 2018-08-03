@@ -5,6 +5,7 @@ package com.biorecorder.basechart.data.grouping;
  */
 public enum GroupingType {
     AVG(1),
+    MIN(1),
     MAX(1),
     FIRST(1),
     MIN_MAX(2);
