@@ -11,7 +11,7 @@ import java.util.List;
  * Created by galafit on 27/9/17.
  */
 class IntColumn extends NumberColumn {
-    private IntSeriesRangeViewer series;
+    private SeriesRangeViewer series;
 
     public IntColumn(IntSeries series) {
         this.series = new SeriesViewer(series);
@@ -59,15 +59,13 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public void clearCache() {
-        if(series instanceof CachedSeries) {
-            ((CachedSeries) series).clearCache();
-        }
+    public void clear() {
+        series.clear();
     }
 
     @Override
-    public ColumnGroupingManager groupingManager() {
-        return new GroupingManager(groupingType);
+    public NumberColumn[] group(LongSeries groupIndexes) {
+        return new GroupingManager(groupingType, groupIndexes).groupedColumns();
     }
 
     @Override
@@ -120,26 +118,31 @@ class IntColumn extends NumberColumn {
         return newColumn;
     }
 
-    class GroupingManager implements ColumnGroupingManager{
+    @Override
+    public void cache(NumberColumn column) {
+        series.cache(column);
+    }
+
+    class GroupingManager {
         private GroupingType groupingType;
-        private LongSeries groupIndexes;
+        private LongSeries groupStartIndexes;
 
-        private IntGroupingFunction groupingFunction;
+        private final IntGroupingFunction groupingFunction;
 
-        public GroupingManager(GroupingType groupingType) {
+        public GroupingManager(GroupingType groupingType, LongSeries groupStartIndexes) {
             this.groupingType = groupingType;
             groupingFunction = new IntGroupingAvg();
+            this.groupStartIndexes = groupStartIndexes;
         }
 
         private long groupsCount() {
-            return  groupIndexes.size() - 1;
+            return  groupStartIndexes.size() - 1;
         }
 
         private int[] getGroupValues(long groupIndex) {
-            return groupingFunction.group(series, groupIndexes.get(groupIndex), groupIndexes.get(groupIndex+1) - groupIndexes.get(groupIndex));
+            return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
         }
 
-        @Override
         public NumberColumn[] groupedColumns() {
             NumberColumn[] resultantColumns = new NumberColumn[groupingType.getDimension()];
             for (int i = 0; i < resultantColumns.length; i++) {
@@ -155,38 +158,43 @@ class IntColumn extends NumberColumn {
                         return getGroupValues(index)[seriesNumber];
                     }
                 };
-                resultantColumns[i] = new IntColumn(groupedSeries);
-                if(resultantColumns.length == 1) {
-                    resultantColumns[0].setGroupingType(groupingType);
-                } else if(resultantColumns.length == 2) { // min-max
-                    resultantColumns[0].setGroupingType(GroupingType.MIN);
-                    resultantColumns[1].setGroupingType(GroupingType.MAX);
-                }
-                for (int j = 0; j < resultantColumns.length; j++) {
-                   resultantColumns[i].setName(name);
-                }
+                resultantColumns[i] = new IntColumn(groupedSeries) {
+                    @Override
+                    public void clear() {
+                        super.clear();
+                        groupingFunction.reset();
+                    }
+
+                    @Override
+                    public void cache(NumberColumn column) {
+                        super.cache(column);
+                        groupingFunction.reset();
+                    }
+                };
+                resultantColumns[i].setName(name);
+                resultantColumns[i].setGroupingType(groupingType);
+            }
+            if(resultantColumns.length == 2) { // min-max
+                resultantColumns[0].setGroupingType(GroupingType.MIN);
+                resultantColumns[1].setGroupingType(GroupingType.MAX);
             }
             return resultantColumns;
         }
-
-        @Override
-        public void setGroupIndexes(LongSeries groupIndexes) {
-            this.groupIndexes = groupIndexes;
-            groupingFunction.reset();
-        }
-
-        @Override
-        public void reset() {
-            groupingFunction.reset();
-        }
     }
 
-    class CachedSeries implements IntSeriesRangeViewer {
-        private IntSeriesRangeViewer series;
+    public interface SeriesRangeViewer extends IntSeries {
+        void setViewRange(long startIndex, long length);
+        void clear();
+        void cache(NumberColumn column);
+
+    }
+
+    class CachedSeries implements SeriesRangeViewer {
+        private SeriesRangeViewer series;
         private IntArrayList cache;
         private boolean isLastElementCacheable;
 
-        public CachedSeries(IntSeriesRangeViewer series, boolean isLastElementCacheable) {
+        public CachedSeries(SeriesRangeViewer series, boolean isLastElementCacheable) {
             this.series = series;
             this.isLastElementCacheable = isLastElementCacheable;
             cache = new IntArrayList((int)series.size());
@@ -199,7 +207,7 @@ class IntColumn extends NumberColumn {
 
         @Override
         public int get(long index) {
-            if(index == series.size() - 1 && !isLastElementCacheable) {
+            if(!isLastElementCacheable && index == series.size() - 1) {
                 return series.get(index);
             }
 
@@ -211,10 +219,9 @@ class IntColumn extends NumberColumn {
             return cache.get(index);
         }
 
-        public IntSeriesRangeViewer getOriginalSeries() {
+        public SeriesRangeViewer getOriginalSeries() {
             return series;
         }
-
 
         @Override
         public void setViewRange(long startIndex, long length) {
@@ -222,12 +229,24 @@ class IntColumn extends NumberColumn {
             cache.clear();
         }
 
-        public void clearCache() {
+        @Override
+        public void clear() {
             cache.clear();
+        }
+
+        @Override
+        public void cache(NumberColumn column) {
+            cache.clear();
+            for (int i = 0; i < column.size() - 1; i++) {
+                cache.add((int)column.value(i));
+            }
+            if(isLastElementCacheable) {
+                cache.add((int)column.value(column.size() - 1));
+            }
         }
     }
 
-    class SeriesViewer implements IntSeriesRangeViewer{
+    class SeriesViewer implements SeriesRangeViewer {
         private IntSeries series;
         private long startIndex = 0;
         private long length = -1;
@@ -265,6 +284,15 @@ class IntColumn extends NumberColumn {
             return series.get(index + startIndex);
         }
 
+        @Override
+        public void clear() {
+            // do nothing
+        }
+
+        @Override
+        public void cache(NumberColumn column) {
+            // do nothing;
+        }
     }
 
 }

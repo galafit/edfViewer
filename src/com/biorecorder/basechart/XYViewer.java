@@ -21,7 +21,7 @@ public class XYViewer {
     }
 
     public double getY(int index) {
-        return dataSeries.getYValue(index, 0);
+        return dataSeries.getYValue(0, index);
     }
 
     public Range getYExtremes() {

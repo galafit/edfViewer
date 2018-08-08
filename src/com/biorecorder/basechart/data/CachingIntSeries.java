@@ -3,7 +3,7 @@ package com.biorecorder.basechart.data;
 import java.text.MessageFormat;
 
 /**
- * Class is designed to store/cache a computed input com.biorecorder.basechart.chart.data and to give quick access to them.
+ * Class is designed to store/copy a computed input com.biorecorder.basechart.chart.data and to give quick access to them.
  * Input com.biorecorder.basechart.chart.data could be a filter, function and so on
  */
 

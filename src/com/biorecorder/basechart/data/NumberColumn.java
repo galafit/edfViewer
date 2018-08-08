@@ -37,11 +37,11 @@ public abstract class NumberColumn {
     public abstract long lowerBound(double value, long length);
     public abstract void enableCaching(boolean isLastElementCacheable);
     public abstract void disableCaching();
-    public abstract void clearCache();
+    public abstract void clear();
 
-    public abstract ColumnGroupingManager groupingManager();
+    public abstract NumberColumn[] group(LongSeries groupIndexes, double groupingInterval);
 
     public abstract NumberColumn copy();
-
+    public abstract void cache(NumberColumn column);
 }
 

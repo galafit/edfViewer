@@ -24,6 +24,10 @@ public class RegularColumn extends NumberColumn {
         return dataInterval;
     }
 
+    public double getStartValue() {
+        return startValue;
+    }
+
     @Override
     public long size() {
         return size;
@@ -59,7 +63,7 @@ public class RegularColumn extends NumberColumn {
 
 
     @Override
-    public void clearCache() {
+    public void clear() {
         // do nothing
     }
 
@@ -74,11 +78,6 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public ColumnGroupingManager groupingManager() {
-        return null;
-    }
-
-    @Override
     public void setViewRange(long from, long length) {
         startIndex = from;
         size = length;
@@ -88,5 +87,20 @@ public class RegularColumn extends NumberColumn {
     public NumberColumn copy() {
         return new RegularColumn(startValue, dataInterval);
     }
+
+    @Override
+    public NumberColumn[] group(LongSeries groupIndexes, double groupingInterval) {
+        int numberOfPointsInGroup = (int)Math.round(groupingInterval / dataInterval);
+        NumberColumn[] resultantColumns = new NumberColumn[1];
+        resultantColumns[0] = new RegularColumn(startValue, dataInterval * numberOfPointsInGroup);
+        return resultantColumns;
+    }
+
+
+    @Override
+    public void cache(NumberColumn column) {
+       // do nothing
+    }
+
 
 }

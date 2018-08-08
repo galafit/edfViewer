@@ -61,7 +61,7 @@ public class DataSeries  {
         return yColumns.size();
     }
 
-    public double getYValue(long index, int columnNumber) {
+    public double getYValue(int columnNumber, long index) {
         return yColumns.get(columnNumber).value(index);
     }
 
@@ -138,10 +138,17 @@ public class DataSeries  {
         return nearestIndex;
     }
 
-    public void setCachingEnabled(boolean isCachingEnabled) {
-        xColumn.setCachingEnabled(isCachingEnabled);
+    public void enableCaching(boolean isLastElementCacheable) {
+        xColumn.enableCaching(isLastElementCacheable);
         for (NumberColumn yColumn : yColumns) {
-           yColumn.setCachingEnabled(isCachingEnabled);
+            yColumn.enableCaching(isLastElementCacheable);
+        }
+    }
+
+    public void disableCaching() {
+        xColumn.disableCaching();
+        for (NumberColumn yColumn : yColumns) {
+            yColumn.disableCaching();
         }
     }
 

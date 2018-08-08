@@ -9,7 +9,6 @@ import com.biorecorder.basechart.data.DataSeries;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by galafit on 2/12/17.
@@ -238,7 +237,7 @@ public class ChartConfig {
      * add trace to the last chart stack
      */
     public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        chartConfig.addTrace(traceConfig, data.addDataSerie(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+        chartConfig.addTrace(traceConfig, data.addDataSeries(traceData), name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
@@ -290,7 +289,7 @@ public class ChartConfig {
      * add trace to the last preview stack
      */
     public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        getPreviewConfig().addTrace(traceConfig, data.addDataSerie(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+        getPreviewConfig().addTrace(traceConfig, data.addDataSeries(traceData), name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**

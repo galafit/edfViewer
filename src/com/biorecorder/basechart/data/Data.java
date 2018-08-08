@@ -25,7 +25,7 @@ public class Data {
         return dataSeries;
     }
 
-    public DataConfig addDataSerie(DataSeries dataSeries) {
+    public DataConfig addDataSeries(DataSeries dataSeries) {
         DataConfig dataConfig = new DataConfig();
         if(dataSeries.getXColumn() instanceof RegularColumn) {
             RegularColumn xColumn = (RegularColumn) dataSeries.getXColumn();

@@ -75,7 +75,7 @@ public class TraceDataManager {
         if (groupedSeries == null) {
             groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             if (processingConfig.isDataExpensive() || isFullGrouping) {
-                groupedSeries.setCachingEnabled(true);
+                groupedSeries.enableCaching(false);
             }
             return groupedSeries;
         }
@@ -86,13 +86,14 @@ public class TraceDataManager {
         if (isFullGrouping) {
             // new grouping on the base of previously grouped data
             if (factor > 1) {
+
                 GroupedDataSeries previousGroupedSeries = groupedSeries;
                 groupedSeries = new GroupedDataSeries(previousGroupedSeries, factor * previousGroupingInterval);
                 groupedSeries.setCachingEnabled(true);
                 // activate "lazy" grouping recalculation on the base of cached grouped data
                 for (int i = 0; i < groupedSeries.size(); i++) {
                     for (int yColumnNumber = 0; yColumnNumber < groupedSeries.YColumnsCount(); yColumnNumber++) {
-                        groupedSeries.getYValue(i, yColumnNumber);
+                        groupedSeries.getYValue(yColumnNumber, i);
                     }
                 }
                 // remove caching from previousGroupedSeries

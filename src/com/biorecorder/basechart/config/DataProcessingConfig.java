@@ -16,7 +16,7 @@ public class DataProcessingConfig {
     // These 2 properties work together.
     // If grouping superposition enabled we can make
     // grouping of ALL points not only visible ones (full grouping) are grouped
-    // and cache the result to use it as a base
+    // and copy the result to use it as a base
     // for further quick groupings
     private boolean isGroupingSuperpositionEnabled = true;
     private int fullGroupingFactor = 64;
