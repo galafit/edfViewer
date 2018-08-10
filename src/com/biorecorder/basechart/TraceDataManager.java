@@ -30,6 +30,78 @@ public class TraceDataManager {
         }
     }
 
+    public Range getDataRange(Double min1, Double max1, boolean isBestSizeEnabled) {
+
+        if(min1 != null && max1 != null) {
+            return new Range(min1, max1);
+        }
+
+        Double min = min1;
+        Double max = max1;
+
+        double screenLength = 1;
+        if(traceDataSeries.size() == 0) {
+            if(min != null && max == null) {
+                max = min + screenLength;
+                return new Range(min, max);
+            }
+            if(min == null && max != null) {
+                min = max - screenLength;
+                return new Range(min, max);
+            }
+            if(min == null && max == null) {
+                min = 0.0;
+                max = screenLength;
+                return new Range(min, max);
+            }
+        }
+
+        Range traceMinMax = traceDataSeries.getXExtremes();
+
+        if(isBestSizeEnabled && traceDataSeries.size() > 1) {
+            screenLength = traceDataSeries.getDataInterval() * width / pixelsInDataPoint;
+            if(min != null && max == null) {
+                max = min + screenLength;
+                return new Range(min, max);
+            }
+            if(min == null && max != null) {
+                min = max - screenLength;
+                return new Range(min, max);
+            }
+
+            if(min == null && max == null) {
+                min = traceMinMax.getMin();
+                max = min + screenLength;
+                return new Range(min, max);
+            }
+        }
+
+        // usual scaling
+        if(min != null && max == null) {
+            max = traceMinMax.getMax();
+            if(max <= min) {
+                max = min + screenLength;
+            }
+            return new Range(min, max);
+        }
+        if(min == null && max != null) {
+            min = traceMinMax.getMin();
+            if(min >= max) {
+                min = max - screenLength;
+            }
+            return new Range(min, max);
+        }
+        // if min == null && max == null
+        if(traceMinMax.length() > 0) {
+            return traceMinMax;
+        } else {
+            min = traceMinMax.getMin();
+            max = min + screenLength;
+            return new Range(min, max);
+        }
+    }
+
+
     public DataSeries getOriginalData() {
         return traceDataSeries;
     }
@@ -44,11 +116,7 @@ public class TraceDataManager {
             return traceDataSeries;
         }
         SubRange subRange = traceDataSeries.getSubRange(min, max);
-        if(processingConfig.isCropToAvailableSpaceEnabled()) {
-            if(min == null || max == null) {
-                subRange = new SubRange(subRange.getStartIndex(), width);
-            }
-        }
+
         boolean isFullGrouping = false;
         if (croppedSeries == null) {
             croppedSeries = traceDataSeries.copy();
