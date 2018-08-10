@@ -39,7 +39,7 @@ public abstract class NumberColumn {
     public abstract void disableCaching();
     public abstract void clear();
 
-    public abstract NumberColumn[] group(LongSeries groupIndexes, double groupingInterval);
+    public abstract NumberColumn[] group(LongSeries groupIndexes);
 
     public abstract NumberColumn copy();
     public abstract void cache(NumberColumn column);

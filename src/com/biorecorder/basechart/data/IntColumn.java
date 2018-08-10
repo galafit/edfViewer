@@ -140,7 +140,12 @@ class IntColumn extends NumberColumn {
         }
 
         private int[] getGroupValues(long groupIndex) {
-            return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
+int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
+           if(groupIndex == groupsCount() - 1)
+            System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
+
+return value;
+            // return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
         }
 
         public NumberColumn[] groupedColumns() {
@@ -155,7 +160,7 @@ class IntColumn extends NumberColumn {
 
                     @Override
                     public int get(long index) {
-                        return getGroupValues(index)[seriesNumber];
+                       return getGroupValues(index)[seriesNumber];
                     }
                 };
                 resultantColumns[i] = new IntColumn(groupedSeries) {
@@ -178,6 +183,7 @@ class IntColumn extends NumberColumn {
                 resultantColumns[0].setGroupingType(GroupingType.MIN);
                 resultantColumns[1].setGroupingType(GroupingType.MAX);
             }
+
             return resultantColumns;
         }
     }

@@ -82,11 +82,11 @@ public class MainFrame extends JFrame {
 
         config.addChartStack(5);
        // config.addTrace(new LineTraceConfig(true), xyData1, "EEG1", "uVolts");
-        config.addTrace(new LineTraceConfig(false), xyData2);
+       // config.addTrace(new LineTraceConfig(false), xyData2);
 
 
         config.addChartStack(5);
-        config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
+      //  config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
      //   config.addTrace(new LineTraceConfig(false), xyData1);
 
     /*    config.addChartStack(5, new Range(-500, 100));

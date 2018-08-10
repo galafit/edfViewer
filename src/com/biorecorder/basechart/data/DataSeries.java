@@ -14,6 +14,13 @@ public class DataSeries  {
     NumberColumn xColumn = new RegularColumn();
     StringColumn annotationColumn;
 
+    public boolean isRegular() {
+        if(xColumn instanceof RegularColumn) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isOrdered() {
         if (isOrdered || xColumn instanceof RegularColumn) {
             return true;
@@ -207,11 +214,8 @@ public class DataSeries  {
         return copySeries;
     }
 
-    public double getAverageDataInterval() {
+    public double getDataInterval() {
         if (size() > 1) {
-            if (xColumn instanceof RegularColumn) {
-                return ((RegularColumn) xColumn).getDataInterval();
-            }
             return getXExtremes().length() / (size() - 1);
         }
         return -1;

@@ -117,7 +117,7 @@ public class SimpleChart {
         long dataSize = traceData.size();
         // in the case if data has a small number of points: (data size < area.width)
         if(!chartConfig.isTracesSpreadEnabled() && dataSize > 1 && dataSize * pixelsPerPoint < fullArea.width / 2) {
-            double avgDataInterval = traceData.getAverageDataInterval();
+            double avgDataInterval = traceData.getDataInterval();
             xMinMax = new Range(xMinMax.getMin(), xMinMax.getMin() + avgDataInterval * fullArea.width / pixelsPerPoint);
         }
         return xMinMax;

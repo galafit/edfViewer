@@ -1,5 +1,7 @@
 package com.biorecorder.basechart.data;
 
+import com.biorecorder.basechart.Range;
+
 /**
  * This class potentially permits for every grouped point (bin)
  * take its start, end and all original points the group includes (if we will need it)
@@ -43,25 +45,23 @@ public class GroupedDataSeries extends DataSeries {
 
     public GroupedDataSeries(DataSeries inDataSeries, double groupingInterval) {
         this.inDataSeries = inDataSeries;
-        if(inDataSeries.xColumn instanceof RegularColumn) {
+        if(inDataSeries.isRegular()) {
             groupStartIndexes = new RegularGroupStartIndexes(groupingInterval);
+            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
         } else {
             groupStartIndexes = new IrregularGroupStartIndexes(groupingInterval);
-        }
-
-        if(inDataSeries.getXColumn() instanceof RegularColumn) {
-            RegularColumn xRegularColumn = (RegularColumn)inDataSeries.getXColumn();
-            xColumn = new RegularColumn(xRegularColumn.getStartValue(), xRegularColumn.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
-        } else {
             NumberColumn[] groupedColumns = inDataSeries.xColumn.group(groupStartIndexes);
             xColumn = groupedColumns[0];
         }
+
         for (int i = 0; i < inDataSeries.yColumns.size(); i++) {
             NumberColumn[] groupedColumns = inDataSeries.yColumns.get(i).group(groupStartIndexes);
             for (NumberColumn column : groupedColumns) {
                 yColumns.add(column);
             }
         }
+        System.out.println(inDataSeries.size() + "  "+groupStartIndexes.size() +" create "+groupStartIndexes.get(groupStartIndexes.size() - 1));
+
     }
 
     /**
@@ -85,7 +85,11 @@ public class GroupedDataSeries extends DataSeries {
         // make group indexes superposition and copy grouped data
         groupStartIndexes.superposition(resultantGroupedSeries.getGroupStartIndexes());
 
-        xColumn.cache(resultantGroupedSeries.getXColumn());
+         if(inDataSeries.isRegular()) {
+            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
+        } else {
+            xColumn.cache(resultantGroupedSeries.getXColumn());
+        }
         for (int i = 0; i < yColumns.size(); i++) {
            yColumns.get(i).cache(resultantGroupedSeries.getYColumn(i));
         }
@@ -97,9 +101,8 @@ public class GroupedDataSeries extends DataSeries {
 
     public void setGroupingInterval(double groupingInterval) {
         groupStartIndexes.setGroupingInterval(groupingInterval);
-        if(inDataSeries.getXColumn() instanceof RegularColumn) {
-            RegularColumn xRegularColumn = (RegularColumn)inDataSeries.getXColumn();
-            xColumn = new RegularColumn(xRegularColumn.getStartValue(), xRegularColumn.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
+        if(inDataSeries.isRegular()) {
+            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
         }
     }
 
@@ -112,19 +115,24 @@ public class GroupedDataSeries extends DataSeries {
     }
 
     public void updateGroups() {
+        System.out.println(inDataSeries.size() + "  "+groupStartIndexes.size() +" create "+groupStartIndexes.get(groupStartIndexes.size() - 1));
         groupStartIndexes.clear();
         xColumn.clear();
+        if(inDataSeries.isRegular()) {
+            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
+        }
         for (NumberColumn yColumn : yColumns) {
             yColumn.clear();
         }
+      //  System.out.println(groupStartIndexes.size() +" update "+groupStartIndexes.get(groupStartIndexes.size() - 1));
     }
 
     private double pointsNumberToGroupingInterval(int numberOfPointsInGroup) {
-        return numberOfPointsInGroup * inDataSeries.getAverageDataInterval();
+        return numberOfPointsInGroup * inDataSeries.getDataInterval();
     }
 
     private int groupingIntervalToPointsNumber(double groupingInterval) {
-        return (int)Math.round(groupingInterval / inDataSeries.getAverageDataInterval());
+        return (int)Math.round(groupingInterval / inDataSeries.getDataInterval());
     }
 
     interface GroupStartIndexes extends LongSeries {
@@ -183,7 +191,7 @@ public class GroupedDataSeries extends DataSeries {
             if(index < size - 1) {
                 return index * groupPointsNumber;
             } else {
-                return Math.min(index * groupPointsNumber, inDataSeries.size());
+                return inDataSeries.size();
             }
         }
 

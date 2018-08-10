@@ -89,11 +89,8 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes, double groupingInterval) {
-        int numberOfPointsInGroup = (int)Math.round(groupingInterval / dataInterval);
-        NumberColumn[] resultantColumns = new NumberColumn[1];
-        resultantColumns[0] = new RegularColumn(startValue, dataInterval * numberOfPointsInGroup);
-        return resultantColumns;
+    public NumberColumn[] group(LongSeries groupIndexes) {
+        return new NumberColumn[0];
     }
 
 

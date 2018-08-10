@@ -73,6 +73,7 @@ public class TraceDataManager {
 
         // first grouping
         if (groupedSeries == null) {
+            System.out.println("first grouping "+groupingInterval+ " "+min+ " "+max);
             groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             if (processingConfig.isDataExpensive() || isFullGrouping) {
                 groupedSeries.enableCaching(false);
@@ -81,28 +82,19 @@ public class TraceDataManager {
         }
 
         // re-grouping
-        double previousGroupingInterval = groupedSeries.getAverageDataInterval();
+        double previousGroupingInterval = groupedSeries.getDataInterval();
         int factor = (int) Math.round(groupingInterval / previousGroupingInterval);
         if (isFullGrouping) {
             // new grouping on the base of previously grouped data
             if (factor > 1) {
-
-                GroupedDataSeries previousGroupedSeries = groupedSeries;
-                groupedSeries = new GroupedDataSeries(previousGroupedSeries, factor * previousGroupingInterval);
-                groupedSeries.setCachingEnabled(true);
-                // activate "lazy" grouping recalculation on the base of cached grouped data
-                for (int i = 0; i < groupedSeries.size(); i++) {
-                    for (int yColumnNumber = 0; yColumnNumber < groupedSeries.YColumnsCount(); yColumnNumber++) {
-                        groupedSeries.getYValue(yColumnNumber, i);
-                    }
-                }
-                // remove caching from previousGroupedSeries
-                previousGroupedSeries.setCachingEnabled(false);
+                groupedSeries.multiplyGroupingInterval(factor);
             }
         } else {
             if (factor == 1) { // scrolling
+                System.out.println(" scrolling "+min+ " "+max);
                 groupedSeries.updateGroups();
             } else { // simple regrouping
+                System.out.println(groupingInterval+" re grouping "+ factor);
                 groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             }
         }

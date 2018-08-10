@@ -14,11 +14,14 @@ public class DataManipulator {
         if(data.size() == 0){
             return null;
         }
-        int min = data.get(from);
-        int max = data.get(from);
+        // invoke data.get(i) can be expensive in the case data is grouped data
+        int dataItem = data.get(from); //
+        int min = dataItem;
+        int max = dataItem;
         for (long i = from + 1; i < from + length ; i++) {
-            min = Math.min(min, data.get(i));
-            max = Math.max(max, data.get(i));
+            dataItem = data.get(i);
+            min = Math.min(min, dataItem);
+            max = Math.max(max, dataItem);
         }
         return new Range(new Double(min), new Double(max));
     }
