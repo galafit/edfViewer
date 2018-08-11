@@ -39,8 +39,11 @@ public class SimpleChartConfig {
     private AxisConfig rightAxisDefaultConfig = new AxisConfig(AxisOrientation.RIGHT);;
     private boolean isLeftAxisPrimary = true;
     private boolean isBottomAxisPrimary = true;
-    // if true traces with small number of points will be spread on all available space
-    private boolean tracesSpreadEnabled = true;
+
+    // if true chart will intent to draw traces so that every trace point mark
+    // occupies the specified in traceConfig markSize (in pixels)
+    private boolean isTracesNaturalDrawingEnabled = false;
+
     private DataProcessingConfig dataProcessingConfig = new DataProcessingConfig();
 
     private ArrayList<TraceInfo> traces = new ArrayList<TraceInfo>();
@@ -54,12 +57,12 @@ public class SimpleChartConfig {
         return dataProcessingConfig;
     }
 
-    public boolean isTracesSpreadEnabled() {
-        return tracesSpreadEnabled;
+    public boolean isTracesNaturalDrawingEnabled() {
+        return isTracesNaturalDrawingEnabled;
     }
 
-    public void setTracesSpreadEnabled(boolean tracesSpreadEnabled) {
-        this.tracesSpreadEnabled = tracesSpreadEnabled;
+    public void setTracesNaturalDrawingEnabled(boolean tracesNaturalDrawingEnabled) {
+        isTracesNaturalDrawingEnabled = tracesNaturalDrawingEnabled;
     }
 
     public void setLeftAxisPrimary(boolean isLeftAxisPrimary) {
@@ -196,7 +199,7 @@ public class SimpleChartConfig {
         this.titleColor = titleColor;
     }
 
-    public int getXAxisCount() {
+    public int xAxisCount() {
         return xAxisConfigs.size();
     }
 
@@ -204,7 +207,7 @@ public class SimpleChartConfig {
         return yAxisConfigs.size();
     }
 
-    public int getTraceCount() {
+    public int traceCount() {
         return traces.size();
     }
 

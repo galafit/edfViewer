@@ -26,12 +26,12 @@ public class HeaderException extends Exception {
     public static final String TYPE_NUMBER_OF_RECORDS_INVALID = "Number of data records invalid. Expected int >= -1";
     public static final String TYPE_RECORD_DURATION_INVALID = "Duration of data record invalid. Expected double >= 0";
     public static final String TYPE_NUMBER_OF_SIGNALS_INVALID = "Number of signals invalid. Expected int >= 0";
-    public static final String TYPE_SIGNAL_PHYSICAL_MIN_INVALID = "Physical min invalid. Expected double";
+    public static final String TYPE_SIGNAL_PHYSICAL_MIN_INVALID = "Physical intersect invalid. Expected double";
     public static final String TYPE_SIGNAL_PHYSICAL_MAX_INVALID = "Physical max invalid. Expected double";
-    public static final String TYPE_SIGNAL_DIGITAL_MIN_INVALID = "Digital min invalid. Expected int >= -32768 (-8388608) for EDF (BDF)";
+    public static final String TYPE_SIGNAL_DIGITAL_MIN_INVALID = "Digital intersect invalid. Expected int >= -32768 (-8388608) for EDF (BDF)";
     public static final String TYPE_SIGNAL_DIGITAL_MAX_INVALID = "Digital max invalid. Expected int <= 32767 (8388607) for EDF (BDF)";
-    public static final String TYPE_SIGNAL_PHYSICAL_MAX_LOWER_OR_EQUAL_MIN = "Physical max <= Physical min";
-    public static final String TYPE_SIGNAL_DIGITAL_MAX_LOWER_OR_EQUAL_MIN = "Digital max <= Digital min";
+    public static final String TYPE_SIGNAL_PHYSICAL_MAX_LOWER_OR_EQUAL_MIN = "Physical max <= Physical intersect";
+    public static final String TYPE_SIGNAL_DIGITAL_MAX_LOWER_OR_EQUAL_MIN = "Digital max <= Digital intersect";
     public static final String TYPE_SIGNAL_NUMBER_OF_SAMPLES_IN_RECORD_INVALID = "Number of samples in data record invalid. Expected int >= 0";
 
     private String exceptionType;

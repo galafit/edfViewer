@@ -40,6 +40,7 @@ public class Axis {
      * Zoom affects only max value. Min value does not changed!!!
      * @param zoomFactor
      */
+
     public void zoom(double zoomFactor) {
         scale.setDomain(rowMinMax.getMin(), rowMinMax.getMax());
         int start = getStart();

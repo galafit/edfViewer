@@ -246,7 +246,7 @@ public class ChartConfig {
     public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
 
-        int traceYIndex = getBaseChartConfig().getTraceYIndex(getBaseChartConfig().getTraceCount() - 1);
+        int traceYIndex = getBaseChartConfig().getTraceYIndex(getBaseChartConfig().traceCount() - 1);
         getBaseChartConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
     }
 
@@ -298,7 +298,7 @@ public class ChartConfig {
     public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name, String dataUnits, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         addPreviewTrace(traceConfig, traceData, name, isXAxisOpposite, isYAxisOpposite);
 
-        int traceYIndex = getPreviewConfig().getTraceYIndex(getPreviewConfig().getTraceCount() - 1);
+        int traceYIndex = getPreviewConfig().getTraceYIndex(getPreviewConfig().traceCount() - 1);
         getPreviewConfig().getYConfig(traceYIndex).getLabelFormatInfo().setSuffix(dataUnits);
     }
 

@@ -151,7 +151,7 @@ public class DefaultDataConfig implements DataConfig {
 
     /**
      * Sets the digital minimum and maximum values of the signal.
-     * Digital min and max must be set for every signal!!!
+     * Digital intersect and join must be set for every signal!!!
      * <br>Default digitalMin = Integer.MIN_VALUE,  digitalMax = Integer.MAX_VALUE
      *
      * @param signalNumber number of the signal(channel). Numeration starts from 0
@@ -161,7 +161,7 @@ public class DefaultDataConfig implements DataConfig {
      */
     public void setDigitalRange(int signalNumber, int digitalMin, int digitalMax) throws IllegalArgumentException {
         if (digitalMax <= digitalMin) {
-            String errMsg = MessageFormat.format("Signal {0}. Digital min-max range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, digitalMin, digitalMax, "max > min");
+            String errMsg = MessageFormat.format("Signal {0}. Digital intersect-join range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, digitalMin, digitalMax, "join > intersect");
             throw new IllegalArgumentException(errMsg);
 
         }
@@ -173,7 +173,7 @@ public class DefaultDataConfig implements DataConfig {
      * of the ADC when the output equals the value of "digital minimum" and "digital maximum").
      * Usually physicalMin = - physicalMax.
      * <p>
-     * Physical min and max must be set for every signal!!!
+     * Physical intersect and join must be set for every signal!!!
      * <br>Default physicalMin = Integer.MIN_VALUE,  physicalMax = Integer.MAX_VALUE
      *
      * @param signalNumber number of the signal(channel). Numeration starts from 0
@@ -183,7 +183,7 @@ public class DefaultDataConfig implements DataConfig {
      */
     public void setPhysicalRange(int signalNumber, double physicalMin, double physicalMax) throws IllegalArgumentException {
         if (physicalMax <= physicalMin) {
-            String errMsg = MessageFormat.format("Signal {0}. Physical min-max range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, physicalMin, physicalMax, "max > min");
+            String errMsg = MessageFormat.format("Signal {0}. Physical intersect-join range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, physicalMin, physicalMax, "join > intersect");
             throw new IllegalArgumentException(errMsg);
         }
         signals.get(signalNumber).setPhysicalRange(physicalMin, physicalMax);

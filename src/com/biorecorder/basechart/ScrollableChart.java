@@ -1,7 +1,6 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.config.ChartConfig;
-import com.biorecorder.basechart.data.Data;
 
 import java.util.*;
 
@@ -69,10 +68,10 @@ public class ScrollableChart {
         Range previewMinMax = preview.getXMinMax(0);
         Range chartMinMax = chart.getOriginalDataMinMax();
         for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
-            chartMinMax = Range.max(chartMinMax, chart.getXMinMax(xAxisIndex));
+            chartMinMax = Range.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
         if(! previewMinMax.contains(chartMinMax)) {
-            previewMinMax = Range.max(previewMinMax, chartMinMax);
+            previewMinMax = Range.join(previewMinMax, chartMinMax);
             preview.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
         }
     }

@@ -179,7 +179,7 @@ return value;
                 resultantColumns[i].setName(name);
                 resultantColumns[i].setGroupingType(groupingType);
             }
-            if(resultantColumns.length == 2) { // min-max
+            if(resultantColumns.length == 2) { // intersect-join
                 resultantColumns[0].setGroupingType(GroupingType.MIN);
                 resultantColumns[1].setGroupingType(GroupingType.MAX);
             }

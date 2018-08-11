@@ -25,89 +25,22 @@ public class TraceDataManager {
         this.traceDataSeries = traceDataSeries;
         this.pixelsInDataPoint = pixelsInDataPoint;
         this.processingConfig = processingConfig;
-        if(this.pixelsInDataPoint <= 0) {
+        if (this.pixelsInDataPoint <= 0) {
             this.pixelsInDataPoint = 1;
         }
     }
 
-    public Range getDataRange(Double min1, Double max1, boolean isBestSizeEnabled) {
 
-        if(min1 != null && max1 != null) {
-            return new Range(min1, max1);
-        }
-
-        Double min = min1;
-        Double max = max1;
-
-        double screenLength = 1;
-        if(traceDataSeries.size() == 0) {
-            if(min != null && max == null) {
-                max = min + screenLength;
-                return new Range(min, max);
-            }
-            if(min == null && max != null) {
-                min = max - screenLength;
-                return new Range(min, max);
-            }
-            if(min == null && max == null) {
-                min = 0.0;
-                max = screenLength;
-                return new Range(min, max);
-            }
-        }
-
-        Range traceMinMax = traceDataSeries.getXExtremes();
-
-        if(isBestSizeEnabled && traceDataSeries.size() > 1) {
-            screenLength = traceDataSeries.getDataInterval() * width / pixelsInDataPoint;
-            if(min != null && max == null) {
-                max = min + screenLength;
-                return new Range(min, max);
-            }
-            if(min == null && max != null) {
-                min = max - screenLength;
-                return new Range(min, max);
-            }
-
-            if(min == null && max == null) {
-                min = traceMinMax.getMin();
-                max = min + screenLength;
-                return new Range(min, max);
-            }
-        }
-
-        // usual scaling
-        if(min != null && max == null) {
-            max = traceMinMax.getMax();
-            if(max <= min) {
-                max = min + screenLength;
-            }
-            return new Range(min, max);
-        }
-        if(min == null && max != null) {
-            min = traceMinMax.getMin();
-            if(min >= max) {
-                min = max - screenLength;
-            }
-            return new Range(min, max);
-        }
-        // if min == null && max == null
-        if(traceMinMax.length() > 0) {
-            return traceMinMax;
-        } else {
-            min = traceMinMax.getMin();
-            max = min + screenLength;
-            return new Range(min, max);
-        }
+    public Range getDataExtremes() {
+       return traceDataSeries.getXExtremes();
     }
-
 
     public DataSeries getOriginalData() {
         return traceDataSeries;
     }
 
 
-    public DataSeries getProcessData(Double min, Double max) {
+    public DataSeries getProcessedData(Double xMin, Double xMax) {
         if (traceDataSeries.size() == 0) {
             return traceDataSeries;
         }
@@ -115,7 +48,7 @@ public class TraceDataManager {
         if (!processingConfig.isCropEnabled() && !processingConfig.isGroupingEnabled()) {
             return traceDataSeries;
         }
-        SubRange subRange = traceDataSeries.getSubRange(min, max);
+        SubRange subRange = traceDataSeries.getSubRange(xMin, xMax);
 
         boolean isFullGrouping = false;
         if (croppedSeries == null) {
@@ -141,7 +74,7 @@ public class TraceDataManager {
 
         // first grouping
         if (groupedSeries == null) {
-            System.out.println("first grouping "+groupingInterval+ " "+min+ " "+max);
+            System.out.println("first grouping " + groupingInterval + " " + xMin + " " + xMax);
             groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             if (processingConfig.isDataExpensive() || isFullGrouping) {
                 groupedSeries.enableCaching(false);
@@ -159,10 +92,10 @@ public class TraceDataManager {
             }
         } else {
             if (factor == 1) { // scrolling
-                System.out.println(" scrolling "+min+ " "+max);
+                System.out.println(" scrolling " + xMin + " " + xMax);
                 groupedSeries.updateGroups();
             } else { // simple regrouping
-                System.out.println(groupingInterval+" re grouping "+ factor);
+                System.out.println(groupingInterval + " re grouping " + factor);
                 groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             }
         }

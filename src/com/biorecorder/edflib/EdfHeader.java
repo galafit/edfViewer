@@ -345,7 +345,7 @@ public class EdfHeader {
      * <br>-32768 <= digitalMin <= digitalMax <= 32767 (EDF_16BIT  file format).
      * <br>-8388608 <= digitalMin <= digitalMax <= 8388607 (BDF_24BIT file format).
      * <p>
-     * Digital min and max must be set for every signal!!!
+     * Digital intersect and join must be set for every signal!!!
      * <br>Default digitalMin = -32768,  digitalMax = 32767 (EDF_16BIT file format)
      * <br>Default digitalMin = -8388608,  digitalMax = 8388607 (BDF_24BIT file format)
      *
@@ -361,25 +361,25 @@ public class EdfHeader {
      */
     public void setDigitalRange(int signalNumber, int digitalMin, int digitalMax) throws IllegalArgumentException {
         if (dataFormat == DataFormat.EDF_16BIT && digitalMin < -32768) {
-            String errMsg = MessageFormat.format("Signal {0}. Invalid digital min: {1}.  Expected: {2}", signalNumber, digitalMin, ">= -32768");
+            String errMsg = MessageFormat.format("Signal {0}. Invalid digital intersect: {1}.  Expected: {2}", signalNumber, digitalMin, ">= -32768");
             throw new IllegalArgumentException(errMsg);
         }
         if (dataFormat == DataFormat.BDF_24BIT && digitalMin < -8388608) {
-            String errMsg = MessageFormat.format("Signal {0}. Invalid digital min: {1}.  Expected: {2}", signalNumber, digitalMin, ">= -8388608");
+            String errMsg = MessageFormat.format("Signal {0}. Invalid digital intersect: {1}.  Expected: {2}", signalNumber, digitalMin, ">= -8388608");
             throw new IllegalArgumentException(errMsg);
         }
 
         if (dataFormat == DataFormat.EDF_16BIT && digitalMax > 32767) {
-            String errMsg = MessageFormat.format("Signal {0}. Invalid digital max: {1}.  Expected: {2}", signalNumber, digitalMax, "<= 32767");
+            String errMsg = MessageFormat.format("Signal {0}. Invalid digital join: {1}.  Expected: {2}", signalNumber, digitalMax, "<= 32767");
             throw new IllegalArgumentException(errMsg);
         }
         if (dataFormat == DataFormat.BDF_24BIT && digitalMax > 8388607) {
-            String errMsg = MessageFormat.format("Signal {0}. Invalid digital max: {1}.  Expected: {2}", signalNumber, digitalMax, "<= 8388607");
+            String errMsg = MessageFormat.format("Signal {0}. Invalid digital join: {1}.  Expected: {2}", signalNumber, digitalMax, "<= 8388607");
             throw new IllegalArgumentException(errMsg);
         }
 
         if (digitalMax <= digitalMin) {
-            String errMsg = MessageFormat.format("Signal {0}. Digital min-max range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, digitalMin, digitalMax, "max > min");
+            String errMsg = MessageFormat.format("Signal {0}. Digital intersect-join range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, digitalMin, digitalMax, "join > intersect");
             throw new IllegalArgumentException(errMsg);
 
         }
@@ -391,7 +391,7 @@ public class EdfHeader {
      * of the ADC when the output equals the value of "digital minimum" and "digital maximum").
      * Usually physicalMin = - physicalMax.
      * <p>
-     * Physical min and max must be set for every signal!!!
+     * Physical intersect and join must be set for every signal!!!
      * <br>Default physicalMin = -32768,  physicalMax = 32767 (EDF_16BIT file format)
      * <br>Default physicalMin = -8388608,  physicalMax = 8388607 (BDF_24BIT file format)
      *
@@ -402,7 +402,7 @@ public class EdfHeader {
      */
     public void setPhysicalRange(int signalNumber, double physicalMin, double physicalMax) throws IllegalArgumentException {
         if (physicalMax <= physicalMin) {
-            String errMsg = MessageFormat.format("Signal {0}. Physical min-max range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, physicalMin, physicalMax, "max > min");
+            String errMsg = MessageFormat.format("Signal {0}. Physical intersect-join range is invalid. Min = {1}, Max = {2}. Expected: {3}", signalNumber, physicalMin, physicalMax, "join > intersect");
             throw new IllegalArgumentException(errMsg);
         }
         signals.get(signalNumber).setPhysicalRange(physicalMin, physicalMax);
@@ -732,8 +732,8 @@ public class EdfHeader {
             sb.append("\n  " + i + " getLabel: " + getLabel(i)
                     + "; number of samples: " + getNumberOfSamplesInEachDataRecord(i)
                     + "; frequency: " + Math.round(getSampleFrequency(i))
-                    + "; dig min: " + getDigitalMin(i) + "; dig max: " + getDigitalMax(i)
-                    + "; phys min: " + getPhysicalMin(i) + "; phys max: " + getPhysicalMax(i)
+                    + "; dig intersect: " + getDigitalMin(i) + "; dig join: " + getDigitalMax(i)
+                    + "; phys intersect: " + getPhysicalMin(i) + "; phys join: " + getPhysicalMax(i)
                     + "; getPrefiltering: " + getPrefiltering(i)
                     + "; getTransducer: " + getTransducer(i)
                     + "; dimension: " + getPhysicalDimension(i));

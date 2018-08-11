@@ -306,7 +306,7 @@ public class HeaderRecord {
                 throw new HeaderException(HeaderException.TYPE_SIGNAL_PHYSICAL_MAX_INVALID, physMaxString, i);
             }
             if(physMax <= physMin) {
-                throw new HeaderException(HeaderException.TYPE_SIGNAL_PHYSICAL_MAX_LOWER_OR_EQUAL_MIN, "max: "+physMax + ", min: "+physMin, i);
+                throw new HeaderException(HeaderException.TYPE_SIGNAL_PHYSICAL_MAX_LOWER_OR_EQUAL_MIN, "join: "+physMax + ", intersect: "+physMin, i);
             }
 /******************** DIGITAL MAX AND MIN *********************************************/
             String digMinString = signalDigitalMin(i);
@@ -332,7 +332,7 @@ public class HeaderRecord {
             }
 
             if(digMax <= digMin) {
-                throw new HeaderException(HeaderException.TYPE_SIGNAL_DIGITAL_MAX_LOWER_OR_EQUAL_MIN, "max: "+digMax + ", min: "+digMin, i);
+                throw new HeaderException(HeaderException.TYPE_SIGNAL_DIGITAL_MAX_LOWER_OR_EQUAL_MIN, "join: "+digMax + ", intersect: "+digMin, i);
             }
 /******************** NUMBER OF SAMPLES PER RECORD *********************************************/
             String samplesString = signalNumberOfSamplesInDataRecord(i);

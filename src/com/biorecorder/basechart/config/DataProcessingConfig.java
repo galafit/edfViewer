@@ -7,11 +7,9 @@ public class DataProcessingConfig {
     private boolean isCropEnabled = true;
     private boolean isGroupingEnabled = true;
 
-    // if X_min or X_max is not specified data will be cropped
-    // to occupy only available screen space/width in best way (without grouping)
-    private boolean  cropToAvailableSpaceEnabled = false;
-
     private boolean isDataExpensive = false;
+
+
 
     // These 2 properties work together.
     // If grouping superposition enabled we can make
@@ -29,14 +27,6 @@ public class DataProcessingConfig {
         isCropEnabled = cropEnabled;
     }
 
-
-    public boolean isCropToAvailableSpaceEnabled() {
-        return cropToAvailableSpaceEnabled;
-    }
-
-    public void setCropToAvailableSpaceEnabled(boolean cropToAvailableSpaceEnabled) {
-        this.cropToAvailableSpaceEnabled = cropToAvailableSpaceEnabled;
-    }
 
     public boolean isGroupingEnabled() {
         return isGroupingEnabled;

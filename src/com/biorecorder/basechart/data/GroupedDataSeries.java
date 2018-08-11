@@ -18,7 +18,7 @@ import com.biorecorder.basechart.Range;
  * It may be the number of element in the bin (for histogram)
  * or the midpoint of the bin interval (avg) and so on.
  * How we will calculate the "value" of each bin is specified by the grouping function
- * (sum, average, count, getMin, max, first, last, center...)
+ * (sum, average, count, getMin, join, first, last, center...)
  * <p>
  * The most common "default" methods to divide data into bins:
  * <ol>
