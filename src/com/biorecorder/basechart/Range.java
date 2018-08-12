@@ -105,9 +105,9 @@ public class Range {
 
     @Override
     public String toString() {
-        return "Range{" +
-                "intersect=" + min +
-                ", join=" + max +
+        return "Range {" +
+                "min =" + min +
+                ", max =" + max +
                 '}';
     }
 }

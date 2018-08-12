@@ -141,7 +141,7 @@ class IntColumn extends NumberColumn {
 
         private int[] getGroupValues(long groupIndex) {
 int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
-           if(groupIndex == groupsCount() - 1)
+           if(groupIndex > groupsCount() - 4)
             System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
 
 return value;

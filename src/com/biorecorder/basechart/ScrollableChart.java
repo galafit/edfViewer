@@ -1,6 +1,7 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.config.ChartConfig;
+import com.biorecorder.basechart.config.SimpleChartConfig;
 
 import java.util.*;
 
@@ -26,18 +27,23 @@ public class ScrollableChart {
         calculateAreas(area);
         chart = new SimpleChart(config.getBaseChartConfig(), config.getData(), chartArea, traceFactory);
         if (config.isPreviewEnabled()) {
-            preview = new SimpleChart(config.getPreviewConfig(), config.getData(), previewArea, traceFactory);
-            updatePreviewMinMax();
+            SimpleChartConfig previewConfig = config.getPreviewConfig();
+
+            Range previewMinMax = chart.getOriginalDataMinMax();
             for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
-                Double axisExtent = config.getScrollExtent(xAxisIndex);
-                if(axisExtent == null && chart.isXAxisUsed(xAxisIndex)) {
-                    axisExtent = chart.getXMinMax(xAxisIndex).length();
-                }
-                if(axisExtent != null) {
+                previewMinMax = Range.join(previewMinMax, chart.getXMinMax(xAxisIndex));
+            }
+            if(previewMinMax != null) {
+                previewConfig.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
+            }
+
+            preview = new SimpleChart(previewConfig, config.getData(), previewArea, traceFactory);
+
+            for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
+                if(chart.isXAxisUsed(xAxisIndex)) {
+                   double axisExtent = chart.getXMinMax(xAxisIndex).length();
                     Scroll scroll = new Scroll(axisExtent, config.getScrollConfig(), preview.getXAxisScale(0));
                     scrolls.put(xAxisIndex, scroll);
-                    Range scrollRange = new Range(scroll.getValue(), scroll.getValue() + scroll.getExtent());
-                    chart.setXMinMax(xAxisIndex,  scrollRange.getMin(), scrollRange.getMax());
                     final int scrollXIndex = xAxisIndex;
                     scroll.addListener(new ScrollListener() {
                         @Override

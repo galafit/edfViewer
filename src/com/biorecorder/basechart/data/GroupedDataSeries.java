@@ -183,6 +183,7 @@ public class GroupedDataSeries extends DataSeries {
             } else {
                 size = inDataSize / groupPointsNumber + 2;
             }
+            System.out.println(size + " size "+ inDataSeries.size() + " "+groupPointsNumber);
             return size;
         }
 

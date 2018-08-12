@@ -14,6 +14,16 @@ public class LinearScale implements Scale {
     private float range[] = {0, 1};
 
     @Override
+    public Scale copy() {
+        LinearScale copyScale = new LinearScale();
+        copyScale.domain[0] = domain[0];
+        copyScale.domain[1] = domain[1];
+        copyScale.range[0] = range[0];
+        copyScale.range[1] = range[1];
+        return copyScale;
+    }
+
+    @Override
     public void setDomain(double... domain) {
         this.domain = domain;
         numberFormatter = null;

@@ -3,6 +3,8 @@ package com.biorecorder.basechart.scales;
 import com.biorecorder.basechart.config.LabelFormatInfo;
 
 public interface Scale {
+    public Scale copy();
+
     public void setDomain(double... domain);
 
     public void setRange(float... range);

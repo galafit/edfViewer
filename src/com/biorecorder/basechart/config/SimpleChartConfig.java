@@ -94,14 +94,8 @@ public class SimpleChartConfig {
      */
     public void addStack(int weight, Double yMin, Double yMax) {
         addStack(weight);
-        if(yMin != null) {
-            setYMin(yAxisConfigs.size() - 1, yMin);
-            setYMin(yAxisConfigs.size() - 2, yMin);
-        }
-        if(yMax != null) {
-            setYMax(yAxisConfigs.size() - 1, yMax);
-            setYMax(yAxisConfigs.size() - 2, yMax);
-        }
+        setYMinMax(yAxisConfigs.size() - 1, yMin, yMax);
+        setYMinMax(yAxisConfigs.size() - 2, yMin, yMax);
     }
 
     public void addStack(int weight) {
@@ -219,18 +213,40 @@ public class SimpleChartConfig {
         return yAxisConfigs.get(axisIndex);
     }
 
-    public void setXMin(int xAxisIndex, double min) {
-        xAxisMins.put(xAxisIndex,min);
-    }
-    public void setXMax(int xAxisIndex, double max) {
-        xAxisMaxs.put(xAxisIndex,max);
+    public void setXMinMax(int xAxisIndex, Double min,  Double max) {
+        if(min != null && max != null && min > max) {
+            throw new IllegalArgumentException("min = "+ min + " max = " + max + ". Expected: min < max");
+        }
+
+        if(min != null) {
+            xAxisMins.put(xAxisIndex, min);
+        } else {
+            xAxisMins.remove(xAxisIndex);
+        }
+
+        if(max != null) {
+            xAxisMaxs.put(xAxisIndex, max);
+        } else {
+            xAxisMaxs.remove(xAxisIndex);
+        }
     }
 
-    public void setYMin(int yAxisIndex, double min) {
-        yAxisMins.put(yAxisIndex,min);
-    }
-    public void setYMax(int yAxisIndex, double max) {
-        yAxisMaxs.put(yAxisIndex,max);
+    public void setYMinMax(int yAxisIndex, Double min,  Double max) {
+        if(min != null && max != null && min > max) {
+            throw new IllegalArgumentException("min = "+ min + " max = " + max + ". Expected: min < max");
+        }
+
+        if(min != null) {
+            yAxisMins.put(yAxisIndex, min);
+        } else {
+            yAxisMins.remove(yAxisIndex);
+        }
+
+        if(max != null) {
+            yAxisMaxs.put(yAxisIndex, max);
+        } else {
+            yAxisMaxs.remove(yAxisIndex);
+        }
     }
 
     public Double getXMin(int xAxisIndex) {

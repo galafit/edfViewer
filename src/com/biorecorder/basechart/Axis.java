@@ -37,33 +37,49 @@ public class Axis {
     }
 
     /**
-     * Zoom affects only max value. Min value does not changed!!!
+     * Zoom does not affect the scale!!!
+     * It just calculates and returns new max corresponding zooming.
+     * Min value does not change!!!
      * @param zoomFactor
+     * @return axis new min and max that correspond zooming
      */
+    Range zoom(double zoomFactor) {
+        Scale copyScale = scale.copy();
+        double min = rowMinMax.getMin();
+        double max = rowMinMax.getMax();
+        copyScale.setDomain(min, max);
 
-    public void zoom(double zoomFactor) {
-        scale.setDomain(rowMinMax.getMin(), rowMinMax.getMax());
         int start = getStart();
         int end = getEnd();
-        double min = getMin();
         int shift = (int)((end - start) * (zoomFactor - 1) / 2);
         //int newStart = getMin - shift;
         int newEnd = end + 2 * shift;
-        //setStartEnd(newStart, newEnd);
-        setStartEnd(start, newEnd);
-       // double minNew = invert(getMin);
-        double maxNew = invert(end);
-        setMinMax(min, maxNew);
-        scale.setRange(start, end);
+        // copyScale.setRange(newStart, newEnd);
+        copyScale.setRange(start, newEnd);
+       // double minNew = copyScale.invert(getMin);
+        double maxNew = copyScale.invert(end);
+
+        return new Range(min, maxNew);
     }
 
-    public void translate(int translation) {
-        setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
+
+    /**
+     * Translation does not affect the scale!!!
+     * It just calculates and returns new min and max corresponding translation.
+     * @param translation
+     * @return axis new min and max that correspond translation
+     */
+    public Range translate(int translation) {
+        Scale copyScale = scale.copy();
+        double min = rowMinMax.getMin();
+        double max = rowMinMax.getMax();
+        copyScale.setDomain(min, max);
+
         int start = getStart();
         int end = getEnd();
-        double minNew = invert(start + translation);
-        double maxNew = invert(end + translation);
-        setMinMax(minNew, maxNew);
+        double minNew = copyScale.invert(start + translation);
+        double maxNew = copyScale.invert(end + translation);
+        return new Range(minNew, maxNew);
     }
 
     public String formatDomainValue(double value) {

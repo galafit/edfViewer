@@ -30,7 +30,6 @@ public class TraceDataManager {
         }
     }
 
-
     public Range getDataExtremes() {
        return traceDataSeries.getXExtremes();
     }

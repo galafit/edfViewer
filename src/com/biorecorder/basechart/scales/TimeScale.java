@@ -42,6 +42,17 @@ public class TimeScale implements Scale {
     private DateFormat numberFormatter;
 
     @Override
+    public Scale copy() {
+        TimeScale copyScale = new TimeScale();
+        copyScale.domain[0] = domain[0];
+        copyScale.domain[1] = domain[1];
+        copyScale.range[0] = range[0];
+        copyScale.range[1] = range[1];
+        copyScale.numberFormatter = null;
+        return copyScale;
+    }
+
+    @Override
     public void setDomain(double... domain) {
         this.domain = domain;
         numberFormatter = null;

@@ -21,7 +21,6 @@ public class ChartConfig {
     private int gapBetweenChartPreview; //px
     private Margin margin;
     private ScrollConfig scrollConfig = new ScrollConfig();
-    private Map<Integer, Double> scrollExtents = new Hashtable<Integer, Double>(2);
 
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
@@ -37,12 +36,10 @@ public class ChartConfig {
         chartConfig = new SimpleChartConfig();
         previewConfig = new SimpleChartConfig();
         if(isPreviewEnabled) {
-            chartConfig.setTracesSpreadEnabled(false);
-            chartConfig.getDataProcessingConfig().setCropToAvailableSpaceEnabled(true);
+            chartConfig.setTracesNaturalDrawingEnabled(true);
             previewConfig.addStack();
             previewConfig.getXConfig(0).setVisible(true);
-            previewConfig.setTracesSpreadEnabled(false);
-            previewConfig.getDataProcessingConfig().setCropToAvailableSpaceEnabled(false);
+            previewConfig.setTracesNaturalDrawingEnabled(false);
         }
 
         AxisConfig leftAxisConfig = chartConfig.getLeftAxisDefaultConfig();
@@ -187,14 +184,10 @@ public class ChartConfig {
         return scrollConfig;
     }
 
-    public Double getScrollExtent(int xAxisIndex) {
-        return scrollExtents.get(xAxisIndex);
-    }
 
-    public void addScroll(int xAxisIndex, double extent) {
-        scrollExtents.put(xAxisIndex, extent);
+    public void setScrollExtent(int xAxisIndex, double startValue, double endValue) {
+        chartConfig.setXMinMax(xAxisIndex, startValue, endValue);
     }
-
 
     public void addChartStack(int weight, double min, double max) {
         chartConfig.addStack(weight, min, max);

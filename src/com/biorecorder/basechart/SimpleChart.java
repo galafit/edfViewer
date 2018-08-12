@@ -62,10 +62,19 @@ public class SimpleChart {
         // create x axis
         for (int xIndex = 0; xIndex < chartConfig.xAxisCount(); xIndex++) {
             Range xExtremes = null;
+            Double min = chartConfig.getXMin(xIndex);
+            Double max = chartConfig.getXMax(xIndex);
+            if (min != null && max != null) {
+                xExtremes = new Range(min, max);
+            } else if (min != null && max == null) {
+                xExtremes = new Range(min, min);
+            } else if (min == null && max != null) {
+                xExtremes = new Range(max, max);
+            }
+
             for (int i = 0; i < chartConfig.traceCount(); i++) {
                 if(chartConfig.getTraceXIndex(i) == xIndex) {
-                    Range traceXExtremes = calculateInitialXExtremes(chartConfig.getXMin(xIndex),
-                            chartConfig.getXMax(xIndex),
+                    Range traceXExtremes = calculateInitialXExtremes(min, max,
                             dataManager.getOriginalTraceData(i),
                             chartConfig.getTraceConfig(i).getMarkSize(),
                             chartConfig.isTracesNaturalDrawingEnabled());
@@ -74,9 +83,9 @@ public class SimpleChart {
                     } else {
                         xExtremes = Range.join(xExtremes, traceXExtremes);
                     }
-
                 }
             }
+
             Axis xAxis = new Axis(chartConfig.getXConfig(xIndex));
             if(xExtremes != null) {
                 xAxis.setMinMax(xExtremes.getMin(), xExtremes.getMax());
@@ -178,7 +187,7 @@ public class SimpleChart {
         Range traceMinMax = traceOriginalData.getXExtremes();
 
         if (isTracesNaturalDrawingEnabled && traceOriginalData.size() > 1) {
-            double screenLength = traceOriginalData.getDataInterval() * fullArea.width / pixelsInDataPoint;
+            double screenLength = traceOriginalData.getDataInterval() * fullArea.width; // / pixelsInDataPoint;
             if (min != null) {
                 max = min + screenLength;
                 return new Range(min, max);
@@ -553,25 +562,23 @@ public class SimpleChart {
 
 
     public void zoomY(int yAxisIndex, float zoomFactor) {
-        yAxisList.get(yAxisIndex).zoom(zoomFactor);
-        margin = null;
-        areasDirty = true;
+        Range newAxisRange = yAxisList.get(yAxisIndex).zoom(zoomFactor);
+        yAxisList.get(yAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
     }
 
     public void zoomX(int xAxisIndex, float zoomFactor) {
-        xAxisList.get(xAxisIndex).zoom(zoomFactor);
-        updateTraceData(xAxisIndex);
+        Range newAxisRange = xAxisList.get(xAxisIndex).zoom(zoomFactor);
+        xAxisList.get(xAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
     }
 
     public void translateY(int yAxisIndex, int translation) {
-        yAxisList.get(yAxisIndex).translate(translation);
-        margin = null;
-        areasDirty = true;
+        Range newAxisRange =  yAxisList.get(yAxisIndex).translate(translation);
+        yAxisList.get(yAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
     }
 
     public void translateX(int xAxisIndex, int translation) {
-        xAxisList.get(xAxisIndex).translate(translation);
-        updateTraceData(xAxisIndex);
+        Range newAxisRange = xAxisList.get(xAxisIndex).translate(translation);
+        xAxisList.get(xAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
     }
 
     public void autoScaleX(int xAxisIndex) {
@@ -582,9 +589,9 @@ public class SimpleChart {
             }
         }
         if(tracesMinMax != null) {
-            xAxisList.get(xAxisIndex).setMinMax(tracesMinMax.getMin(), tracesMinMax.getMax());
+            setXMinMax(xAxisIndex, tracesMinMax.getMin(), tracesMinMax.getMax());
         }
-        updateTraceData(xAxisIndex);
+
     }
 
     public void autoScaleY(int yAxisIndex) {
@@ -595,7 +602,7 @@ public class SimpleChart {
             }
         }
         if(tracesMinMax != null) {
-            yAxisList.get(yAxisIndex).setMinMax(tracesMinMax.getMin(), tracesMinMax.getMax());
+            setYMinMax(yAxisIndex, tracesMinMax.getMin(), tracesMinMax.getMax());
         }
     }
 
