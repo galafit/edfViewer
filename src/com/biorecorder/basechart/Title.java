@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.graphics.*;
+
 import java.util.ArrayList;
 
 /**

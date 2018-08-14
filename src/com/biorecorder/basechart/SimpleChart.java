@@ -1,10 +1,14 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.Axis;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
 import com.biorecorder.basechart.config.SimpleChartConfig;
 import com.biorecorder.basechart.config.traces.TraceConfig;
+import com.biorecorder.basechart.graphics.BCanvas;
+import com.biorecorder.basechart.graphics.BPoint;
+import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.traces.Trace;
 import com.biorecorder.basechart.data.Data;

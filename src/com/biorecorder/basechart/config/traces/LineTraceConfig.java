@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.config.traces;
 
-import com.biorecorder.basechart.BColor;
-import com.biorecorder.basechart.BStroke;
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BStroke;
 
 /**
  * Created by galafit on 11/10/17.

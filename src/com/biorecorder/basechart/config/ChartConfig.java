@@ -1,14 +1,12 @@
 package com.biorecorder.basechart.config;
 
-import com.biorecorder.basechart.BStroke;
+import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.Margin;
 import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.data.Data;
 import com.biorecorder.basechart.data.DataSeries;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Map;
 
 /**
  * Created by galafit on 2/12/17.

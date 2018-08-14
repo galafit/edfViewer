@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.config;
 
-import com.biorecorder.basechart.BColor;
-import com.biorecorder.basechart.BStroke;
-import com.biorecorder.basechart.TextStyle;
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BStroke;
+import com.biorecorder.basechart.graphics.TextStyle;
 import com.biorecorder.basechart.scales.Unit;
 
 /**

@@ -1,5 +1,7 @@
 package com.biorecorder.basechart.data;
 
+import com.biorecorder.basechart.series.IntSeries;
+
 /**
  * Created by galafit on 23/7/18.
  */

@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.config;
 
-import com.biorecorder.basechart.BColor;
+import com.biorecorder.basechart.graphics.BColor;
 
 /**
  * Created by galafit on 19/8/17.

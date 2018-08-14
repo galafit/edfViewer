@@ -1,6 +1,10 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.config.ScrollConfig;
+import com.biorecorder.basechart.graphics.BCanvas;
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.scales.Scale;
 
 import java.util.*;

@@ -4,6 +4,10 @@ package com.biorecorder.basechart.traces;
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
+import com.biorecorder.basechart.graphics.BCanvas;
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BPath;
+import com.biorecorder.basechart.graphics.BPoint;
 
 /**
  * Created by galafit on 11/10/17.

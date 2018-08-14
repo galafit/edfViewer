@@ -2,6 +2,8 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.config.SimpleChartConfig;
+import com.biorecorder.basechart.graphics.BCanvas;
+import com.biorecorder.basechart.graphics.BRectangle;
 
 import java.util.*;
 

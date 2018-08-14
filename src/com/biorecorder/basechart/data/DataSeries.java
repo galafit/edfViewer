@@ -1,6 +1,8 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.series.IntSeries;
+import com.biorecorder.basechart.series.StringSeries;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -121,7 +123,6 @@ public class DataSeries  {
         if (annotationColumn != null) {
             size = Math.min(size, annotationColumn.size());
         }
-
         return size;
     }
 
