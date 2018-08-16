@@ -12,7 +12,6 @@ import java.util.ArrayList;
  * Created by galafit on 2/12/17.
  */
 public class ChartConfig {
-    private Data data = new Data();
     private boolean isPreviewEnabled = true;
     private SimpleChartConfig chartConfig;
     private SimpleChartConfig previewConfig;
@@ -130,10 +129,6 @@ public class ChartConfig {
         scrollConfig.setScrollColor(theme.getScrollColor());
     }
 
-    public Data getData() {
-        return data;
-    }
-
     public boolean isAutoScrollEnable() {
         return autoScrollEnable;
     }
@@ -228,7 +223,7 @@ public class ChartConfig {
      * add trace to the last chart stack
      */
     public void addTrace(TraceConfig traceConfig, DataSeries traceData, String name, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        chartConfig.addTrace(traceConfig, data.addDataSeries(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+        chartConfig.addTrace(traceConfig, traceData, name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
@@ -280,7 +275,7 @@ public class ChartConfig {
      * add trace to the last preview stack
      */
     public void addPreviewTrace(TraceConfig traceConfig, DataSeries traceData, String name,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        getPreviewConfig().addTrace(traceConfig, data.addDataSeries(traceData), name,  isXAxisOpposite, isYAxisOpposite);
+        getPreviewConfig().addTrace(traceConfig, traceData, name,  isXAxisOpposite, isYAxisOpposite);
     }
 
     /**

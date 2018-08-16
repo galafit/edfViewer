@@ -61,13 +61,13 @@ public class GroupedDataSeries extends DataSeries {
                 yColumns.add(column);
             }
         }
-        System.out.println(inDataSeries.size() + "  "+groupStartIndexes.size() +" create "+groupStartIndexes.get(groupStartIndexes.size() - 1));
-
+        calculateSize();
+        System.out.println(inDataSeries.size() + " grouped "+size);
     }
 
     /**
      * This method can be used only if grouping superposition
-     * can be applied to the grouping function. For example:
+     * is permitted for the grouping function. For example:
      * Min, Max, First, Last. Superposition for Average available
      * only for regular series (when each group has the same number of points)
      * @param factor - multiply factor
@@ -78,7 +78,7 @@ public class GroupedDataSeries extends DataSeries {
 
         // force calculating and caching all grouped elements
         long lastElement = resultantGroupedSeries.size() - 1;
-        for (int i = 0; i < resultantGroupedSeries.YColumnsCount(); i++) {
+        for (int i = 0; i < resultantGroupedSeries.yCount(); i++) {
             resultantGroupedSeries.getYValue(i, lastElement);
         }
         resultantGroupedSeries.getXValue(lastElement);
@@ -89,11 +89,12 @@ public class GroupedDataSeries extends DataSeries {
          if(inDataSeries.isRegular()) {
             xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
         } else {
-            xColumn.cache(resultantGroupedSeries.getXColumn());
+            xColumn.cache(resultantGroupedSeries.xColumn);
         }
         for (int i = 0; i < yColumns.size(); i++) {
-           yColumns.get(i).cache(resultantGroupedSeries.getYColumn(i));
+           yColumns.get(i).cache(resultantGroupedSeries.yColumns.get(i));
         }
+        calculateSize();
     }
 
     public GroupStartIndexes getGroupStartIndexes() {
@@ -115,7 +116,8 @@ public class GroupedDataSeries extends DataSeries {
         return groupStartIndexes.getNumberOfPointsInGroup();
     }
 
-    public void updateGroups() {
+    @Override
+    public void onDataChanged() {
         System.out.println(inDataSeries.size() + "  "+groupStartIndexes.size() +" create "+groupStartIndexes.get(groupStartIndexes.size() - 1));
         groupStartIndexes.clear();
         xColumn.clear();
@@ -125,7 +127,10 @@ public class GroupedDataSeries extends DataSeries {
         for (NumberColumn yColumn : yColumns) {
             yColumn.clear();
         }
-      //  System.out.println(groupStartIndexes.size() +" update "+groupStartIndexes.get(groupStartIndexes.size() - 1));
+
+        calculateSize();
+        //  System.out.println(groupStartIndexes.size() +" update "+groupStartIndexes.get(groupStartIndexes.size() - 1));
+
     }
 
     private double pointsNumberToGroupingInterval(int numberOfPointsInGroup) {

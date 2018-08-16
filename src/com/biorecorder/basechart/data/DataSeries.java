@@ -11,10 +11,11 @@ import java.util.ArrayList;
  * Created by galafit on 19/9/17.
  */
 public class DataSeries  {
-    boolean isOrdered = true;
-    ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
-    NumberColumn xColumn = new RegularColumn();
-    StringColumn annotationColumn;
+    protected boolean isOrdered = true;
+    protected ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
+    protected NumberColumn xColumn = new RegularColumn();
+    protected StringColumn annotationColumn;
+    protected long size;
 
     public boolean isRegular() {
         if(xColumn instanceof RegularColumn) {
@@ -30,48 +31,60 @@ public class DataSeries  {
         return false;
     }
 
-    NumberColumn getXColumn() {
+    private void setXData(NumberColumn column) {
+        xColumn = column;
+        calculateSize();
+    }
+
+    private void addYData(NumberColumn column) {
+        yColumns.add(column);
+        calculateSize();
+    }
+
+    /*public NumberColumn getXData() {
         return xColumn;
     }
 
-    NumberColumn getYColumn(int columnNumber) {
-       return yColumns.get(columnNumber);
-    }
+    public NumberColumn getYData(int yNumber) {
+        return yColumns.get(yNumber);
+    }*/
 
     public void setXData(double xStartValue, double xInterval) {
         xColumn = new RegularColumn(xStartValue, xInterval);
     }
 
     public void setXData(IntSeries series) {
-        xColumn = new IntColumn(series);
+        setXData(new IntColumn(series));
     }
 
   /*  public void setXData(FloatSeries series) {
-        xColumn = new FloatColumn(series);
+        setXData(new FloatColumn(series));
     }*/
 
     public void addYData(IntSeries series) {
-        yColumns.add(new IntColumn(series));
+        addYData(new IntColumn(series));
     }
 
   /*  public void addYData(FloatSeries series) {
-        yColumns.add(new FloatColumn(series));
+        addYData(new FloatColumn(series));
     }*/
 
     public void setAnnotations(StringSeries series) {
         annotationColumn = new StringColumn(series);
+        calculateSize();
     }
 
-    public void removeYData(int columnNumber) {
-        yColumns.remove(columnNumber);
+    public void removeYData(int yNumber) {
+        yColumns.remove(yNumber);
+        calculateSize();
     }
 
-    public int YColumnsCount() {
+    public int yCount() {
         return yColumns.size();
     }
 
-    public double getYValue(int columnNumber, long index) {
-        return yColumns.get(columnNumber).value(index);
+    public double getYValue(int yNumber, long index) {
+        return yColumns.get(yNumber).value(index);
     }
 
     public double getXValue(long index) {
@@ -86,7 +99,6 @@ public class DataSeries  {
     }
 
     public Range getXExtremes() {
-        long size = size();
         if (size == 0) {
             return null;
         }
@@ -97,33 +109,38 @@ public class DataSeries  {
         }
 
         return xColumn.extremes(size);
-
     }
 
-    public Range getYExtremes(int yColumnNumber) {
-        long size = size();
+    public Range getYExtremes(int yNumber) {
         if (size == 0) {
             return null;
         }
-        return yColumns.get(yColumnNumber).extremes(size);
+        return yColumns.get(yNumber).extremes(size);
     }
 
     public long size() {
-        if (yColumns.size() == 0 && annotationColumn == null) {
-            return 0;
-        }
-        long size = 0;
-        if(xColumn instanceof RegularColumn) {
-           size = xColumn.size();
-        }
+       return size;
+    }
 
-        for (NumberColumn column : yColumns) {
-            size = Math.min(size, column.size());
+    protected void calculateSize() {
+        size = xColumn.size();
+        for (int i = 0; i < yColumns.size(); i++) {
+            size = Math.min(size, yColumns.get(i).size());
         }
-        if (annotationColumn != null) {
+        if(annotationColumn != null) {
             size = Math.min(size, annotationColumn.size());
         }
-        return size;
+    }
+
+    public void onDataAdded() {
+        calculateSize();
+    }
+
+    public void onDataChanged() {
+        xColumn.clear();
+        for (NumberColumn yColumn : yColumns) {
+            yColumn.clear();
+        }
     }
 
     /**
@@ -131,14 +148,13 @@ public class DataSeries  {
      * @return index of nearest data item
      */
     public long findNearestData(double xValue) {
-        long size = size();
 
         long lowerBoundIndex = xColumn.lowerBound(xValue, size);
         if (lowerBoundIndex < 0) {
             return 0;
         }
-        if (lowerBoundIndex >= size() - 1) {
-            return size() - 1;
+        if (lowerBoundIndex >= size - 1) {
+            return size - 1;
         }
         double distance1 = xValue - getXValue(lowerBoundIndex);
         double distance2 = getXValue(lowerBoundIndex + 1) - xValue;
@@ -165,6 +181,11 @@ public class DataSeries  {
         for (NumberColumn yColumn : yColumns) {
             yColumn.setViewRange(startIndex, length);
         }
+
+        if(annotationColumn != null) {
+            annotationColumn.setViewRange(startIndex, length);
+        }
+        calculateSize();
     }
 
     public SubRange getSubRange(Double startXValue, Double endXValue) {
@@ -174,7 +195,6 @@ public class DataSeries  {
             throw new IllegalArgumentException(formattedError);
         }
 
-        long size = size();
         if(size == 0) {
             return new SubRange(0, 0);
         }
@@ -212,12 +232,13 @@ public class DataSeries  {
         for (NumberColumn yColumn : yColumns) {
             copySeries.yColumns.add(yColumn.copy());
         }
+        copySeries.onDataAdded();
         return copySeries;
     }
 
     public double getDataInterval() {
-        if (size() > 1) {
-            return getXExtremes().length() / (size() - 1);
+        if (size > 1) {
+            return getXExtremes().length() / (size - 1);
         }
         return -1;
     }
@@ -225,9 +246,6 @@ public class DataSeries  {
     /**********************************************************************
      *     Helper Methods to add data
      *********************************************************************/
-    void setXData(NumberColumn numberColumn) {
-        xColumn = numberColumn;
-    }
 
     public void setXData(int[] data) {
         xColumn = new IntColumn(data);
@@ -245,9 +263,6 @@ public class DataSeries  {
         }
     }*/
 
-    void addYData(NumberColumn numberColumn) {
-        yColumns.add(numberColumn);
-    }
 
     public void addYData(int[] data) {
         yColumns.add(new IntColumn(data));

@@ -27,7 +27,7 @@ public class ScrollableChart {
     public ScrollableChart(ChartConfig config,  BRectangle area, TraceFactory traceFactory) {
         this.config = config;
         calculateAreas(area);
-        chart = new SimpleChart(config.getBaseChartConfig(), config.getData(), chartArea, traceFactory);
+        chart = new SimpleChart(config.getBaseChartConfig(), chartArea, traceFactory);
         if (config.isPreviewEnabled()) {
             SimpleChartConfig previewConfig = config.getPreviewConfig();
 
@@ -39,7 +39,7 @@ public class ScrollableChart {
                 previewConfig.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
             }
 
-            preview = new SimpleChart(previewConfig, config.getData(), previewArea, traceFactory);
+            preview = new SimpleChart(previewConfig, previewArea, traceFactory);
 
             for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
                 if(chart.isXAxisUsed(xAxisIndex)) {

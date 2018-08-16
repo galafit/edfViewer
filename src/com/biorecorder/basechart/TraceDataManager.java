@@ -92,7 +92,7 @@ public class TraceDataManager {
         } else {
             if (factor == 1) { // scrolling
                 System.out.println(" scrolling " + xMin + " " + xMax);
-                groupedSeries.updateGroups();
+                groupedSeries.onDataChanged();
             } else { // simple regrouping
                 System.out.println(groupingInterval + " re grouping " + factor);
                 groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);

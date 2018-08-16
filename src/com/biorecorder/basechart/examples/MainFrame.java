@@ -63,7 +63,7 @@ public class MainFrame extends JFrame {
         XYData xyData1 = new XYData();
         xyData1.setYData(yData1);
 
-        XYData xyData2 = new XYData();
+     /*   XYData xyData2 = new XYData();
         xyData2.setYData(yData2);
         xyData2.setXData(xData);
 
@@ -72,7 +72,7 @@ public class MainFrame extends JFrame {
        // xyData3.setYGroupingType(GroupingType.MAX);
 
         XYData bandData = new XYData();
-        bandData.setYData(bandYData);
+        bandData.setYData(bandYData);*/
 
         ChartConfig config = new ChartConfig(false, true);
 

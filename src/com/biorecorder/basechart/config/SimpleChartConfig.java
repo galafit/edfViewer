@@ -3,6 +3,8 @@ package com.biorecorder.basechart.config;
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.config.traces.TraceConfig;
 import com.biorecorder.basechart.RangeInt;
+import com.biorecorder.basechart.data.Data;
+import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.graphics.BStroke;
@@ -15,6 +17,8 @@ import java.util.*;
  */
 public class SimpleChartConfig {
     private static final int DEFAULT_WEIGHT = 10;
+
+    Data data = new Data();
 
     private BColor[] defaultTraceColors = {BColor.MAGENTA, BColor.BLUE};
     private String title;
@@ -55,6 +59,10 @@ public class SimpleChartConfig {
     public SimpleChartConfig() {
         xAxisConfigs.add(new AxisConfig(AxisOrientation.BOTTOM));
         xAxisConfigs.add(new AxisConfig(AxisOrientation.TOP));
+    }
+
+    public Data getData() {
+        return data;
     }
 
     public DataProcessingConfig getDataProcessingConfig() {
@@ -152,13 +160,14 @@ public class SimpleChartConfig {
 
 
     // add trace to the last stack
-    public void addTrace(TraceConfig traceConfig, DataConfig traceDataConfig, String traceName, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(TraceConfig traceConfig, DataSeries traceData, String traceName, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         if(yAxisConfigs.size() == 0) {
            addStack();
         }
         if(traceConfig.getColor() == null) {
             traceConfig.setColor(defaultTraceColors[traces.size() % defaultTraceColors.length]);
         }
+        data.addSeries(traceData);
 
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
@@ -184,7 +193,6 @@ public class SimpleChartConfig {
         traceInfo.setName(name);
         traceInfo.setXAxisIndex(xAxisIndex);
         traceInfo.setYAxisIndex(yAxisIndex);
-        traceInfo.setTraceDataConfig(traceDataConfig);
         traceInfo.setTraceConfig(traceConfig);
         traces.add(traceInfo);
     }
@@ -285,10 +293,6 @@ public class SimpleChartConfig {
         return traces.get(traceIndex).getYAxisIndex();
     }
 
-    public DataConfig getTraceDataConfig(int traceIndex) {
-        return traces.get(traceIndex).getTraceDataConfig();
-    }
-
     public String getTitle() {
         return title;
     }
@@ -339,18 +343,9 @@ public class SimpleChartConfig {
 
     class TraceInfo {
         private TraceConfig traceConfig;
-        private DataConfig traceDataConfig;
         private int xAxisIndex;
         private int yAxisIndex;
         private String name;
-
-        public DataConfig getTraceDataConfig() {
-            return traceDataConfig;
-        }
-
-        public void setTraceDataConfig(DataConfig traceDataConfig) {
-            this.traceDataConfig = traceDataConfig;
-        }
 
         public TraceConfig getTraceConfig() {
             return traceConfig;

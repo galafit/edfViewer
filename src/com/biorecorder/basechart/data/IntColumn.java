@@ -144,8 +144,8 @@ class IntColumn extends NumberColumn {
 
         private int[] getGroupValues(long groupIndex) {
 int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
-           if(groupIndex > groupsCount() - 4)
-            System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
+          // if(groupIndex > groupsCount() - 4)
+          //  System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
 
 return value;
             // return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
@@ -272,7 +272,6 @@ return value;
                 startIndex = 0;
             }
             if(startIndex >= series.size()) {
-                startIndex = 0;
                 length = 0;
             }
             if(length > series.size() - startIndex) {

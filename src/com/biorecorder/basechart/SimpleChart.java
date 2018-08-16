@@ -49,18 +49,19 @@ public class SimpleChart {
     private int hoverPointIndex = -1;
     private int hoverTraceIndex = -1;
 
-    public SimpleChart(SimpleChartConfig chartConfig, Data data, BRectangle area) {
-        this(chartConfig, data, area, new DefaultTraceFactory());
+    public SimpleChart(SimpleChartConfig chartConfig,  BRectangle area) {
+        this(chartConfig,  area, new DefaultTraceFactory());
     }
 
 
-    public SimpleChart(SimpleChartConfig chartConfig, Data data, BRectangle area, TraceFactory traceFactory) {
+    public SimpleChart(SimpleChartConfig chartConfig, BRectangle area, TraceFactory traceFactory) {
         this.chartConfig = chartConfig;
         this.fullArea = area;
 
-        dataManager = new DataManager(data, chartConfig.getDataProcessingConfig());
+        Data data = chartConfig.getData();
+        dataManager = new DataManager(chartConfig.getDataProcessingConfig());
         for (int i = 0; i < chartConfig.traceCount(); i++) {
-            dataManager.addTrace(chartConfig.getTraceDataConfig(i), chartConfig.getTraceConfig(i).getMarkSize());
+            dataManager.addTrace(data.getSeries(i), chartConfig.getTraceConfig(i).getMarkSize());
         }
 
         // create x axis

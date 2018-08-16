@@ -17,8 +17,8 @@ public class XYData extends DataSeries {
     }
 
     private void removeYData() {
-        if(yColumns.size() > 0) {
-           yColumns.remove(yColumns.size() - 1);
+        if(yCount() > 0) {
+            removeYData(yCount() - 1);
         }
     }
 }
