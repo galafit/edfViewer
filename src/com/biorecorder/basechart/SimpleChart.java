@@ -105,6 +105,8 @@ public class SimpleChart {
             Axis traceXAxis = xAxisList.get(chartConfig.getTraceXIndex(i));
             trace.setData( dataManager.getProcessedTraceData(i, traceXAxis.getMin(), traceXAxis.getMax()));
             trace.setName(chartConfig.getTraceName(i));
+            trace.setXAxisIndex(chartConfig.getTraceXIndex(i));
+            trace.setYAxisIndex(chartConfig.getTraceYIndex(i));
             traces.add(trace);
         }
 
@@ -124,12 +126,6 @@ public class SimpleChart {
                 yAxis.setMinMax(yExtremes.getMin(), yExtremes.getMax());
             }
             yAxisList.add(yAxis);
-        }
-
-        // set traces x and y axes
-        for (int i = 0; i < traces.size(); i++) {
-            traces.get(i).setXAxis(xAxisList.get(chartConfig.getTraceXIndex(i)));
-            traces.get(i).setYAxis(yAxisList.get(chartConfig.getTraceYIndex(i)));
         }
 
         // title
@@ -161,6 +157,11 @@ public class SimpleChart {
         // tooltips
         tooltip = new Tooltip(chartConfig.getTooltipConfig());
         crosshair = new Crosshair(chartConfig.getCrosshairConfig());
+
+    }
+
+
+    private void createAxes() {
 
     }
 
@@ -364,7 +365,7 @@ public class SimpleChart {
     private void updateTraceData(int xAxisIndex) {
         Axis xAxis = xAxisList.get(xAxisIndex);
         for (int i = 0; i < traces.size(); i++) {
-            if(traces.get(i).getXAxis() == xAxis) {
+            if(traces.get(i).getXAxisIndex() == xAxisIndex) {
                 traces.get(i).setData(dataManager.getProcessedTraceData(i, xAxis.getMin(), xAxis.getMax()));
             }
         }
@@ -380,9 +381,8 @@ public class SimpleChart {
     }
 
     boolean isXAxisUsed(int xAxisIndex) {
-       Axis xAxis = xAxisList.get(xAxisIndex);
         for (Trace trace : traces) {
-           if(trace.getXAxis() == xAxis) {
+           if(trace.getXAxisIndex() == xAxisIndex) {
                return true;
            }
         }
@@ -432,7 +432,7 @@ public class SimpleChart {
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 
         for (Trace trace : traces) {
-            trace.draw(canvas);
+            trace.draw(canvas, xAxisList.get(trace.getXAxisIndex()).getScale(), yAxisList.get(trace.getYAxisIndex()).getScale());
         }
         canvas.restore();
 
@@ -648,14 +648,18 @@ public class SimpleChart {
         }
 
         if (hoverTraceIndex >= 0) {
-            double xValue = traces.get(hoverTraceIndex).getXAxis().invert(x);
-            int nearestIndex = (int)traces.get(hoverTraceIndex).getData().findNearestData(xValue);
+            Trace trace = traces.get(hoverTraceIndex);
+            int nearestIndex = (int)trace.findNearestData(x, y,
+                    xAxisList.get(trace.getXAxisIndex()).getScale(),
+                    yAxisList.get(trace.getYAxisIndex()).getScale());
             if (hoverPointIndex != nearestIndex) {
                 hoverPointIndex = nearestIndex;
                 if (hoverPointIndex >= 0) {
                     TooltipInfo tooltipInfo = new TooltipInfo();
                     tooltipInfo.addItems(traces.get(hoverTraceIndex).getInfo(hoverPointIndex));
-                    BPoint dataPosition = traces.get(hoverTraceIndex).getDataPosition(hoverPointIndex);
+                    BPoint dataPosition = traces.get(hoverTraceIndex).getDataPosition(hoverPointIndex,
+                            xAxisList.get(trace.getXAxisIndex()).getScale(),
+                            yAxisList.get(trace.getYAxisIndex()).getScale());
                     tooltip.setTooltipInfo(tooltipInfo);
                     tooltip.setXY(dataPosition.getX(), yAxisList.get(getTraceYIndex(hoverTraceIndex)).getEnd());
                     crosshair.setXY(dataPosition.getX(), dataPosition.getY());

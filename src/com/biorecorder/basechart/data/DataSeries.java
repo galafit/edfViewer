@@ -15,7 +15,7 @@ public class DataSeries  {
     protected ArrayList<NumberColumn> yColumns = new ArrayList<NumberColumn>();
     protected NumberColumn xColumn = new RegularColumn();
     protected StringColumn annotationColumn;
-    protected long size;
+    private long size;
 
     public boolean isRegular() {
         if(xColumn instanceof RegularColumn) {
@@ -40,14 +40,6 @@ public class DataSeries  {
         yColumns.add(column);
         calculateSize();
     }
-
-    /*public NumberColumn getXData() {
-        return xColumn;
-    }
-
-    public NumberColumn getYData(int yNumber) {
-        return yColumns.get(yNumber);
-    }*/
 
     public void setXData(double xStartValue, double xInterval) {
         xColumn = new RegularColumn(xStartValue, xInterval);

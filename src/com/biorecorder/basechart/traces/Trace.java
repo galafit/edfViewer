@@ -6,14 +6,15 @@ import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPoint;
+import com.biorecorder.basechart.scales.Scale;
 
 
 /**
  * Created by galafit on 16/9/17.
  */
 public abstract class Trace {
-    private Axis xAxis;
-    private Axis yAxis;
+    private int xAxisIndex;
+    private int yAxisIndex;
     private String name;
     private DataSeries data;
 
@@ -25,20 +26,20 @@ public abstract class Trace {
         return data;
     }
 
-    public Axis getXAxis() {
-        return xAxis;
+    public int getXAxisIndex() {
+        return xAxisIndex;
     }
 
-    public void setXAxis(Axis xAxis) {
-        this.xAxis = xAxis;
+    public void setXAxisIndex(int xAxisIndex) {
+        this.xAxisIndex = xAxisIndex;
     }
 
-    public Axis getYAxis() {
-        return yAxis;
+    public int getYAxisIndex() {
+        return yAxisIndex;
     }
 
-    public void setYAxis(Axis yAxis) {
-        this.yAxis = yAxis;
+    public void setYAxisIndex(int yAxisIndex) {
+        this.yAxisIndex = yAxisIndex;
     }
 
     public String getName() {
@@ -53,15 +54,18 @@ public abstract class Trace {
         return data.getXExtremes();
     }
 
-    public abstract BColor getColor();
+    public long findNearestData(int x, int y, Scale xScale, Scale yScale) {
+        return data.findNearestData(xScale.invert(x));
 
-    public abstract int getMarkSize();
+    }
+
+    public abstract BColor getColor();
 
     public abstract Range getYExtremes();
 
-    public abstract BPoint getDataPosition(int dataIndex);
+    public abstract BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale);
 
     public abstract InfoItem[] getInfo(int dataIndex);
 
-    public abstract void draw(BCanvas canvas);
+    public abstract void draw(BCanvas canvas, Scale xScale, Scale yScale);
 }

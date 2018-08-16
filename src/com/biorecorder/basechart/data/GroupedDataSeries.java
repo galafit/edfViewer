@@ -62,7 +62,7 @@ public class GroupedDataSeries extends DataSeries {
             }
         }
         calculateSize();
-        System.out.println(inDataSeries.size() + " grouped "+size);
+        System.out.println(inDataSeries.size() + " grouped "+size());
     }
 
     /**

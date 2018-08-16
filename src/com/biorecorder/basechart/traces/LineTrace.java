@@ -8,6 +8,7 @@ import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
 import com.biorecorder.basechart.graphics.BPoint;
+import com.biorecorder.basechart.scales.Scale;
 
 /**
  * Created by galafit on 11/10/17.
@@ -32,11 +33,6 @@ public class LineTrace extends Trace {
         return traceConfig.getColor();
     }
 
-    @Override
-    public int getMarkSize() {
-        return traceConfig.getMarkSize();
-    }
-
     BColor getLineColor() {
         return traceConfig.getColor();
     }
@@ -56,10 +52,10 @@ public class LineTrace extends Trace {
         }
         InfoItem[] infoItems = new InfoItem[3];
         infoItems[0] = new InfoItem(getName(), "", getColor());
-        //infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getxValue(dataIndex)), null);
-        //infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getyValues(dataIndex)), null);
-        infoItems[1] = new InfoItem("X: ", getXAxis().formatDomainValue(xyData.getX(dataIndex)), null);
-        infoItems[2] = new InfoItem("Y: ", getYAxis().formatDomainValue(xyData.getY(dataIndex)), null);
+        infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
+        infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
+       // infoItems[1] = new InfoItem("X: ", getXAxis().formatDomainValue(xyData.getX(dataIndex)), null);
+       // infoItems[2] = new InfoItem("Y: ", getYAxis().formatDomainValue(xyData.getY(dataIndex)), null);
 
         return infoItems;
     }
@@ -71,49 +67,49 @@ public class LineTrace extends Trace {
 
 
     @Override
-    public BPoint getDataPosition(int dataIndex) {
-        return new BPoint((int)getXAxis().scale(xyData.getX(dataIndex)), (int)getYAxis().scale(xyData.getY(dataIndex)));
+    public BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale) {
+        return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.scale(xyData.getY(dataIndex)));
     }
 
     @Override
-    public void draw(BCanvas canvas) {
+    public void draw(BCanvas canvas, Scale xScale, Scale yScale) {
         if (xyData == null || xyData.size() == 0) {
             return;
         }
 
         BPath path = null;
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
-            path = drawLinearPath(canvas);
+            path = drawLinearPath(canvas, xScale, yScale);
         }
         if(traceConfig.getMode() == LineTraceConfig.STEP) {
-            path = drawStepPath(canvas);
+            path = drawStepPath(canvas, xScale, yScale);
         }
         if(traceConfig.getMode() == LineTraceConfig.VERTICAL_LINES) {
-            path = drawVerticalLinesPath(canvas);
+            path = drawVerticalLinesPath(canvas, xScale, yScale);
         }
 
         if(path != null && traceConfig.isFilled()) {
-            int x_0 = (int) getXAxis().scale(xyData.getX(0));
-            int x_last = (int) getXAxis().scale(xyData.getX(xyData.size() - 1));
-            path.lineTo(x_last, getYAxis().getStart());
-            path.lineTo(x_0, getYAxis().getStart());
+            int x_0 = (int) xScale.scale(xyData.getX(0));
+            int x_last = (int) xScale.scale(xyData.getX(xyData.size() - 1));
+            path.lineTo(x_last, yScale.getRange()[0]);
+            path.lineTo(x_0, yScale.getRange()[0]);
             path.close();
             canvas.setColor(getFillColor());
             canvas.fillPath(path);
         }
     }
 
-    private BPath drawLinearPath(BCanvas canvas) {
+    private BPath drawLinearPath(BCanvas canvas, Scale xScale, Scale yScale) {
         BPath path = new BPath();
-        int x = (int) getXAxis().scale(xyData.getX(0));
-        int y = (int) getYAxis().scale(xyData.getY(0));
+        int x = (int) xScale.scale(xyData.getX(0));
+        int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);
         canvas.setColor(getMarkColor());
         int pointRadius = traceConfig.getMarkSize() / 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
-            x = (int) getXAxis().scale(xyData.getX(i));
-            y = (int) getYAxis().scale(xyData.getY(i));
+            x = (int) xScale.scale(xyData.getX(i));
+            y = (int) yScale.scale(xyData.getY(i));
             path.lineTo(x, y);
             canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
@@ -123,18 +119,18 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawStepPath(BCanvas canvas) {
+    private BPath drawStepPath(BCanvas canvas, Scale xScale, Scale yScale) {
         BPath path = new BPath();
-        int x = (int) getXAxis().scale(xyData.getX(0));
-        int y = (int) getYAxis().scale(xyData.getY(0));
+        int x = (int) xScale.scale(xyData.getX(0));
+        int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);
         canvas.setColor(getMarkColor());
         int pointRadius = traceConfig.getMarkSize()/ 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
-            x = (int) getXAxis().scale(xyData.getX(i));
+            x = (int) xScale.scale(xyData.getX(i));
             path.lineTo(x, y);
-            y = (int) getYAxis().scale(xyData.getY(i));
+            y = (int) yScale.scale(xyData.getY(i));
             path.lineTo(x, y);
             canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
@@ -144,22 +140,22 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawVerticalLinesPath(BCanvas canvas) {
-        int x = (int) getXAxis().scale(xyData.getX(0));
-        int y = (int) getYAxis().scale(xyData.getY(0));
+    private BPath drawVerticalLinesPath(BCanvas canvas, Scale xScale, Scale yScale) {
+        int x = (int) xScale.scale(xyData.getX(0));
+        int y = (int) yScale.scale(xyData.getY(0));
         canvas.setColor(getMarkColor());
         int pointRadius = traceConfig.getMarkSize() / 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         VerticalLine vLine = new VerticalLine(y);
         for (int i = 1; i < xyData.size(); i++) {
             int x_prev = x;
-            x = (int) getXAxis().scale(xyData.getX(i));
+            x = (int) xScale.scale(xyData.getX(i));
             // draw horizontal lines to avoid line breaking
             if(x > x_prev + 1) {
                 vLine.setNewBounds(y);
                 canvas.drawLine(x_prev, y, x, y);
             }
-            y = (int) getYAxis().scale(xyData.getY(i));
+            y = (int) yScale.scale(xyData.getY(i));
             vLine.setNewBounds(y);
             // draw vertical line
             canvas.drawLine(x, vLine.min, x, vLine.max);
