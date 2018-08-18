@@ -9,8 +9,6 @@ import com.biorecorder.basechart.scales.Unit;
  * Created by galafit on 5/9/17.
  */
 public class AxisConfig {
-    private AxisOrientation orientation;
-    private AxisType axisType = AxisType.LINEAR;
     private BColor color =  BColor.GRAY; // BColor.GRAY;
     private BColor gridColor = BColor.LIGHT_GRAY; //BColor(100, 100, 100);
     private BColor minorGridColor = BColor.LIGHT_GRAY;//new BColor(80, 80, 80);
@@ -32,8 +30,7 @@ public class AxisConfig {
     private int minorTickMarkInsideSize = 1; // px
     private int minorTickMarkOutsideSize = 1; // px
 
-
-    private String title;
+    private boolean isTitleVisible = false;
     private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
     private int titlePadding; // px
 
@@ -45,14 +42,12 @@ public class AxisConfig {
 
     private boolean isMinMaxRoundingEnable = false;
 
-    public AxisConfig(AxisOrientation orientation) {
-        this.orientation = orientation;
+    public AxisConfig() {
         titlePadding = (int)(0.4 * titleTextStyle.getSize());
         labelPadding = (int)(0.3 * labelTextStyle.getSize());
     }
 
     public AxisConfig(AxisConfig axisConfig) {
-        orientation = axisConfig.orientation;
         color = axisConfig.color;
         gridColor = axisConfig.gridColor;
         minorGridColor = axisConfig.minorGridColor;
@@ -68,7 +63,7 @@ public class AxisConfig {
         tickMarkOutsideSize = axisConfig.tickMarkOutsideSize;
         tickStep = axisConfig.tickStep;
 
-        title = axisConfig.title;
+        isTitleVisible = axisConfig.isTitleVisible;
         titleTextStyle = new TextStyle(axisConfig.titleTextStyle);
         titlePadding = axisConfig.titlePadding;
 
@@ -79,14 +74,6 @@ public class AxisConfig {
         minorGridCounter = axisConfig.minorGridCounter;
 
         isMinMaxRoundingEnable = axisConfig.isMinMaxRoundingEnable;
-    }
-
-    public AxisType getAxisType() {
-        return axisType;
-    }
-
-    public void setAxisType(AxisType axisType) {
-        this.axisType = axisType;
     }
 
     public boolean isLabelInside() {
@@ -216,6 +203,7 @@ public class AxisConfig {
     }
 
     /** =======================Minor Ticks ========================== **/
+
     public int getMinorTickMarkWidth() {
         return minorTickMarkWidth;
     }
@@ -240,14 +228,13 @@ public class AxisConfig {
         this.minorTickMarkOutsideSize = minorTickMarkOutsideSize;
     }
 
-    /** ======================= Title ========================== **/
-
-    public String getTitle() {
-        return title;
+    /** ======================= Name ========================== **/
+    public boolean isTitleVisible() {
+        return isTitleVisible;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTitleVisible(boolean titleVisible) {
+        isTitleVisible = titleVisible;
     }
 
     public TextStyle getTitleTextStyle() {
@@ -301,34 +288,6 @@ public class AxisConfig {
     }
 
     /** ======================= Helper Methods ========================== **/
-
-    public boolean isTop() {
-        if(orientation == AxisOrientation.TOP) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isBottom() {
-        if(orientation == AxisOrientation.BOTTOM) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isLeft() {
-        if(orientation == AxisOrientation.LEFT) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isRight() {
-        if(orientation == AxisOrientation.RIGHT) {
-            return true;
-        }
-        return false;
-    }
 
     public BColor getLabelsColor() {
         return color;

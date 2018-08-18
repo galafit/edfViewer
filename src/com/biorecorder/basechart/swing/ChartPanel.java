@@ -5,6 +5,7 @@ import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.swing.SwingCanvas;
+import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,10 +26,15 @@ public class ChartPanel extends JPanel implements KeyListener {
     private List<Integer> xAxisList = new ArrayList<>();
     private List<Integer> yAxisList = new ArrayList<>();
     private List<Integer> yAxisListPreview = new ArrayList<>();
-    private ScrollableChart chart;
+    private final ScrollableChart chart;
 
-    public ChartPanel(ChartConfig config) {
-        BColor bg = config.getBaseChartConfig().getMarginColor();
+    public ChartPanel(ScrollableChart chart1) {
+        this.chart = chart1;
+
+        BRectangle startArea = new BRectangle(0, 0, 200, 200);
+        chart.setArea(startArea);
+
+        BColor bg = chart.getChartConfig().getMarginColor();
         setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue()));
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -80,7 +86,7 @@ public class ChartPanel extends JPanel implements KeyListener {
                         autoscaleChartY();
                         autoscaleChartX();
                     }
-                    if(chart.previewContains(e.getX(), e.getY())) {
+                    if(chart.isPreviewEnabled() && chart.previewContains(e.getX(), e.getY())) {
                         autoscalePreviewY();
                     }
 
@@ -90,7 +96,7 @@ public class ChartPanel extends JPanel implements KeyListener {
                     if (chart.chartContains(e.getX(), e.getY()) && chart.selectChartTrace(e.getX(), e.getY())) {
                         repaint();
                     }
-                    if (chart.previewContains(e.getX(), e.getY()) && (chart.selectPreviewTrace(e.getX(), e.getY()) || chart.setScrollsPosition(e.getX(), e.getY()))) {
+                    if (chart.isPreviewEnabled() && chart.previewContains(e.getX(), e.getY()) && (chart.selectPreviewTrace(e.getX(), e.getY()) || chart.setScrollsPosition(e.getX(), e.getY()))) {
                         repaint();
                     }
                 }
@@ -104,7 +110,7 @@ public class ChartPanel extends JPanel implements KeyListener {
                             repaint();
                         }
                     }
-                    if (chart.previewContains(e.getX(), e.getY())) {
+                    if (chart.isPreviewEnabled() && chart.previewContains(e.getX(), e.getY())) {
                         if (chart.previewHoverOn(e.getX(), e.getY(), chart.getPreviewSelectedTraceIndex())) {
                             repaint();
                         }
@@ -112,7 +118,7 @@ public class ChartPanel extends JPanel implements KeyListener {
                 } else {
                     pastX = e.getX();
                     pastY = e.getY();
-                    if (chart.isPointInsideScroll(e.getX(), e.getY())) {
+                    if (chart.isPreviewEnabled() && chart.isPointInsideScroll(e.getX(), e.getY())) {
                         isPressedInsideScroll = true;
                     } else {
                         isPressedInsideScroll = false;
@@ -129,7 +135,7 @@ public class ChartPanel extends JPanel implements KeyListener {
                         repaint();
                     }
                 }
-                if (chart.previewContains(e.getX(), e.getY())) {
+                if (chart.isPreviewEnabled() && chart.previewContains(e.getX(), e.getY())) {
                     if (chart.previewHoverOff()) {
                         repaint();
                     }
@@ -160,11 +166,7 @@ public class ChartPanel extends JPanel implements KeyListener {
             public void componentResized(ComponentEvent e) {
                 Rectangle bounds = getBounds();
                 BRectangle area = new BRectangle(0, 0, bounds.width, bounds.height);
-                if (chart == null) {
-                    chart = new ScrollableChart(config, area);
-                } else {
-                    chart.setArea(area);
-                }
+                chart.setArea(area);
                 repaint();
             }
         });

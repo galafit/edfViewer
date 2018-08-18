@@ -38,6 +38,9 @@ public class TraceDataManager {
         return traceDataSeries;
     }
 
+    public DataSeries getProcessedData_(Double xMin, Double xMax) {
+        return traceDataSeries;
+    }
 
     public DataSeries getProcessedData(Double xMin, Double xMax) {
         if (traceDataSeries.size() == 0) {

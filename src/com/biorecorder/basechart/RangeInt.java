@@ -47,4 +47,12 @@ public class RangeInt {
         }
         return new RangeInt(Math.min(range1.start, range2.start), Math.max(range1.end, range2.end));
     }
+
+    @Override
+    public String toString() {
+        return "Range {" +
+                "min =" + start +
+                ", max =" + end +
+                '}';
+    }
 }

@@ -4,14 +4,13 @@ import com.biorecorder.basechart.axis.Axis;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
-import com.biorecorder.basechart.config.SimpleChartConfig;
-import com.biorecorder.basechart.config.traces.TraceConfig;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BPoint;
-import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.config.AxisConfig;
+import com.biorecorder.basechart.config.AxisOrientation;
+import com.biorecorder.basechart.config.ChartConfig;
+import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.basechart.data.Data;
 import com.biorecorder.basechart.data.DataSeries;
 
 import java.util.*;
@@ -20,9 +19,38 @@ import java.util.List;
 /**
  * Created by hdablin on 24.03.17.
  */
-public class SimpleChart {
+public class Chart {
+    private static final int DEFAULT_WEIGHT = 10;
+
+    private BColor[] defaultTraceColors = {BColor.MAGENTA, BColor.BLUE};
+
+    /*
+ * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
+ * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
+ * All LEFT and RIGHT Y-axis are stacked.
+ * If there is no trace associated with some axis... this axis is invisible.
+ **/
     private List<Axis> xAxisList = new ArrayList<Axis>(2);
     private List<Axis> yAxisList = new ArrayList<Axis>();
+
+    private Map<Integer, Double> xAxisMins = new HashMap<Integer, Double>();
+    private Map<Integer, Double> xAxisMaxs = new HashMap<Integer, Double>();
+    private Map<Integer, Double> yAxisMins = new HashMap<Integer, Double>();
+    private Map<Integer, Double> yAxisMaxs = new HashMap<Integer, Double>();
+
+    // if true chart will intent to draw traces so that every trace point mark
+    // occupies the specified in traceConfig markSize (in pixels)
+    private boolean isTracesNaturalDrawingEnabled = false;
+
+
+    private AxisConfig yAxisDefaultConfig = new AxisConfig();
+
+    private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
+
+    private boolean isLeftAxisPrimary = true;
+    private boolean isBottomAxisPrimary = true;
+
+
     private List<Trace> traces = new ArrayList<Trace>();
 
     private List<Legend> legends = new ArrayList<Legend>();
@@ -31,7 +59,7 @@ public class SimpleChart {
     private BRectangle titleArea;
     private BRectangle chartArea;
     private BRectangle graphArea;
-    private SimpleChartConfig chartConfig;
+    private ChartConfig chartConfig = new ChartConfig();
     private Margin margin;
     private DataManager dataManager;
 
@@ -49,26 +77,30 @@ public class SimpleChart {
     private int hoverPointIndex = -1;
     private int hoverTraceIndex = -1;
 
-    public SimpleChart(SimpleChartConfig chartConfig,  BRectangle area) {
-        this(chartConfig,  area, new DefaultTraceFactory());
+    private BtnGroup buttonGroup = new BtnGroup();
+
+
+    public Chart() {
+        dataManager = new DataManager(chartConfig.getDataProcessingConfig());
+
+        xAxisList.add(new Axis(AxisOrientation.BOTTOM, new LinearScale()));
+        xAxisList.add(new Axis(AxisOrientation.TOP, new LinearScale()));
+
+        // title
+        title = new Title(chartConfig.getTitle(), chartConfig.getTitleTextStyle(), chartConfig.getTitleColor());
+
+        // tooltips
+        tooltip = new Tooltip(chartConfig.getTooltipConfig());
+        crosshair = new Crosshair(chartConfig.getCrosshairConfig());
     }
 
 
-    public SimpleChart(SimpleChartConfig chartConfig, BRectangle area, TraceFactory traceFactory) {
-        this.chartConfig = chartConfig;
-        this.fullArea = area;
-
-        Data data = chartConfig.getData();
-        dataManager = new DataManager(chartConfig.getDataProcessingConfig());
-        for (int i = 0; i < chartConfig.traceCount(); i++) {
-            dataManager.addTrace(data.getSeries(i), chartConfig.getTraceConfig(i).getMarkSize());
-        }
-
-        // create x axis
-        for (int xIndex = 0; xIndex < chartConfig.xAxisCount(); xIndex++) {
+    private void initiateAxisAndTraces() {
+        // calculate and set min and max for every xAxis
+        for (int xIndex = 0; xIndex < xAxisList.size(); xIndex++) {
             Range xExtremes = null;
-            Double min = chartConfig.getXMin(xIndex);
-            Double max = chartConfig.getXMax(xIndex);
+            Double min = xAxisMins.get(xIndex);
+            Double max = xAxisMaxs.get(xIndex);
             if (min != null && max != null) {
                 xExtremes = new Range(min, max);
             } else if (min != null && max == null) {
@@ -77,13 +109,13 @@ public class SimpleChart {
                 xExtremes = new Range(max, max);
             }
 
-            for (int i = 0; i < chartConfig.traceCount(); i++) {
-                if(chartConfig.getTraceXIndex(i) == xIndex) {
+            for (int i = 0; i < traces.size(); i++) {
+                if(traces.get(i).getXAxisIndex() == xIndex) {
                     Range traceXExtremes = calculateInitialXExtremes(min, max,
                             dataManager.getOriginalTraceData(i),
-                            chartConfig.getTraceConfig(i).getMarkSize(),
-                            chartConfig.isTracesNaturalDrawingEnabled());
-                    if(chartConfig.isTracesNaturalDrawingEnabled()) {
+                            traces.get(i).getMarkSize(),
+                            isTracesNaturalDrawingEnabled);
+                    if(isTracesNaturalDrawingEnabled) {
                         xExtremes = Range.min(xExtremes, traceXExtremes);
                     } else {
                         xExtremes = Range.join(xExtremes, traceXExtremes);
@@ -91,80 +123,35 @@ public class SimpleChart {
                 }
             }
 
-            Axis xAxis = new Axis(chartConfig.getXConfig(xIndex));
             if(xExtremes != null) {
-                xAxis.setMinMax(xExtremes.getMin(), xExtremes.getMax());
+                xAxisList.get(xIndex).setMinMax(xExtremes.getMin(), xExtremes.getMax());
             }
-            xAxisList.add(xAxis);
         }
 
-        // create traces
-        for (int i = 0; i < chartConfig.traceCount(); i++) {
-            TraceConfig traceConfig = chartConfig.getTraceConfig(i);
-            Trace trace = traceFactory.getTrace(traceConfig);
-            Axis traceXAxis = xAxisList.get(chartConfig.getTraceXIndex(i));
-            trace.setData( dataManager.getProcessedTraceData(i, traceXAxis.getMin(), traceXAxis.getMax()));
-            trace.setName(chartConfig.getTraceName(i));
-            trace.setXAxisIndex(chartConfig.getTraceXIndex(i));
-            trace.setYAxisIndex(chartConfig.getTraceYIndex(i));
-            traces.add(trace);
+        // set traces data
+        for (int i = 0; i < traces.size(); i++) {
+            Axis traceXAxis = xAxisList.get(traces.get(i).getXAxisIndex());
+            traces.get(i).setData( dataManager.getProcessedTraceData(i, traceXAxis.getMin(), traceXAxis.getMax()));
         }
 
-        // create y axis
-        for (int yIndex = 0; yIndex < chartConfig.getYAxisCount(); yIndex++) {
+        // calculate and set min and max for every yAxis
+        for (int yIndex = 0; yIndex < yAxisList.size(); yIndex++) {
             Range yExtremes = null;
-            for (int i = 0; i < chartConfig.traceCount(); i++) {
-                if(chartConfig.getTraceYIndex(i) == yIndex) {
-                    Range traceYExtremes = calculateInitialYExtremes(chartConfig.getYMin(yIndex),
-                            chartConfig.getYMax(yIndex),
+            for (int i = 0; i < traces.size(); i++) {
+                if(traces.get(i).getYAxisIndex() == yIndex) {
+                    Range traceYExtremes = calculateInitialYExtremes(yAxisMins.get(yIndex),
+                            yAxisMaxs.get(yIndex),
                             traces.get(i));
                     yExtremes = Range.join(yExtremes, traceYExtremes);
                 }
             }
-            Axis yAxis = new Axis(chartConfig.getYConfig(yIndex));
+
             if(yExtremes != null) {
-                yAxis.setMinMax(yExtremes.getMin(), yExtremes.getMax());
+                yAxisList.get(yIndex).setMinMax(yExtremes.getMin(), yExtremes.getMax());
             }
-            yAxisList.add(yAxis);
         }
-
-        // title
-        title = new Title(chartConfig.getTitle(), chartConfig.getTitleTextStyle(), chartConfig.getTitleColor());
-
-        // legend buttons for every panel (y stack)
-        BtnGroup buttonGroup = new BtnGroup();
-        for (int i = 0; i < yAxisList.size() / 2; i++) {
-            legends.add(new Legend(chartConfig.getLegendConfig(), buttonGroup));
-        }
-
-        for (int i = 0; i < traces.size(); i++) {
-            int stackIndex = getTraceYIndex(i) / 2;
-            ToggleBtn legendButton = new ToggleBtn(traces.get(i).getColor(), traces.get(i).getName());
-            final int traceIndex = i;
-            legendButton.addListener(new StateListener() {
-                @Override
-                public void stateChanged(boolean isSelected) {
-                    if(isSelected) {
-                        selectedTraceIndex = traceIndex;
-                    }
-                    if(!isSelected && selectedTraceIndex == traceIndex) {
-                        selectedTraceIndex = -1;
-                    }
-                }
-            });
-            legends.get(stackIndex).add(legendButton);
-        }
-        // tooltips
-        tooltip = new Tooltip(chartConfig.getTooltipConfig());
-        crosshair = new Crosshair(chartConfig.getCrosshairConfig());
 
     }
-
-
-    private void createAxes() {
-
-    }
-
 
     private Range calculateInitialXExtremes(Double configXMin, Double configXMax, DataSeries traceOriginalData, int pixelsInTraceDataPoint, boolean isTracesNaturalDrawingEnabled) {
         int pixelsInDataPoint = pixelsInTraceDataPoint;
@@ -329,7 +316,7 @@ public class SimpleChart {
         // set YAxis ranges
         BRectangle paintingArea = new BRectangle(fullArea.x, fullArea.y + top, fullArea.width, fullArea.height - top - bottom);
         for (int i = 0; i < yAxisList.size(); i++) {
-            RangeInt yRange = chartConfig.getYStartEnd(i, paintingArea);
+            RangeInt yRange = getYStartEnd(i, paintingArea);
             yAxisList.get(i).setStartEnd(yRange.getEnd(), yRange.getStart());
         }
         if (left < 0) {
@@ -362,6 +349,31 @@ public class SimpleChart {
         areasDirty = false;
     }
 
+    public int getStacksSumWeight() {
+        int weightSum = 0;
+        for (Integer weight : stackWeights) {
+            weightSum += weight;
+        }
+        return weightSum;
+    }
+
+    private RangeInt getYStartEnd(int yAxisIndex, BRectangle area) {
+        int weightSum = getStacksSumWeight();
+
+        int weightSumTillYAxis = 0;
+        for (int i = 0; i < yAxisIndex / 2; i++) {
+            weightSumTillYAxis += stackWeights.get(i);
+        }
+
+        int yAxisWeight = stackWeights.get(yAxisIndex / 2);
+        int axisHeight = area.height * yAxisWeight / weightSum;
+
+        int end = area.y + area.height * weightSumTillYAxis / weightSum;
+        int start = end + axisHeight;
+        return new RangeInt(end, start);
+    }
+
+
     private void updateTraceData(int xAxisIndex) {
         Axis xAxis = xAxisList.get(xAxisIndex);
         for (int i = 0; i < traces.size(); i++) {
@@ -391,6 +403,10 @@ public class SimpleChart {
 
 
     public void draw(BCanvas canvas) {
+        if(traces.size() > 0 && dataDirty) {
+            initiateAxisAndTraces();
+            dataDirty = false;
+        }
         if (areasDirty) {
             calculateMarginsAndAreas(canvas, chartConfig.getMargin());
         }
@@ -447,9 +463,160 @@ public class SimpleChart {
         }
     }
 
+
+
     /**
      * =======================Base methods to interact==========================
      **/
+    public void setDefaultTraceColors(BColor[] defaultTraceColors) {
+        this.defaultTraceColors = defaultTraceColors;
+    }
+
+    public ChartConfig getConfig() {
+        return chartConfig;
+    }
+
+    public AxisConfig getYAxisDefaultConfig() {
+        return yAxisDefaultConfig;
+    }
+
+    public AxisConfig getYAxisConfig(int yIndex) {
+        return yAxisList.get(yIndex).getConfig();
+    }
+
+    public AxisConfig getXAxisConfig(int xIndex) {
+        return xAxisList.get(xIndex).getConfig();
+    }
+
+    public boolean isTracesNaturalDrawingEnabled() {
+        return isTracesNaturalDrawingEnabled;
+    }
+
+    public void setTracesNaturalDrawingEnabled(boolean tracesNaturalDrawingEnabled) {
+        isTracesNaturalDrawingEnabled = tracesNaturalDrawingEnabled;
+    }
+
+    public void addStack(int weight) {
+        Axis leftYAxis = new Axis(AxisOrientation.LEFT, new LinearScale());
+        Axis rightYAxis = new Axis(AxisOrientation.RIGHT, new LinearScale());
+        leftYAxis.setConfig(yAxisDefaultConfig);
+        rightYAxis.setConfig(yAxisDefaultConfig);
+        if(isLeftAxisPrimary) {
+            leftYAxis.getConfig().setGridLineStroke(new BStroke(1));
+        } else {
+            rightYAxis.getConfig().setGridLineStroke(new BStroke(1));
+        }
+        yAxisList.add(leftYAxis);
+        yAxisList.add(rightYAxis);
+        stackWeights.add(weight);
+
+        legends.add(new Legend(chartConfig.getLegendConfig(), buttonGroup));
+    }
+
+    public void addStack() {
+        addStack(DEFAULT_WEIGHT);
+    }
+
+
+    /**
+     * add trace to the stack with the given number
+     * @param stackNumber
+     * @param trace
+     * @param traceData
+     * @param isXAxisOpposite
+     * @param isYAxisOpposite
+     */
+    public void addTrace(int stackNumber, Trace trace, DataSeries traceData,  boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        dataManager.addTrace(traceData.copy(), trace.getMarkSize());
+
+        boolean isBottomXAxis = true;
+        boolean isLeftYAxis = true;
+        if (isXAxisOpposite && isBottomAxisPrimary) {
+            isBottomXAxis = false;
+        }
+        if (!isXAxisOpposite && !isBottomAxisPrimary) {
+            isBottomXAxis = false;
+        }
+        if (isYAxisOpposite && isLeftAxisPrimary) {
+            isLeftYAxis = false;
+        }
+        if (!isYAxisOpposite && !isLeftAxisPrimary) {
+            isLeftYAxis = false;
+        }
+        int xAxisIndex = isBottomXAxis ? 0 : 1;
+        int yAxisIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 - 1;
+        trace.setXAxisIndex(xAxisIndex);
+        trace.setYAxisIndex(yAxisIndex);
+        yAxisList.get(yAxisIndex).getConfig().setVisible(true);
+        xAxisList.get(xAxisIndex).getConfig().setVisible(true);
+
+        if(trace.getName() == null) {
+            trace.setName("Trace " + traces.size());
+        }
+        if(trace.getMainColor() == null) {
+            trace.setMainColor(defaultTraceColors[traces.size() % defaultTraceColors.length]);
+        }
+
+        traces.add(trace);
+
+        double xMin = xAxisList.get(xAxisIndex).getMin();
+        double xMax = xAxisList.get(xAxisIndex).getMax();
+        if(!dataDirty) {
+            trace.setData(dataManager.getProcessedTraceData(traces.size() - 1, xMin, xMax));
+        }
+
+        // add trace legend button
+        ToggleBtn legendButton = new ToggleBtn(trace.getMainColor(), trace.getName());
+        final int traceIndex = traces.size() - 1;
+        legendButton.addListener(new StateListener() {
+            @Override
+            public void stateChanged(boolean isSelected) {
+                if(isSelected) {
+                    selectedTraceIndex = traceIndex;
+                }
+                if(!isSelected && selectedTraceIndex == traceIndex) {
+                    selectedTraceIndex = -1;
+                }
+            }
+        });
+        legends.get(stackNumber).add(legendButton);
+    }
+
+    public void setXMinMax(int xAxisIndex, Double min,  Double max) {
+        if(min != null && max != null && min > max) {
+            throw new IllegalArgumentException("min = "+ min + " max = " + max + ". Expected: min < max");
+        }
+
+        if(min != null) {
+            xAxisMins.put(xAxisIndex, min);
+        } else {
+            xAxisMins.remove(xAxisIndex);
+        }
+
+        if(max != null) {
+            xAxisMaxs.put(xAxisIndex, max);
+        } else {
+            xAxisMaxs.remove(xAxisIndex);
+        }
+    }
+
+    public void setYMinMax(int yAxisIndex, Double min,  Double max) {
+        if(min != null && max != null && min > max) {
+            throw new IllegalArgumentException("min = "+ min + " max = " + max + ". Expected: min < max");
+        }
+
+        if(min != null) {
+            yAxisMins.put(yAxisIndex, min);
+        } else {
+            yAxisMins.remove(yAxisIndex);
+        }
+
+        if(max != null) {
+            yAxisMaxs.put(yAxisIndex, max);
+        } else {
+            yAxisMaxs.remove(yAxisIndex);
+        }
+    }
 
     public void setArea(BRectangle area) {
         fullArea = area;
@@ -612,11 +779,11 @@ public class SimpleChart {
     }
 
     public int getTraceYIndex(int traceIndex) {
-        return chartConfig.getTraceYIndex(traceIndex);
+        return traces.get(traceIndex).getYAxisIndex();
     }
 
     public int getTraceXIndex(int traceIndex) {
-        return chartConfig.getTraceXIndex(traceIndex);
+        return traces.get(traceIndex).getXAxisIndex();
     }
 
 

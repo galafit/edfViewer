@@ -1,10 +1,12 @@
 package com.biorecorder.basechart.examples;
 
+import com.biorecorder.basechart.ScrollableChart;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.lists.IntArrayList;
 import com.biorecorder.basechart.data.XYData;
+import com.biorecorder.basechart.traces.LineTrace;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,30 +65,34 @@ public class MainFrame extends JFrame {
         XYData xyData1 = new XYData();
         xyData1.setYData(yData1);
 
-     /*   XYData xyData2 = new XYData();
-        xyData2.setYData(yData2);
+        XYData xyData2 = new XYData();
+        xyData2.setYData(yData1);
         xyData2.setXData(xData);
 
-        XYData xyData3 = new XYData();
+      /*  XYData xyData3 = new XYData();
         xyData3.setYData(yData2);
        // xyData3.setYGroupingType(GroupingType.MAX);
 
         XYData bandData = new XYData();
         bandData.setYData(bandYData);*/
 
-        ChartConfig config = new ChartConfig(false, true);
+        ScrollableChart chart = new ScrollableChart(true);
 
-        config.addTrace(new LineTraceConfig(false), xyData1);
+        chart.addChartStack();
+
+        chart.addChartTrace(0, new LineTrace(), xyData1, false, false);
         //config.addChartStack(5);
        // config.addTrace(new BooleanTraceConfig(), bandData, "Band");
 
-        config.addChartStack(5);
+       // chart.addChartStack(5);
        // config.addTrace(new LineTraceConfig(true), xyData1, "EEG1", "uVolts");
        // config.addTrace(new LineTraceConfig(false), xyData2);
 
 
-        config.addChartStack(5);
-      //  config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
+        chart.addChartStack();
+        chart.addChartTrace(1, new LineTrace(), xyData2, false, false);
+
+        //  config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
      //   config.addTrace(new LineTraceConfig(false), xyData1);
 
     /*    config.addChartStack(5, new Range(-500, 100));
@@ -106,7 +112,7 @@ public class MainFrame extends JFrame {
         //config.addPreviewGroupingInterval(1000);
 
 
-        chartPanel = new ChartPanel(config);
+        chartPanel = new ChartPanel(chart);
 
         chartPanel.setPreferredSize(new Dimension(width, height));
         add(chartPanel, BorderLayout.CENTER);

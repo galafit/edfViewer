@@ -114,12 +114,12 @@ public class Text {
                 Text text2 = new Text(str, p.x, p.y, TextAnchor.END, TextAnchor.START, fm);
                 Text text3 = new Text(str, p1.x, p1.y, TextAnchor.MIDDLE, TextAnchor.MIDDLE, fm);
 
-                g.setColor(Color.gray);
+                g.setMainColor(Color.gray);
                 g.fillRect(text1.getxValue(), text1.getyValues() - fm.getAscent(),strWidth , strAscent);
                 g.fillRect(text2.getxValue(), text2.getyValues() - fm.getAscent(),strWidth , strAscent);
                 g.fillRect(text3.getxValue(), text3.getyValues() - fm.getAscent(),strWidth , strAscent);
 
-                g.setColor(Color.RED);
+                g.setMainColor(Color.RED);
                 Graphics2D g2  = (Graphics2D) g;
                 text1.draw(g2);
                 text2.draw(g2);
@@ -129,12 +129,12 @@ public class Text {
                 Text rotatedText2 = new Text(str, p.x, p.y, TextAnchor.START, TextAnchor.END, -90, fm);
                 Text rotatedText3 = new Text(str, p1.x, p1.y, TextAnchor.MIDDLE, TextAnchor.MIDDLE, 90, fm);
 
-                g.setColor(Color.BLUE);
+                g.setMainColor(Color.BLUE);
                 rotatedText1.draw(g2);
                 rotatedText2.draw(g2);
                 rotatedText3.draw(g2);
 
-                g.setColor(Color.black);
+                g.setMainColor(Color.black);
                 g.drawLine(p.x, p.y - 600, p.x, p.y + 600);
                 g.drawLine(p.x - 300, p.y, p.x + 300, p.y);
                 g.drawLine(p1.x - 300, p1.y, p1.x + 300, p1.y);

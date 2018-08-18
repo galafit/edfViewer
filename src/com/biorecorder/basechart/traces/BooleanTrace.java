@@ -27,10 +27,19 @@ public class BooleanTrace extends Trace {
     }
 
     @Override
-    public BColor getColor() {
+    public BColor getMainColor() {
         return traceConfig.getColor();
      }
 
+    @Override
+    public int getMarkSize() {
+        return traceConfig.getMarkSize();
+    }
+
+    @Override
+    public void setMainColor(BColor color) {
+        traceConfig.setColor(color);
+    }
 
     @Override
     public InfoItem[] getInfo(int dataIndex){
@@ -38,7 +47,7 @@ public class BooleanTrace extends Trace {
             return new InfoItem[0];
         }
         InfoItem[] infoItems = new InfoItem[2];
-        infoItems[0] = new InfoItem(getName(), "", getColor());
+        infoItems[0] = new InfoItem(getName(), "", getMainColor());
         infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
         return infoItems;
     }
@@ -62,9 +71,9 @@ public class BooleanTrace extends Trace {
      /*   if (xyData == null || xyData.size() == 0) {
             return;
         }
-        BColor color = getColor();
+        BColor color = getMainColor();
         BColor resultantColor  = new BColor(color.getRed(), color.getGreen(), color.getBlue(), 110);
-        canvas.setColor(resultantColor);
+        canvas.setMainColor(resultantColor);
         for (int i = 0; i < xyData.size() - 1; i++) {
            if(xyData.getY(i) > 0) {
                int x1 = (int)getXAxis().scale(xyData.getX(i));

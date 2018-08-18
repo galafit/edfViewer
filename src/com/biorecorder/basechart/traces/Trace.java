@@ -59,7 +59,9 @@ public abstract class Trace {
 
     }
 
-    public abstract BColor getColor();
+    public abstract int getMarkSize();
+    public abstract BColor getMainColor();
+    public abstract void setMainColor(BColor color);
 
     public abstract Range getYExtremes();
 

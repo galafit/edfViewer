@@ -220,11 +220,10 @@ public class GroupedDataSeries extends DataSeries {
 
     class IrregularGroupStartIndexes implements GroupStartIndexes {
         private double groupingInterval;
-        LongArrayList groupStartsList;
+        LongArrayList groupStartsList = new LongArrayList();
 
 
         public IrregularGroupStartIndexes(double groupingInterval) {
-            LongArrayList groupIndexesList = new LongArrayList();
             setGroupingInterval(groupingInterval);
         }
 
