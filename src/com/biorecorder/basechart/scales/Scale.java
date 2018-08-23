@@ -1,27 +1,27 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.config.LabelFormatInfo;
+import com.biorecorder.basechart.axis.TickFormatInfo;
 
 public interface Scale {
     public Scale copy();
 
     public void setDomain(double... domain);
 
-    public void setRange(float... range);
+    public void setRange(double... range);
 
     public double[] getDomain();
 
-    public float[] getRange();
+    public double[] getRange();
 
-    public float scale(double value);
+    public double scale(double value);
 
-    public double invert(float value);
+    public double invert(double value);
 
     public String formatDomainValue(double value);
 
-    public TickProvider getTickProvider(int tickCount, LabelFormatInfo labelFormatInfo);
+    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo formatInfo);
 
-    public TickProvider getTickProvider(double tickStep, Unit tickUnit, LabelFormatInfo labelFormatInfo);
+    public TickProvider getTickProviderByStep(double tickStep, TickFormatInfo formatInfo);
 
 }
 

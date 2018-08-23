@@ -1,9 +1,10 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.config.LabelFormatInfo;
+import com.biorecorder.basechart.axis.TickFormatInfo;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 /**
  * Created by galafit on 6/9/17.
@@ -11,58 +12,60 @@ import java.text.MessageFormat;
 public class LinearScale implements Scale {
     DecimalFormat numberFormatter;
     private double domain[] = {0, 1};
-    private float range[] = {0, 1};
+    private double range[] = {0, 1};
 
     @Override
     public Scale copy() {
         LinearScale copyScale = new LinearScale();
-        copyScale.domain[0] = domain[0];
-        copyScale.domain[1] = domain[1];
-        copyScale.range[0] = range[0];
-        copyScale.range[1] = range[1];
+        copyScale.domain = Arrays.copyOf(domain, domain.length);
+        copyScale.range = Arrays.copyOf(range, range.length);
         return copyScale;
     }
 
     @Override
     public void setDomain(double... domain) {
-        this.domain = domain;
+        this.domain = Arrays.copyOf(domain, domain.length);
         numberFormatter = null;
     }
 
     @Override
-    public void setRange(float... range) {
-        this.range = range;
+    public void setRange(double... range) {
+        this.range = Arrays.copyOf(range, range.length);
         numberFormatter = null;
     }
 
     @Override
     public double[] getDomain() {
-        return domain;
+        return Arrays.copyOf(domain, domain.length);
     }
 
     @Override
-    public float[] getRange() {
-        return range;
+    public double[] getRange() {
+        return Arrays.copyOf(range, range.length);
     }
 
     @Override
-    public float scale(double value) {
+    public double scale(double value) {
         return (float) (range[0] + (value - domain[0]) * (range[range.length - 1] - range[0]) / (domain[domain.length - 1] - domain[0]));
     }
 
     @Override
-    public double invert(float value) {
+    public double invert(double value) {
         return domain[0] + (value - range[0]) * (domain[domain.length - 1] - domain[0]) / (range[range.length - 1] - range[0]);
     }
 
     @Override
-    public TickProvider getTickProvider(int tickCount, LabelFormatInfo labelFormatInfo) {
-        return new LinearTickProvider(tickCount, labelFormatInfo);
+    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo formatInfo) {
+        LinearTickProvider provider = new LinearTickProvider(formatInfo);
+        provider.setTickCount(tickCount);
+        return provider;
     }
 
     @Override
-    public TickProvider getTickProvider(double tickStep, Unit tickUnit, LabelFormatInfo labelFormatInfo) {
-        return new LinearTickProvider(tickStep, tickUnit, labelFormatInfo);
+    public TickProvider getTickProviderByStep(double tickStep,  TickFormatInfo formatInfo) {
+        LinearTickProvider provider = new LinearTickProvider(formatInfo);
+        provider.setTickStep(tickStep);
+        return provider;
     }
 
     @Override
@@ -81,7 +84,7 @@ public class LinearScale implements Scale {
     }
 
     // TODO: use metric shortcuts - k, M, G... from formatInfo
-    private DecimalFormat getNumberFormat(int power, LabelFormatInfo labelFormatInfo) {
+    private DecimalFormat getNumberFormat(int power, TickFormatInfo labelFormatInfo) {
         DecimalFormat dfNeg4 = new DecimalFormat("0.0000");
         DecimalFormat dfNeg3 = new DecimalFormat("0.000");
         DecimalFormat dfNeg2 = new DecimalFormat("0.00");
@@ -120,28 +123,30 @@ public class LinearScale implements Scale {
 
 
     class LinearTickProvider implements TickProvider {
-        private double tickStep;
+        private double tickStep = 1;
         int tickDigits;
         int tickPower;
-        private LabelFormatInfo labelFormatInfo;
+        private TickFormatInfo labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
         private Tick lastTick;
 
-        public LinearTickProvider(int tickCount, LabelFormatInfo labelFormatInfo) {
+        public LinearTickProvider(TickFormatInfo labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
+        }
+
+        public void setTickStep(double tickStep) {
+            this.tickStep = tickStep;
+            NormalizedNumber normalizedStep = new NormalizedNumber(tickStep);
+            tickPower = normalizedStep.getPowerOfLastSignificantDigit();
+            tickDigits = (int) (normalizedStep.getMantissa() * Math.pow(10, tickPower));
+            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
+        }
+
+        public void setTickCount(int tickCount) {
             NormalizedNumber normalizedStep = getRoundTickStep(tickCount);
             tickStep = normalizedStep.getValue();
             tickDigits = (int) normalizedStep.getMantissa();
             tickPower = normalizedStep.getPower();
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
-        }
-
-        public LinearTickProvider(double tickStep, Unit tickUnit, LabelFormatInfo labelFormatInfo) {
-            this.tickStep = tickStep;
-            this.labelFormatInfo = labelFormatInfo;
-            NormalizedNumber normalizedStep = new NormalizedNumber(tickStep);
-            tickPower = normalizedStep.getPowerOfLastSignificantDigit();
-            tickDigits = (int) (normalizedStep.getMantissa() * Math.pow(10, tickPower));
             labelFormat = getNumberFormat(tickPower, labelFormatInfo);
         }
 
@@ -196,7 +201,7 @@ public class LinearScale implements Scale {
 
 
         /**
-         * On the com.biorecorder.basechart.chart of ticks amount calculate round Tick Step
+         * Calculates round Tick Step
          * that is  multiples of 2, 5 or 10.
          * FirstDigit is in {1,2,5,10};
          */

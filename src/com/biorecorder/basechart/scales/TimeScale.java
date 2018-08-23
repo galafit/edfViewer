@@ -1,10 +1,11 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.config.LabelFormatInfo;
+import com.biorecorder.basechart.axis.TickFormatInfo;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 /**
  * Created by galafit on 7/1/18.
@@ -37,60 +38,69 @@ public class TimeScale implements Scale {
             MSECONDS_100, MSECONDS_200, MSECONDS_500, SECOND, SECONDS_2, SECONDS_5, SECONDS_10,
             SECONDS_30, MINUTE, MINUTES_2, MINUTES_5, MINUTES_10, MINUTES_30, HOUR, HOURS_2, HOURS_5};
 
-    private double domain[] = {0, 1};
-    private float range[] = {0, 1};
+    private long domain[] = {0, 1};
+    private double range[] = {0, 1};
     private DateFormat numberFormatter;
 
     @Override
     public Scale copy() {
         TimeScale copyScale = new TimeScale();
-        copyScale.domain[0] = domain[0];
-        copyScale.domain[1] = domain[1];
-        copyScale.range[0] = range[0];
-        copyScale.range[1] = range[1];
-        copyScale.numberFormatter = null;
+        copyScale.domain = Arrays.copyOf(domain, domain.length);
+        copyScale.range = Arrays.copyOf(range, range.length);
         return copyScale;
     }
 
     @Override
     public void setDomain(double... domain) {
-        this.domain = domain;
+        this.domain = new long[domain.length];
+        for (int i = 0; i < domain.length; i++) {
+            this.domain[i] = (long) domain[i];
+        }
         numberFormatter = null;
     }
 
     @Override
-    public void setRange(float... range) {
-        this.range = range;
+    public void setRange(double... range) {
+        this.range = Arrays.copyOf(range, range.length);
         numberFormatter = null;
     }
+
     @Override
     public double[] getDomain() {
-        return domain;
+        double domainCopy[] = new double[domain.length];
+        for (int i = 0; i < domain.length; i++) {
+           domainCopy[i] = domain[i];
+        }
+        return domainCopy;
     }
 
     @Override
-    public float[] getRange() {
-        return range;
+    public double[] getRange() {
+        return Arrays.copyOf(range, range.length);
     }
 
     @Override
-    public float scale(double value) {
+    public double scale(double value) {
         return (float)(range[0] + (value - domain[0]) * (range[range.length - 1] - range[0]) / (domain[domain.length - 1] - domain[0]));
     }
 
     @Override
-    public double invert(float value) {
+    public double invert(double value) {
         return domain[0] + (value - range[0]) * (domain[domain.length - 1] - domain[0]) / (range[range.length - 1] - range[0]);
     }
 
     @Override
-    public TickProvider getTickProvider(int tickCount, LabelFormatInfo labelFormatInfo) {
-        return new TimeTickProvider(tickCount, labelFormatInfo);
+    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo labelFormatInfo) {
+        TimeTickProvider provider = new TimeTickProvider();
+        provider.setTickCount(tickCount);
+        return provider;
     }
 
     @Override
-    public  TickProvider getTickProvider(double tickStep, Unit tickUnit, LabelFormatInfo labelFormatInfo) {
-        return new TimeTickProvider(tickStep, tickUnit, labelFormatInfo);
+    public  TickProvider getTickProviderByStep(double tickStep,  TickFormatInfo labelFormatInfo) {
+        TimeTickProvider provider = new TimeTickProvider();
+        provider.setTickStep(tickStep);
+        return provider;
     }
 
     @Override
@@ -124,29 +134,18 @@ public class TimeScale implements Scale {
 
 
     class TimeTickProvider implements TickProvider {
-        private long tickStep;
+        private long tickStep = 1;
         private DateFormat dateFormat;
         private Tick lastTick;
 
-        public TimeTickProvider(int tickCount, LabelFormatInfo labelFormatInfo) {
-            tickStep = getRoundTickStep(tickCount);
-            dateFormat = getDateFormat(tickStep);
+        public void setTickStep(double tickStep) {
+            this.tickStep = (long) tickStep;
+            dateFormat = getDateFormat(this.tickStep);
         }
 
-        public TimeTickProvider(double tickStep, Unit tickUnit, LabelFormatInfo labelFormatInfo) {
-            this.tickStep = (long) tickStep;
-            switch (tickUnit) {
-                case SECOND:
-                    this.tickStep *= SECOND;
-                    break;
-                case MINUTE:
-                    this.tickStep *= MINUTE;
-                    break;
-                case HOUR:
-                    this.tickStep *= HOUR;
-                    break;
-            }
-            dateFormat = getDateFormat(this.tickStep);
+        public void setTickCount(int tickCount) {
+            tickStep = getRoundTickStep(tickCount);
+            dateFormat = getDateFormat(tickStep);
         }
 
         @Override
@@ -158,7 +157,7 @@ public class TimeScale implements Scale {
         @Override
         public Tick getNextTick() {
             if (lastTick == null) {
-                long min = (long)domain[0];
+                long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
                 double tickValue = lastTick.getValue() + tickStep;

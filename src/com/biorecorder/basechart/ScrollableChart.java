@@ -1,6 +1,6 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.AxisConfig;
+import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.config.ScrollConfig;
 import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.config.Theme;
@@ -34,10 +34,10 @@ public class ScrollableChart {
     public ScrollableChart(boolean isPreviewEnabled) {
         chart = new Chart();
         AxisConfig defaultYAxisConfig = chart.getYAxisDefaultConfig();
-        defaultYAxisConfig.setLabelInside(true);
+        defaultYAxisConfig.setTickLabelInside(true);
         defaultYAxisConfig.setTickMarkInsideSize(3);
         defaultYAxisConfig.setTickMarkOutsideSize(0);
-        defaultYAxisConfig.setMinMaxRoundingEnable(true);
+        defaultYAxisConfig.setMinMaxRoundingEnabled(true);
 
         if (isPreviewEnabled) {
             preview = new Chart();
@@ -45,8 +45,8 @@ public class ScrollableChart {
             chart.setTracesNaturalDrawingEnabled(true);
 
             defaultYAxisConfig = preview.getYAxisDefaultConfig();
-            defaultYAxisConfig.setMinMaxRoundingEnable(true);
-            defaultYAxisConfig.setLabelInside(true);
+            defaultYAxisConfig.setMinMaxRoundingEnabled(true);
+            defaultYAxisConfig.setTickLabelInside(true);
             defaultYAxisConfig.setTickMarkInsideSize(3);
             defaultYAxisConfig.setTickMarkOutsideSize(0);
         }

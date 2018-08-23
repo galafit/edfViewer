@@ -67,7 +67,7 @@ public abstract class Trace {
 
     public abstract BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale);
 
-    public abstract InfoItem[] getInfo(int dataIndex);
+    public abstract InfoItem[] getInfo(int dataIndex, Scale xScale, Scale yScale);
 
     public abstract void draw(BCanvas canvas, Scale xScale, Scale yScale);
 }

@@ -60,16 +60,16 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    public InfoItem[] getInfo(int dataIndex){
+    public InfoItem[] getInfo(int dataIndex, Scale xScale, Scale yScale){
         if (dataIndex == -1){
             return new InfoItem[0];
         }
         InfoItem[] infoItems = new InfoItem[3];
         infoItems[0] = new InfoItem(getName(), "", getMainColor());
-        infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
-        infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
-       // infoItems[1] = new InfoItem("X: ", getXAxis().formatDomainValue(xyData.getX(dataIndex)), null);
-       // infoItems[2] = new InfoItem("Y: ", getYAxis().formatDomainValue(xyData.getY(dataIndex)), null);
+       // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
+       // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
+        infoItems[1] = new InfoItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
+        infoItems[2] = new InfoItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
 
         return infoItems;
     }

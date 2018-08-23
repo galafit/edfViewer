@@ -90,7 +90,7 @@ public class MainFrame extends JFrame {
 
 
         chart.addChartStack();
-        chart.addChartTrace(1, new LineTrace(), xyData2, false, false);
+        chart.addChartTrace(1, new LineTrace(new LineTraceConfig(true)), xyData2, false, false);
 
         //  config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
      //   config.addTrace(new LineTraceConfig(false), xyData1);

@@ -1,9 +1,9 @@
-package com.biorecorder.basechart.config;
+package com.biorecorder.basechart.axis;
 
 /**
  * Created by galafit on 5/9/17.
  */
-public class LabelFormatInfo {
+public class TickFormatInfo {
     private String prefix;
     private String suffix;
     /**
@@ -19,10 +19,10 @@ public class LabelFormatInfo {
      */
     private boolean enableExponentShortcut = true;
 
-    public LabelFormatInfo() {
+    public TickFormatInfo() {
     }
 
-    public LabelFormatInfo(LabelFormatInfo labelFormatInfo) {
+    public TickFormatInfo(TickFormatInfo labelFormatInfo) {
         prefix = labelFormatInfo.prefix;
         suffix = labelFormatInfo.suffix;
         enableExponentShortcut = labelFormatInfo.enableExponentShortcut;

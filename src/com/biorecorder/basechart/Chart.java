@@ -4,8 +4,8 @@ import com.biorecorder.basechart.axis.Axis;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
-import com.biorecorder.basechart.config.AxisConfig;
-import com.biorecorder.basechart.config.AxisOrientation;
+import com.biorecorder.basechart.axis.AxisConfig;
+import com.biorecorder.basechart.axis.AxisOrientation;
 import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
@@ -816,17 +816,16 @@ public class Chart {
 
         if (hoverTraceIndex >= 0) {
             Trace trace = traces.get(hoverTraceIndex);
-            int nearestIndex = (int)trace.findNearestData(x, y,
-                    xAxisList.get(trace.getXAxisIndex()).getScale(),
-                    yAxisList.get(trace.getYAxisIndex()).getScale());
+            Scale xScale = xAxisList.get(trace.getXAxisIndex()).getScale();
+            Scale yScale = yAxisList.get(trace.getYAxisIndex()).getScale();
+
+            int nearestIndex = (int)trace.findNearestData(x, y, xScale, yScale);
             if (hoverPointIndex != nearestIndex) {
                 hoverPointIndex = nearestIndex;
                 if (hoverPointIndex >= 0) {
                     TooltipInfo tooltipInfo = new TooltipInfo();
-                    tooltipInfo.addItems(traces.get(hoverTraceIndex).getInfo(hoverPointIndex));
-                    BPoint dataPosition = traces.get(hoverTraceIndex).getDataPosition(hoverPointIndex,
-                            xAxisList.get(trace.getXAxisIndex()).getScale(),
-                            yAxisList.get(trace.getYAxisIndex()).getScale());
+                    tooltipInfo.addItems(traces.get(hoverTraceIndex).getInfo(hoverPointIndex, xScale, yScale));
+                    BPoint dataPosition = traces.get(hoverTraceIndex).getDataPosition(hoverPointIndex, xScale, yScale);
                     tooltip.setTooltipInfo(tooltipInfo);
                     tooltip.setXY(dataPosition.getX(), yAxisList.get(getTraceYIndex(hoverTraceIndex)).getEnd());
                     crosshair.setXY(dataPosition.getX(), dataPosition.getY());
