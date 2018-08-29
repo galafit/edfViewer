@@ -9,7 +9,7 @@ import com.biorecorder.basechart.scales.Tick;
 public class AxisBottom extends Axis1 {
 
     @Override
-    protected int ticksLabelSizeForWidth(TextMetric tm, int angle) {
+    protected int labelSizeForWidth(TextMetric tm, int angle) {
         if(angle == 0) {
             return tm.height();
         }

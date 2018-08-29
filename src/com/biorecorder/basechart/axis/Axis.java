@@ -213,8 +213,8 @@ public class Axis {
     }
 
     private TickProvider getTickProvider() {
-        if(config.getTickStep() > 0) {
-            return  scale.getTickProvider(config.getTickStep(), config.getTickStepUnit(), config.getLabelFormatInfo());
+        if(config.getTickInterval() > 0) {
+            return  scale.getTickProvider(config.getTickInterval(), config.getTickStepUnit(), config.getLabelFormatInfo());
         }
 
         int fontFactor = 4;

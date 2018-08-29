@@ -17,14 +17,14 @@ public class AxisConfig {
     private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
 
 
-    private float tickStep = -1;
+    private float tickInterval = -1; // in axis domain units
 
     private int tickMarkInsideSize = 0; // px
     private int tickMarkOutsideSize = 3; // px
 
     private int minorTickMarkInsideSize = 1; // px
     private int minorTickMarkOutsideSize = 1; // px
-    private int minorTickCount = 3; // minor ticks divider
+    private int minorTickIntervalCount = 3; // number of minor intervals in one major interval
 
     private boolean isVisible = false;
     private boolean isAxisLineVisible = false;
@@ -48,8 +48,8 @@ public class AxisConfig {
 
         tickMarkInsideSize = axisConfig.tickMarkInsideSize;
         tickMarkOutsideSize = axisConfig.tickMarkOutsideSize;
-        tickStep = axisConfig.tickStep;
-        minorTickCount = axisConfig.minorTickCount;
+        tickInterval = axisConfig.tickInterval;
+        minorTickIntervalCount = axisConfig.minorTickIntervalCount;
 
         isTitleVisible = axisConfig.isTitleVisible;
         titlePadding = axisConfig.titlePadding;
@@ -125,12 +125,12 @@ public class AxisConfig {
         return tickMarkOutsideSize;
     }
 
-    public float getTickStep() {
-        return tickStep;
+    public float getTickInterval() {
+        return tickInterval;
     }
 
-    public void setTickStep(float tickStep) {
-        this.tickStep = tickStep;
+    public void setTickInterval(float tickInterval) {
+        this.tickInterval = tickInterval;
     }
 
     public TickFormatInfo getTickFormatInfo() {
@@ -157,12 +157,12 @@ public class AxisConfig {
         return minorTickMarkOutsideSize;
     }
 
-    public void setMinorTickCount(int minorTickCount) {
-        this.minorTickCount = minorTickCount;
+    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
+        this.minorTickIntervalCount = minorTickIntervalCount;
     }
 
-    public int getMinorTickCount() {
-        return minorTickCount;
+    public int getMinorTickIntervalCount() {
+        return minorTickIntervalCount;
     }
 
 
