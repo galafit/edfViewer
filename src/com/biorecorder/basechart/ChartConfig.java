@@ -1,16 +1,7 @@
-package com.biorecorder.basechart.config;
+package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.config.traces.TraceConfig;
-import com.biorecorder.basechart.RangeInt;
-import com.biorecorder.basechart.data.Data;
-import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.graphics.TextStyle;
-
-import java.util.*;
 
 /**
  * Created by galafit on 18/8/17.

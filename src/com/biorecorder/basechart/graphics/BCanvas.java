@@ -29,5 +29,6 @@ public interface BCanvas {
     public void drawPoint(int x, int y);
     public void drawPath(BPath path);
     public void fillPath(BPath path);
+    public BPath getEmptyPath();
 
 }

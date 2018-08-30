@@ -1,9 +1,9 @@
-package com.biorecorder.basechart.config;
+package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
 
 /**
- * Chart color themes
+ * BaseChart color themes
  */
 public enum Theme {
     WHITE(1),

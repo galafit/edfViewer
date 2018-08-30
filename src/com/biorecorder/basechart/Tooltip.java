@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.TooltipConfig;
 import com.biorecorder.basechart.graphics.*;
 
 /**

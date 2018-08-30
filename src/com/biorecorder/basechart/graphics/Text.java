@@ -1,8 +1,5 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.graphics;
 
-
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.TextMetric;
 
 /**
  * Created by galafit on 10/9/17.

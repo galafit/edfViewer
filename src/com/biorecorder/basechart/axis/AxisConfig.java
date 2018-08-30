@@ -27,11 +27,11 @@ public class AxisConfig {
     private int minorTickIntervalCount = 3; // number of minor intervals in one major interval
 
     private boolean isVisible = false;
-    private boolean isAxisLineVisible = false;
-    private boolean isTitleVisible = false;
+    private boolean isAxisLineVisible = true;
+    private boolean isTitleVisible = true;
     private boolean isTickLabelsVisible = true;
     private boolean isGridVisible = false;
-    private boolean isMinorGridVisible = false;
+    private boolean isMinorGridVisible = true;
 
     private boolean isMinMaxRoundingEnabled = false;
 

@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.CrosshairConfig;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.graphics.BStroke;

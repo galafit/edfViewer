@@ -1,159 +1,224 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.config.AxisConfig;
-import com.biorecorder.basechart.config.AxisOrientation;
+import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.graphics.Text;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.graphics.TextMetric;
-import com.biorecorder.basechart.scales.*;
+import com.biorecorder.basechart.lists.IntArrayList;
+import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.Tick;
+import com.biorecorder.basechart.scales.TickProvider;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by galafit on 5/9/17.
+ * Axis is visual representation of Scale that generates and draws
+ * visual elements such as axis lines, labels, and ticks.
+ * Also it is a wrapper class that gives simplified access to the Scale methods
+ * and some advanced functionality such as Zooming and Translating. See
+ * {@link #setConfig(AxisConfig)}
  */
-public class Axis {
-    protected final int DEFAULT_TICK_COUNT = 30;
-    private final AxisOrientation orientation;
-    private String title;
-    private Scale scale;
-    private AxisConfig config = new AxisConfig();
+public abstract class Axis {
+    protected final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16, 20, 32, 40, 64, 80, 100}; // used to skip ticks if they overlap
+    protected final double TICKS_ROUNDING_UNCERTAINTY = 0.2; // 20% for one side
+    protected int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
 
-    private Range rowMinMax; // without rounding
+    private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
-    private Text titleText;
-    private List<Tick> ticks;
-    private List<Double> minorTicks;
-    private List<Line> tickLines;
-    private List<Line> minorTickLines;
-    private List<Text> tickLabels;
-    private Line axisLine;
-    private TickProvider tickProvider;
+    protected String title;
+    protected Scale scale;
+    protected AxisConfig config = new AxisConfig();
 
-    public Axis(AxisOrientation orientation, Scale scale) {
-        this.orientation = orientation;
-        this.scale = scale;
+    // need this field to implement smooth zooming when minMaxRounding enabled
+    protected Range rowMinMax; // without rounding
+
+    protected Text titleText;
+    protected int ticksSkipStep = 1;
+    protected List<Text> tickLabels = new ArrayList<>();
+    IntArrayList tickPositions = new IntArrayList();
+    IntArrayList minorTickPositions = new IntArrayList();
+    protected TickProvider tickProvider;
+    protected boolean isDirty = true;
+    private int width = -1;
+
+    public Axis(Scale scale) {
+        this.scale = scale.copy();
         rowMinMax = new Range(getMin(), getMax());
     }
 
-    public AxisConfig getConfig() {
-        return config;
+    private void setDirty() {
+        tickProvider = null;
+        isDirty = true;
+        width = -1;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        setDirty();
+    }
+
+    /**
+     * set Axis scale. Inner scale is a COPY of the given scale
+     * to prevent direct access from outside
+     *
+     * @param scale
+     */
+    public void setScale(Scale scale) {
+        this.scale = scale.copy();
+        rowMinMax = new Range(getMin(), getMax());
+        setDirty();
+    }
+
+    /**
+     * get the COPY of inner scale
+     *
+     * @return copy of inner scale
+     */
+    public Scale getScale() {
+        return scale.copy();
+    }
+
+    /**
+     * get the COPY of inner config. To change axis config
+     * use {@link #setConfig(AxisConfig)}
+     *
+     * @return copy of inner config
+     */
+    public AxisConfig getConfig() {
+        return new AxisConfig(config);
+    }
+
+    /**
+     * set Axis config. Inner config is a COPY of the given config
+     * to prevent direct access from outside
+     *
+     * @param config
+     */
     public void setConfig(AxisConfig config) {
         // set a copy to safely change
         this.config = new AxisConfig(config);
+        setDirty();
+    }
+
+
+    public void setVisible(boolean isVisible) {
+       config.setVisible(isVisible);
+        setDirty();
+    }
+
+    public void setGridVisible(boolean isVisible) {
+       config.setGridVisible(isVisible);
     }
 
     /**
-     * Zoom does not affect the scale!!!
-     * It just calculates and returns new max corresponding zooming.
-     * Min value does not change!!!
+     * Zoom does not affect the axis scale!
+     * It copies the axis scales and transforms its domain respectively.
+     * Note: zoom affects only max value, min value does not change!!!
+     *
      * @param zoomFactor
-     * @return axis new min and max that correspond zooming
+     * @return new scale with transformed domain
      */
-    public Range zoom(double zoomFactor) {
-        Scale copyScale = scale.copy();
+    public Scale zoom(double zoomFactor) {
+        Scale zoomedScale = scale.copy();
         double min = rowMinMax.getMin();
         double max = rowMinMax.getMax();
-        copyScale.setDomain(min, max);
+        zoomedScale.setDomain(min, max);
 
         int start = getStart();
         int end = getEnd();
-        int shift = (int)((end - start) * (zoomFactor - 1) / 2);
-        //int newStart = getMin - shift;
-        int newEnd = end + 2 * shift;
-        // copyScale.setRange(newStart, newEnd);
-        copyScale.setRange(start, newEnd);
-       // double minNew = copyScale.invert(getMin);
-        double maxNew = copyScale.invert(end);
 
-        return new Range(min, maxNew);
+        double zoomedLength = (end - start) * zoomFactor;
+        double zoomedEnd = start + zoomedLength;
+        zoomedScale.setRange(start, zoomedEnd);
+        double maxNew = zoomedScale.invert(end);
+        zoomedScale.setDomain(min, maxNew);
+
+        return zoomedScale;
     }
 
 
     /**
-     * Translation does not affect the scale!!!
-     * It just calculates and returns new min and max corresponding translation.
+     * Zoom does not affect the axis scale!
+     * It copies the axis scales and transforms its domain respectively.
+     *
      * @param translation
-     * @return axis new min and max that correspond translation
+     * @return new scale with transformed domain
      */
-    public Range translate(int translation) {
-        Scale copyScale = scale.copy();
+    public Scale translate(int translation) {
+        Scale translatedScale = scale.copy();
         double min = rowMinMax.getMin();
         double max = rowMinMax.getMax();
-        copyScale.setDomain(min, max);
+        translatedScale.setDomain(min, max);
 
         int start = getStart();
         int end = getEnd();
-        double minNew = copyScale.invert(start + translation);
-        double maxNew = copyScale.invert(end + translation);
-        return new Range(minNew, maxNew);
+        double minNew = translatedScale.invert(start + translation);
+        double maxNew = translatedScale.invert(end + translation);
+        translatedScale.setDomain(minNew, maxNew);
+        return translatedScale;
     }
 
+    /**
+     * Format domain value according to the range one "point precision"
+     * cutting unnecessary double digits that exceeds that "point precision"
+     */
     public String formatDomainValue(double value) {
         return scale.formatDomainValue(value);
     }
 
     public void setMinMax(Double min, Double max) {
-        if(min == null && max == null) {
+        if (min == null && max == null) {
             return;
         }
-        if (min!= null && max != null && min > max){
+        if (min != null && max != null && min > max) {
             String errorMessage = "Expected Min < Max. Min = {0}, Max = {1}.";
-            String formattedError = MessageFormat.format(errorMessage,min,max);
+            String formattedError = MessageFormat.format(errorMessage, min, max);
             throw new IllegalArgumentException(formattedError);
         }
-        if(min == null && max != null) {
-            min = scale.getDomain()[0];
-            if(min >= max) {
+        double[] domain = scale.getDomain();
+        if (min == null && max != null) {
+            min = domain[0];
+            if (min >= max) {
                 min = max - 1;
             }
         }
-        if(min != null && max == null) {
-            max = scale.getDomain()[1];
-            if(min >= max) {
+        if (min != null && max == null) {
+            max = domain[domain.length - 1];
+            if (min >= max) {
                 max = min + 1;
             }
         }
-
+        rowMinMax = new Range(min, max);
         scale.setDomain(min, max);
-        rowMinMax = new Range(getMin(), getMax());
-        ticks = null;
-        tickProvider = null;
-        titleText = null;
+        setDirty();
     }
 
-    public void setStartEnd(float start, float end) {
-        setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
-        scale.setRange(start, end);
-        tickProvider = null;
-        ticks = null;
-        titleText = null;
+    public void setStartEnd(double start, double end) {
+        scale.setRange((int) start, (int) end);
+        setDirty();
     }
-
-    public Scale getScale() {
-        return scale;
-    }
-
 
     public double getMin() {
         return scale.getDomain()[0];
     }
 
     public double getMax() {
-        return scale.getDomain()[scale.getDomain().length -1];
+        return scale.getDomain()[scale.getDomain().length - 1];
     }
 
     public int getStart() {
-        return (int)scale.getRange()[0];
+        return (int) scale.getRange()[0];
     }
 
     public int getEnd() {
-        return (int)scale.getRange()[scale.getRange().length -1];
+        return (int) scale.getRange()[scale.getRange().length - 1];
     }
 
     public double scale(double value) {
@@ -164,504 +229,365 @@ public class Axis {
         return scale.invert(value);
     }
 
-    public int getThickness(BCanvas canvas) {
+    public int getLength() {
+        return Math.abs(getEnd() - getStart());
+    }
+
+    public int getWidth(BCanvas canvas) {
         if (!config.isVisible()) {
             return 0;
         }
+        if(width < 0) { // calculate width
+            width = 0;
+            if (config.isAxisLineVisible()) {
+                width += config.getStyle().getAxisLineStroke().getWidth() / 2;
+            }
 
-        int size = 0;
-        if(config.isAxisLineVisible()) {
-            size += config.getAxisLineStroke().getWidth() / 2;
-        }
-
-        if (config.isTicksVisible()) {
-            size += config.getTickMarkOutsideSize();
-        }
-        if(config.isLabelsVisible() && !config.isLabelInside()) {
-            int labelsSize = 0;
-            TextMetric tm = canvas.getTextMetric(config.getLabelTextStyle());
-            if(isHorizontal()) { // horizontal axis
-                labelsSize = tm.height();
-            } else { // vertical axis
-                Tick minTick, maxTick;
+            if (config.isTicksVisible()) {
+                width += config.getTickMarkOutsideSize();
+            }
+            if (config.isTickLabelsVisible() && !config.isTickLabelInside()) {
+                TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
                 if(tickProvider == null) {
-                    tickProvider = getTickProvider();
+                    configTickProvider(tm);
                 }
-                if(config.isMinMaxRoundingEnable()) {
-                   minTick = tickProvider.getLowerTick(getMin());
-                   maxTick = tickProvider.getUpperTick(getMax());
-                } else {
-                    minTick = tickProvider.getUpperTick(getMin());
-                    maxTick = tickProvider.getLowerTick(getMax());
-                }
-                labelsSize = Math.max(tm.stringWidth(minTick.getLabel()), tm.stringWidth(maxTick.getLabel()));
+
+                Tick minTick = tickProvider.getUpperTick(getMin());
+                Tick maxTick = tickProvider.getLowerTick(getMax());
+
+                String longestLabel = minTick.getLabel().length() > maxTick.getLabel().length() ? minTick.getLabel() : maxTick.getLabel();
+                width += config.getTickPadding() + labelSizeForWidth(tm, 0, longestLabel);
             }
-            size += config.getLabelPadding() + labelsSize;
-        }
-        if (config.isTitleVisible() && titleText != null) {
-            TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
-            size = size + config.getTitlePadding() + tm.height();
-        }
-        return size;
-    }
-
-    private boolean isHorizontal() {
-        if(orientation == AxisOrientation.TOP || orientation == AxisOrientation.BOTTOM) {
-            return true;
-        }
-        return false;
-    }
-
-    private TickProvider getTickProvider() {
-        if(config.getTickInterval() > 0) {
-            return  scale.getTickProvider(config.getTickInterval(), config.getTickStepUnit(), config.getLabelFormatInfo());
-        }
-
-        int fontFactor = 4;
-        double tickPixelInterval = fontFactor * config.getLabelTextStyle().getSize();
-        int tickCount = (int) (Math.abs(getStart() - getEnd()) / tickPixelInterval);
-        tickCount = Math.max(tickCount, DEFAULT_TICK_COUNT);
-        return scale.getTickProvider(tickCount, config.getLabelFormatInfo());
-    }
-
-
-    private Line tickToGridLine(double tickValue, int length) {
-        if(orientation == AxisOrientation.TOP) {
-            int x = (int)scale(tickValue);
-            int y1 = 0;
-            int y2 = length;
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.BOTTOM) {
-            int x = (int)scale(tickValue);
-            int y1 = 0;
-            int y2 = -length;
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.LEFT) {
-            int y = (int)scale(tickValue);
-            int x1 = 0;
-            int x2 = length;
-            return new Line(x1, y, x2, y);
-        } else { // if orientation == AxisOrientation.RIGHT
-            int y = (int) scale(tickValue);
-            int x1 = 0;
-            int x2 = -length;
-            return new Line(x1, y, x2, y);
-        }
-    }
-
-    private Line tickToMarkLine(Tick tick) {
-        int axisWidth = config.getAxisLineStroke().getWidth();
-        if(orientation == AxisOrientation.TOP) {
-            int x = (int)scale(tick.getValue());
-            int y1 = -axisWidth / 2 - config.getTickMarkOutsideSize();
-            int y2 = axisWidth / 2 + config.getTickMarkInsideSize();
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.BOTTOM) {
-            int x = (int)scale(tick.getValue());
-            int y1 = axisWidth / 2 + config.getTickMarkOutsideSize();
-            int y2 = -axisWidth / 2 - config.getTickMarkInsideSize();
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.LEFT) {
-            int y = (int)scale(tick.getValue());
-            int x1 = -axisWidth / 2 - config.getTickMarkOutsideSize();
-            int x2 = axisWidth / 2 + config.getTickMarkInsideSize();
-            return new Line(x1, y, x2, y);
-        } else {// if orientation == AxisOrientation.RIGHT
-            int y = (int) scale(tick.getValue());
-            int x1 = axisWidth / 2 + config.getTickMarkOutsideSize();
-            int x2 = -axisWidth / 2 - config.getTickMarkInsideSize();
-            return new Line(x1, y, x2, y);
-        }
-    }
-
-    private Line minorTickToMarkLine(double minorTickValue) {
-        int axisWidth = config.getAxisLineStroke().getWidth();
-        if(orientation == AxisOrientation.TOP) {
-            int x = (int)scale(minorTickValue);
-            int y1 = -axisWidth / 2 - config.getMinorTickMarkOutsideSize();
-            int y2 = axisWidth / 2 + config.getMinorTickMarkInsideSize();
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.BOTTOM) {
-            int x = (int)scale(minorTickValue);
-            int y1 = axisWidth / 2 + config.getMinorTickMarkOutsideSize();
-            int y2 = -axisWidth / 2 - config.getMinorTickMarkInsideSize();
-            return new Line(x, y1, x, y2);
-        } else if(orientation == AxisOrientation.LEFT) {
-            int y = (int)scale(minorTickValue);
-            int x1 = -axisWidth / 2 - config.getMinorTickMarkOutsideSize();
-            int x2 = axisWidth / 2 + config.getMinorTickMarkInsideSize();
-            return new Line(x1, y, x2, y);
-        } else { // if orientation == AxisOrientation.RIGHT
-            int y = (int) scale(minorTickValue);
-            int x1 = axisWidth / 2 + config.getMinorTickMarkOutsideSize();
-            int x2 = -axisWidth / 2 - config.getMinorTickMarkInsideSize();
-            return new Line(x1, y, x2, y);
-        }
-    }
-
-
-    private Text tickToLabel(Tick tick, TextMetric tm) {
-        int axisWidth = config.getAxisLineStroke().getWidth();
-        int labelPadding = config.getLabelPadding();
-        int space = 2;// px
-        int charHalfWidth = tm.stringWidth("0")/2;
-        if(orientation == AxisOrientation.TOP) {
-            if(config.isLabelInside()) {
-                int x = (int)scale(tick.getValue()) + space;
-                int y = axisWidth / 2 + labelPadding;
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.END, tm);
-
-            } else {
-                int x = (int)scale(tick.getValue()) - charHalfWidth;
-                if(x < getStart()) {
-                    x = getStart() + space;
-                }
-                int y = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.START, tm);
-            }
-         } else if(orientation == AxisOrientation.BOTTOM) {
-            if(config.isLabelInside()) {
-                int x = (int)scale(tick.getValue()) + space;
-                int y = -axisWidth / 2 - labelPadding;
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.START, tm);
-
-            } else {
-                int x = (int)scale(tick.getValue()) - charHalfWidth;
-                if(x < getStart()) {
-                    x = getStart() + space;
-                }
-                int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.END, tm);
-            }
-        } else if(orientation == AxisOrientation.LEFT) {
-            if(config.isLabelInside()) {
-                int y = (int)scale(tick.getValue()) - space;
-                int x = axisWidth / 2 + labelPadding;
-                int labelHeight = tm.height();
-
-                if(y - labelHeight/2 - 1 < getEnd()) {
-                    y += labelPadding;
-                    return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.END, tm);
-                }
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.START, tm);
-
-            } else {
-                int y = (int)scale(tick.getValue());
-                int x = -axisWidth / 2 - config.getTickMarkInsideSize() - labelPadding;
-                int labelHeight = tm.height();
-                if(y + labelHeight/2 + 1 > getStart()) {
-                    y -= space;
-                    return new Text(tick.getLabel(), x, y, TextAnchor.END, TextAnchor.START, tm);
-                }
-                if(y - labelHeight/2 - 1 < getEnd()) {
-                    return new Text(tick.getLabel(), x, y, TextAnchor.END, TextAnchor.END, tm);
-                }
-                return new Text(tick.getLabel(), x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
-
-            }
-        } else { // if orientation == AxisOrientation.RIGHT
-            if (config.isLabelInside()) {
-                int y = (int) scale(tick.getValue()) - space;
-                int x = -axisWidth / 2 - labelPadding;
-                int labelHeight = tm.height();
-
-                if (y - labelHeight / 2 - 1 < getEnd()) {
-                    y += space;
-                    return new Text(tick.getLabel(), x, y, TextAnchor.END, TextAnchor.END, tm);
-                }
-                return new Text(tick.getLabel(), x, y, TextAnchor.END, TextAnchor.START, tm);
-
-            } else {
-                int y = (int) scale(tick.getValue());
-                int x = axisWidth / 2 + config.getTickMarkInsideSize() + labelPadding;
-                int labelHeight = tm.height();
-                if (y + labelHeight / 2 + 1 > getStart()) {
-                    y -= labelPadding;
-                    return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.START, tm);
-                }
-                if (y - labelHeight / 2 - 1 < getEnd()) {
-                    return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.END, tm);
-                }
-                return new Text(tick.getLabel(), x, y, TextAnchor.START, TextAnchor.MIDDLE, tm);
-
+            if (config.isTitleVisible() && title != null) {
+                TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
+                width += config.getTitlePadding() + tm.height();
             }
         }
+        return width;
     }
 
-    private int getTicksDivider(BCanvas canvas, List<Tick> ticks) {
-        if(ticks.size() < 2) {
-            return 1;
-        }
-        TextMetric tm = canvas.getTextMetric(config.getLabelTextStyle());
-        double labelsSize;
-        if(isHorizontal()) {
-            labelsSize = Math.max(tm.stringWidth(ticks.get(0).getLabel()), tm.stringWidth(ticks.get(ticks.size() - 1).getLabel()));
+    private boolean isTicksStepSpecified() {
+        return config.getTickInterval() > 0;
+    }
+
+    private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
+        int labelsGap = 2 * config.getTickLabelTextStyle().getSize(); // min gap between labels = 2 symbols size (roughly)
+        int labelSize = labelSizeForOverlap(tm, 0, label);
+
+        int requiredSpace = labelSize  + labelsGap;
+
+        // first and last labels are usually shifted to avoid its cutting on the edge
+        // so we need additional extra space
+        requiredSpace += labelSize / 2;
+        return requiredSpace;
+    }
+
+    private int roundingUncertaintyToTicksCount() {
+        // min number of ticks interval to have rounding within the desirable uncertainty
+        int minTicksIntervalsCount = (int)(1 / TICKS_ROUNDING_UNCERTAINTY) + 1;
+
+        // multiply by 2 because we can add 2 additional ticks on every axis side
+        // to get a number of ticks multiples of 2 or 3
+        minTicksIntervalsCount *= 2;
+
+        int ticksCount = minTicksIntervalsCount + 1;
+
+        // multiply by 2 because provider can give less number of ticks
+        ticksCount *= 2;
+
+        return ticksCount;
+    }
+
+    private void configTickProvider(TextMetric tm) {
+        int ticksCount;
+        if (isTicksStepSpecified()) {
+            tickProvider =  scale.getTickProviderByStep(config.getTickInterval(), config.getTickFormatInfo());
         } else {
-            labelsSize = tm.height();
+            int fontFactor = 4;
+            int tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
+            ticksCount = getLength() / tickPixelInterval;
+
+            // ensure that number of ticks is sufficient to get the specified rounding uncertainty
+            ticksCount = Math.max(ticksCount, roundingUncertaintyToTicksCount());
+
+            if(ticksCount < 2) {
+                ticksCount = 2;
+            }
+            tickProvider =  scale.getTickProviderByCount(ticksCount, config.getTickFormatInfo());
         }
 
-        double tickPixelInterval = Math.abs(scale(ticks.get(0).getValue()) - scale(ticks.get(1).getValue()));
-        // getMin space between labels = 1 symbols size (roughly)
-        double labelSpace = 2 * config.getLabelTextStyle().getSize();
-        double requiredSpace = labelsSize + labelSpace;
-        int ticksDivider = (int) (requiredSpace / tickPixelInterval) + 1;
-        return ticksDivider;
-    }
+        double min = getMin();
+        double max = getMax();
 
+        Tick tickMin = tickProvider.getLowerTick(min);
+        Tick tickMinNext = tickProvider.getNextTick();
+        Tick tickMax = tickProvider.getUpperTick(max);
 
-    /**
-     * Create ticks and minor ticks
-     */
-    private void createTicks(BCanvas canvas) {
-        ticks = getTicks(canvas);
-        if(config.isMinMaxRoundingEnable()) {
-            getScale().setDomain(ticks.get(0).getValue(), ticks.get(ticks.size() - 1).getValue());
-        }
+        // Calculate required space to avoid labels overlapping.
+        // Simplified algorithm assumes that the biggest tick size are on the axis edges
+        // (it is reasonable for all axis except the category one that at the moment not used)
+        String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
+        int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
+        double ticksPixelInterval =  Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
 
-        minorTicks = new ArrayList<Double>();
-        for (int i = 0; i < ticks.size() - 1; i++) {
-            double minorTickStep = (ticks.get(i+1).getValue() - ticks.get(i).getValue()) / config.getMinorGridCounter();
-            double minorTickValue =  ticks.get(i).getValue();
-            for (int j = 1; j < config.getMinorGridCounter(); j++) {
-                minorTickValue += minorTickStep;
-                if(minorTickValue >= getMin() && minorTickValue <=getMax()) {
-                    minorTicks.add(minorTickValue);
+        // Calculate how many ticks need to be skipped to avoid labels overlapping.
+        // When ticksSkipStep = n, only every n'th label on the axis will be shown.
+        // For example if ticksSkipStep = 2 every other label will be shown.
+        ticksSkipStep = 1;
+        if(ticksPixelInterval < requiredSpace) {
+            ticksSkipStep = (int) Math.round(requiredSpace / ticksPixelInterval);
+            // choose "nice" ticksSkipStep from available ones
+            for (int i = 0; i < TICKS_AVAILABLE_SKIP_STEPS.length; i++) {
+                if (ticksSkipStep <= TICKS_AVAILABLE_SKIP_STEPS[i]) {
+                    ticksSkipStep = TICKS_AVAILABLE_SKIP_STEPS[i];
+                    break;
                 }
             }
         }
 
-        if(ticks.get(0).getValue() < getMin()) {
-            ticks.remove(0);
+        // check if increased tick step will be ok for rounding with the specified uncertainty
+        boolean isIncreasedTickStepOk = false;
+        if(ticksSkipStep * ticksPixelInterval / getLength() < TICKS_ROUNDING_UNCERTAINTY){
+            isIncreasedTickStepOk = true;
         }
-        if(ticks.get(ticks.size() - 1).getValue() > getMax()) {
-            ticks.remove(ticks.size() - 1);
+
+        if(isTicksStepSpecified() || isIncreasedTickStepOk) {
+            this.tickProvider.increaseTickStep(ticksSkipStep);
+            ticksSkipStep = 1;
+        }
+
+        if(ticksSkipStep > 1) { // means precise ticks. We should skip all ticks except min, max and may be middle tick
+            tickMin = tickProvider.getUpperTick(min);
+            tickMax = tickProvider.getLowerTick(max);
+            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / ticksPixelInterval);
+
+            // check if there is space for 3 ticks
+            if(ticksSkipStep < tickIntervalCount / 2 && tickIntervalCount > 3  && ((tickIntervalCount / 2) * 2) * ticksPixelInterval > 3 * requiredSpace ) { // min, max and middle tick
+                ticksSkipStep = tickIntervalCount / 2;
+            } else { // only min and max ticks
+                ticksSkipStep = tickIntervalCount;
+            }
         }
     }
 
-    private List<Tick> getTicks(BCanvas canvas) {
+    public void roundMinMax(BCanvas canvas) {
+        TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
         if(tickProvider == null) {
-            tickProvider = getTickProvider();
+            configTickProvider(tm);
         }
-        ArrayList<Tick> allTicks = new ArrayList<Tick>();
-        int maxTicksAmount = 500; // if bigger it means that there is some error
 
-        Tick tick = tickProvider.getLowerTick(getMin());
-        for (int i = 0; i < maxTicksAmount; i++) {
-            if(tick.getValue() < getMax()) {
-                allTicks.add(tick);
-                tick = tickProvider.getNextTick();
+        double min = getMin();
+        double max = getMax();
+
+        Tick tickMin = tickProvider.getLowerTick(min);
+        Tick tickMinNext = tickProvider.getNextTick();
+        Tick tickMax = tickProvider.getUpperTick(max);
+
+        if (tickMin.getValue() == min && tickMax.getValue() == max) {
+            return;
+        }
+        if(ticksSkipStep > 1) {
+            // adjust ticksSkipStep for "precise" ticks
+            // (when only min, max and may be middle ticks are displayed)
+
+            double ticksPixelInterval =  Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
+            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / ticksPixelInterval);
+            if(ticksSkipStep < tickIntervalCount - 2) { // 3 ticks: min, max and middle
+                if(tickIntervalCount % 2 != 0) {
+                    tickIntervalCount++;
+                    tickMax = tickProvider.getNextTick();
+                }
+                ticksSkipStep = tickIntervalCount / 2;
             } else {
-                break;
+               ticksSkipStep = tickIntervalCount; // 2 ticks: only min and max
             }
-        }
-        allTicks.add(tick);
-        int tickDivider = getTicksDivider(canvas, allTicks);
-        int MIN_TICK_NUMBER1 = 2;
-        int MIN_TICK_NUMBER2 = 4;
-        double tickSpaceCount = (allTicks.size() - 1) / tickDivider;
-        if(config.isMinMaxRoundingEnable()) {
-            // если есть округление и тиков < MIN_TICK_NUMBER1 то оставляем только первый и последний
-            if (tickSpaceCount < MIN_TICK_NUMBER1) {
-                ArrayList<Tick> resultantTicks = new ArrayList<Tick>(2);
-                resultantTicks.add(allTicks.get(0));
-                resultantTicks.add(allTicks.get(allTicks.size() - 1));
-                scale.setDomain(resultantTicks.get(0).getValue(), resultantTicks.get(resultantTicks.size() - 1).getValue());
-                return resultantTicks;
-            }
-            // если есть округление и тиков < MIN_TICK_NUMBER2 то оставляем  первый, последний и средний
-            if (tickSpaceCount < MIN_TICK_NUMBER2 && tickSpaceCount >= MIN_TICK_NUMBER1) {
-                ArrayList<Tick> resultantTicks = new ArrayList<Tick>(3);
-                if ((allTicks.size() - 1) % 2 != 0) {
-                    tickProvider.getUpperTick(allTicks.get(allTicks.size() - 1).getValue());
-                    allTicks.add(tickProvider.getNextTick());
-                }
-                int middleTickNumber = (allTicks.size() - 1) / 2;
-                resultantTicks.add(allTicks.get(0));
-                resultantTicks.add(allTicks.get(middleTickNumber));
-                resultantTicks.add(allTicks.get(allTicks.size() - 1));
-                scale.setDomain(resultantTicks.get(0).getValue(), resultantTicks.get(resultantTicks.size() - 1).getValue());
-                return resultantTicks;
-            }
-            ArrayList<Tick> resultantTicks = new ArrayList<Tick>();
-            // если есть округление и тиков >= MIN_TICK_NUMBER2 оставляем только тики через tickDivider
-            for (int i = 0; i < allTicks.size(); i++) {
-                if (i % tickDivider == 0) {
-                    resultantTicks.add(allTicks.get(i));
-                }
-            }
-            tickProvider.getLowerTick(getMax());
-            if ((allTicks.size() - 1) % tickDivider > 0) {
-                for (int i = 0; i <= tickDivider - (allTicks.size() - 1) % tickDivider; i++) {
-                    tick = tickProvider.getNextTick();
-                }
-                resultantTicks.add(tick);
-            }
-            return resultantTicks;
         }
 
-        // если нет округления то  увеличиваем  tick step в tickDivider раз
-        ArrayList<Tick> resultantTicks = new ArrayList<Tick>();
-        tickProvider.increaseTickStep(tickDivider);
-        resultantTicks = new ArrayList<Tick>();
-
-        tick = tickProvider.getLowerTick(getMin());
-        for (int i = 0; i < maxTicksAmount; i++) {
-            if(tick.getValue() < getMax()) {
-                resultantTicks.add(tick);
-                tick = tickProvider.getNextTick();
-            } else {
-                break;
-            }
-        }
-        resultantTicks.add(tick);
-        return resultantTicks;
+        scale.setDomain(tickMin.getValue(), tickMax.getValue());
     }
+
 
     private void createAxisElements(BCanvas canvas) {
-        if(ticks == null) {
-            createTicks(canvas);
+        TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+        if(tickProvider == null) {
+            configTickProvider(tm);
         }
-        // tick lines
-        tickLines = new ArrayList<Line>();
-        if(config.isTicksVisible()) {
-            for (Tick tick : ticks) {
-                tickLines.add(tickToMarkLine(tick));
+
+        tickPositions.clear();
+        minorTickPositions.clear();
+        tickLabels.clear();
+
+        double min = getMin();
+        double max = getMax();
+
+        Tick currentTick = tickProvider.getUpperTick(min);
+        Tick nextTick = null;
+
+        int minorTickIntervalCount = config.getMinorTickIntervalCount();
+
+        while (currentTick.getValue() <= max) {
+            // tick position
+            tickPositions.add((int)scale(currentTick.getValue()));
+
+            // tick label
+            if(config.isTickLabelsVisible()) {
+                tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
+            }
+
+            for (int i = 0; i < ticksSkipStep; i++) {
+               nextTick = tickProvider.getNextTick();
+            }
+
+            if(config.isMinorGridVisible() || config.isMinorGridVisible()) {
+                // minor tick positions
+                double minorTickInterval = (nextTick.getValue() - currentTick.getValue()) / minorTickIntervalCount;
+                double minorTickValue = currentTick.getValue();
+                for (int i = 1; i < minorTickIntervalCount; i++) {
+                    minorTickValue += minorTickInterval;
+                    if(minorTickValue <= max) {
+                        minorTickPositions.add((int)scale(minorTickValue));
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            if (tickPositions.size() > MAX_TICKS_COUNT) {
+                String errMsg = MessageFormat.format(TOO_MANY_TICKS_MSG, tickPositions.size(), MAX_TICKS_COUNT);
+                throw new RuntimeException(errMsg);
+            }
+            currentTick = nextTick;
+        }
+
+        if(config.isMinorGridVisible() || config.isMinorGridVisible()) {
+            // add minor ticks that are located between minorTick and min
+            currentTick = tickProvider.getUpperTick(min);
+            Tick previousTick = null;
+            for (int i = 0; i < ticksSkipStep; i++) {
+                previousTick = tickProvider.getPreviousTick();
+            }
+            double minorTickInterval = (currentTick.getValue() - previousTick.getValue()) / minorTickIntervalCount;
+            double minorTickValue = currentTick.getValue();
+            IntArrayList positions = new IntArrayList();
+            for (int i = 1; i < minorTickIntervalCount; i++) {
+                minorTickValue -= minorTickInterval;
+                if(minorTickValue >= min) {
+                    positions.add((int)scale(minorTickValue));
+                } else {
+                    break;
+                }
+            }
+            if(positions.size() > 0) {
+                // additionalPositions need to be reversed
+                int[] minorTickAdditionalPositions = new int[(int)positions.size()];
+                for (int i = 0; i < positions.size(); i++) {
+                    minorTickAdditionalPositions[i] = positions.get(positions.size() - 1 - i);
+                }
+                minorTickPositions.add(0, minorTickAdditionalPositions);
             }
         }
-        // minor tick lines
-        minorTickLines = new ArrayList<Line>();
-        if(config.isMinorTicksVisible()) {
-            for (Double minorTick : minorTicks) {
-                minorTickLines.add(minorTickToMarkLine(minorTick));
-            }
+
+        // title
+        if(config.isTitleVisible()) {
+            titleText = createTitle(canvas);
         }
 
-        // tick labels
-        TextMetric tm = canvas.getTextMetric(config.getLabelTextStyle());
-        tickLabels = new ArrayList<Text>();
-        if(config.isLabelsVisible()) {
-            for (Tick tick : ticks) {
-                tickLabels.add(tickToLabel(tick, tm));
-            }
-        }
-
-        // axis line
-        if (isHorizontal()) {
-            axisLine = new Line(getStart(), 0, getEnd(), 0);
-        } else {
-            axisLine = new Line(0, getStart(), 0, getEnd());
-        }
+        isDirty = false;
     }
 
-    private void createTitle(BCanvas canvas, int AxisThickness) {
-        TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
-        if(orientation == AxisOrientation.TOP) {
-            int y = - AxisThickness + tm.height();
-            int x = (getEnd() + getStart()) / 2;
-            titleText = new Text(title, x, y, TextAnchor.MIDDLE, TextAnchor.START, tm);
-        } else if(orientation == AxisOrientation.BOTTOM) {
-            int y = AxisThickness - tm.height() / 2;
-            int x = (getEnd() + getStart()) / 2;
-            titleText = new Text(title, x, y, TextAnchor.MIDDLE, TextAnchor.MIDDLE, tm);
-        } else if(orientation == AxisOrientation.LEFT) {
-            int x = -AxisThickness;
-            int y = (getEnd() + getStart()) / 2;
-            titleText = new Text(title, x, y, TextAnchor.END, TextAnchor.MIDDLE, -90, tm);
-        } else { // if orientation == AxisOrientation.RIGHT
-            int x = AxisThickness;
-            int y = (getEnd() + getStart()) / 2;
-            titleText = new Text(title, x, y, TextAnchor.END, TextAnchor.MIDDLE, +90, tm);
-        }
-    }
-
-    private int getMaxTickLabelsWidth(TextMetric tm, List<Tick> ticks) {
-        int maxSize = 0;
-        for (Tick tick : ticks) {
-            maxSize = Math.max(maxSize, tm.stringWidth(tick.getLabel()));
-        }
-        return maxSize;
-    }
 
     public void drawGrid(BCanvas canvas, int axisOriginPoint, int length) {
         canvas.save();
         if(!config.isVisible()) {
             return;
         }
-        if(ticks == null) {
+        if(isDirty) {
             createAxisElements(canvas);
         }
-        if(isHorizontal()) {
-            canvas.translate(0, axisOriginPoint);
-        } else {
-            canvas.translate(axisOriginPoint, 0);
-        }
 
-        canvas.setColor(config.getMinorGridColor());
-        canvas.setStroke(config.getMinorGridLineStroke());
-        if(config.isMinorGridVisible()) {
-            for (double minorTick : minorTicks) {
-                Line mGridLine = tickToGridLine(minorTick, length);
-                canvas.drawLine(mGridLine.getX1(), mGridLine.getY1(), mGridLine.getX2(), mGridLine.getY2());
+        translateCanvas(canvas, axisOriginPoint);
+
+        if(config.isGridVisible()) {
+            canvas.setColor(config.getStyle().getGridColor());
+            canvas.setStroke(config.getStyle().getGridLineStroke());
+            for (int i = 0; i < tickPositions.size(); i++) {
+               drawGridLine(canvas, tickPositions.get(i), length);
             }
         }
 
-        canvas.setColor(config.getGridColor());
-        canvas.setStroke(config.getGridLineStroke());
-        if(config.isGridVisible()) {
-            for (Tick tick : ticks) {
-                Line gridLine = tickToGridLine(tick.getValue(), length);
-                canvas.drawLine(gridLine.getX1(), gridLine.getY1(), gridLine.getX2(), gridLine.getY2());
+        if(config.isMinorGridVisible()) {
+            canvas.setColor(config.getStyle().getMinorGridColor());
+            canvas.setStroke(config.getStyle().getMinorGridLineStroke());
+            for (int i = 0; i < minorTickPositions.size(); i++) {
+                drawGridLine(canvas, minorTickPositions.get(i), length);
             }
         }
         canvas.restore();
     }
 
-    public void drawAxis(BCanvas canvas,  int axisOriginPoint, int AxisThickness) {
+    public void drawAxis(BCanvas canvas,  int axisOriginPoint) {
         canvas.save();
-         if(!config.isVisible()) {
+        if(!config.isVisible()) {
             return;
         }
-        if(ticks == null) {
+        if(isDirty) {
             createAxisElements(canvas);
         }
-        if(titleText == null) {
-             createTitle(canvas, AxisThickness);
+        translateCanvas(canvas, axisOriginPoint);
+
+        if(config.isTicksVisible()) {
+            canvas.setColor(config.getStyle().getTickColor());
+            canvas.setStroke(new BStroke(config.getStyle().getTickMarkWidth()));
+            for (int i = 0; i < tickPositions.size(); i++) {
+                drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
+            }
         }
-        if(isHorizontal()) {
-            canvas.translate(0, axisOriginPoint);
-        } else {
-            canvas.translate(axisOriginPoint, 0);
+
+        if(config.isMinorGridVisible()) {
+            canvas.setColor(config.getStyle().getMinorTickColor());
+            canvas.setStroke(new BStroke(config.getStyle().getMinorTickMarkWidth()));
+            for (int i = 0; i < minorTickPositions.size(); i++) {
+                drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
+            }
         }
-        canvas.setColor(config.getTicksColor());
-        canvas.setStroke(new BStroke(config.getTickMarkWidth()));
-        for (Line tickLine : tickLines) {
-            canvas.drawLine(tickLine.getX1(), tickLine.getY1(), tickLine.getX2(), tickLine.getY2());
-        }
-        canvas.setStroke(new BStroke(config.getMinorTickMarkWidth()));
-        for (Line minorTickLine : minorTickLines) {
-            canvas.drawLine(minorTickLine.getX1(), minorTickLine.getY1(), minorTickLine.getX2(), minorTickLine.getY2());
+
+        if(config.isTickLabelsVisible()) {
+            canvas.setStroke(new BStroke(1));
+            // canvas.setColor(config.getLabelsColor());
+            canvas.setTextStyle(config.getTickLabelTextStyle());
+            for (Text tickLabel : tickLabels) {
+                tickLabel.draw(canvas);
+            }
         }
 
         if(config.isAxisLineVisible()) {
-            canvas.setColor(config.getColor());
-            canvas.setStroke(config.getAxisLineStroke());
-            canvas.drawLine(axisLine.getX1(), axisLine.getY1(), axisLine.getX2(), axisLine.getY2());
+            canvas.setColor(config.getStyle().getAxisLineColor());
+            canvas.setStroke(config.getStyle().getAxisLineStroke());
+            drawAxisLine(canvas);
         }
 
-        canvas.setStroke(new BStroke(1));
-        canvas.setColor(config.getLabelsColor());
-        canvas.setTextStyle(config.getLabelTextStyle());
-        for (Text tickLabel : tickLabels) {
-            tickLabel.draw(canvas);
-        }
-
-        if(titleText != null) {
-            canvas.setColor(config.getTitleColor());
+        if(config.isTitleVisible()) {
+            //canvas.setColor(config.getTitleColor());
             canvas.setTextStyle(config.getTitleTextStyle());
             titleText.draw(canvas);
         }
         canvas.restore();
     }
 
-}
+    protected abstract void translateCanvas(BCanvas canvas, int axisOriginPoint);
 
+    protected abstract int labelSizeForWidth(TextMetric tm, int angle, String label);
+
+    protected abstract int labelSizeForOverlap(TextMetric tm, int angle, String label);
+
+    protected abstract Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel);
+
+    protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
+
+    protected abstract void drawGridLine(BCanvas canvas, int tickPosition, int length);
+
+    protected abstract void drawAxisLine(BCanvas canvas);
+
+    protected abstract Text createTitle(BCanvas canvas);
+
+}

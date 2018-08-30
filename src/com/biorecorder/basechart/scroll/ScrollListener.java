@@ -1,4 +1,4 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.scroll;
 
 /**
  * Created by galafit on 16/11/17.

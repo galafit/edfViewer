@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
-import com.biorecorder.basechart.config.LegendConfig;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 

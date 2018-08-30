@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.DataProcessingConfig;
 import com.biorecorder.basechart.data.SubRange;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.data.GroupedDataSeries;

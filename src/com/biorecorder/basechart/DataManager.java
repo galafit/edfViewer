@@ -1,7 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.config.DataProcessingConfig;
-import com.biorecorder.basechart.data.Data;
 import com.biorecorder.basechart.data.DataSeries;
 
 import java.util.ArrayList;

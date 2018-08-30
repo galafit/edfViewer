@@ -1,12 +1,9 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.axis.Axis;
+import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
-import com.biorecorder.basechart.axis.AxisConfig;
-import com.biorecorder.basechart.axis.AxisOrientation;
-import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
@@ -19,7 +16,7 @@ import java.util.List;
 /**
  * Created by hdablin on 24.03.17.
  */
-public class Chart {
+public class BaseChart {
     private static final int DEFAULT_WEIGHT = 10;
 
     private BColor[] defaultTraceColors = {BColor.MAGENTA, BColor.BLUE};
@@ -80,11 +77,16 @@ public class Chart {
     private BtnGroup buttonGroup = new BtnGroup();
 
 
-    public Chart() {
+    public BaseChart() {
         dataManager = new DataManager(chartConfig.getDataProcessingConfig());
 
-        xAxisList.add(new Axis(AxisOrientation.BOTTOM, new LinearScale()));
-        xAxisList.add(new Axis(AxisOrientation.TOP, new LinearScale()));
+        xAxisList.add(new AxisBottom(new LinearScale()));
+        xAxisList.add(new AxisTop(new LinearScale()));
+        if(isBottomAxisPrimary) {
+            xAxisList.get(0).setGridVisible(true);
+        } else {
+            xAxisList.get(1).setGridVisible(true);
+        }
 
         // title
         title = new Title(chartConfig.getTitle(), chartConfig.getTitleTextStyle(), chartConfig.getTitleColor());
@@ -264,6 +266,7 @@ public class Chart {
 
     Margin getMargin(BCanvas canvas) {
         if (margin == null) {
+            System.out.println("margins get");
             calculateMarginsAndAreas(canvas, chartConfig.getMargin());
         }
         return margin;
@@ -271,12 +274,14 @@ public class Chart {
 
     BRectangle getGraphArea(BCanvas canvas) {
         if (graphArea == null) {
+            System.out.println("margins get graph area");
             calculateMarginsAndAreas(canvas, chartConfig.getMargin());
         }
         return graphArea;
     }
 
     void setMargin(BCanvas canvas, Margin margin) {
+        System.out.println("margins set");
         calculateMarginsAndAreas(canvas, margin);
     }
 
@@ -286,6 +291,11 @@ public class Chart {
 
 
     void calculateMarginsAndAreas(BCanvas canvas, Margin margin) {
+        if(dataDirty) {
+            initiateAxisAndTraces();
+            dataDirty = false;
+        }
+
         int titleHeight = title.getTitleHeight(canvas, fullArea.width);
         titleArea = new BRectangle(fullArea.x, fullArea.y, fullArea.width, titleHeight);
         chartArea = new BRectangle(fullArea.x, fullArea.y + titleHeight, fullArea.width, fullArea.height - titleHeight);
@@ -306,11 +316,11 @@ public class Chart {
         xAxisList.get(0).setStartEnd(xStart, xEnd);
         xAxisList.get(1).setStartEnd(xStart, xEnd);
         if (top < 0) {
-            top = titleHeight + xAxisList.get(1).getThickness(canvas);
+            top = titleHeight + xAxisList.get(1).getWidth(canvas);
 
         }
         if (bottom < 0) {
-            bottom = xAxisList.get(0).getThickness(canvas);
+            bottom = xAxisList.get(0).getWidth(canvas);
         }
 
         // set YAxis ranges
@@ -321,12 +331,12 @@ public class Chart {
         }
         if (left < 0) {
             for (int i = 0; i < yAxisList.size() / 2; i++) {
-                left = Math.max(left, yAxisList.get(i * 2).getThickness(canvas));
+                left = Math.max(left, yAxisList.get(i * 2).getWidth(canvas));
             }
         }
         if (right < 0) {
             for (int i = 0; i < yAxisList.size() / 2; i++) {
-                right = Math.max(right, yAxisList.get(i * 2 + 1).getThickness(canvas));
+                right = Math.max(right, yAxisList.get(i * 2 + 1).getWidth(canvas));
             }
         }
 
@@ -346,6 +356,17 @@ public class Chart {
         xEnd = graphArea.x + graphArea.width;
         xAxisList.get(0).setStartEnd(xStart, xEnd);
         xAxisList.get(1).setStartEnd(xStart, xEnd);
+
+        for (Axis axis : xAxisList) {
+            if(axis.getConfig().isMinMaxRoundingEnabled() && axis.getConfig().isVisible()) {
+                axis.roundMinMax(canvas);
+            }
+        }
+        for (Axis axis : yAxisList) {
+            if(axis.getConfig().isMinMaxRoundingEnabled() && axis.getConfig().isVisible()) {
+                axis.roundMinMax(canvas);
+            }
+        }
         areasDirty = false;
     }
 
@@ -403,11 +424,8 @@ public class Chart {
 
 
     public void draw(BCanvas canvas) {
-        if(traces.size() > 0 && dataDirty) {
-            initiateAxisAndTraces();
-            dataDirty = false;
-        }
         if (areasDirty) {
+            System.out.println("calculate areas");
             calculateMarginsAndAreas(canvas, chartConfig.getMargin());
         }
 
@@ -435,13 +453,13 @@ public class Chart {
         }
 
         for (int i = 0; i < xAxisList.size() / 2; i++) {
-            xAxisList.get(i * 2).drawAxis(canvas, bottomPosition, margin.bottom());
-            xAxisList.get(i * 2 + 1).drawAxis(canvas, topPosition, margin.top() - titleArea.height);
+            xAxisList.get(i * 2).drawAxis(canvas, bottomPosition);
+            xAxisList.get(i * 2 + 1).drawAxis(canvas, topPosition);
         }
 
         for (int i = 0; i < yAxisList.size() / 2; i++) {
-            yAxisList.get(i * 2).drawAxis(canvas, leftPosition, margin.left());
-            yAxisList.get(i * 2 + 1).drawAxis(canvas, rightPosition, margin.right());
+            yAxisList.get(i * 2).drawAxis(canvas, leftPosition);
+            yAxisList.get(i * 2 + 1).drawAxis(canvas, rightPosition);
         }
 
         canvas.save();
@@ -497,14 +515,14 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        Axis leftYAxis = new Axis(AxisOrientation.LEFT, new LinearScale());
-        Axis rightYAxis = new Axis(AxisOrientation.RIGHT, new LinearScale());
+        Axis leftYAxis = new AxisLeft(new LinearScale());
+        Axis rightYAxis = new AxisRight(new LinearScale());
         leftYAxis.setConfig(yAxisDefaultConfig);
         rightYAxis.setConfig(yAxisDefaultConfig);
         if(isLeftAxisPrimary) {
-            leftYAxis.getConfig().setGridLineStroke(new BStroke(1));
+            leftYAxis.setGridVisible(true);
         } else {
-            rightYAxis.getConfig().setGridLineStroke(new BStroke(1));
+            rightYAxis.setGridVisible(true);
         }
         yAxisList.add(leftYAxis);
         yAxisList.add(rightYAxis);
@@ -544,11 +562,11 @@ public class Chart {
             isLeftYAxis = false;
         }
         int xAxisIndex = isBottomXAxis ? 0 : 1;
-        int yAxisIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 - 1;
+        int yAxisIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 + 1;
         trace.setXAxisIndex(xAxisIndex);
         trace.setYAxisIndex(yAxisIndex);
-        yAxisList.get(yAxisIndex).getConfig().setVisible(true);
-        xAxisList.get(xAxisIndex).getConfig().setVisible(true);
+        yAxisList.get(yAxisIndex).setVisible(true);
+        xAxisList.get(xAxisIndex).setVisible(true);
 
         if(trace.getName() == null) {
             trace.setName("Trace " + traces.size());
@@ -662,6 +680,7 @@ public class Chart {
     public void setXMinMax(int xAxisIndex, double min, double max) {
         xAxisList.get(xAxisIndex).setMinMax(min, max);
         updateTraceData(xAxisIndex);
+        areasDirty = true;
     }
 
     public Range getXMinMax(int xAxisIndex) {
@@ -674,7 +693,6 @@ public class Chart {
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
         yAxisList.get(yAxisIndex).setMinMax(min, max);
-        margin = null;
         areasDirty = true;
     }
 
@@ -733,24 +751,32 @@ public class Chart {
     }
 
 
-    public void zoomY(int yAxisIndex, float zoomFactor) {
-        Range newAxisRange = yAxisList.get(yAxisIndex).zoom(zoomFactor);
-        yAxisList.get(yAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
+    public void zoomY(int yAxisIndex, double zoomFactor) {
+        Scale zoomedScale = yAxisList.get(yAxisIndex).zoom(zoomFactor);
+        double zoomedMin = zoomedScale.getDomain()[0];
+        double zoomedMax = zoomedScale.getDomain()[zoomedScale.getDomain().length - 1];
+        setYMinMax(yAxisIndex, zoomedMin, zoomedMax);
     }
 
-    public void zoomX(int xAxisIndex, float zoomFactor) {
-        Range newAxisRange = xAxisList.get(xAxisIndex).zoom(zoomFactor);
-        xAxisList.get(xAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
+    public void zoomX(int xAxisIndex, double zoomFactor) {
+        Scale zoomedScale =  xAxisList.get(xAxisIndex).zoom(zoomFactor);
+        double zoomedMin = zoomedScale.getDomain()[0];
+        double zoomedMax = zoomedScale.getDomain()[zoomedScale.getDomain().length - 1];
+        setXMinMax(xAxisIndex, zoomedMin, zoomedMax);
     }
 
     public void translateY(int yAxisIndex, int translation) {
-        Range newAxisRange =  yAxisList.get(yAxisIndex).translate(translation);
-        yAxisList.get(yAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
+        Scale translatedScale =  yAxisList.get(yAxisIndex).translate(translation);
+        double translatedMin = translatedScale.getDomain()[0];
+        double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
+        setYMinMax(yAxisIndex, translatedMin, translatedMax);
     }
 
     public void translateX(int xAxisIndex, int translation) {
-        Range newAxisRange = xAxisList.get(xAxisIndex).translate(translation);
-        xAxisList.get(xAxisIndex).setMinMax(newAxisRange.getMin(), newAxisRange.getMax());
+        Scale translatedScale = xAxisList.get(xAxisIndex).translate(translation);
+        double translatedMin = translatedScale.getDomain()[0];
+        double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
+        setXMinMax(xAxisIndex, translatedMin, translatedMax);
     }
 
     public void autoScaleX(int xAxisIndex) {

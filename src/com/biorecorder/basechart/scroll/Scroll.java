@@ -1,6 +1,7 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.scroll;
 
-import com.biorecorder.basechart.config.ScrollConfig;
+import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.ScrollConfig;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
@@ -65,14 +66,14 @@ public class Scroll {
         return extent;
     }
 
-    public float getPosition() {
+    public double getPosition() {
         return scale.scale(value);
     }
 
     /**
      * @return true if value was changed and false if newValue = current scroll value
      */
-    public boolean setPosition(float x) {
+    public boolean setPosition(double x) {
         double value = scale.invert(x);
         return setValue(value);
     }
@@ -81,9 +82,9 @@ public class Scroll {
         return value;
     }
 
-    public float getWidth() {
-        float scrollStart = scale.scale(value);
-        float scrollEnd = scale.scale(value + extent);
+    public double getWidth() {
+        double scrollStart = scale.scale(value);
+        double scrollEnd = scale.scale(value + extent);
         return scrollEnd - scrollStart;
     }
 
@@ -110,11 +111,11 @@ public class Scroll {
         return scale.getDomain()[scale.getDomain().length - 1];
     }
 
-    private float getStart() {
+    private double getStart() {
         return scale.getRange()[0];
     }
 
-    private float getEnd() {
+    private double getEnd() {
         return scale.getRange()[scale.getRange().length - 1];
     }
 

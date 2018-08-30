@@ -1,11 +1,8 @@
 package com.biorecorder.basechart.swing;
 
 import com.biorecorder.basechart.ScrollableChart;
-import com.biorecorder.basechart.config.ChartConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.swing.SwingCanvas;
-import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
 
 import javax.swing.*;
 import java.awt.*;

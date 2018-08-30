@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.config.traces;
+package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BStroke;

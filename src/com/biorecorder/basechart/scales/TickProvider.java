@@ -9,5 +9,4 @@ public interface TickProvider {
     public Tick getNextTick();
     public Tick getPreviousTick();
     public void increaseTickStep(int increaseFactor);
-    public TickProvider copy();
 }

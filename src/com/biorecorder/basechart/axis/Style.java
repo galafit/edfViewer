@@ -7,13 +7,15 @@ import com.biorecorder.basechart.graphics.BStroke;
  * This class group properties that usually are changed by css styles
  */
 public class Style {
-    private BColor color =  BColor.GRAY; // BColor.GRAY;
+    private BColor lineColor =  BColor.GRAY;
+    private BColor tickColor = BColor.GRAY;
+    private BColor minorTickColor = BColor.GRAY;
     private BColor gridColor = BColor.LIGHT_GRAY; //BColor(100, 100, 100);
-    private BColor minorGridColor = BColor.LIGHT_GRAY;//new BColor(80, 80, 80);
+    private BColor minorGridColor = BColor.LIGHT_GRAY; //new BColor(80, 80, 80);
 
     private BStroke axisLineStroke = new BStroke(1);
     private BStroke gridLineStroke = new BStroke(1);
-    private BStroke minorGridLineStroke = new BStroke(0); //new BStroke(1, BStroke.DOT);
+    private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
 
     private int tickMarkWidth = 1; // px
     private int minorTickMarkWidth = 0; // px
@@ -22,7 +24,9 @@ public class Style {
     }
 
     public Style(Style style) {
-        color = style.color;
+        lineColor = style.lineColor;
+        tickColor = style.tickColor;
+        minorTickColor = style.minorTickColor;
         gridColor = style.gridColor;
         minorGridColor = style.minorGridColor;
 
@@ -34,21 +38,41 @@ public class Style {
         minorTickMarkWidth = style.minorTickMarkWidth;
     }
 
+    public void setLineColor(BColor lineColor) {
+        this.lineColor = lineColor;
+    }
 
-    public void setColors(BColor color, BColor gridColor, BColor minorGridColor) {
-        this.color = color;
+    public void setTickColor(BColor tickColor) {
+        this.tickColor = tickColor;
+    }
+
+    public void setMinorTickColor(BColor minorTickColor) {
+        this.minorTickColor = minorTickColor;
+    }
+
+    public void setGridColor(BColor gridColor) {
         this.gridColor = gridColor;
+    }
+
+    public void setMinorGridColor(BColor minorGridColor) {
         this.minorGridColor = minorGridColor;
     }
 
-    public BColor getColor() {
-        return color;
+    public BColor getTickColor() {
+        return tickColor;
+    }
+
+    public BColor getMinorTickColor() {
+        return minorTickColor;
+    }
+
+    public BColor getAxisLineColor() {
+        return lineColor;
     }
 
     public BColor getGridColor() {
         return gridColor;
     }
-
 
     public BColor getMinorGridColor() {
         return minorGridColor;

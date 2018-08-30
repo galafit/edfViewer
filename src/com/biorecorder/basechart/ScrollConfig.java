@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.config;
+package com.biorecorder.basechart;
 
 
 import com.biorecorder.basechart.graphics.BColor;

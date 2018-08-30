@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.config.traces.BooleanTraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
@@ -69,7 +68,7 @@ public class BooleanTrace extends Trace {
 
     @Override
     public void draw(BCanvas canvas, Scale xScale, Scale yScale) {
-        float[] yRange = yScale.getRange();
+        double[] yRange = yScale.getRange();
         int yStart = (int)yRange[0];
         int yEnd = (int) yRange[yRange.length - 1];
         if (xyData == null || xyData.size() == 0) {

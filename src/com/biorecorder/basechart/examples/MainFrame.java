@@ -2,8 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.ScrollableChart;
 import com.biorecorder.basechart.swing.ChartPanel;
-import com.biorecorder.basechart.config.ChartConfig;
-import com.biorecorder.basechart.config.traces.LineTraceConfig;
+import com.biorecorder.basechart.traces.LineTraceConfig;
 import com.biorecorder.basechart.lists.IntArrayList;
 import com.biorecorder.basechart.data.XYData;
 import com.biorecorder.basechart.traces.LineTrace;
@@ -39,8 +38,9 @@ public class MainFrame extends JFrame {
         }
 
         for (int i = 0; i < 16000; i++) {
-            yData2.add(i + 1000);
+            yData2.add(i + 100);
         }
+
         for (int i = 0; i < 16000; i++) {
             xData.add(i);
         }
@@ -66,7 +66,7 @@ public class MainFrame extends JFrame {
         xyData1.setYData(yData1);
 
         XYData xyData2 = new XYData();
-        xyData2.setYData(yData1);
+        xyData2.setYData(yData2);
         xyData2.setXData(xData);
 
       /*  XYData xyData3 = new XYData();

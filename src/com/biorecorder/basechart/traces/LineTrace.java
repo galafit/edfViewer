@@ -2,7 +2,6 @@ package com.biorecorder.basechart.traces;
 
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.config.traces.LineTraceConfig;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
@@ -105,8 +104,8 @@ public class LineTrace extends Trace {
         if(path != null && traceConfig.isFilled()) {
             int x_0 = (int) xScale.scale(xyData.getX(0));
             int x_last = (int) xScale.scale(xyData.getX(xyData.size() - 1));
-            path.lineTo(x_last, yScale.getRange()[0]);
-            path.lineTo(x_0, yScale.getRange()[0]);
+            path.lineTo(x_last, (int)yScale.getRange()[0]);
+            path.lineTo(x_0, (int)yScale.getRange()[0]);
             path.close();
             canvas.setColor(getFillColor());
             canvas.fillPath(path);
@@ -114,7 +113,7 @@ public class LineTrace extends Trace {
     }
 
     private BPath drawLinearPath(BCanvas canvas, Scale xScale, Scale yScale) {
-        BPath path = new BPath();
+        BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);
@@ -134,7 +133,7 @@ public class LineTrace extends Trace {
     }
 
     private BPath drawStepPath(BCanvas canvas, Scale xScale, Scale yScale) {
-        BPath path = new BPath();
+        BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);

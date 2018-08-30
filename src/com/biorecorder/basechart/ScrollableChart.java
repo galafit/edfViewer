@@ -1,12 +1,11 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
-import com.biorecorder.basechart.config.ScrollConfig;
-import com.biorecorder.basechart.config.ChartConfig;
-import com.biorecorder.basechart.config.Theme;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.scroll.Scroll;
+import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.traces.Trace;
 
 import java.util.*;
@@ -16,15 +15,15 @@ import java.util.*;
  * Created by galafit on 3/10/17.
  */
 public class ScrollableChart {
-    private Chart chart;
-    private Chart preview;
+    private BaseChart chart;
+    private BaseChart preview;
     private BRectangle fullArea;
     private BRectangle chartArea;
     private BRectangle previewArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
 
-    private int gap; // between Chart and Preview px
+    private int gap; // between BaseChart and Preview px
     private Margin margin;
     private ScrollConfig scrollConfig = new ScrollConfig();
 
@@ -32,25 +31,23 @@ public class ScrollableChart {
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
 
     public ScrollableChart(boolean isPreviewEnabled) {
-        chart = new Chart();
+        chart = new BaseChart();
         AxisConfig defaultYAxisConfig = chart.getYAxisDefaultConfig();
-        defaultYAxisConfig.setTickLabelInside(true);
-        defaultYAxisConfig.setTickMarkInsideSize(3);
-        defaultYAxisConfig.setTickMarkOutsideSize(0);
+        defaultYAxisConfig.setTickLabelInside(false);
+        defaultYAxisConfig.setTickMarkSize(3, 0);
         defaultYAxisConfig.setMinMaxRoundingEnabled(true);
 
         if (isPreviewEnabled) {
-            preview = new Chart();
+            preview = new BaseChart();
             preview.setTracesNaturalDrawingEnabled(false);
             chart.setTracesNaturalDrawingEnabled(true);
 
             defaultYAxisConfig = preview.getYAxisDefaultConfig();
             defaultYAxisConfig.setMinMaxRoundingEnabled(true);
-            defaultYAxisConfig.setTickLabelInside(true);
-            defaultYAxisConfig.setTickMarkInsideSize(3);
-            defaultYAxisConfig.setTickMarkOutsideSize(0);
+            defaultYAxisConfig.setTickLabelInside(false);
+            defaultYAxisConfig.setTickMarkSize(3, 0);
         }
-        setColorTheme(Theme.DARK);
+        setColorTheme(Theme.WHITE);
     }
 
     private void createScrolls() {
@@ -127,7 +124,7 @@ public class ScrollableChart {
 
     public void draw(BCanvas canvas) {
         if (preview != null) {
-            Margin chartMargin = chart.getMargin(canvas);
+         /*   Margin chartMargin = chart.getMargin(canvas);
             Margin previewMargin = preview.getMargin(canvas);
             if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
                 int left = Math.max(chartMargin.left(), previewMargin.left());
@@ -136,7 +133,7 @@ public class ScrollableChart {
                 previewMargin = new Margin(previewMargin.top(), right, previewMargin.bottom(), left);
                 chart.setMargin(canvas, chartMargin);
                 preview.setMargin(canvas, previewMargin);
-            }
+            }*/
 
         }
         chart.draw(canvas);
@@ -230,9 +227,9 @@ public class ScrollableChart {
         }
 
         for (AxisConfig axisConfig : axisConfigs) {
-            axisConfig.setColor(theme.getAxisColor());
-            axisConfig.setGridColor(theme.getGridColor());
-            axisConfig.setMinorGridColor(theme.getGridColor());
+            axisConfig.getStyle().setLineColor(theme.getAxisColor());
+            axisConfig.getStyle().setGridColor(theme.getGridColor());
+            axisConfig.getStyle().setMinorGridColor(theme.getGridColor());
         }
 
         chart.setDefaultTraceColors(theme.getTraceColors());
@@ -336,11 +333,11 @@ public class ScrollableChart {
         return chart.yAxisCount();
     }
 
-    public void zoomChartY(int yAxisIndex, float zoomFactor) {
+    public void zoomChartY(int yAxisIndex, double zoomFactor) {
         chart.zoomY(yAxisIndex, zoomFactor);
     }
 
-    public void zoomChartX(int xAxisIndex, float zoomFactor) {
+    public void zoomChartX(int xAxisIndex, double zoomFactor) {
         chart.zoomX(xAxisIndex, zoomFactor);
         if (preview != null) {
             if (chart.getXMinMax(xAxisIndex).length() > preview.getXMinMax(0).length()) {
@@ -361,7 +358,7 @@ public class ScrollableChart {
             chart.translateX(xAxisIndex, dx);
         } else {
             if (scrolls.get(xAxisIndex) != null) {
-                float scrollTranslation = dx * scrolls.get(xAxisIndex).getWidth() / chartArea.width;
+                double scrollTranslation = dx * scrolls.get(xAxisIndex).getWidth() / chartArea.width;
                 translateScrolls(scrollTranslation);
             }
         }
@@ -437,7 +434,7 @@ public class ScrollableChart {
     /**
      * @return true if scrollValue was changed and false if newValue = current scroll value
      */
-    public boolean setScrollsPosition(float x, float y) {
+    public boolean setScrollsPosition(double x, double y) {
         if (previewArea == null) {
             return false;
         }
@@ -448,8 +445,8 @@ public class ScrollableChart {
         return scrollsMoved;
     }
 
-    public boolean translateScrolls(float dx) {
-        Float maxScrollsPosition = null;
+    public boolean translateScrolls(double dx) {
+        Double maxScrollsPosition = null;
         for (Integer key : scrolls.keySet()) {
             maxScrollsPosition = (maxScrollsPosition == null) ? scrolls.get(key).getPosition() : Math.max(maxScrollsPosition, scrolls.get(key).getPosition());
         }
@@ -543,7 +540,7 @@ public class ScrollableChart {
     }
 
 
-    public void zoomPreviewY(int yAxisIndex, float zoomFactor) {
+    public void zoomPreviewY(int yAxisIndex, double zoomFactor) {
         if (preview != null) {
             preview.zoomY(yAxisIndex, zoomFactor);
         }

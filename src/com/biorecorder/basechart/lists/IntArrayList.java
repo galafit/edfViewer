@@ -104,6 +104,38 @@ public class IntArrayList implements IntSeries {
         size += numNew;
     }
 
+
+    /**
+     * Inserts all of the elements from the given array into the
+     * list, starting at the given position.  Shifts the element
+     * currently at that position (if any) and any subsequent elements to
+     * the right (increases their indices).
+     *
+     * @param index index at which to insert the first element from the
+     *              given array
+     * @param values array containing elements to be added to the list
+     * @throws IndexOutOfBoundsException
+     * @throws NullPointerException if the given array is null
+     */
+
+    public void add(int index, int[] values) {
+        rangeCheckForAdd(index);
+
+        int numNew = values.length;
+        ensureCapacity(size + numNew);  // Increments modCount
+        int numMoved = size - index;
+        if (numMoved > 0)
+            System.arraycopy(data, index, data, index + numNew,
+                    numMoved);
+        System.arraycopy(values, 0, data, index, numNew);
+        size += numNew;
+    }
+
+    private void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
     /**
 
      * Trims the capacity of this array list instance to be the

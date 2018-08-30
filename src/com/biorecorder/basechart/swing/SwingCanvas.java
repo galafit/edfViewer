@@ -187,39 +187,17 @@ public class SwingCanvas implements BCanvas {
 
     @Override
     public void drawPath(BPath path) {
-        g2.draw(createAwtPath(path));
+        g2.draw(((AwtPath) path).getGeneralPath());
     }
 
     @Override
     public void fillPath(BPath path) {
-        g2.fill(createAwtPath(path));
+        g2.fill(((AwtPath) path).getGeneralPath());
     }
 
-    private GeneralPath createAwtPath(BPath bPath) {
-        GeneralPath path = new GeneralPath();
-        float[] pointsCoords = new float[6];
-        BPathIterator pathIterator = bPath.getPathIterator();
-        while (pathIterator.hasNext()) {
-            int type = pathIterator.next(pointsCoords);
-            switch (type) {
-                case BPathIterator.SEG_MOVETO:
-                    path.moveTo(pointsCoords[0], pointsCoords[1]);
-                    break;
-                case BPathIterator.SEG_LINETO:
-                    path.lineTo(pointsCoords[0], pointsCoords[1]);
-                    break;
-                case BPathIterator.SEG_QUADTO:
-                    path.quadTo(pointsCoords[0], pointsCoords[1], pointsCoords[2], pointsCoords[3]);
-                    break;
-                case BPathIterator.SEG_CUBICTO:
-                    path.curveTo(pointsCoords[0], pointsCoords[1], pointsCoords[2], pointsCoords[3], pointsCoords[4], pointsCoords[5]);
-                    break;
-                case BPathIterator.SEG_CLOSE:
-                    path.closePath();
-                    break;
-            }
-        }
-        return path;
+    @Override
+    public BPath getEmptyPath() {
+        return new AwtPath();
     }
 
     @Override
