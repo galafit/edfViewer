@@ -5,7 +5,7 @@ import com.biorecorder.basechart.graphics.BColor;
 /**
  * Created by galafit on 19/8/17.
  */
-public class CrosshairConfig {
+public class CrossHairConfig {
     private BColor lineColor = BColor.RED;
     private int lineWidth = 1;
 

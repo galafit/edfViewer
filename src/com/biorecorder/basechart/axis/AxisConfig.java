@@ -1,39 +1,42 @@
 package com.biorecorder.basechart.axis;
 
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.graphics.TextStyle;
 
 /**
  * Created by galafit on 5/9/17.
  */
 public class AxisConfig {
-    private Style style = new Style();
+    private BColor axisLineColor =  BColor.GRAY;
+    private BStroke axisLineStroke = new BStroke(1);
 
-    private TickFormatInfo tickFormatInfo = new TickFormatInfo();
-    private boolean isTickLabelInside = false;
     private int tickPadding; // (px) padding between tick mark and tick label
     private TextStyle tickLabelTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
 
     private int titlePadding; // px
-    private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
-
-
-    private float tickInterval = -1; // in axis domain units
-
+    private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
+    private BColor titleColor = BColor.GRAY;
+    
     private int tickMarkInsideSize = 0; // px
     private int tickMarkOutsideSize = 3; // px
+    private int tickMarkWidth = 1; // px
+    private BColor tickMarkColor = BColor.GRAY;
+    private BColor tickLabelColor = BColor.GRAY;
+    
+    private int minorTickMarkWidth = 0; // px
+    private BColor minorTickMarkColor = BColor.GRAY;
 
+    private BStroke gridLineStroke = new BStroke(1);
+    private BColor gridColor = BColor.LIGHT_GRAY;
+
+    private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
+    private BColor minorGridColor = BColor.LIGHT_GRAY;
     private int minorTickMarkInsideSize = 1; // px
     private int minorTickMarkOutsideSize = 1; // px
-    private int minorTickIntervalCount = 3; // number of minor intervals in one major interval
 
-    private boolean isVisible = false;
-    private boolean isAxisLineVisible = true;
-    private boolean isTitleVisible = true;
-    private boolean isTickLabelsVisible = true;
-    private boolean isGridVisible = false;
-    private boolean isMinorGridVisible = true;
+    private boolean isTickLabelInside = false;
 
-    private boolean isMinMaxRoundingEnabled = false;
 
     public AxisConfig() {
         titlePadding = (int)(0.4 * titleTextStyle.getSize());
@@ -41,41 +44,61 @@ public class AxisConfig {
     }
 
     public AxisConfig(AxisConfig axisConfig) {
-        style = new Style(axisConfig.style);
-        tickPadding = axisConfig.tickPadding;
-        tickFormatInfo = new TickFormatInfo(axisConfig.tickFormatInfo);
-        isTickLabelInside = axisConfig.isTickLabelInside;
+        axisLineColor = axisConfig.axisLineColor;
+        axisLineStroke = new BStroke(axisConfig.axisLineStroke);
 
+        gridColor = axisConfig.gridColor;
+        minorGridColor = axisConfig.minorGridColor;
+        gridLineStroke = new BStroke(axisConfig.gridLineStroke);
+        minorGridLineStroke = new BStroke(axisConfig.minorGridLineStroke);
+
+        tickPadding = axisConfig.tickPadding;
+        tickMarkWidth = axisConfig.tickMarkWidth;
         tickMarkInsideSize = axisConfig.tickMarkInsideSize;
         tickMarkOutsideSize = axisConfig.tickMarkOutsideSize;
-        tickInterval = axisConfig.tickInterval;
-        minorTickIntervalCount = axisConfig.minorTickIntervalCount;
-
-        isTitleVisible = axisConfig.isTitleVisible;
-        titlePadding = axisConfig.titlePadding;
+        tickMarkColor = axisConfig.tickMarkColor;
+        tickLabelColor = axisConfig.tickLabelColor;
         tickLabelTextStyle = new TextStyle(axisConfig.tickLabelTextStyle);
+        isTickLabelInside = axisConfig.isTickLabelInside;
+
+        minorTickMarkWidth = axisConfig.minorTickMarkWidth;
+        minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
+        minorTickMarkInsideSize = axisConfig.minorTickMarkInsideSize;
+        minorTickMarkColor = axisConfig.minorTickMarkColor;
+
+        titlePadding = axisConfig.titlePadding;
         titleTextStyle = new TextStyle(axisConfig.titleTextStyle);
-
-        isVisible = axisConfig.isVisible;
-        isAxisLineVisible = axisConfig.isAxisLineVisible;
-        isTickLabelsVisible = axisConfig.isTickLabelsVisible;
-        isTitleVisible = axisConfig.isTitleVisible;
-        isGridVisible = axisConfig.isGridVisible;
-        isMinorGridVisible = axisConfig.isMinorGridVisible;
-
-        isMinMaxRoundingEnabled = axisConfig.isMinMaxRoundingEnabled;
+        titleColor = axisConfig.titleColor;
     }
 
-    public boolean isMinMaxRoundingEnabled() {
-        return isMinMaxRoundingEnabled;
+    public void setColors(BColor baseColor, BColor gridColor, BColor minorGridColor) {
+        axisLineColor = baseColor;
+        tickLabelColor = baseColor;
+        tickMarkColor = baseColor;
+        minorTickMarkColor = baseColor;
+        titleColor = baseColor;
+        this.gridColor = gridColor;
+        this.minorGridColor = minorGridColor;
     }
 
-    public void setMinMaxRoundingEnabled(boolean isMinMaxRoundingEnabled) {
-        this.isMinMaxRoundingEnabled = isMinMaxRoundingEnabled;
+    public void setLineColor(BColor lineColor) {
+        this.axisLineColor = lineColor;
     }
 
-    public Style getStyle() {
-        return style;
+    public BColor getAxisLineColor() {
+        return axisLineColor;
+    }
+
+    public void setAxisLineColor(BColor lineColor) {
+        this.axisLineColor = lineColor;
+    }
+
+    public BStroke getAxisLineStroke() {
+        return axisLineStroke;
+    }
+
+    public void setAxisLineStroke(BStroke axisLineStroke) {
+        this.axisLineStroke = axisLineStroke;
     }
 
 
@@ -93,28 +116,21 @@ public class AxisConfig {
         return titleTextStyle;
     }
 
+    public BColor getTitleColor() {
+        return titleColor;
+    }
+
+    public void setTitleColor(BColor titleColor) {
+        this.titleColor = titleColor;
+    }
+
+
     /** ======================= Ticks ========================== **/
 
-
-    public boolean isTickLabelInside() {
-        return isTickLabelInside;
-    }
-
-    public void setTickLabelInside(boolean tickLabelInside) {
-        isTickLabelInside = tickLabelInside;
-    }
 
     public void setTickMarkSize(int insideSize, int outsideSize) {
         this.tickMarkOutsideSize = outsideSize;
         this.tickMarkInsideSize = insideSize;
-    }
-
-    public int getTickPadding() {
-        return tickPadding;
-    }
-
-    public void setTickPadding(int tickPadding) {
-        this.tickPadding = tickPadding;
     }
 
     public int getTickMarkInsideSize() {
@@ -125,20 +141,45 @@ public class AxisConfig {
         return tickMarkOutsideSize;
     }
 
-    public float getTickInterval() {
-        return tickInterval;
+    public void setTickMarkColor(BColor tickMarkColor) {
+        this.tickMarkColor = tickMarkColor;
     }
 
-    public void setTickInterval(float tickInterval) {
-        this.tickInterval = tickInterval;
+    public BColor getTickMarkColor() {
+        return tickMarkColor;
     }
 
-    public TickFormatInfo getTickFormatInfo() {
-        return tickFormatInfo;
+    public int getTickMarkWidth() {
+        return tickMarkWidth;
     }
+
+    public void setTickMarkWidth(int tickMarkWidth) {
+        this.tickMarkWidth = tickMarkWidth;
+    }
+
+    public int getTickPadding() {
+        return tickPadding;
+    }
+
+    public void setTickPadding(int tickPadding) {
+        this.tickPadding = tickPadding;
+    }
+
 
     public TextStyle getTickLabelTextStyle() {
         return tickLabelTextStyle;
+    }
+
+    public BColor getTickLabelColor() {
+        return tickLabelColor;
+    }
+
+    public boolean isTickLabelInside() {
+        return isTickLabelInside;
+    }
+
+    public void setTickLabelInside(boolean tickLabelInside) {
+        isTickLabelInside = tickLabelInside;
     }
 
     /** =======================Minor Ticks ========================== **/
@@ -157,74 +198,57 @@ public class AxisConfig {
         return minorTickMarkOutsideSize;
     }
 
-    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
-        this.minorTickIntervalCount = minorTickIntervalCount;
+    public void setMinorTickMarkColor(BColor minorTickMarkColor) {
+        this.minorTickMarkColor = minorTickMarkColor;
     }
 
-    public int getMinorTickIntervalCount() {
-        return minorTickIntervalCount;
+    public BColor getMinorTickMarkColor() {
+        return minorTickMarkColor;
     }
 
-
-    /** ======================= Visibility ========================== **/
-
-
-    public boolean isVisible() {
-        return isVisible;
+    public BStroke getMinorGridLineStroke() {
+        return minorGridLineStroke;
     }
 
-    public void setVisible(boolean isVisible) {
-        this.isVisible = isVisible;
-    }
-
-    public boolean isTitleVisible() {
-        return isTitleVisible;
-    }
-
-    public void setTitleVisible(boolean titleVisible) {
-        isTitleVisible = titleVisible;
-    }
-
-    public boolean isTickLabelsVisible() {
-        return isTickLabelsVisible;
-    }
-
-    public void setTickLabelsVisible(boolean tickLabelsVisible) {
-        isTickLabelsVisible = tickLabelsVisible;
-    }
-
-    public boolean isGridVisible() {
-        return isGridVisible;
-    }
-
-    public void setGridVisible(boolean gridVisible) {
-        isGridVisible = gridVisible;
-    }
-
-    public boolean isMinorGridVisible() {
-        return isMinorGridVisible;
-    }
-
-    public void setMinorGridVisible(boolean minorGridVisible) {
-        isMinorGridVisible = minorGridVisible;
-    }
-
-    public boolean isTicksVisible() {
-        if(tickMarkOutsideSize == 0 && tickMarkInsideSize == 0) {
-            return false;
-        }
-        return true;
+    public void setMinorGridLineStroke(BStroke minorGridLineStroke) {
+        this.minorGridLineStroke = minorGridLineStroke;
     }
 
 
-    public boolean isMinorTicksVisible() {
-        if(minorTickMarkOutsideSize == 0 && minorTickMarkInsideSize == 0) {
-            return false;
-        }
-        return true;
+    public int getMinorTickMarkWidth() {
+        return minorTickMarkWidth;
     }
 
-    public boolean isAxisLineVisible() {
-        return isAxisLineVisible;
+    public void setMinorTickMarkWidth(int minorTickMarkWidth) {
+        this.minorTickMarkWidth = minorTickMarkWidth;
     }
+
+
+    /** ======================= Grid ========================== **/
+
+
+    public void setGridColor(BColor gridColor) {
+        this.gridColor = gridColor;
+    }
+
+    public void setMinorGridColor(BColor minorGridColor) {
+        this.minorGridColor = minorGridColor;
+    }
+
+    public BColor getGridColor() {
+        return gridColor;
+    }
+
+    public BColor getMinorGridColor() {
+        return minorGridColor;
+    }
+
+    public BStroke getGridLineStroke() {
+        return gridLineStroke;
+    }
+
+    public void setGridLineStroke(BStroke gridLineStroke) {
+        this.gridLineStroke = gridLineStroke;
+    }
+
 }

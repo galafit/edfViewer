@@ -17,7 +17,7 @@ public class AxisTop extends AxisHorizontal {
 
     @Override
     protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel) {
-        int axisWidth = config.getStyle().getAxisLineStroke().getWidth();
+        int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
         int charHalfWidth = tm.stringWidth("0")/2;
@@ -41,7 +41,7 @@ public class AxisTop extends AxisHorizontal {
 
     @Override
     protected void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize) {
-        int axisWidth = config.getStyle().getAxisLineStroke().getWidth();
+        int axisWidth = config.getAxisLineStroke().getWidth();
         int x = tickPosition;
         int y1 = -axisWidth / 2 - outsideSize;
         int y2 = axisWidth / 2 + insideSize;

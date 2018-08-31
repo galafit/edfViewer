@@ -22,26 +22,42 @@ import java.util.List;
  * {@link #setConfig(AxisConfig)}
  */
 public abstract class Axis {
-    protected final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16, 20, 32, 40, 64, 80, 100}; // used to skip ticks if they overlap
-    protected final double TICKS_ROUNDING_UNCERTAINTY = 0.2; // 20% for one side
-    protected int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
+    private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16, 20, 32, 40, 64, 80, 100}; // used to skip ticks if they overlap
+    private final double TICKS_ROUNDING_UNCERTAINTY = 0.2; // 20% for one side
+    private int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
     protected String title;
-    protected Scale scale;
+    private Scale scale;
     protected AxisConfig config = new AxisConfig();
 
-    // need this field to implement smooth zooming when minMaxRounding enabled
-    protected Range rowMinMax; // without rounding
+    private boolean isVisible = false;
+    private boolean isAxisLineVisible = true;
+    private boolean isTitleVisible = true;
+    private boolean isTickLabelVisible = true;
+    private boolean isGridVisible = false;
 
-    protected Text titleText;
-    protected int ticksSkipStep = 1;
-    protected List<Text> tickLabels = new ArrayList<>();
-    IntArrayList tickPositions = new IntArrayList();
-    IntArrayList minorTickPositions = new IntArrayList();
-    protected TickProvider tickProvider;
-    protected boolean isDirty = true;
+    private double tickInterval = -1; // in axis domain units
+    private boolean isMinMaxRoundingEnabled = false;
+
+    private int minorTickIntervalCount = 3; // number of minor intervals in one major interval
+
+    private TickFormatInfo tickFormatInfo = new TickFormatInfo();
+
+    
+    // need this field to implement smooth zooming when minMaxRounding enabled
+    private Range rowMinMax; // without rounding
+
+    private TickProvider tickProvider;
+
+    private int ticksSkipStep = 1;
+    private List<Text> tickLabels = new ArrayList<>();
+    private IntArrayList tickPositions = new IntArrayList();
+    private IntArrayList minorTickPositions = new IntArrayList();
+    private Text titleText;
+
+    private boolean isDirty = true;
     private int width = -1;
 
     public Axis(Scale scale) {
@@ -55,6 +71,14 @@ public abstract class Axis {
         width = -1;
     }
 
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public boolean isMinMaxRoundingEnabled() {
+        return isMinMaxRoundingEnabled;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -63,6 +87,27 @@ public abstract class Axis {
         this.title = title;
         setDirty();
     }
+
+    public void setTickInterval(double tickInterval) {
+        this.tickInterval = tickInterval;
+        setDirty();
+    }
+
+    public void setMinMaxRoundingEnabled(boolean minMaxRoundingEnabled) {
+        isMinMaxRoundingEnabled = minMaxRoundingEnabled;
+        setDirty();
+    }
+
+    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
+        this.minorTickIntervalCount = minorTickIntervalCount;
+        setDirty();
+    }
+
+    public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
+        this.tickFormatInfo = tickFormatInfo;
+        setDirty();
+    }
+
 
     /**
      * set Axis scale. Inner scale is a COPY of the given scale
@@ -109,13 +154,30 @@ public abstract class Axis {
 
 
     public void setVisible(boolean isVisible) {
-       config.setVisible(isVisible);
+       this.isVisible = isVisible;
+       setDirty();
+    }
+
+
+    public void setTickLabelVisible(boolean tickLabelVisible) {
+        isTickLabelVisible = tickLabelVisible;
+        setDirty();
+    }
+
+    public void setTitleVisible(boolean titleVisible) {
+        isTitleVisible = titleVisible;
+        setDirty();
+    }
+
+    public void setAxisLineVisible(boolean axisLineVisible) {
+        isAxisLineVisible = axisLineVisible;
         setDirty();
     }
 
     public void setGridVisible(boolean isVisible) {
-       config.setGridVisible(isVisible);
+        isGridVisible = isVisible;
     }
+
 
     /**
      * Zoom does not affect the axis scale!
@@ -234,19 +296,18 @@ public abstract class Axis {
     }
 
     public int getWidth(BCanvas canvas) {
-        if (!config.isVisible()) {
+        if (!isVisible) {
             return 0;
         }
         if(width < 0) { // calculate width
             width = 0;
-            if (config.isAxisLineVisible()) {
-                width += config.getStyle().getAxisLineStroke().getWidth() / 2;
+            if (isAxisLineVisible) {
+                width += config.getAxisLineStroke().getWidth() / 2;
             }
 
-            if (config.isTicksVisible()) {
-                width += config.getTickMarkOutsideSize();
-            }
-            if (config.isTickLabelsVisible() && !config.isTickLabelInside()) {
+            width += config.getTickMarkOutsideSize();
+
+            if (isTickLabelVisible && ! config.isTickLabelInside()) {
                 TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
                 if(tickProvider == null) {
                     configTickProvider(tm);
@@ -258,7 +319,7 @@ public abstract class Axis {
                 String longestLabel = minTick.getLabel().length() > maxTick.getLabel().length() ? minTick.getLabel() : maxTick.getLabel();
                 width += config.getTickPadding() + labelSizeForWidth(tm, 0, longestLabel);
             }
-            if (config.isTitleVisible() && title != null) {
+            if (isTitleVisible && title != null) {
                 TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
                 width += config.getTitlePadding() + tm.height();
             }
@@ -267,7 +328,7 @@ public abstract class Axis {
     }
 
     private boolean isTicksStepSpecified() {
-        return config.getTickInterval() > 0;
+        return tickInterval > 0;
     }
 
     private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
@@ -301,7 +362,7 @@ public abstract class Axis {
     private void configTickProvider(TextMetric tm) {
         int ticksCount;
         if (isTicksStepSpecified()) {
-            tickProvider =  scale.getTickProviderByStep(config.getTickInterval(), config.getTickFormatInfo());
+            tickProvider =  scale.getTickProviderByStep(tickInterval, tickFormatInfo);
         } else {
             int fontFactor = 4;
             int tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
@@ -313,7 +374,7 @@ public abstract class Axis {
             if(ticksCount < 2) {
                 ticksCount = 2;
             }
-            tickProvider =  scale.getTickProviderByCount(ticksCount, config.getTickFormatInfo());
+            tickProvider =  scale.getTickProviderByCount(ticksCount, tickFormatInfo);
         }
 
         double min = getMin();
@@ -423,14 +484,12 @@ public abstract class Axis {
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = null;
 
-        int minorTickIntervalCount = config.getMinorTickIntervalCount();
-
         while (currentTick.getValue() <= max) {
             // tick position
             tickPositions.add((int)scale(currentTick.getValue()));
 
             // tick label
-            if(config.isTickLabelsVisible()) {
+            if(isTickLabelVisible) {
                 tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
             }
 
@@ -438,7 +497,7 @@ public abstract class Axis {
                nextTick = tickProvider.getNextTick();
             }
 
-            if(config.isMinorGridVisible() || config.isMinorGridVisible()) {
+            if(minorTickIntervalCount > 0) {
                 // minor tick positions
                 double minorTickInterval = (nextTick.getValue() - currentTick.getValue()) / minorTickIntervalCount;
                 double minorTickValue = currentTick.getValue();
@@ -459,7 +518,7 @@ public abstract class Axis {
             currentTick = nextTick;
         }
 
-        if(config.isMinorGridVisible() || config.isMinorGridVisible()) {
+        if(minorTickIntervalCount > 0) {
             // add minor ticks that are located between minorTick and min
             currentTick = tickProvider.getUpperTick(min);
             Tick previousTick = null;
@@ -488,7 +547,7 @@ public abstract class Axis {
         }
 
         // title
-        if(config.isTitleVisible()) {
+        if(isTitleVisible) {
             titleText = createTitle(canvas);
         }
 
@@ -498,7 +557,7 @@ public abstract class Axis {
 
     public void drawGrid(BCanvas canvas, int axisOriginPoint, int length) {
         canvas.save();
-        if(!config.isVisible()) {
+        if(! isVisible) {
             return;
         }
         if(isDirty) {
@@ -507,27 +566,26 @@ public abstract class Axis {
 
         translateCanvas(canvas, axisOriginPoint);
 
-        if(config.isGridVisible()) {
-            canvas.setColor(config.getStyle().getGridColor());
-            canvas.setStroke(config.getStyle().getGridLineStroke());
+        if(isGridVisible) {
+            canvas.setColor(config.getGridColor());
+            canvas.setStroke(config.getGridLineStroke());
             for (int i = 0; i < tickPositions.size(); i++) {
                drawGridLine(canvas, tickPositions.get(i), length);
             }
-        }
 
-        if(config.isMinorGridVisible()) {
-            canvas.setColor(config.getStyle().getMinorGridColor());
-            canvas.setStroke(config.getStyle().getMinorGridLineStroke());
+            canvas.setColor(config.getMinorGridColor());
+            canvas.setStroke(config.getMinorGridLineStroke());
             for (int i = 0; i < minorTickPositions.size(); i++) {
                 drawGridLine(canvas, minorTickPositions.get(i), length);
             }
         }
+
         canvas.restore();
     }
 
     public void drawAxis(BCanvas canvas,  int axisOriginPoint) {
         canvas.save();
-        if(!config.isVisible()) {
+        if(! isVisible) {
             return;
         }
         if(isDirty) {
@@ -535,44 +593,45 @@ public abstract class Axis {
         }
         translateCanvas(canvas, axisOriginPoint);
 
-        if(config.isTicksVisible()) {
-            canvas.setColor(config.getStyle().getTickColor());
-            canvas.setStroke(new BStroke(config.getStyle().getTickMarkWidth()));
+        if(config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
+            canvas.setColor(config.getTickMarkColor());
+            canvas.setStroke(new BStroke(config.getTickMarkWidth()));
             for (int i = 0; i < tickPositions.size(); i++) {
                 drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
             }
         }
 
-        if(config.isMinorGridVisible()) {
-            canvas.setColor(config.getStyle().getMinorTickColor());
-            canvas.setStroke(new BStroke(config.getStyle().getMinorTickMarkWidth()));
+        if(config.getMinorTickMarkInsideSize() > 0 || config.getMinorTickMarkOutsideSize() > 0) {
+            canvas.setColor(config.getMinorTickMarkColor());
+            canvas.setStroke(new BStroke(config.getMinorTickMarkWidth()));
             for (int i = 0; i < minorTickPositions.size(); i++) {
                 drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
             }
         }
 
-        if(config.isTickLabelsVisible()) {
+        if(isTickLabelVisible) {
             canvas.setStroke(new BStroke(1));
-            // canvas.setColor(config.getLabelsColor());
+            canvas.setColor(config.getTickLabelColor());
             canvas.setTextStyle(config.getTickLabelTextStyle());
             for (Text tickLabel : tickLabels) {
                 tickLabel.draw(canvas);
             }
         }
 
-        if(config.isAxisLineVisible()) {
-            canvas.setColor(config.getStyle().getAxisLineColor());
-            canvas.setStroke(config.getStyle().getAxisLineStroke());
+        if(isAxisLineVisible) {
+            canvas.setColor(config.getAxisLineColor());
+            canvas.setStroke(config.getAxisLineStroke());
             drawAxisLine(canvas);
         }
 
-        if(config.isTitleVisible()) {
-            //canvas.setColor(config.getTitleColor());
+        if(isTitleVisible) {
+            canvas.setColor(config.getTitleColor());
             canvas.setTextStyle(config.getTitleTextStyle());
             titleText.draw(canvas);
         }
         canvas.restore();
     }
+
 
     protected abstract void translateCanvas(BCanvas canvas, int axisOriginPoint);
 

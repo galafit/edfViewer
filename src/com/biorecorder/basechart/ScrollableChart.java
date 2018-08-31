@@ -6,6 +6,8 @@ import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollListener;
+import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.themes.Theme;
 import com.biorecorder.basechart.traces.Trace;
 
 import java.util.*;
@@ -15,15 +17,15 @@ import java.util.*;
  * Created by galafit on 3/10/17.
  */
 public class ScrollableChart {
-    private BaseChart chart;
-    private BaseChart preview;
+    private Chart chart;
+    private Chart preview;
     private BRectangle fullArea;
     private BRectangle chartArea;
     private BRectangle previewArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
 
-    private int gap; // between BaseChart and Preview px
+    private int gap; // between Chart and Preview px
     private Margin margin;
     private ScrollConfig scrollConfig = new ScrollConfig();
 
@@ -31,23 +33,13 @@ public class ScrollableChart {
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
 
     public ScrollableChart(boolean isPreviewEnabled) {
-        chart = new BaseChart();
-        AxisConfig defaultYAxisConfig = chart.getYAxisDefaultConfig();
-        defaultYAxisConfig.setTickLabelInside(false);
-        defaultYAxisConfig.setTickMarkSize(3, 0);
-        defaultYAxisConfig.setMinMaxRoundingEnabled(true);
-
+        chart = new Chart();
         if (isPreviewEnabled) {
-            preview = new BaseChart();
+            preview = new Chart();
             preview.setTracesNaturalDrawingEnabled(false);
             chart.setTracesNaturalDrawingEnabled(true);
-
-            defaultYAxisConfig = preview.getYAxisDefaultConfig();
-            defaultYAxisConfig.setMinMaxRoundingEnabled(true);
-            defaultYAxisConfig.setTickLabelInside(false);
-            defaultYAxisConfig.setTickMarkSize(3, 0);
         }
-        setColorTheme(Theme.WHITE);
+        setTheme(new DarkTheme());
     }
 
     private void createScrolls() {
@@ -197,48 +189,13 @@ public class ScrollableChart {
     /**
      * =======================Base methods to interact with com.biorecorder.basechart.chart==========================
      **/
-    public void setColorTheme(Theme theme) {
-        List<AxisConfig> axisConfigs = new ArrayList<>();
-        axisConfigs.add(chart.getYAxisDefaultConfig());
-        for (int i = 0; i < chart.yAxisCount(); i++) {
-            axisConfigs.add(chart.getYAxisConfig(i));
-        }
-        for (int i = 0; i < chart.xAxisCount(); i++) {
-            axisConfigs.add(chart.getXAxisConfig(i));
-        }
+    public void setTheme(Theme theme) {
+         chart.setConfig(theme.getChartConfig());
 
         if (preview != null) {
-            axisConfigs.add(preview.getYAxisDefaultConfig());
-            for (int i = 0; i < preview.yAxisCount(); i++) {
-                axisConfigs.add(preview.getYAxisConfig(i));
-            }
-            for (int i = 0; i < preview.xAxisCount(); i++) {
-                axisConfigs.add(preview.getXAxisConfig(i));
-            }
-
-            preview.setDefaultTraceColors(theme.getTraceColors());
-            preview.getConfig().setBackground(theme.getPreviewBgColor());
-            preview.getConfig().setMarginColor(theme.getPreviewMarginColor());
-            preview.getConfig().getLegendConfig().setBackgroundColor(theme.getPreviewBgColor());
-            preview.getConfig().setTitleColor(theme.getTitleColor());
-            preview.getConfig().getCrosshairConfig().setLineColor(theme.getCrosshairColor());
-
-            scrollConfig.setScrollColor(theme.getScrollColor());
+            preview.setConfig(theme.getPreviewConfig());
+            scrollConfig = theme.getScrollConfig();
         }
-
-        for (AxisConfig axisConfig : axisConfigs) {
-            axisConfig.getStyle().setLineColor(theme.getAxisColor());
-            axisConfig.getStyle().setGridColor(theme.getGridColor());
-            axisConfig.getStyle().setMinorGridColor(theme.getGridColor());
-        }
-
-        chart.setDefaultTraceColors(theme.getTraceColors());
-        chart.getConfig().setBackground(theme.getChartBgColor());
-        chart.getConfig().setMarginColor(theme.getChartMarginColor());
-        chart.getConfig().getLegendConfig().setBackgroundColor(theme.getChartBgColor());
-        chart.getConfig().setTitleColor(theme.getTitleColor());
-        chart.getConfig().getCrosshairConfig().setLineColor(theme.getCrosshairColor());
-
     }
 
 

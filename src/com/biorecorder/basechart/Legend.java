@@ -4,6 +4,8 @@ import com.biorecorder.basechart.button.ToggleBtn;
 import com.biorecorder.basechart.button.BtnGroup;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.graphics.HorizontalAlign;
+import com.biorecorder.basechart.graphics.VerticalAlign;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +18,16 @@ public class Legend {
     private BtnGroup buttonGroup;
     private List<ToggleBtn> buttons = new ArrayList<ToggleBtn>();
     private LegendConfig legendConfig;
+    private HorizontalAlign halign;
+    private VerticalAlign valign;
     private BRectangle area;
     private boolean isDirty = true;
 
-    public Legend(LegendConfig legendConfig, BtnGroup buttonGroup) {
+    public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign, BtnGroup buttonGroup) {
         this.legendConfig = legendConfig;
         this.buttonGroup = buttonGroup;
+        this.halign = halign;
+        this.valign = valign;
     }
 
     public boolean toggle(int x, int y) {
@@ -47,7 +53,7 @@ public class Legend {
     }
 
     private void createButtons(BCanvas canvas) {
-        if(legendConfig.getPosition() == LegendConfig.TOP_RIGHT) {
+        if(halign == HorizontalAlign.RIGHT) {
             int x = area.x + area.width;
             int y = area.y;
             for (int i = 0; i < buttons.size(); i++) {
@@ -61,7 +67,8 @@ public class Legend {
                     x -= btnArea.width - getInterItemSpace();
                 }
             }
-        } else {
+        }
+        if(halign == HorizontalAlign.LEFT) {
             int x = area.x;
             int y = area.y;
             for (int i = 0; i < buttons.size(); i++) {
@@ -81,7 +88,7 @@ public class Legend {
 
 
     public void draw(BCanvas canvas) {
-        if (!legendConfig.isVisible() || buttons.size() == 0) {
+        if (buttons.size() == 0) {
             return;
         }
         if(isDirty) {

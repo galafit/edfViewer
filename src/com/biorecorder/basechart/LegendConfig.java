@@ -9,12 +9,8 @@ import com.biorecorder.basechart.graphics.TextStyle;
  * Created by galafit on 18/8/17.
  */
 public class LegendConfig {
-    public static final int TOP_LEFT = 0;
-    public static final int TOP_RIGHT = 1;
 
-    private boolean isVisible = true;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
-    private int position = TOP_LEFT;
 
   //  private int borderWidth = 1;
  //   private BColor borderColor = BColor.LIGHT_GRAY;
@@ -33,24 +29,8 @@ public class LegendConfig {
         this.textColor = textColor;
     }
 
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public void setVisible(boolean isVisible) {
-        isVisible = isVisible;
-    }
-
     public TextStyle getTextStyle() {
         return textStyle;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
     }
 
     public BColor getBackgroundColor() {

@@ -16,10 +16,15 @@ import java.util.List;
 /**
  * Created by hdablin on 24.03.17.
  */
-public class BaseChart {
+public class Chart {
+    private String title;
     private static final int DEFAULT_WEIGHT = 10;
 
-    private BColor[] defaultTraceColors = {BColor.MAGENTA, BColor.BLUE};
+    private HorizontalAlign legendHAlign = HorizontalAlign.LEFT;
+    private VerticalAlign legendVAlign = VerticalAlign.TOP;
+
+    private boolean isLegendVisible = true;
+    private boolean isTitleVisible = true;
 
     /*
  * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
@@ -39,24 +44,23 @@ public class BaseChart {
     // occupies the specified in traceConfig markSize (in pixels)
     private boolean isTracesNaturalDrawingEnabled = false;
 
-
-    private AxisConfig yAxisDefaultConfig = new AxisConfig();
-
-    private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
-
     private boolean isLeftAxisPrimary = true;
     private boolean isBottomAxisPrimary = true;
 
+    private boolean isYAxisMinMaxRoundingEnabled = true;
+
+    private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
+
+    private ChartConfig chartConfig = new ChartConfig();
+    private DataProcessingConfig dataProcessingConfig = new DataProcessingConfig();
 
     private List<Trace> traces = new ArrayList<Trace>();
-
     private List<Legend> legends = new ArrayList<Legend>();
-    private Title title;
+    private Title titleText;
     private BRectangle fullArea;
     private BRectangle titleArea;
     private BRectangle chartArea;
     private BRectangle graphArea;
-    private ChartConfig chartConfig = new ChartConfig();
     private Margin margin;
     private DataManager dataManager;
 
@@ -65,7 +69,6 @@ public class BaseChart {
      **/
     private boolean dataDirty = true;
     private boolean areasDirty = true;
-
 
     private Crosshair crosshair;
     private Tooltip tooltip;
@@ -77,8 +80,8 @@ public class BaseChart {
     private BtnGroup buttonGroup = new BtnGroup();
 
 
-    public BaseChart() {
-        dataManager = new DataManager(chartConfig.getDataProcessingConfig());
+    public Chart() {
+        dataManager = new DataManager(dataProcessingConfig);
 
         xAxisList.add(new AxisBottom(new LinearScale()));
         xAxisList.add(new AxisTop(new LinearScale()));
@@ -88,12 +91,12 @@ public class BaseChart {
             xAxisList.get(1).setGridVisible(true);
         }
 
-        // title
-        title = new Title(chartConfig.getTitle(), chartConfig.getTitleTextStyle(), chartConfig.getTitleColor());
+        // titleText
+        titleText = new Title(title, chartConfig.getTitleConfig());
 
         // tooltips
         tooltip = new Tooltip(chartConfig.getTooltipConfig());
-        crosshair = new Crosshair(chartConfig.getCrosshairConfig());
+        crosshair = new Crosshair(chartConfig.getCrossHairConfig());
     }
 
 
@@ -296,7 +299,7 @@ public class BaseChart {
             dataDirty = false;
         }
 
-        int titleHeight = title.getTitleHeight(canvas, fullArea.width);
+        int titleHeight = titleText.getTitleHeight(canvas, fullArea.width);
         titleArea = new BRectangle(fullArea.x, fullArea.y, fullArea.width, titleHeight);
         chartArea = new BRectangle(fullArea.x, fullArea.y + titleHeight, fullArea.width, fullArea.height - titleHeight);
         int left = -1;
@@ -358,12 +361,12 @@ public class BaseChart {
         xAxisList.get(1).setStartEnd(xStart, xEnd);
 
         for (Axis axis : xAxisList) {
-            if(axis.getConfig().isMinMaxRoundingEnabled() && axis.getConfig().isVisible()) {
+            if(axis.isMinMaxRoundingEnabled() && axis.isVisible()) {
                 axis.roundMinMax(canvas);
             }
         }
         for (Axis axis : yAxisList) {
-            if(axis.getConfig().isMinMaxRoundingEnabled() && axis.getConfig().isVisible()) {
+            if(axis.isMinMaxRoundingEnabled() && axis.isVisible()) {
                 axis.roundMinMax(canvas);
             }
         }
@@ -432,7 +435,7 @@ public class BaseChart {
         canvas.setColor(chartConfig.getMarginColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
 
-        canvas.setColor(chartConfig.getBackground());
+        canvas.setColor(chartConfig.getBackgroundColor());
         canvas.fillRect(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 
         canvas.enableAntiAliasAndHinting();
@@ -470,9 +473,11 @@ public class BaseChart {
         }
         canvas.restore();
 
-        title.draw(canvas, titleArea);
-        for (Legend legend : legends) {
-            legend.draw(canvas);
+        titleText.draw(canvas, titleArea);
+        if(isLegendVisible) {
+            for (Legend legend : legends) {
+                legend.draw(canvas);
+            }
         }
 
         if (hoverTraceIndex >= 0 && hoverPointIndex >= 0) {
@@ -481,33 +486,57 @@ public class BaseChart {
         }
     }
 
+    /**
+     * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
+     */
+    private boolean isYAxisLeft(int axisIndex) {
+        if ( (axisIndex & 1) == 0 ) { // even (left)
+            return true;
+        }
+        //odd (right)
+        return false;
+    }
+
+    /**
+     * X-axis: 0(even) - BOTTOM and 1(odd) - TOP
+     */
+    private boolean isXAxisBottom(int axisIndex) {
+        if ( (axisIndex & 1) == 0 ) { // even (bottom)
+            return true;
+        }
+        //odd (top)
+        return false;
+    }
 
 
     /**
      * =======================Base methods to interact==========================
      **/
-    public void setDefaultTraceColors(BColor[] defaultTraceColors) {
-        this.defaultTraceColors = defaultTraceColors;
-    }
+
 
     public ChartConfig getConfig() {
         return chartConfig;
     }
 
-    public AxisConfig getYAxisDefaultConfig() {
-        return yAxisDefaultConfig;
-    }
 
-    public AxisConfig getYAxisConfig(int yIndex) {
-        return yAxisList.get(yIndex).getConfig();
-    }
+    public void setConfig(ChartConfig chartConfig) {
+        this.chartConfig = chartConfig;
+        for (int i = 0; i < xAxisList.size(); i++) {
+            if(isXAxisBottom(i)) {
+                xAxisList.get(i).setConfig(chartConfig.getBottomAxisConfig());
+            } else {
+                xAxisList.get(i).setConfig(chartConfig.getTopAxisConfig());
+            }
+        }
 
-    public AxisConfig getXAxisConfig(int xIndex) {
-        return xAxisList.get(xIndex).getConfig();
-    }
-
-    public boolean isTracesNaturalDrawingEnabled() {
-        return isTracesNaturalDrawingEnabled;
+        for (int i = 0; i < yAxisList.size(); i++) {
+           if(isYAxisLeft(i)) {
+               yAxisList.get(i).setConfig(chartConfig.getLeftAxisConfig());
+           } else {
+               yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
+           }
+        }
+        areasDirty = false;
     }
 
     public void setTracesNaturalDrawingEnabled(boolean tracesNaturalDrawingEnabled) {
@@ -515,20 +544,23 @@ public class BaseChart {
     }
 
     public void addStack(int weight) {
-        Axis leftYAxis = new AxisLeft(new LinearScale());
-        Axis rightYAxis = new AxisRight(new LinearScale());
-        leftYAxis.setConfig(yAxisDefaultConfig);
-        rightYAxis.setConfig(yAxisDefaultConfig);
+        Axis leftAxis = new AxisLeft(new LinearScale());
+        Axis rightAxis = new AxisRight(new LinearScale());
+        leftAxis.setConfig(chartConfig.getLeftAxisConfig());
+        rightAxis.setConfig(chartConfig.getRightAxisConfig());
+        leftAxis.setMinMaxRoundingEnabled(isYAxisMinMaxRoundingEnabled);
+        rightAxis.setMinMaxRoundingEnabled(isYAxisMinMaxRoundingEnabled);
         if(isLeftAxisPrimary) {
-            leftYAxis.setGridVisible(true);
+            leftAxis.setGridVisible(true);
         } else {
-            rightYAxis.setGridVisible(true);
+            rightAxis.setGridVisible(true);
         }
-        yAxisList.add(leftYAxis);
-        yAxisList.add(rightYAxis);
+        yAxisList.add(leftAxis);
+        yAxisList.add(rightAxis);
         stackWeights.add(weight);
 
-        legends.add(new Legend(chartConfig.getLegendConfig(), buttonGroup));
+        legends.add(new Legend(chartConfig.getLegendConfig(), legendHAlign, legendVAlign, buttonGroup));
+        areasDirty = true;
     }
 
     public void addStack() {
@@ -572,7 +604,8 @@ public class BaseChart {
             trace.setName("Trace " + traces.size());
         }
         if(trace.getMainColor() == null) {
-            trace.setMainColor(defaultTraceColors[traces.size() % defaultTraceColors.length]);
+            BColor[] traceColors = chartConfig.getTraceColors();
+            trace.setMainColor(traceColors[traces.size() % traceColors.length]);
         }
 
         traces.add(trace);

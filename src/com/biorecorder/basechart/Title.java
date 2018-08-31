@@ -8,16 +8,14 @@ import java.util.ArrayList;
  * Created by hdablin on 17.08.17.
  */
 public class Title {
-    private TextStyle textStyle;
-    private BColor color;
+    private TitleConfig config;
     private String[] words = new String[0];
     private ArrayList<String> strings;
 
-    public Title(String chartTitle, TextStyle textStyle, BColor color) {
+    public Title(String chartTitle, TitleConfig config) {
         if(chartTitle != null) {
             words = chartTitle.split(" ");
-            this.textStyle = textStyle;
-            this.color = color;
+            this.config = config;
         }
     }
 
@@ -25,21 +23,22 @@ public class Title {
         if(words.length == 0) {
             return 0;
         }
-        canvas.setTextStyle(textStyle);
+
+        canvas.setTextStyle(config.getTextStyle());
         formStrings(canvas, areaWidth);
-        int strHeight = canvas.getTextMetric(textStyle).height();
+        int strHeight = canvas.getTextMetric(config.getTextStyle()).height();
         return strHeight * strings.size()
                 + getInterLineSpace() * (strings.size() - 1)
-                + getMargin().top() + getMargin().bottom();
+                + config.getMargin().top() + config.getMargin().bottom();
     }
 
     private void formStrings(BCanvas canvas, int areaWidth){
         strings = new ArrayList<String>();
         StringBuilder resultantString = new StringBuilder(words[0]);
-        TextMetric tm = canvas.getTextMetric(textStyle);
+        TextMetric tm = canvas.getTextMetric(config.getTextStyle());
         for (int i = 1; i < words.length; i++) {
             int strWidth = tm.stringWidth(resultantString + " "+ words[i]);
-            if ( strWidth + getMargin().left() + getMargin().right() > areaWidth ){
+            if ( strWidth + config.getMargin().left() + config.getMargin().right() > areaWidth ){
                 strings.add(resultantString.toString());
                 resultantString = new StringBuilder(words[i]);
             } else {
@@ -53,17 +52,18 @@ public class Title {
         if(words.length == 0) {
             return;
         }
-        canvas.setTextStyle(textStyle);
-        canvas.setColor(color);
+        canvas.setTextStyle(config.getTextStyle());
+        canvas.setColor(config.getTextColor());
         if (strings == null){
             formStrings(canvas, area.width);
         }
-        int y = area.y + getMargin().top();
-        TextMetric tm = canvas.getTextMetric(textStyle);
+        Margin margin = config.getMargin();
+        int y = area.y + margin.top();
+        TextMetric tm = canvas.getTextMetric(config.getTextStyle());
         for (String string : strings) {
             int x = (area.x + area.width) / 2 - tm.stringWidth(string) / 2;
-            if (x < area.x + getMargin().left()) {
-                x = area.x + getMargin().left();
+            if (x < area.x + margin.left()) {
+                x = area.x + margin.left();
             }
             canvas.drawString(string,x,y + tm.ascent());
             y += getInterLineSpace() + tm.height();
@@ -73,14 +73,7 @@ public class Title {
 
 
     private  int getInterLineSpace() {
-        return (int)(textStyle.getSize() * 0.2);
+        return (int)(config.getTextStyle().getSize() * 0.2);
     }
 
-    private Margin getMargin(){
-       /* return new Margin((int)(textStyle.getSize() * 0),
-                (int)(textStyle.getSize() * 0.5),
-                (int)(textStyle.getSize() * 0.5),
-                (int)(textStyle.getSize() * 0.5));*/
-        return new Margin(0, (int)(textStyle.getSize() * 0.5), 0, (int)(textStyle.getSize() * 0.5));
-    }
 }

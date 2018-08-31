@@ -1,50 +1,48 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.TextStyle;
 
 /**
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
-    private String title;
-    private BColor background;
+    private BColor[] traceColors = {BColor.MAGENTA, BColor.BLUE};
+
+    private BColor backgroundColor;
     private BColor marginColor;
+
     private Margin margin;
-    private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.BOLD, 14);
-    private BColor titleColor = BColor.BLACK;
+
+    private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();
-    private CrosshairConfig crosshairConfig = new CrosshairConfig();
+    private CrossHairConfig crossHairConfig = new CrossHairConfig();
 
-    private DataProcessingConfig dataProcessingConfig = new DataProcessingConfig();
+    private AxisConfig leftAxisConfig = new AxisConfig();
+    private AxisConfig rightAxisConfig = new AxisConfig();
+    private AxisConfig bottomAxisConfig = new AxisConfig();
+    private AxisConfig topAxisConfig = new AxisConfig();
 
-    public DataProcessingConfig getDataProcessingConfig() {
-        return dataProcessingConfig;
+
+    public TitleConfig getTitleConfig() {
+        return titleConfig;
     }
 
-    public BColor getTitleColor() {
-        return titleColor;
+    public BColor[] getTraceColors() {
+        return traceColors;
     }
 
-    public void setTitleColor(BColor titleColor) {
-        this.titleColor = titleColor;
+    public void setTraceColors(BColor[] traceColors) {
+        this.traceColors = traceColors;
     }
 
-    public String getTitle() {
-        return title;
+    public BColor getBackgroundColor() {
+        return backgroundColor;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public BColor getBackground() {
-        return background;
-    }
-
-    public void setBackground(BColor background) {
-        this.background = background;
+    public void setBackgroundColor(BColor backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     public BColor getMarginColor() {
@@ -55,18 +53,6 @@ public class ChartConfig {
         this.marginColor = marginColor;
     }
 
-    public Margin getMargin() {
-        return margin;
-    }
-
-    public void setMargin(Margin margin) {
-        this.margin = margin;
-    }
-
-    public TextStyle getTitleTextStyle() {
-        return titleTextStyle;
-    }
-
     public LegendConfig getLegendConfig() {
         return legendConfig;
     }
@@ -75,7 +61,47 @@ public class ChartConfig {
         return tooltipConfig;
     }
 
-    public CrosshairConfig getCrosshairConfig() {
-        return crosshairConfig;
+    public CrossHairConfig getCrossHairConfig() {
+        return crossHairConfig;
+    }
+
+    public Margin getMargin() {
+        return margin;
+    }
+
+    public void setMargin(Margin margin) {
+        this.margin = margin;
+    }
+
+    public AxisConfig getLeftAxisConfig() {
+        return leftAxisConfig;
+    }
+
+    public void setLeftAxisConfig(AxisConfig leftAxisConfig) {
+        this.leftAxisConfig = leftAxisConfig;
+    }
+
+    public AxisConfig getRightAxisConfig() {
+        return rightAxisConfig;
+    }
+
+    public void setRightAxisConfig(AxisConfig rightAxisConfig) {
+        this.rightAxisConfig = rightAxisConfig;
+    }
+
+    public AxisConfig getBottomAxisConfig() {
+        return bottomAxisConfig;
+    }
+
+    public void setBottomAxisConfig(AxisConfig bottomAxisConfig) {
+        this.bottomAxisConfig = bottomAxisConfig;
+    }
+
+    public AxisConfig getTopAxisConfig() {
+        return topAxisConfig;
+    }
+
+    public void setTopAxisConfig(AxisConfig topAxisConfig) {
+        this.topAxisConfig = topAxisConfig;
     }
 }
