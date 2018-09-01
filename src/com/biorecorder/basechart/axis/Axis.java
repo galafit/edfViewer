@@ -34,6 +34,7 @@ public abstract class Axis {
 
     private boolean isVisible = false;
     private boolean isGridVisible = false;
+    private boolean isTickLabelVisible = true;
 
     private double tickInterval = -1; // in axis domain units
     private boolean isMinMaxRoundingEnabled = false;
@@ -101,6 +102,7 @@ public abstract class Axis {
         this.tickFormatInfo = tickFormatInfo;
         setDirty();
     }
+
 
 
     /**
@@ -279,13 +281,11 @@ public abstract class Axis {
         }
         if(width < 0) { // calculate width
             width = 0;
-            if (config.isAxisLineVisible()) {
-                width += config.getAxisLineStroke().getWidth() / 2;
-            }
+            width += config.getAxisLineStroke().getWidth() / 2;
 
             width += config.getTickMarkOutsideSize();
 
-            if (config.isTickLabelVisible() && ! config.isTickLabelInside()) {
+            if (isTickLabelVisible && ! config.isTickLabelInside()) {
                 TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
                 if(tickProvider == null) {
                     configTickProvider(tm);
@@ -395,7 +395,7 @@ public abstract class Axis {
             }
         }
 
-        if(config.isTickLabelVisible()) {
+        if(isTickLabelVisible) {
             canvas.setStroke(new BStroke(1));
             canvas.setColor(config.getTickLabelColor());
             canvas.setTextStyle(config.getTickLabelTextStyle());
@@ -404,7 +404,7 @@ public abstract class Axis {
             }
         }
 
-        if(config.isAxisLineVisible()) {
+        if(config.getAxisLineStroke().getWidth() > 0) {
             canvas.setColor(config.getAxisLineColor());
             canvas.setStroke(config.getAxisLineStroke());
             drawAxisLine(canvas);
@@ -543,7 +543,7 @@ public abstract class Axis {
             tickPositions.add((int)scale(currentTick.getValue()));
 
             // tick label
-            if(config.isTickLabelVisible()) {
+            if(isTickLabelVisible) {
                 tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
             }
 
