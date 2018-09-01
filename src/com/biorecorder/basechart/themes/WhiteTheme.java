@@ -38,15 +38,15 @@ public class WhiteTheme extends Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickLabelInside(false);
-        xAxisConfig.setTickMarkSize(3, 0);
+        xAxisConfig.setTickMarkSize(4, 0);
 
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickLabelInside(true);
-        yAxisConfig.setTickMarkSize(0, 3);
+        yAxisConfig.setTickMarkSize(4, 0);
 
-
+        chartConfig.setTraceColors(colors);
         chartConfig.setBackgroundColor(chartBgColor);
         chartConfig.setMarginColor(chartMarginColor);
         chartConfig.getTitleConfig().setTextColor(titleColor);
@@ -55,7 +55,9 @@ public class WhiteTheme extends Theme {
         chartConfig.setTopAxisConfig(xAxisConfig);
         chartConfig.setBottomAxisConfig(xAxisConfig);
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
+        chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
 
+        previewConfig.setTraceColors(colors);
         previewConfig.setBackgroundColor(previewBgColor);
         previewConfig.setMarginColor(previewMarginColor);
         previewConfig.getTitleConfig().setTextColor(titleColor);
@@ -64,6 +66,7 @@ public class WhiteTheme extends Theme {
         previewConfig.setTopAxisConfig(xAxisConfig);
         previewConfig.setBottomAxisConfig(xAxisConfig);
         previewConfig.getCrossHairConfig().setLineColor(crosshairColor);
+        previewConfig.getLegendConfig().setBackgroundColor(chartBgColor);
 
         scrollConfig.setScrollColor(scrollColor);
     }

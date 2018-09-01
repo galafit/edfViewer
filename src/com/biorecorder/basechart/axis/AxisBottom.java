@@ -12,8 +12,8 @@ import com.biorecorder.basechart.scales.Scale;
  */
 public class AxisBottom extends AxisHorizontal {
 
-    public AxisBottom(Scale scale) {
-        super(scale);
+    public AxisBottom(Scale scale, AxisConfig axisConfig) {
+        super(scale, axisConfig);
     }
 
     @Override

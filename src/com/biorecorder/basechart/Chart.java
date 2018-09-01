@@ -79,12 +79,12 @@ public class Chart {
 
     private BtnGroup buttonGroup = new BtnGroup();
 
-
-    public Chart() {
+    public Chart(ChartConfig chartConfig) {
+        this.chartConfig = chartConfig;
         dataManager = new DataManager(dataProcessingConfig);
 
-        xAxisList.add(new AxisBottom(new LinearScale()));
-        xAxisList.add(new AxisTop(new LinearScale()));
+        xAxisList.add(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
+        xAxisList.add(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         if(isBottomAxisPrimary) {
             xAxisList.get(0).setGridVisible(true);
         } else {
@@ -266,6 +266,29 @@ public class Chart {
         // if min == null && max == null
         return traceMinMax;
     }
+
+    /**
+     * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
+     */
+    private boolean isYAxisLeft(int axisIndex) {
+        if ( (axisIndex & 1) == 0 ) { // even (left)
+            return true;
+        }
+        //odd (right)
+        return false;
+    }
+
+    /**
+     * X-axis: 0(even) - BOTTOM and 1(odd) - TOP
+     */
+    private boolean isXAxisBottom(int axisIndex) {
+        if ( (axisIndex & 1) == 0 ) { // even (bottom)
+            return true;
+        }
+        //odd (top)
+        return false;
+    }
+
 
     Margin getMargin(BCanvas canvas) {
         if (margin == null) {
@@ -486,28 +509,6 @@ public class Chart {
         }
     }
 
-    /**
-     * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
-     */
-    private boolean isYAxisLeft(int axisIndex) {
-        if ( (axisIndex & 1) == 0 ) { // even (left)
-            return true;
-        }
-        //odd (right)
-        return false;
-    }
-
-    /**
-     * X-axis: 0(even) - BOTTOM and 1(odd) - TOP
-     */
-    private boolean isXAxisBottom(int axisIndex) {
-        if ( (axisIndex & 1) == 0 ) { // even (bottom)
-            return true;
-        }
-        //odd (top)
-        return false;
-    }
-
 
     /**
      * =======================Base methods to interact==========================
@@ -544,8 +545,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        Axis leftAxis = new AxisLeft(new LinearScale());
-        Axis rightAxis = new AxisRight(new LinearScale());
+        Axis leftAxis = new AxisLeft(new LinearScale(), chartConfig.getLeftAxisConfig());
+        Axis rightAxis = new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig());
         leftAxis.setConfig(chartConfig.getLeftAxisConfig());
         rightAxis.setConfig(chartConfig.getRightAxisConfig());
         leftAxis.setMinMaxRoundingEnabled(isYAxisMinMaxRoundingEnabled);

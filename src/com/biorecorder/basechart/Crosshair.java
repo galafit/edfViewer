@@ -15,6 +15,10 @@ public class Crosshair {
         this.crossHairConfig = crossHairConfig;
     }
 
+    public void setConfig(CrossHairConfig crossHairConfig) {
+        this.crossHairConfig = crossHairConfig;
+    }
+
     public void setXY(int x, int y) {
         this.x = x;
         this.y = y;

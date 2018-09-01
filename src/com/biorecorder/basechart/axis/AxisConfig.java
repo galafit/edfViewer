@@ -10,6 +10,7 @@ import com.biorecorder.basechart.graphics.TextStyle;
 public class AxisConfig {
     private BColor axisLineColor =  BColor.GRAY;
     private BStroke axisLineStroke = new BStroke(1);
+    private boolean isAxisLineVisible = true;
 
     private int tickPadding; // (px) padding between tick mark and tick label
     private TextStyle tickLabelTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
@@ -23,17 +24,17 @@ public class AxisConfig {
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
+    private boolean isTickLabelVisible = true;
     
-    private int minorTickMarkWidth = 0; // px
+    private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
-
     private BStroke gridLineStroke = new BStroke(1);
     private BColor gridColor = BColor.LIGHT_GRAY;
 
     private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
     private BColor minorGridColor = BColor.LIGHT_GRAY;
-    private int minorTickMarkInsideSize = 1; // px
-    private int minorTickMarkOutsideSize = 1; // px
+    private int minorTickMarkInsideSize = 0; // px
+    private int minorTickMarkOutsideSize = 0; // px
 
     private boolean isTickLabelInside = false;
 
@@ -60,6 +61,7 @@ public class AxisConfig {
         tickLabelColor = axisConfig.tickLabelColor;
         tickLabelTextStyle = new TextStyle(axisConfig.tickLabelTextStyle);
         isTickLabelInside = axisConfig.isTickLabelInside;
+        isTickLabelVisible = axisConfig.isTickLabelVisible;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -69,6 +71,7 @@ public class AxisConfig {
         titlePadding = axisConfig.titlePadding;
         titleTextStyle = new TextStyle(axisConfig.titleTextStyle);
         titleColor = axisConfig.titleColor;
+        isAxisLineVisible = axisConfig.isAxisLineVisible;
     }
 
     public void setColors(BColor baseColor, BColor gridColor, BColor minorGridColor) {
@@ -101,6 +104,13 @@ public class AxisConfig {
         this.axisLineStroke = axisLineStroke;
     }
 
+    public boolean isAxisLineVisible() {
+        return isAxisLineVisible;
+    }
+
+    public void setAxisLineVisible(boolean axisLineVisible) {
+        isAxisLineVisible = axisLineVisible;
+    }
 
     /** ======================= Title ========================== **/
 
@@ -180,6 +190,14 @@ public class AxisConfig {
 
     public void setTickLabelInside(boolean tickLabelInside) {
         isTickLabelInside = tickLabelInside;
+    }
+
+    public boolean isTickLabelVisible() {
+        return isTickLabelVisible;
+    }
+
+    public void setTickLabelVisible(boolean tickLabelVisible) {
+        isTickLabelVisible = tickLabelVisible;
     }
 
     /** =======================Minor Ticks ========================== **/

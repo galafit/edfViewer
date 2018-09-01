@@ -30,6 +30,10 @@ public class Scroll {
         value = getMin();
     }
 
+    public void setConfig(ScrollConfig scrollConfig) {
+        this.scrollConfig = scrollConfig;
+    }
+
     public void addListener(ScrollListener listener) {
         eventListeners.add(listener);
     }

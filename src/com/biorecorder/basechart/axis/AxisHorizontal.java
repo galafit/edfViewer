@@ -8,8 +8,8 @@ import com.biorecorder.basechart.scales.Scale;
  * Created by galafit on 29/8/18.
  */
 abstract class AxisHorizontal extends Axis {
-    public AxisHorizontal(Scale scale) {
-        super(scale);
+    public AxisHorizontal(Scale scale, AxisConfig axisConfig) {
+        super(scale, axisConfig);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
@@ -27,19 +26,25 @@ public class ScrollableChart {
 
     private int gap; // between Chart and Preview px
     private Margin margin;
-    private ScrollConfig scrollConfig = new ScrollConfig();
 
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
+    private Theme theme;
 
-    public ScrollableChart(boolean isPreviewEnabled) {
-        chart = new Chart();
+
+
+    public ScrollableChart(boolean isPreviewEnabled, Theme theme) {
+        this.theme = theme;
+        chart = new Chart(theme.getChartConfig());
         if (isPreviewEnabled) {
-            preview = new Chart();
+            preview = new Chart(theme.getPreviewConfig());
             preview.setTracesNaturalDrawingEnabled(false);
             chart.setTracesNaturalDrawingEnabled(true);
         }
-        setTheme(new DarkTheme());
+    }
+
+    public ScrollableChart(boolean isPreviewEnabled) {
+        this(isPreviewEnabled, new DarkTheme());
     }
 
     private void createScrolls() {
@@ -48,7 +53,7 @@ public class ScrollableChart {
             for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
                 if (chart.isXAxisUsed(xAxisIndex)) {
                     double axisExtent = chart.getXMinMax(xAxisIndex).length();
-                    Scroll scroll = new Scroll(axisExtent, scrollConfig, preview.getXAxisScale(0));
+                    Scroll scroll = new Scroll(axisExtent, theme.getScrollConfig(), preview.getXAxisScale(0));
                     scrolls.put(xAxisIndex, scroll);
                     final int scrollXIndex = xAxisIndex;
                     scroll.addListener(new ScrollListener() {
@@ -116,7 +121,7 @@ public class ScrollableChart {
 
     public void draw(BCanvas canvas) {
         if (preview != null) {
-         /*   Margin chartMargin = chart.getMargin(canvas);
+            Margin chartMargin = chart.getMargin(canvas);
             Margin previewMargin = preview.getMargin(canvas);
             if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
                 int left = Math.max(chartMargin.left(), previewMargin.left());
@@ -125,7 +130,7 @@ public class ScrollableChart {
                 previewMargin = new Margin(previewMargin.top(), right, previewMargin.bottom(), left);
                 chart.setMargin(canvas, chartMargin);
                 preview.setMargin(canvas, previewMargin);
-            }*/
+            }
 
         }
         chart.draw(canvas);
@@ -194,7 +199,9 @@ public class ScrollableChart {
 
         if (preview != null) {
             preview.setConfig(theme.getPreviewConfig());
-            scrollConfig = theme.getScrollConfig();
+            for (Integer key : scrolls.keySet()) {
+                scrolls.get(key).setConfig(theme.getScrollConfig());
+            }
         }
     }
 

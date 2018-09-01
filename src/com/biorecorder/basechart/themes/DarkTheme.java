@@ -22,10 +22,10 @@ public class DarkTheme extends Theme {
 
     public DarkTheme() {
         BColor chartBgColor = new BColor(18, 15, 18);//BColor.BLACK;
-        BColor chartMarginColor = chartBgColor;
+        BColor chartMarginColor = BColor.BLACK;//chartBgColor;
         BColor titleColor = new BColor(160, 140, 110);
 
-        BColor previewBgColor = new BColor(25, 25, 30); //new BColor(28, 25, 28);
+        BColor previewBgColor = BColor.BLACK; //new BColor(25, 25, 30); //new BColor(28, 25, 28);
         BColor previewMarginColor = previewBgColor;
 
         BColor axisColor = titleColor;
@@ -37,14 +37,15 @@ public class DarkTheme extends Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickLabelInside(false);
-        xAxisConfig.setTickMarkSize(3, 0);
+        xAxisConfig.setTickMarkSize(4, 0);
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickLabelInside(true);
-        yAxisConfig.setTickMarkSize(0, 3);
+        yAxisConfig.setTickMarkSize(4, 0);
 
 
+        chartConfig.setTraceColors(colors);
         chartConfig.setBackgroundColor(chartBgColor);
         chartConfig.setMarginColor(chartMarginColor);
         chartConfig.getTitleConfig().setTextColor(titleColor);
@@ -53,7 +54,9 @@ public class DarkTheme extends Theme {
         chartConfig.setTopAxisConfig(xAxisConfig);
         chartConfig.setBottomAxisConfig(xAxisConfig);
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
+        chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
 
+        previewConfig.setTraceColors(colors);
         previewConfig.setBackgroundColor(previewBgColor);
         previewConfig.setMarginColor(previewMarginColor);
         previewConfig.getTitleConfig().setTextColor(titleColor);
@@ -62,6 +65,7 @@ public class DarkTheme extends Theme {
         previewConfig.setTopAxisConfig(xAxisConfig);
         previewConfig.setBottomAxisConfig(xAxisConfig);
         previewConfig.getCrossHairConfig().setLineColor(crosshairColor);
+        previewConfig.getLegendConfig().setBackgroundColor(chartBgColor);
 
         scrollConfig.setScrollColor(scrollColor);
     }

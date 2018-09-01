@@ -9,8 +9,9 @@ import com.biorecorder.basechart.scales.Scale;
  * Created by galafit on 29/8/18.
  */
 abstract class AxisVertical extends Axis {
-    public AxisVertical(Scale scale) {
-        super(scale);
+
+    public AxisVertical(Scale scale, AxisConfig axisConfig) {
+        super(scale, axisConfig);
     }
 
     @Override

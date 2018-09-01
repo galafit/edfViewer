@@ -12,8 +12,8 @@ import com.biorecorder.basechart.scales.Scale;
  */
 public class AxisLeft extends AxisVertical {
 
-    public AxisLeft(Scale scale) {
-        super(scale);
+    public AxisLeft(Scale scale, AxisConfig axisConfig) {
+        super(scale, axisConfig);
     }
 
     @Override

@@ -16,6 +16,10 @@ public class Tooltip {
         this.tooltipConfig = tooltipConfig;
     }
 
+    public void setConfig(TooltipConfig tooltipConfig) {
+        this.tooltipConfig = tooltipConfig;
+    }
+
     public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
