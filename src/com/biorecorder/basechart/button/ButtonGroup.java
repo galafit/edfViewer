@@ -6,19 +6,19 @@ import java.util.List;
 /**
  * Created by galafit on 18/12/17.
  */
-public class BtnGroup {
-    private List<BtnModel> items = new ArrayList<BtnModel>();
-    private BtnModel selection;
+public class ButtonGroup {
+    private List<ButtonModel> items = new ArrayList<ButtonModel>();
+    private ButtonModel selection;
 
 
-    public void add(BtnModel item) {
+    public void add(ButtonModel item) {
        items.add(item);
        item.setGroup(this);
     }
 
-    public void setSelected(BtnModel item, boolean isSelected) {
+    public void setSelected(ButtonModel item, boolean isSelected) {
         if (isSelected && item != null && item != selection) {
-            BtnModel oldSelection = selection;
+            ButtonModel oldSelection = selection;
             selection = item;
             if (oldSelection != null) {
                 oldSelection.setSelected(false);
@@ -30,11 +30,11 @@ public class BtnGroup {
         }
     }
 
-    public BtnModel getSelection() {
+    public ButtonModel getSelection() {
         return selection;
     }
 
-    public boolean isSelected(BtnModel m) {
+    public boolean isSelected(ButtonModel m) {
         return (m == selection);
     }
 }

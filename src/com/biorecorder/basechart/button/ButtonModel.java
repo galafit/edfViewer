@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implemented similar to swing ToggleButtonModel (and swing ButtonGroup).
+ * Implemented similar to swing ButtonModel (and  ButtonGroup).
  * Permit to select only one or none
  * button in the button group.
  */
-public class BtnModel {
+public class ButtonModel {
     private List<StateListener> selectionListeners = new ArrayList<StateListener>();
-    private BtnGroup group;
+    private ButtonGroup group;
 
-    public void setGroup(BtnGroup group) {
+    public void setGroup(ButtonGroup group) {
         this.group = group;
     }
 

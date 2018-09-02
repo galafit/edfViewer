@@ -2,8 +2,8 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.StateListener;
-import com.biorecorder.basechart.button.ToggleBtn;
-import com.biorecorder.basechart.button.BtnGroup;
+import com.biorecorder.basechart.button.SwitchButton;
+import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
@@ -77,10 +77,10 @@ public class Chart {
     private int hoverPointIndex = -1;
     private int hoverTraceIndex = -1;
 
-    private BtnGroup buttonGroup = new BtnGroup();
+    private ButtonGroup buttonGroup = new ButtonGroup();
 
-    public Chart(ChartConfig chartConfig) {
-        this.chartConfig = chartConfig;
+    public Chart(ChartConfig chartConfig1) {
+        this.chartConfig = new ChartConfig(chartConfig1);
         dataManager = new DataManager(dataProcessingConfig);
 
         xAxisList.add(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
@@ -520,8 +520,8 @@ public class Chart {
     }
 
 
-    public void setConfig(ChartConfig chartConfig) {
-        this.chartConfig = chartConfig;
+    public void setConfig(ChartConfig chartConfig1) {
+        this.chartConfig = new ChartConfig(chartConfig1);
         for (int i = 0; i < xAxisList.size(); i++) {
             if(isXAxisBottom(i)) {
                 xAxisList.get(i).setConfig(chartConfig.getBottomAxisConfig());
@@ -537,7 +537,24 @@ public class Chart {
                yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
            }
         }
-        areasDirty = false;
+        // tooltips
+        tooltip = new Tooltip(chartConfig.getTooltipConfig());
+        crosshair = new Crosshair(chartConfig.getCrossHairConfig());
+
+        //legends
+        for (Legend legend : legends) {
+            legend.setConfig(chartConfig.getLegendConfig());
+        }
+
+        int colorsCount = chartConfig.getTraceColors().length;
+        for (int i = 0; i < traces.size(); i++) {
+            BColor traceColor = chartConfig.getTraceColors()[i % colorsCount];
+            traces.get(i).setMainColor(traceColor);
+            int stackNumber = traces.get(i).getYAxisIndex() / 2;
+            legends.get(stackNumber).getButton(i).setColor(traceColor);
+        }
+
+        areasDirty = true;
     }
 
     public void setTracesNaturalDrawingEnabled(boolean tracesNaturalDrawingEnabled) {
@@ -618,7 +635,7 @@ public class Chart {
         }
 
         // add trace legend button
-        ToggleBtn legendButton = new ToggleBtn(trace.getMainColor(), trace.getName());
+        SwitchButton legendButton = new SwitchButton(trace.getMainColor(), trace.getName());
         final int traceIndex = traces.size() - 1;
         legendButton.addListener(new StateListener() {
             @Override
@@ -631,7 +648,7 @@ public class Chart {
                 }
             }
         });
-        legends.get(stackNumber).add(legendButton);
+        legends.get(stackNumber).add(traceIndex, legendButton);
     }
 
     public void setXMinMax(int xAxisIndex, Double min,  Double max) {
@@ -682,7 +699,7 @@ public class Chart {
 
     public boolean selectTrace(int x, int y) {
         for (Legend legend : legends) {
-            if(legend.toggle(x, y)) {
+            if(legend.selectItem(x, y)) {
                 return true;
             }
         }

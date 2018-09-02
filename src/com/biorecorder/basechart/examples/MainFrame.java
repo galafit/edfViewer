@@ -2,6 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.ScrollableChart;
 import com.biorecorder.basechart.swing.ChartPanel;
+import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.traces.LineTraceConfig;
 import com.biorecorder.basechart.lists.IntArrayList;
 import com.biorecorder.basechart.data.XYData;
@@ -121,6 +122,13 @@ public class MainFrame extends JFrame {
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        chart.setTheme(new WhiteTheme());
+        chartPanel.repaint();
     }
 
     public void update() {

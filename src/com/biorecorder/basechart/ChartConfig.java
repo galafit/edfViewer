@@ -24,6 +24,23 @@ public class ChartConfig {
     private AxisConfig bottomAxisConfig = new AxisConfig();
     private AxisConfig topAxisConfig = new AxisConfig();
 
+    public ChartConfig() {
+    }
+
+    public ChartConfig(ChartConfig chartConfig) {
+        traceColors = chartConfig.traceColors;
+        backgroundColor = chartConfig.backgroundColor;
+        marginColor = chartConfig.marginColor;
+        margin = chartConfig.margin;
+        titleConfig = new TitleConfig(chartConfig.titleConfig);
+        legendConfig = new LegendConfig(chartConfig.legendConfig);
+        tooltipConfig = chartConfig.tooltipConfig;
+        crossHairConfig = chartConfig.crossHairConfig;
+        leftAxisConfig = new AxisConfig(chartConfig.leftAxisConfig);
+        rightAxisConfig = new AxisConfig(chartConfig.rightAxisConfig);
+        topAxisConfig = new AxisConfig(chartConfig.topAxisConfig);
+        bottomAxisConfig = new AxisConfig(chartConfig.bottomAxisConfig);
+    }
 
     public TitleConfig getTitleConfig() {
         return titleConfig;

@@ -2,6 +2,7 @@ package com.biorecorder.basechart.themes;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.TextStyle;
 
 /**
  * Created by galafit on 31/8/18.

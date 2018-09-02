@@ -6,25 +6,26 @@ import com.biorecorder.basechart.graphics.*;
 /**
  * Created by galafit on 18/12/17.
  */
-public class ToggleBtn {
-    private BtnModel model = new BtnModel();
+public class SwitchButton {
+    private ButtonModel model = new ButtonModel();
     private BColor color = BColor.BLACK;
     private String label = "";
-    private BColor background = BColor.LIGHT_GRAY;
-    private boolean isVisible = true;
+    private BColor backgroundColor = BColor.LIGHT_GRAY;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
-    private Margin margin = new Margin((int)(textStyle.getSize() * 0),
-            (int)(textStyle.getSize() * 1),
-            (int)(textStyle.getSize() * 0.5),
-            (int)(textStyle.getSize() * 1));
+    private Margin margin = new Margin((int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2));
+
     private BRectangle bounds;
 
-    public ToggleBtn(BColor color, String label) {
+    public SwitchButton(BColor color, String label) {
         this.color = color;
         this.label = label;
     }
 
-    public void toggle() {
+
+    public void switchState() {
         if(model.isSelected()) {
             model.setSelected(false);
         } else {
@@ -43,7 +44,7 @@ public class ToggleBtn {
         model.addListener(listener);
     }
 
-    public BtnModel getModel() {
+    public ButtonModel getModel() {
         return model;
     }
 
@@ -72,29 +73,29 @@ public class ToggleBtn {
         if(bounds == null) {
             createBounds(canvas);
         }
-        // draw background
-        canvas.setColor(background);
+        // draw backgroundColor
+        canvas.setColor(backgroundColor);
         canvas.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         canvas.setColor(color);
 
         // draw item
         TextMetric tm = canvas.getTextMetric(textStyle);
-        int x = bounds.x + getPadding();
-        int y = bounds.y + getPadding() + tm.ascent();
+        int x = bounds.x + margin.left();
+        int y = bounds.y + margin.top() + tm.ascent();
         canvas.drawString(label, x, y);
 
         if(model.isSelected()) {
             // draw border
             canvas.drawRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
             // draw selection marker
-            x = bounds.x + getPadding() + tm.stringWidth(label) + getColorMarkerPadding();
+            x = bounds.x + margin.left() + tm.stringWidth(label) + getCheckMarkPadding();
             y = bounds.y + bounds.height/2;
 
-            int x1 = x + getColorMarkerSize()/2;
-            int y1 = bounds.y + bounds.height - getPadding();
+            int x1 = x + getCheckMarkSize()/2;
+            int y1 = bounds.y + bounds.height - margin.bottom();
 
-            int x2 = x + getColorMarkerSize();
-            int y2 = bounds.y + getPadding();
+            int x2 = x + getCheckMarkSize();
+            int y2 = bounds.y + margin.top();
 
             canvas.drawLine(x, y, x1, y1);
             canvas.drawLine(x1, y1, x2, y2);
@@ -103,41 +104,39 @@ public class ToggleBtn {
     }
 
     private int getItemWidth(TextMetric tm) {
-        return tm.stringWidth(label) + getColorMarkerSize() + getColorMarkerPadding()
-                + 2 * getPadding();
+        return tm.stringWidth(label) + getCheckMarkSize() + getCheckMarkPadding()
+                + margin.left() + margin.right();
 
     }
 
     private int getItemHeight(TextMetric tm) {
-        return tm.height() + 2 * getPadding();
+        return tm.height() + margin.top() + margin.bottom();
 
     }
 
-    private int getPadding() {
-        return (int) (textStyle.getSize() * 0.2);
-    }
-
-    private int getColorMarkerSize() {
+    private int getCheckMarkSize() {
         return (int) (textStyle.getSize() * 0.8);
     }
 
-    private int getColorMarkerPadding() {
+    private int getCheckMarkPadding() {
         return (int) (textStyle.getSize() * 0.5);
     }
 
-    public void setBackground(BColor background) {
-        this.background = background;
-    }
-
-    public void setVisible(boolean visible) {
-        isVisible = visible;
+    public void setBackgroundColor(BColor backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     public void setTextStyle(TextStyle textStyle) {
         this.textStyle = textStyle;
+        bounds = null;
     }
 
     public void setMargin(Margin margin) {
         this.margin = margin;
+        bounds = null;
+    }
+
+    public void setColor(BColor color) {
+        this.color = color;
     }
 }

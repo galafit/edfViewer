@@ -1,7 +1,6 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.Margin;
 import com.biorecorder.basechart.graphics.TextStyle;
 
 
@@ -15,22 +14,26 @@ public class LegendConfig {
   //  private int borderWidth = 1;
  //   private BColor borderColor = BColor.LIGHT_GRAY;
     private BColor backgroundColor = BColor.WHITE;
-    private BColor textColor = BColor.BLACK;
-    private Margin margin = new Margin((int)(getTextStyle().getSize() * 0),
-            (int)(getTextStyle().getSize() * 1),
-            (int)(getTextStyle().getSize() * 0.5),
-            (int)(getTextStyle().getSize() * 1));
+    private Margin itemMargin = new Margin((int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2),
+            (int)(textStyle.getSize() * 0.2));
 
-    public BColor getTextColor() {
-        return textColor;
+    public LegendConfig() {
     }
 
-    public void setTextColor(BColor textColor) {
-        this.textColor = textColor;
+    public LegendConfig(LegendConfig legendConfig) {
+        backgroundColor = legendConfig.backgroundColor;
+        textStyle = legendConfig.textStyle;
+        itemMargin = legendConfig.itemMargin;
     }
 
     public TextStyle getTextStyle() {
         return textStyle;
+    }
+
+    public void setTextStyle(TextStyle textStyle) {
+        this.textStyle = textStyle;
     }
 
     public BColor getBackgroundColor() {
@@ -41,11 +44,11 @@ public class LegendConfig {
         this.backgroundColor = backgroundColor;
     }
 
-    public Margin getMargin() {
-        return margin;
+    public Margin getItemMargin() {
+        return itemMargin;
     }
 
-    public void setMargin(Margin margin) {
-        this.margin = margin;
+    public void setItemMargin(Margin itemMargin) {
+        this.itemMargin = itemMargin;
     }
 }

@@ -1,41 +1,42 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.button.ToggleBtn;
-import com.biorecorder.basechart.button.BtnGroup;
+import com.biorecorder.basechart.button.SwitchButton;
+import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.graphics.HorizontalAlign;
 import com.biorecorder.basechart.graphics.VerticalAlign;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  * Created by hdablin on 11.08.17.
  */
 public class Legend {
-    private BtnGroup buttonGroup;
-    private List<ToggleBtn> buttons = new ArrayList<ToggleBtn>();
-    private LegendConfig legendConfig;
+    private ButtonGroup buttonGroup;
+    private Map<Integer, SwitchButton> buttons = new HashMap<>();
+    private LegendConfig config;
     private HorizontalAlign halign;
     private VerticalAlign valign;
     private BRectangle area;
     private boolean isDirty = true;
 
-    public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign, BtnGroup buttonGroup) {
-        this.legendConfig = legendConfig;
+    public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign, ButtonGroup buttonGroup) {
+        this.config = legendConfig;
         this.buttonGroup = buttonGroup;
         this.halign = halign;
         this.valign = valign;
     }
 
-    public boolean toggle(int x, int y) {
-        for (ToggleBtn button : buttons) {
-           if(button.contains(x, y)) {
-               button.toggle();
-               return true;
-           }
+    public boolean selectItem(int x, int y) {
+        for (Integer key : buttons.keySet()){
+            SwitchButton button = buttons.get(key);
+            if(button.contains(x, y)) {
+                button.switchState();
+                return true;
+            }
         }
         return false;
     }
@@ -45,40 +46,59 @@ public class Legend {
         isDirty = true;
     }
 
-    public void add(ToggleBtn legendButton) {
-        buttons.add(legendButton);
+    public void setConfig(LegendConfig legendConfig) {
+        config = legendConfig;
+        for (Integer key : buttons.keySet()){
+            SwitchButton button = buttons.get(key);
+            button.setBackgroundColor(config.getBackgroundColor());
+            button.setTextStyle(config.getTextStyle());
+            button.setMargin(config.getItemMargin());
+        }
+        isDirty = true;
+    }
+
+    public void add(int traceNumber, SwitchButton legendButton) {
+        buttons.put(traceNumber, legendButton);
         buttonGroup.add(legendButton.getModel());
-        legendButton.setBackground(legendConfig.getBackgroundColor());
-        legendButton.setTextStyle(legendConfig.getTextStyle());
+        legendButton.setBackgroundColor(config.getBackgroundColor());
+        legendButton.setTextStyle(config.getTextStyle());
+        legendButton.setMargin(config.getItemMargin());
+        isDirty = true;
+    }
+
+    public SwitchButton getButton(int traceNumber) {
+        return buttons.get(traceNumber);
     }
 
     private void createButtons(BCanvas canvas) {
         if(halign == HorizontalAlign.RIGHT) {
             int x = area.x + area.width;
             int y = area.y;
-            for (int i = 0; i < buttons.size(); i++) {
-                BRectangle btnArea = buttons.get(i).getBounds(canvas);
+            for (Integer key : buttons.keySet()) {
+                SwitchButton button = buttons.get(key);
+                BRectangle btnArea = button.getBounds(canvas);
                 if(x - btnArea.width <= area.x) {
                     x = area.x + area.width;
                     y += btnArea.height;
-                    buttons.get(i).setLocation(x - btnArea.width, y, canvas);
+                    button.setLocation(x - btnArea.width, y, canvas);
                 } else {
-                    buttons.get(i).setLocation(x - btnArea.width, y, canvas);
+                    button.setLocation(x - btnArea.width, y, canvas);
                     x -= btnArea.width - getInterItemSpace();
                 }
             }
         }
         if(halign == HorizontalAlign.LEFT) {
-            int x = area.x;
+             int x = area.x;
             int y = area.y;
-            for (int i = 0; i < buttons.size(); i++) {
-                BRectangle btnArea = buttons.get(i).getBounds(canvas);
+            for (Integer key : buttons.keySet()) {
+                SwitchButton button = buttons.get(key);
+                BRectangle btnArea = button.getBounds(canvas);
                 if(x + btnArea.width >= area.x + area.width) {
                     x = area.x;
                     y += btnArea.height;
-                    buttons.get(i).setLocation(x, y, canvas);
+                    button.setLocation(x, y, canvas);
                 } else {
-                    buttons.get(i).setLocation(x, y, canvas);
+                    button.setLocation(x, y, canvas);
                     x += btnArea.width + getInterItemSpace();
                 }
             }
@@ -94,9 +114,9 @@ public class Legend {
         if(isDirty) {
             createButtons(canvas);
         }
-        canvas.setTextStyle(legendConfig.getTextStyle());
-        for (int i = 0; i < buttons.size(); i++) {
-           buttons.get(i).draw(canvas);
+        canvas.setTextStyle(config.getTextStyle());
+        for (Integer key : buttons.keySet()) {
+           buttons.get(key).draw(canvas);
         }
     }
 

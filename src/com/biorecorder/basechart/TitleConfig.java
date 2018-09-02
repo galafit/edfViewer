@@ -16,6 +16,15 @@ public class TitleConfig {
                 (int)(textStyle.getSize() * 0.5),
                 (int)(textStyle.getSize() * 0.5));*/
 
+    public TitleConfig() {
+    }
+
+    public TitleConfig(TitleConfig titleConfig) {
+        textStyle = titleConfig.textStyle;
+        textColor = titleConfig.textColor;
+        margin = titleConfig.margin;
+    }
+
     public TextStyle getTextStyle() {
         return textStyle;
     }

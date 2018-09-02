@@ -10,6 +10,14 @@ public class ScrollConfig {
     private BColor scrollColor = BColor.RED;
     private int scrollMinWidth = 10; //px
 
+    public ScrollConfig() {
+    }
+
+    public ScrollConfig(ScrollConfig scrollConfig) {
+        scrollColor = scrollConfig.scrollColor;
+        scrollMinWidth = scrollConfig.scrollMinWidth;
+    }
+
     public void setScrollColor(BColor scrollColor) {
         this.scrollColor = scrollColor;
     }

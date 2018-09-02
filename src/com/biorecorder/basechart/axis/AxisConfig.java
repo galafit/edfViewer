@@ -57,7 +57,7 @@ public class AxisConfig {
         tickMarkOutsideSize = axisConfig.tickMarkOutsideSize;
         tickMarkColor = axisConfig.tickMarkColor;
         tickLabelColor = axisConfig.tickLabelColor;
-        tickLabelTextStyle = new TextStyle(axisConfig.tickLabelTextStyle);
+        tickLabelTextStyle = axisConfig.tickLabelTextStyle;
         isTickLabelInside = axisConfig.isTickLabelInside;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
@@ -66,7 +66,7 @@ public class AxisConfig {
         minorTickMarkColor = axisConfig.minorTickMarkColor;
 
         titlePadding = axisConfig.titlePadding;
-        titleTextStyle = new TextStyle(axisConfig.titleTextStyle);
+        titleTextStyle = axisConfig.titleTextStyle;
         titleColor = axisConfig.titleColor;
     }
 
