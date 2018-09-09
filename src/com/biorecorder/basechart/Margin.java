@@ -16,6 +16,13 @@ public class Margin {
         this.left = left;
     }
 
+    public Margin(int margin) {
+        this.top = margin;
+        this.right = margin;
+        this.bottom = margin;
+        this.left = margin;
+    }
+
     public int top() {
         return top;
     }
@@ -30,6 +37,20 @@ public class Margin {
 
     public int left() {
         return left;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof Margin) {
+            Margin  m = (Margin) obj;
+            if(m.right == right && m.left == left && m.top == top && m.bottom == bottom) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

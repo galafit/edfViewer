@@ -55,16 +55,16 @@ public class LinearScale implements Scale {
     }
 
     @Override
-    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo formatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
-        provider.setTickCount(tickCount);
+        provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public TickProvider getTickProviderByStep(double tickStep,  TickFormatInfo formatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, TickFormatInfo formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
-        provider.setTickStep(tickStep);
+        provider.setTickInterval(tickInterval);
         return provider;
     }
 
@@ -73,8 +73,8 @@ public class LinearScale implements Scale {
         if (numberFormatter == null) {
             float rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
             double domainLength = domain[domain.length - 1] - domain[0];
-            NormalizedNumber pointStep = new NormalizedNumber(domainLength / rangePointsCount);
-            numberFormatter = getNumberFormat(pointStep.getPower(), null);
+            NormalizedNumber pointInterval = new NormalizedNumber(domainLength / rangePointsCount);
+            numberFormatter = getNumberFormat(pointInterval.getPower(), null);
         }
         long longPart = (long) value;
         if(value == longPart) {
@@ -123,7 +123,7 @@ public class LinearScale implements Scale {
 
 
     class LinearTickProvider implements TickProvider {
-        private double tickStep = 1;
+        private double tickInterval = 1;
         int tickDigits;
         int tickPower;
         private TickFormatInfo labelFormatInfo;
@@ -134,25 +134,25 @@ public class LinearScale implements Scale {
             this.labelFormatInfo = labelFormatInfo;
         }
 
-        public void setTickStep(double tickStep) {
-            this.tickStep = tickStep;
-            NormalizedNumber normalizedStep = new NormalizedNumber(tickStep);
-            tickPower = normalizedStep.getPowerOfLastSignificantDigit();
-            tickDigits = (int) (normalizedStep.getMantissa() * Math.pow(10, tickPower));
+        public void setTickInterval(double tickInterval) {
+            this.tickInterval = tickInterval;
+            NormalizedNumber normalizedInterval = new NormalizedNumber(tickInterval);
+            tickPower = normalizedInterval.getPowerOfLastSignificantDigit();
+            tickDigits = (int) (normalizedInterval.getMantissa() * Math.pow(10, tickPower));
             labelFormat = getNumberFormat(tickPower, labelFormatInfo);
         }
 
-        public void setTickCount(int tickCount) {
-            NormalizedNumber normalizedStep = getRoundTickStep(tickCount);
-            tickStep = normalizedStep.getValue();
-            tickDigits = (int) normalizedStep.getMantissa();
-            tickPower = normalizedStep.getPower();
+        public void setTickIntervalCount(int tickIntervalCount) {
+            NormalizedNumber normalizedInterval = getRoundTickInterval(tickIntervalCount);
+            tickInterval = normalizedInterval.getValue();
+            tickDigits = (int) normalizedInterval.getMantissa();
+            tickPower = normalizedInterval.getPower();
             labelFormat = getNumberFormat(tickPower, labelFormatInfo);
         }
 
         @Override
-        public void increaseTickStep(int increaseFactor) {
-            tickStep *= increaseFactor;
+        public void increaseTickInterval(int increaseFactor) {
+            tickInterval *= increaseFactor;
             tickDigits *= increaseFactor;
             while (tickDigits % 10 == 0) {
                 tickDigits /= 10;
@@ -167,7 +167,7 @@ public class LinearScale implements Scale {
                 double min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() + tickStep;
+                double tickValue = lastTick.getValue() + tickInterval;
                 lastTick = new Tick(tickValue, labelFormat.format(tickValue));
             }
             return lastTick;
@@ -179,7 +179,7 @@ public class LinearScale implements Scale {
                 double min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() - tickStep;
+                double tickValue = lastTick.getValue() - tickInterval;
                 lastTick = new Tick(tickValue, labelFormat.format(tickValue));
             }
             return lastTick;
@@ -187,32 +187,32 @@ public class LinearScale implements Scale {
 
         @Override
         public Tick getUpperTick(double value) {
-            double tickValue = Math.ceil(value / tickStep) * tickStep;
+            double tickValue = Math.ceil(value / tickInterval) * tickInterval;
             lastTick = new Tick(tickValue, labelFormat.format(tickValue));
             return lastTick;
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            double tickValue = Math.floor(value / tickStep) * tickStep;
+            double tickValue = Math.floor(value / tickInterval) * tickInterval;
             lastTick = new Tick(tickValue, labelFormat.format(tickValue));
             return lastTick;
         }
 
 
         /**
-         * Calculates round Tick Step
+         * Calculates round Tick Interval
          * that is  multiples of 2, 5 or 10.
          * FirstDigit is in {1,2,5,10};
          */
-        private NormalizedNumber getRoundTickStep(int tickCount) {
-            if (tickCount <= 1) {
-                String errMsg = MessageFormat.format("Invalid ticks tickCount: {0}. Expected >= 2", tickCount);
+        private NormalizedNumber getRoundTickInterval(int tickIntervalCount) {
+            if (tickIntervalCount <= 1) {
+                String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
                 throw new IllegalArgumentException(errMsg);
             }
             double max = domain[domain.length - 1];
             double min = domain[0];
-            double step = (max - min) / (tickCount - 1);
+            double step = (max - min) / tickIntervalCount;
             NormalizedNumber normalizedStep = new NormalizedNumber(step);
 
             int power = normalizedStep.getPower();
@@ -244,69 +244,6 @@ public class LinearScale implements Scale {
                     break;
             }
             return new NormalizedNumber(firstDigit, power);
-        }
-
-        /**
-         * Find closest roundStep >= given step
-         *
-         * @param step given step
-         * @return closest roundInterval >= given step
-         */
-        private NormalizedNumber roundStepUp(double step) {
-            // int[] roundValues = {1, 2, 3, 4, 5, 6, 8, 10};
-            int[] roundSteps = {1, 2, 4, 5, 8, 10};
-            NormalizedNumber normalizedStep = new NormalizedNumber(step);
-            int power = normalizedStep.getPower();
-            int firstDigit = (int) normalizedStep.getMantissa();
-            if (firstDigit < normalizedStep.getMantissa()) {
-                firstDigit++;
-            }
-
-            // find the closest roundStep that is >= firstDigits
-            for (int roundStep : roundSteps) {
-                if (roundStep >= firstDigit) {
-                    firstDigit = roundStep;
-                    break;
-                }
-            }
-            if (firstDigit == 10) {
-                firstDigit = 1;
-                power++;
-            }
-            return new NormalizedNumber(firstDigit, power);
-        }
-
-        /**
-         * Find and set round ticksStep such that:
-         * resultantTicksAmount <= maxCount
-         *
-         * @param maxCount - desirable amount of ticks
-         */
-        private NormalizedNumber getStepForMaxTickCount(int maxCount) {
-            if (maxCount <= 1) {
-                String errMsg = MessageFormat.format("Invalid ticks amount: {0}. Expected >= 2", maxCount);
-                throw new IllegalArgumentException(errMsg);
-            }
-            double max = domain[domain.length - 1];
-            double min = domain[0];
-            double step = (max - min) / (maxCount - 1);
-            NormalizedNumber roundStep = roundStepUp(step);
-            tickStep = roundStep.getValue();
-            int ticksCount = (int) ((getLowerTick(min).getValue() - getUpperTick(max).getValue()) / tickStep) + 1;
-
-        /*
-         * Due to rounding (roundMin < getMin < max < roundMax)
-         * sometimes it is possible that the resultant ticksCount may be
-         * greater than the maxCount:
-         * resultantAmount = maxCount + 1.
-         * In this case we repeat the same procedure with (maxCount -1)
-         */
-            if (ticksCount > maxCount && maxCount > 2) {
-                maxCount--;
-                step = (max - min) / (maxCount - 1);
-                roundStep = roundStepUp(step);
-            }
-            return roundStep;
         }
     }
 }

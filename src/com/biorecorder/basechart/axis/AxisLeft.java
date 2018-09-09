@@ -21,14 +21,13 @@ public class AxisLeft extends AxisVertical {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
+        int labelHeight = tm.ascent();
 
-        if(config.isTickLabelInside()) {
+        if(isTickLabelInside) {
             int y = tickPosition - space;
             int x = axisWidth / 2  + labelPadding;
-            int labelHeight = tm.height();
-
             if(y - labelHeight/2 - 1 < getEnd()) {
-                y += labelPadding;
+                y += space;
                 return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
             }
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
@@ -36,9 +35,7 @@ public class AxisLeft extends AxisVertical {
         } else {
             int y = tickPosition;
             int x = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
-            int labelHeight = tm.height();
             if(y + labelHeight/2 + 1 > getStart()) {
-                y -= space;
                 return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
             }
             if(y - labelHeight/2 - 1 < getEnd()) {
@@ -70,7 +67,7 @@ public class AxisLeft extends AxisVertical {
     protected Text createTitle(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
         int x = -getWidth(canvas);
-        int y = (getEnd() + getStart()) / 2;
+        int y = (int)(getEnd() + getStart()) / 2;
         return new Text(title, x, y, TextAnchor.END, TextAnchor.MIDDLE, -90, tm);
     }
 }

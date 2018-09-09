@@ -29,6 +29,6 @@ abstract class AxisHorizontal extends Axis {
 
     @Override
     protected void drawAxisLine(BCanvas canvas) {
-        canvas.drawLine(getStart(), 0, getEnd(), 0);
+        canvas.drawLine((int)getStart(), 0, (int)getEnd(), 0);
     }
 }

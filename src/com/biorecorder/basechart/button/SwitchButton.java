@@ -56,6 +56,15 @@ public class SwitchButton {
         bounds.y = y;
     }
 
+    public void moveLocation(int dx, int dy) {
+        if(bounds == null) {
+            return;
+        }
+        bounds.x += dx;
+        bounds.y += dy;
+    }
+
+
     public BRectangle getBounds(BCanvas canvas) {
         if(bounds == null) {
             createBounds(canvas);

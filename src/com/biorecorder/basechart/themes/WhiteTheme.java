@@ -38,13 +38,11 @@ public class WhiteTheme extends Theme {
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
-        xAxisConfig.setTickLabelInside(false);
         xAxisConfig.setTickMarkSize(4, 0);
 
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
-        yAxisConfig.setTickLabelInside(true);
         yAxisConfig.setTickMarkSize(4, 0);
 
         chartConfig.setTraceColors(colors);

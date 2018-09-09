@@ -18,6 +18,9 @@ import java.util.*;
 public class ScrollableChart {
     private Chart chart;
     private Chart preview;
+    private int previewHeightPct = 30; // The height of the preview as a percent of full height
+    private int previewHeightPixels = 80; // The height of the preview in pixels
+
     private BRectangle fullArea;
     private BRectangle chartArea;
     private BRectangle previewArea;
@@ -31,31 +34,31 @@ public class ScrollableChart {
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
     private Theme theme;
 
-
-
-    public ScrollableChart(boolean isPreviewEnabled, Theme theme) {
-        this.theme = theme;
+    public ScrollableChart(boolean isPreviewEnabled) {
+        this.theme = new DarkTheme();
         chart = new Chart(theme.getChartConfig());
         if (isPreviewEnabled) {
             preview = new Chart(theme.getPreviewConfig());
-            preview.setTracesNaturalDrawingEnabled(false);
-            chart.setTracesNaturalDrawingEnabled(true);
         }
     }
 
-    public ScrollableChart(boolean isPreviewEnabled) {
-        this(isPreviewEnabled, new DarkTheme());
-    }
 
     private void createScrolls() {
         if (preview != null) {
             updatePreviewMinMax();
-            for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
-                if (chart.isXAxisUsed(xAxisIndex)) {
-                    double axisExtent = chart.getXMinMax(xAxisIndex).length();
-                    Scroll scroll = new Scroll(axisExtent, theme.getScrollConfig(), preview.getXAxisScale(0));
-                    scrolls.put(xAxisIndex, scroll);
-                    final int scrollXIndex = xAxisIndex;
+            double xMin = preview.getXMinMax(0).getMin();
+            for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
+                if (chart.isXAxisUsed(xIndex)) {
+                    double xExtent = chart.getBestExtent(xIndex);
+                    Scroll scroll = new Scroll(xExtent, theme.getScrollConfig(), preview.getXAxisScale(0));
+
+                    double xMax = xMin + xExtent;
+                    chart.setXMinMax(xIndex, xMin, xMax);
+                    for (int i = 0; i < chart.yAxisCount(); i++) {
+                        chart.autoScaleY(i);
+                    }
+                    scrolls.put(xIndex, scroll);
+                    final int scrollXIndex = xIndex;
                     scroll.addListener(new ScrollListener() {
                         @Override
                         public void onScrollChanged(double scrollValue, double scrollExtent) {
@@ -121,7 +124,7 @@ public class ScrollableChart {
 
     public void draw(BCanvas canvas) {
         if (preview != null) {
-            Margin chartMargin = chart.getMargin(canvas);
+           /* Margin chartMargin = chart.getMargin(canvas);
             Margin previewMargin = preview.getMargin(canvas);
             if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
                 int left = Math.max(chartMargin.left(), previewMargin.left());
@@ -130,11 +133,7 @@ public class ScrollableChart {
                 previewMargin = new Margin(previewMargin.top(), right, previewMargin.bottom(), left);
                 chart.setMargin(canvas, chartMargin);
                 preview.setMargin(canvas, previewMargin);
-            }
-
-        }
-        chart.draw(canvas);
-        if(preview != null) {
+            }*/
             preview.draw(canvas);
             if(scrolls.keySet().size() == 0) {
                 createScrolls();
@@ -142,13 +141,12 @@ public class ScrollableChart {
             for (Integer key : scrolls.keySet()) {
                 scrolls.get(key).draw(canvas, preview.getGraphArea(canvas));
             }
+
         }
+        chart.draw(canvas);
     }
 
-    private void calculateAndSetAreas(BRectangle area) {
-        if(area == null) {
-            return;
-        }
+    private void calculateAndSetAreas() {
         int top = 0;
         int bottom = 0;
         int left = 0;
@@ -159,26 +157,28 @@ public class ScrollableChart {
             left = margin.left();
             right = margin.right();
         }
-        int width = area.width - left - right;
-        int height = area.height - top - bottom;
+        int width = fullArea.width - left - right;
+        int height = fullArea.height - top - bottom;
         if (preview != null) {
-            int chartWeight = chart.getStacksSumWeight();
-            int previewWeight = preview.getStacksSumWeight();
-            int chartHeight;
-            int previewHeight;
-            if(chartWeight > 0 && previewWeight > 0) {
-                chartHeight = (height - gap) * chartWeight / (chartWeight + previewWeight);
-            } else {
-                chartHeight = 2 * height / 3;
+            height -= gap;
+            int previewHeight = previewHeightPixels;
+            if(previewHeightPct > 0) {
+                previewHeight = height * previewHeightPct / 100;
             }
-            previewHeight = (height - gap) - chartHeight;
 
-            chartArea = new BRectangle(area.x + left, area.y + top, width, chartHeight);
-            previewArea = new BRectangle(area.x + left, area.y + chartHeight + top + gap, width, previewHeight);
+            int chartHeight = height - previewHeight;
+            if(chartHeight <= 0) {
+                String errMsg = "Preview height too big: " + previewHeightPixels + ". Full height: " + height;
+                throw new IllegalStateException(errMsg);
+            }
+
+            chartArea = new BRectangle(fullArea.x + left, fullArea.y + top, width, chartHeight);
+            previewArea = new BRectangle(fullArea.x + left, fullArea.y + chartHeight + top + gap, width, previewHeight);
+
             chart.setArea(chartArea);
             preview.setArea(previewArea);
         } else {
-            chartArea = new BRectangle(area.x + left, area.y + top, width, height);
+            chartArea = new BRectangle(fullArea.x + left, fullArea.y + top, width, height);
             chart.setArea(chartArea);
         }
     }
@@ -208,7 +208,7 @@ public class ScrollableChart {
 
     public void setArea(BRectangle area) {
         fullArea = area;
-        calculateAndSetAreas(area);
+        calculateAndSetAreas();
     }
 
     public void update() {
@@ -227,12 +227,10 @@ public class ScrollableChart {
 
     public void addChartStack() {
         chart.addStack();
-        calculateAndSetAreas(fullArea);
     }
 
     public void addChartStack(int weight) {
         chart.addStack(weight);
-        calculateAndSetAreas(fullArea);
     }
 
     public void addChartTrace(int stackNumber, Trace trace, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
@@ -360,12 +358,10 @@ public class ScrollableChart {
 
     public void addPreviewStack() {
         preview.addStack();
-        calculateAndSetAreas(fullArea);
     }
 
     public void addPreviewStack(int weight) {
         preview.addStack(weight);
-        calculateAndSetAreas(fullArea);
     }
 
     public void addPreviewTrace(int stackNumber, Trace trace, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {

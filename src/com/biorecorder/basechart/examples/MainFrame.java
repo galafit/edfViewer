@@ -39,7 +39,7 @@ public class MainFrame extends JFrame {
         }
 
         for (int i = 0; i < 16000; i++) {
-            yData2.add(i + 100);
+            yData2.add(i);
         }
 
         for (int i = 0; i < 16000; i++) {
@@ -90,8 +90,8 @@ public class MainFrame extends JFrame {
        // config.addTrace(new LineTraceConfig(false), xyData2);
 
 
-        chart.addChartStack();
-        chart.addChartTrace(1, new LineTrace(new LineTraceConfig(true)), xyData2, false, false);
+       // chart.addChartStack();
+       // chart.addChartTrace(1, new LineTrace(new LineTraceConfig(true)), xyData1, false, false);
 
         //  config.addTrace(new LineTraceConfig(true), xyData2, "EEG2", "uVolts");
      //   config.addTrace(new LineTraceConfig(false), xyData1);
@@ -122,13 +122,13 @@ public class MainFrame extends JFrame {
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
-        try {
+      /*  try {
             Thread.sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         chart.setTheme(new WhiteTheme());
-        chartPanel.repaint();
+        chartPanel.repaint();*/
     }
 
     public void update() {

@@ -23,7 +23,7 @@ public class AxisConfig {
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
-    
+
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
     private BStroke gridLineStroke = new BStroke(1);
@@ -33,8 +33,6 @@ public class AxisConfig {
     private BColor minorGridColor = BColor.LIGHT_GRAY;
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
-
-    private boolean isTickLabelInside = false;
 
 
     public AxisConfig() {
@@ -58,7 +56,6 @@ public class AxisConfig {
         tickMarkColor = axisConfig.tickMarkColor;
         tickLabelColor = axisConfig.tickLabelColor;
         tickLabelTextStyle = axisConfig.tickLabelTextStyle;
-        isTickLabelInside = axisConfig.isTickLabelInside;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -171,14 +168,6 @@ public class AxisConfig {
 
     public BColor getTickLabelColor() {
         return tickLabelColor;
-    }
-
-    public boolean isTickLabelInside() {
-        return isTickLabelInside;
-    }
-
-    public void setTickLabelInside(boolean tickLabelInside) {
-        isTickLabelInside = tickLabelInside;
     }
 
 

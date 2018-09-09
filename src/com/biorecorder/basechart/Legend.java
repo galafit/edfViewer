@@ -17,10 +17,11 @@ import java.util.Map;
 public class Legend {
     private ButtonGroup buttonGroup;
     private Map<Integer, SwitchButton> buttons = new HashMap<>();
+    private BRectangle bounds;
+
     private LegendConfig config;
     private HorizontalAlign halign;
     private VerticalAlign valign;
-    private BRectangle area;
     private boolean isDirty = true;
 
     public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign, ButtonGroup buttonGroup) {
@@ -42,8 +43,34 @@ public class Legend {
     }
 
     public  void setArea(BRectangle area) {
-        this.area = area;
-        isDirty = true;
+        if(bounds == null || bounds.width > area.width) {
+            bounds = area;
+            isDirty = true;
+        }
+        int dx = 0;
+        int dy = 0;
+        if(halign == HorizontalAlign.LEFT) {
+            dx = area.x - bounds.x;
+        }
+        if(halign == HorizontalAlign.RIGHT) {
+            dx = area.x + area.width - bounds.width - bounds.x;
+        }
+        dy = area.y - bounds.y;
+        if(dx != 0 || dy != 0) {
+            moveBounds(dx, dy);
+        }
+
+        bounds = area;
+    }
+
+    private void moveBounds(int dx, int dy) {
+        if(dx != 0 || dy != 0) {
+            bounds.x += dx;
+            bounds.y += dy;
+            for (Integer key : buttons.keySet()){
+                buttons.get(key).moveLocation(dx, dy);
+            }
+        }
     }
 
     public void setConfig(LegendConfig legendConfig) {
@@ -70,38 +97,58 @@ public class Legend {
         return buttons.get(traceNumber);
     }
 
-    private void createButtons(BCanvas canvas) {
+    private void arrangeButtons(BCanvas canvas) {
+        BRectangle area = bounds;
         if(halign == HorizontalAlign.RIGHT) {
             int x = area.x + area.width;
             int y = area.y;
+            int width = 0;
+            int height = 0;
             for (Integer key : buttons.keySet()) {
                 SwitchButton button = buttons.get(key);
                 BRectangle btnArea = button.getBounds(canvas);
+                if(height == 0) {
+                    height = btnArea.height;
+                }
                 if(x - btnArea.width <= area.x) {
                     x = area.x + area.width;
                     y += btnArea.height;
+                    height += btnArea.height;
                     button.setLocation(x - btnArea.width, y, canvas);
                 } else {
                     button.setLocation(x - btnArea.width, y, canvas);
-                    x -= btnArea.width - getInterItemSpace();
+                    x -= btnArea.width;
+                    width = Math.max(width, area.x + area.width - x);
+                    x -= getInterItemSpace();
                 }
             }
+            bounds = new BRectangle(area.x + area.width - width, area.y, width, height);
         }
         if(halign == HorizontalAlign.LEFT) {
-             int x = area.x;
+            int x = area.x;
             int y = area.y;
+            int width = 0;
+            int height = 0;
             for (Integer key : buttons.keySet()) {
                 SwitchButton button = buttons.get(key);
                 BRectangle btnArea = button.getBounds(canvas);
+                if(height == 0) {
+                    height = btnArea.height;
+                }
                 if(x + btnArea.width >= area.x + area.width) {
                     x = area.x;
                     y += btnArea.height;
+                    height += btnArea.height;
                     button.setLocation(x, y, canvas);
                 } else {
                     button.setLocation(x, y, canvas);
-                    x += btnArea.width + getInterItemSpace();
+                    x += btnArea.width;
+                    width = Math.max(width, x);
+                    x += getInterItemSpace();
                 }
             }
+            bounds = new BRectangle(area.x, area.y, width, height);
+
         }
         isDirty = false;
     }
@@ -112,7 +159,7 @@ public class Legend {
             return;
         }
         if(isDirty) {
-            createButtons(canvas);
+            arrangeButtons(canvas);
         }
         canvas.setTextStyle(config.getTextStyle());
         for (Integer key : buttons.keySet()) {

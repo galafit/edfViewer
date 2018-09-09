@@ -90,16 +90,16 @@ public class TimeScale implements Scale {
     }
 
     @Override
-    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo labelFormatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
-        provider.setTickCount(tickCount);
+        provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public  TickProvider getTickProviderByStep(double tickStep,  TickFormatInfo labelFormatInfo) {
+    public  TickProvider getTickProviderByInterval(double tickInterval, TickFormatInfo labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
-        provider.setTickStep(tickStep);
+        provider.setTickInterval(tickInterval);
         return provider;
     }
 
@@ -108,25 +108,25 @@ public class TimeScale implements Scale {
         if (numberFormatter == null) {
             float rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
             double domainLength = domain[domain.length - 1] - domain[0];
-            long pointStep = (long)(domainLength / rangePointsCount);
-            numberFormatter = getDateFormat(pointStep);
+            long pointInterval = (long)(domainLength / rangePointsCount);
+            numberFormatter = getDateFormat(pointInterval);
         }
         return numberFormatter.format(value);
     }
 
-    private DateFormat getDateFormat(long step) {
+    private DateFormat getDateFormat(long Interval) {
         String DATE_FORMAT_MSEC = "HH:mm:ss.SSS";
         String DATE_FORMAT_SEC = "HH:mm:ss";
         String DATE_FORMAT_MIN = "HH:mm";
         String DATE_FORMAT_HOUR = "HH";
         DateFormat format = new SimpleDateFormat(DATE_FORMAT_MSEC);
-        if (step >= SECOND) {
+        if (Interval >= SECOND) {
             format = new SimpleDateFormat(DATE_FORMAT_SEC);
         }
-        if (step >= MINUTE) {
+        if (Interval >= MINUTE) {
             format = new SimpleDateFormat(DATE_FORMAT_MIN);
         }
-        if (step >= HOUR) {
+        if (Interval >= HOUR) {
             format = new SimpleDateFormat(DATE_FORMAT_HOUR);
         }
         return format;
@@ -134,24 +134,24 @@ public class TimeScale implements Scale {
 
 
     class TimeTickProvider implements TickProvider {
-        private long tickStep = 1;
+        private long tickInterval = 1;
         private DateFormat dateFormat;
         private Tick lastTick;
 
-        public void setTickStep(double tickStep) {
-            this.tickStep = (long) tickStep;
-            dateFormat = getDateFormat(this.tickStep);
+        public void setTickInterval(double tickInterval) {
+            this.tickInterval = (long) tickInterval;
+            dateFormat = getDateFormat(this.tickInterval);
         }
 
-        public void setTickCount(int tickCount) {
-            tickStep = getRoundTickStep(tickCount);
-            dateFormat = getDateFormat(tickStep);
+        public void setTickIntervalCount(int tickIntervalCount) {
+            tickInterval = getRoundTickInterval(tickIntervalCount);
+            dateFormat = getDateFormat(tickInterval);
         }
 
         @Override
-        public void increaseTickStep(int increaseFactor) {
-            tickStep *= increaseFactor;
-            dateFormat = getDateFormat(tickStep);
+        public void increaseTickInterval(int increaseFactor) {
+            tickInterval *= increaseFactor;
+            dateFormat = getDateFormat(tickInterval);
         }
 
         @Override
@@ -160,7 +160,7 @@ public class TimeScale implements Scale {
                 long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() + tickStep;
+                double tickValue = lastTick.getValue() + tickInterval;
                 lastTick = new Tick(tickValue, dateFormat.format(tickValue));
             }
             return lastTick;
@@ -172,7 +172,7 @@ public class TimeScale implements Scale {
                 double min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() - tickStep;
+                double tickValue = lastTick.getValue() - tickInterval;
                 lastTick = new Tick(tickValue, dateFormat.format(tickValue));
             }
             return lastTick;
@@ -180,44 +180,44 @@ public class TimeScale implements Scale {
 
         @Override
         public Tick getUpperTick(double value) {
-            double tickValue = Math.ceil(value / tickStep) * tickStep;
+            double tickValue = Math.ceil(value / tickInterval) * tickInterval;
             lastTick = new Tick(tickValue, dateFormat.format(tickValue));
             return lastTick;
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            double tickValue = Math.floor(value / tickStep) * tickStep;
+            double tickValue = Math.floor(value / tickInterval) * tickInterval;
             lastTick = new Tick(tickValue, dateFormat.format(tickValue));
             return lastTick;
         }
 
 
         /**
-         * On the com.biorecorder.basechart.chart of ticks amount choose the closest tickStep
+         * Choose the closest tickInterval
          * from TIME_INTERVALS
          */
-        private long getRoundTickStep(int tickCount) {
-            if (tickCount <= 1) {
-                String errMsg = MessageFormat.format("Invalid ticks tickCount: {0}. Expected >= 2", tickCount);
+        private long getRoundTickInterval(int tickIntervalCount) {
+            if (tickIntervalCount <= 1) {
+                String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
                 throw new IllegalArgumentException(errMsg);
             }
-            long max = (long) domain[domain.length - 1];
-            long min = (long) domain[0];
-            long step = (max - min) / (tickCount - 1);
+            long max =  domain[domain.length - 1];
+            long min =  domain[0];
+            long interval = (max - min) / tickIntervalCount;
             for (int i = 0; i < TIME_INTERVALS.length - 1; i++) {
-                if(step >= TIME_INTERVALS[i] && step <= TIME_INTERVALS[i + 1]) {
-                    if(step - TIME_INTERVALS[i] <= TIME_INTERVALS[i + 1] - step) {
-                        step = TIME_INTERVALS[i];
+                if(interval >= TIME_INTERVALS[i] && interval <= TIME_INTERVALS[i + 1]) {
+                    if(interval - TIME_INTERVALS[i] <= TIME_INTERVALS[i + 1] - interval) {
+                        interval = TIME_INTERVALS[i];
                     } else {
-                        step = TIME_INTERVALS[i + 1];
+                        interval = TIME_INTERVALS[i + 1];
                     }
                 }
             }
-            if(step > TIME_INTERVALS[TIME_INTERVALS.length - 1]) {
-                step = TIME_INTERVALS[TIME_INTERVALS.length - 1];
+            if(interval > TIME_INTERVALS[TIME_INTERVALS.length - 1]) {
+                interval = TIME_INTERVALS[TIME_INTERVALS.length - 1];
             }
-            return step;
+            return interval;
         }
     }
 }

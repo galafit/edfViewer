@@ -31,6 +31,6 @@ abstract class AxisVertical extends Axis {
 
     @Override
     protected void drawAxisLine(BCanvas canvas) {
-        canvas.drawLine(0, getStart(), 0, getEnd());
+        canvas.drawLine(0, (int)getStart(), 0, (int)getEnd());
     }
 }

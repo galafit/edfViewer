@@ -8,5 +8,5 @@ public interface TickProvider {
     public Tick getLowerTick(double value);
     public Tick getNextTick();
     public Tick getPreviousTick();
-    public void increaseTickStep(int increaseFactor);
+    public void increaseTickInterval(int increaseFactor);
 }

@@ -9,66 +9,72 @@ import java.util.ArrayList;
  */
 public class Title {
     private TitleConfig config;
-    private String[] words = new String[0];
-    private ArrayList<String> strings;
+    private ArrayList<Text> lines = new ArrayList<Text>();
+    private BRectangle bounds = new BRectangle(0, 0, 0, 0);
 
-    public Title(String chartTitle, TitleConfig config) {
-        if(chartTitle != null) {
-            words = chartTitle.split(" ");
-            this.config = config;
-        }
+
+    public Title(String title, TitleConfig config, BRectangle area, BCanvas canvas) {
+        this.config = config;
+        formLines(canvas, title, area);
     }
 
-    public int getTitleHeight(BCanvas canvas, int areaWidth){
-        if(words.length == 0) {
-            return 0;
-        }
 
-        canvas.setTextStyle(config.getTextStyle());
-        formStrings(canvas, areaWidth);
-        int strHeight = canvas.getTextMetric(config.getTextStyle()).height();
-        return strHeight * strings.size()
-                + getInterLineSpace() * (strings.size() - 1)
-                + config.getMargin().top() + config.getMargin().bottom();
+    public BRectangle getBounds() {
+        return bounds;
     }
 
-    private void formStrings(BCanvas canvas, int areaWidth){
-        strings = new ArrayList<String>();
-        StringBuilder resultantString = new StringBuilder(words[0]);
+    private void formLines(BCanvas canvas, String title, BRectangle area){
+        if(title == null) {
+            return;
+        }
+        String[] words = title.split(" ");
+        StringBuilder stringBuilder = new StringBuilder(words[0]);
         TextMetric tm = canvas.getTextMetric(config.getTextStyle());
+        Margin margin = config.getMargin();
+        int y = area.y + margin.top();
+        int x;
         for (int i = 1; i < words.length; i++) {
-            int strWidth = tm.stringWidth(resultantString + " "+ words[i]);
-            if ( strWidth + config.getMargin().left() + config.getMargin().right() > areaWidth ){
-                strings.add(resultantString.toString());
-                resultantString = new StringBuilder(words[i]);
+            int strWidth = tm.stringWidth(stringBuilder + " "+ words[i]);
+            if ( strWidth + margin.left() + margin.right() > area.width ){
+                String lineString = stringBuilder.toString();
+                x = (area.x + area.width) / 2 - tm.stringWidth(lineString) / 2;
+                if (x < area.x + margin.left()) {
+                    x = area.x + margin.left();
+                }
+                lines.add(new Text(lineString, x, y + tm.ascent()));
+
+                y += getInterLineSpace() + tm.height();
+                stringBuilder = new StringBuilder(words[i]);
             } else {
-                resultantString.append(" ").append(words[i]);
+                stringBuilder.append(" ").append(words[i]);
             }
         }
-        strings.add(resultantString.toString());
+
+        // last line
+        String lineString = stringBuilder.toString();
+        x = (area.x + area.width) / 2 - tm.stringWidth(lineString) / 2;
+        if (x < area.x + margin.left()) {
+            x = area.x + margin.left();
+        }
+
+        lines.add(new Text(lineString, x, y + tm.ascent()));
+
+        int height = tm.height() * lines.size()
+                + getInterLineSpace() * (lines.size() - 1)
+                + margin.top() + margin.bottom();
+
+        bounds = new BRectangle(area.x, area.y, area.width, height);
     }
 
-    public void draw(BCanvas canvas, BRectangle area){
-        if(words.length == 0) {
+    public void draw(BCanvas canvas){
+        if (lines.size() == 0){
             return;
         }
         canvas.setTextStyle(config.getTextStyle());
         canvas.setColor(config.getTextColor());
-        if (strings == null){
-            formStrings(canvas, area.width);
+        for (Text string : lines) {
+            string.draw(canvas);
         }
-        Margin margin = config.getMargin();
-        int y = area.y + margin.top();
-        TextMetric tm = canvas.getTextMetric(config.getTextStyle());
-        for (String string : strings) {
-            int x = (area.x + area.width) / 2 - tm.stringWidth(string) / 2;
-            if (x < area.x + margin.left()) {
-                x = area.x + margin.left();
-            }
-            canvas.drawString(string,x,y + tm.ascent());
-            y += getInterLineSpace() + tm.height();
-        }
-
     }
 
 

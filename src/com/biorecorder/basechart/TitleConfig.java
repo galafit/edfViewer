@@ -7,14 +7,9 @@ import com.biorecorder.basechart.graphics.TextStyle;
  * Created by galafit on 31/8/18.
  */
 public class TitleConfig {
-    private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.BOLD, 14);
+    private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
     private BColor textColor = BColor.BLACK;
-    private Margin margin = new Margin(0, (int)(textStyle.getSize() * 0.5),
-            0, (int)(textStyle.getSize() * 0.5));
-   /* new Margin((int)(textStyle.getSize() * 0),
-                (int)(textStyle.getSize() * 0.5),
-                (int)(textStyle.getSize() * 0.5),
-                (int)(textStyle.getSize() * 0.5));*/
+    private Margin margin = new Margin(textStyle.getSize());
 
     public TitleConfig() {
     }

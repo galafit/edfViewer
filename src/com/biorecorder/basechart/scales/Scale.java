@@ -19,9 +19,9 @@ public interface Scale {
 
     public String formatDomainValue(double value);
 
-    public TickProvider getTickProviderByCount(int tickCount, TickFormatInfo formatInfo);
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo formatInfo);
 
-    public TickProvider getTickProviderByStep(double tickStep, TickFormatInfo formatInfo);
+    public TickProvider getTickProviderByInterval(double tickInterval, TickFormatInfo formatInfo);
 
 }
 

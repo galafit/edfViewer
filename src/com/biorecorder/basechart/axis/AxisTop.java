@@ -22,7 +22,7 @@ public class AxisTop extends AxisHorizontal {
         int space = 2;// px
         int charHalfWidth = tm.stringWidth("0")/2;
 
-        if(config.isTickLabelInside()) {
+        if(isTickLabelInside) {
             int x = tickPosition + space;
             int y = axisWidth / 2  + labelPadding;
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
@@ -30,7 +30,7 @@ public class AxisTop extends AxisHorizontal {
         } else {
             int x = tickPosition - charHalfWidth;
             if(x < getStart()) {
-                x = getStart() + space;
+                x = (int)getStart() + space;
             }
             int y = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
@@ -60,7 +60,7 @@ public class AxisTop extends AxisHorizontal {
     protected Text createTitle(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
         int y = - getWidth(canvas) + tm.height();
-        int x = (getEnd() + getStart()) / 2;
+        int x = (int)(getEnd() + getStart()) / 2;
         return new Text(title, x, y, TextAnchor.MIDDLE, TextAnchor.START, tm);
     }
 }

@@ -1,6 +1,5 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.Text;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BStroke;
@@ -23,29 +22,23 @@ import java.util.List;
  */
 public abstract class Axis {
     private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16, 20, 32, 40, 64, 80, 100}; // used to skip ticks if they overlap
-    private final double TICKS_ROUNDING_UNCERTAINTY = 0.2; // 20% for one side
     private int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
+    // used to calculate ticks count. If <= 0 will not be taken into account
+    private int roundingAccuracyPct = 0; // percents for one side
+
     protected String title;
     private Scale scale;
     protected AxisConfig config;
-
-    private boolean isVisible = false;
-    private boolean isGridVisible = false;
-    private boolean isTickLabelVisible = true;
+    protected boolean isTickLabelInside = false;
 
     private double tickInterval = -1; // in axis domain units
-    private boolean isMinMaxRoundingEnabled = false;
 
     private int minorTickIntervalCount = 3; // number of minor intervals in one major interval
 
     private TickFormatInfo tickFormatInfo = new TickFormatInfo();
-
-    
-    // need this field to implement smooth zooming when minMaxRounding enabled
-    private Range rowMinMax; // without rounding
 
     private TickProvider tickProvider;
 
@@ -61,21 +54,12 @@ public abstract class Axis {
     public Axis(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
         this.config = axisConfig;
-        rowMinMax = new Range(getMin(), getMax());
     }
 
     private void setDirty() {
         tickProvider = null;
         isDirty = true;
         width = -1;
-    }
-
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public boolean isMinMaxRoundingEnabled() {
-        return isMinMaxRoundingEnabled;
     }
 
     public void setTitle(String title) {
@@ -85,11 +69,6 @@ public abstract class Axis {
 
     public void setTickInterval(double tickInterval) {
         this.tickInterval = tickInterval;
-        setDirty();
-    }
-
-    public void setMinMaxRoundingEnabled(boolean minMaxRoundingEnabled) {
-        isMinMaxRoundingEnabled = minMaxRoundingEnabled;
         setDirty();
     }
 
@@ -103,7 +82,21 @@ public abstract class Axis {
         setDirty();
     }
 
+    public void setTickLabelInside(boolean tickLabelInside) {
+        isTickLabelInside = tickLabelInside;
+        setDirty();
+    }
 
+    /**
+     * Specify maximum distance between axis start and minTick (or axis end and maxTick)
+     * in relation to axis length (percents)
+     * Ticks count is calculated on the base of the given rounding accuracy.
+     * If rounding accuracy <= 0 it will not be taken into account!!!
+     * @param roundingAccuracyPct - rounding accuracy percents
+     */
+    public void setRoundingAccuracyPct(int roundingAccuracyPct) {
+        this.roundingAccuracyPct = roundingAccuracyPct;
+    }
 
     /**
      * set Axis scale. Inner scale is a COPY of the given scale
@@ -113,7 +106,6 @@ public abstract class Axis {
      */
     public void setScale(Scale scale) {
         this.scale = scale.copy();
-        rowMinMax = new Range(getMin(), getMax());
         setDirty();
     }
 
@@ -149,16 +141,6 @@ public abstract class Axis {
     }
 
 
-    public void setVisible(boolean isVisible) {
-       this.isVisible = isVisible;
-       setDirty();
-    }
-
-    public void setGridVisible(boolean isVisible) {
-        isGridVisible = isVisible;
-    }
-
-
     /**
      * Zoom does not affect the axis scale!
      * It copies the axis scales and transforms its domain respectively.
@@ -169,18 +151,15 @@ public abstract class Axis {
      */
     public Scale zoom(double zoomFactor) {
         Scale zoomedScale = scale.copy();
-        double min = rowMinMax.getMin();
-        double max = rowMinMax.getMax();
-        zoomedScale.setDomain(min, max);
 
-        int start = getStart();
-        int end = getEnd();
+        double start = getStart();
+        double end = getEnd();
 
         double zoomedLength = (end - start) * zoomFactor;
         double zoomedEnd = start + zoomedLength;
         zoomedScale.setRange(start, zoomedEnd);
         double maxNew = zoomedScale.invert(end);
-        zoomedScale.setDomain(min, maxNew);
+        zoomedScale.setDomain(getMin(), maxNew);
 
         return zoomedScale;
     }
@@ -195,12 +174,9 @@ public abstract class Axis {
      */
     public Scale translate(int translation) {
         Scale translatedScale = scale.copy();
-        double min = rowMinMax.getMin();
-        double max = rowMinMax.getMax();
-        translatedScale.setDomain(min, max);
 
-        int start = getStart();
-        int end = getEnd();
+        double start = getStart();
+        double end = getEnd();
         double minNew = translatedScale.invert(start + translation);
         double maxNew = translatedScale.invert(end + translation);
         translatedScale.setDomain(minNew, maxNew);
@@ -215,35 +191,24 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public void setMinMax(Double min, Double max) {
-        if (min == null && max == null) {
+    public void setMinMax(double min, double max) {
+        if(min == getMin() && max == getMax()) {
             return;
         }
-        if (min != null && max != null && min > max) {
+        if (min > max) {
             String errorMessage = "Expected Min < Max. Min = {0}, Max = {1}.";
             String formattedError = MessageFormat.format(errorMessage, min, max);
             throw new IllegalArgumentException(formattedError);
         }
-        double[] domain = scale.getDomain();
-        if (min == null && max != null) {
-            min = domain[0];
-            if (min >= max) {
-                min = max - 1;
-            }
-        }
-        if (min != null && max == null) {
-            max = domain[domain.length - 1];
-            if (min >= max) {
-                max = min + 1;
-            }
-        }
-        rowMinMax = new Range(min, max);
         scale.setDomain(min, max);
         setDirty();
     }
 
     public void setStartEnd(double start, double end) {
-        scale.setRange((int) start, (int) end);
+        if((int)(start) == (int) getStart() && (int) end == (int) getEnd()) {
+            return;
+        }
+        scale.setRange(start,  end);
         setDirty();
     }
 
@@ -255,12 +220,12 @@ public abstract class Axis {
         return scale.getDomain()[scale.getDomain().length - 1];
     }
 
-    public int getStart() {
-        return (int) scale.getRange()[0];
+    public double getStart() {
+        return  scale.getRange()[0];
     }
 
-    public int getEnd() {
-        return (int) scale.getRange()[scale.getRange().length - 1];
+    public double getEnd() {
+        return scale.getRange()[scale.getRange().length - 1];
     }
 
     public double scale(double value) {
@@ -272,20 +237,17 @@ public abstract class Axis {
     }
 
     public int getLength() {
-        return Math.abs(getEnd() - getStart());
+        return (int) Math.abs(getEnd() - getStart());
     }
 
     public int getWidth(BCanvas canvas) {
-        if (!isVisible) {
-            return 0;
-        }
         if(width < 0) { // calculate width
             width = 0;
             width += config.getAxisLineStroke().getWidth() / 2;
 
             width += config.getTickMarkOutsideSize();
 
-            if (isTickLabelVisible && ! config.isTickLabelInside()) {
+            if (!isTickLabelInside) {
                 TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
                 if(tickProvider == null) {
                     configTickProvider(tm);
@@ -318,9 +280,6 @@ public abstract class Axis {
         Tick tickMinNext = tickProvider.getNextTick();
         Tick tickMax = tickProvider.getUpperTick(max);
 
-        if (tickMin.getValue() == min && tickMax.getValue() == max) {
-            return;
-        }
         if(ticksSkipStep > 1) {
             // adjust ticksSkipStep for "precise" ticks
             // (when only min, max and may be middle ticks are displayed)
@@ -337,33 +296,27 @@ public abstract class Axis {
                ticksSkipStep = tickIntervalCount; // 2 ticks: only min and max
             }
         }
-
         scale.setDomain(tickMin.getValue(), tickMax.getValue());
     }
 
     public void drawGrid(BCanvas canvas, int axisOriginPoint, int length) {
         canvas.save();
-        if(! isVisible) {
-            return;
-        }
         if(isDirty) {
             createAxisElements(canvas);
         }
 
         translateCanvas(canvas, axisOriginPoint);
 
-        if(isGridVisible) {
-            canvas.setColor(config.getGridColor());
-            canvas.setStroke(config.getGridLineStroke());
-            for (int i = 0; i < tickPositions.size(); i++) {
-               drawGridLine(canvas, tickPositions.get(i), length);
-            }
+        canvas.setColor(config.getGridColor());
+        canvas.setStroke(config.getGridLineStroke());
+        for (int i = 0; i < tickPositions.size(); i++) {
+            drawGridLine(canvas, tickPositions.get(i), length);
+        }
 
-            canvas.setColor(config.getMinorGridColor());
-            canvas.setStroke(config.getMinorGridLineStroke());
-            for (int i = 0; i < minorTickPositions.size(); i++) {
-                drawGridLine(canvas, minorTickPositions.get(i), length);
-            }
+        canvas.setColor(config.getMinorGridColor());
+        canvas.setStroke(config.getMinorGridLineStroke());
+        for (int i = 0; i < minorTickPositions.size(); i++) {
+            drawGridLine(canvas, minorTickPositions.get(i), length);
         }
 
         canvas.restore();
@@ -371,9 +324,7 @@ public abstract class Axis {
 
     public void drawAxis(BCanvas canvas,  int axisOriginPoint) {
         canvas.save();
-        if(! isVisible) {
-            return;
-        }
+
         if(isDirty) {
             createAxisElements(canvas);
         }
@@ -395,13 +346,11 @@ public abstract class Axis {
             }
         }
 
-        if(isTickLabelVisible) {
-            canvas.setStroke(new BStroke(1));
-            canvas.setColor(config.getTickLabelColor());
-            canvas.setTextStyle(config.getTickLabelTextStyle());
-            for (Text tickLabel : tickLabels) {
-                tickLabel.draw(canvas);
-            }
+        canvas.setStroke(new BStroke(1));
+        canvas.setColor(config.getTickLabelColor());
+        canvas.setTextStyle(config.getTickLabelTextStyle());
+        for (Text tickLabel : tickLabels) {
+            tickLabel.draw(canvas);
         }
 
         if(config.getAxisLineStroke().getWidth() > 0) {
@@ -418,54 +367,63 @@ public abstract class Axis {
         canvas.restore();
     }
 
-    private boolean isTicksStepSpecified() {
+    private boolean isTickIntervalSpecified() {
         return tickInterval > 0;
     }
 
+
+    private int roundingUncertaintyToTickIntervalCount() {
+        if(roundingAccuracyPct <= 0) {
+            return 0;
+        }
+
+        // min number of ticks interval to have rounding within the desirable uncertainty
+        int ticksIntervalCount = 100 / roundingAccuracyPct;
+
+        // multiply by 2 because we can add 2 additional ticks on every axis side
+        // to get a number of ticks multiples of 2 or 3
+        ticksIntervalCount *= 2;
+
+        // multiply by 2 because provider can give less number of ticks
+      //  ticksIntervalCount *= 2;
+
+        // some unnecessary rounding for more nice ticks
+        if(ticksIntervalCount <= 12) {
+            ticksIntervalCount = 10;
+        }
+
+        return ticksIntervalCount;
+    }
+
     private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
-        int labelsGap = 2 * config.getTickLabelTextStyle().getSize(); // min gap between labels = 2 symbols size (roughly)
+        int labelsGap = (int)(2.5 * config.getTickLabelTextStyle().getSize()); // min gap between labels = 2 symbols size (roughly)
         int labelSize = labelSizeForOverlap(tm, 0, label);
 
         int requiredSpace = labelSize  + labelsGap;
 
         // first and last labels are usually shifted to avoid its cutting on the edge
         // so we need additional extra space
-        requiredSpace += labelSize / 2;
+       // requiredSpace += labelSize / 2;
         return requiredSpace;
     }
 
-    private int roundingUncertaintyToTicksCount() {
-        // min number of ticks interval to have rounding within the desirable uncertainty
-        int minTicksIntervalsCount = (int)(1 / TICKS_ROUNDING_UNCERTAINTY) + 1;
-
-        // multiply by 2 because we can add 2 additional ticks on every axis side
-        // to get a number of ticks multiples of 2 or 3
-        minTicksIntervalsCount *= 2;
-
-        int ticksCount = minTicksIntervalsCount + 1;
-
-        // multiply by 2 because provider can give less number of ticks
-        ticksCount *= 2;
-
-        return ticksCount;
-    }
-
     private void configTickProvider(TextMetric tm) {
-        int ticksCount;
-        if (isTicksStepSpecified()) {
-            tickProvider =  scale.getTickProviderByStep(tickInterval, tickFormatInfo);
+        int tickIntervalCount;
+        if (isTickIntervalSpecified()) {
+            tickProvider =  scale.getTickProviderByInterval(tickInterval, tickFormatInfo);
         } else {
             int fontFactor = 4;
             int tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
-            ticksCount = getLength() / tickPixelInterval;
+            tickIntervalCount = getLength() / tickPixelInterval;
 
-            // ensure that number of ticks is sufficient to get the specified rounding uncertainty
-            ticksCount = Math.max(ticksCount, roundingUncertaintyToTicksCount());
+            // ensure that number of tick intervals is sufficient to get the specified rounding uncertainty
+            tickIntervalCount = Math.max(tickIntervalCount, roundingUncertaintyToTickIntervalCount());
 
-            if(ticksCount < 2) {
-                ticksCount = 2;
+            if(tickIntervalCount < 1) {
+                tickIntervalCount = 1;
             }
-            tickProvider =  scale.getTickProviderByCount(ticksCount, tickFormatInfo);
+
+            tickProvider =  scale.getTickProviderByIntervalCount(tickIntervalCount, tickFormatInfo);
         }
 
         double min = getMin();
@@ -497,24 +455,23 @@ public abstract class Axis {
             }
         }
 
-        // check if increased tick step will be ok for rounding with the specified uncertainty
-        boolean isIncreasedTickStepOk = false;
-        if(ticksSkipStep * ticksPixelInterval / getLength() < TICKS_ROUNDING_UNCERTAINTY){
-            isIncreasedTickStepOk = true;
+        // check if increased tick interval will be ok for rounding with the specified uncertainty
+        boolean isIncreasedTickIntervalOk = false;
+        if(roundingAccuracyPct <= 0 || Math.round(100 * ticksSkipStep * ticksPixelInterval/ getLength()) <= roundingAccuracyPct){
+            isIncreasedTickIntervalOk = true;
         }
 
-        if(isTicksStepSpecified() || isIncreasedTickStepOk) {
-            this.tickProvider.increaseTickStep(ticksSkipStep);
+        if(isTickIntervalSpecified() || isIncreasedTickIntervalOk) {
+            this.tickProvider.increaseTickInterval(ticksSkipStep);
             ticksSkipStep = 1;
         }
 
         if(ticksSkipStep > 1) { // means precise ticks. We should skip all ticks except min, max and may be middle tick
             tickMin = tickProvider.getUpperTick(min);
             tickMax = tickProvider.getLowerTick(max);
-            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / ticksPixelInterval);
+            tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / ticksPixelInterval);
 
-            // check if there is space for 3 ticks
-            if(ticksSkipStep < tickIntervalCount / 2 && tickIntervalCount > 3  && ((tickIntervalCount / 2) * 2) * ticksPixelInterval > 3 * requiredSpace ) { // min, max and middle tick
+            if(ticksSkipStep <= tickIntervalCount / 2 && tickIntervalCount > 3  && ((tickIntervalCount / 2) * 2) * ticksPixelInterval > 2 * requiredSpace ) { // min, max and middle tick
                 ticksSkipStep = tickIntervalCount / 2;
             } else { // only min and max ticks
                 ticksSkipStep = tickIntervalCount;
@@ -543,9 +500,7 @@ public abstract class Axis {
             tickPositions.add((int)scale(currentTick.getValue()));
 
             // tick label
-            if(isTickLabelVisible) {
-                tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
-            }
+            tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
 
             for (int i = 0; i < ticksSkipStep; i++) {
                 nextTick = tickProvider.getNextTick();
