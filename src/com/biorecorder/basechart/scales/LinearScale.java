@@ -206,17 +206,16 @@ public class LinearScale implements Scale {
          * FirstDigit is in {1,2,5,10};
          */
         private NormalizedNumber getRoundTickInterval(int tickIntervalCount) {
-            if (tickIntervalCount <= 1) {
+            if (tickIntervalCount < 1) {
                 String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
                 throw new IllegalArgumentException(errMsg);
             }
             double max = domain[domain.length - 1];
             double min = domain[0];
-            double step = (max - min) / tickIntervalCount;
-            NormalizedNumber normalizedStep = new NormalizedNumber(step);
-
-            int power = normalizedStep.getPower();
-            int firstDigit = (int) Math.round(normalizedStep.getMantissa());
+            double interval = (max - min) / tickIntervalCount;
+            NormalizedNumber normalizedInterval = new NormalizedNumber(interval);
+            int power = normalizedInterval.getPower();
+            int firstDigit = (int) Math.round(normalizedInterval.getMantissa());
             switch (firstDigit) {
                 case 3:
                     firstDigit = 2;

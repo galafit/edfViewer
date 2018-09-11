@@ -198,7 +198,7 @@ public class TimeScale implements Scale {
          * from TIME_INTERVALS
          */
         private long getRoundTickInterval(int tickIntervalCount) {
-            if (tickIntervalCount <= 1) {
+            if (tickIntervalCount < 1) {
                 String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
                 throw new IllegalArgumentException(errMsg);
             }

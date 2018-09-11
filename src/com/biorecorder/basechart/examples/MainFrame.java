@@ -33,16 +33,16 @@ public class MainFrame extends JFrame {
         yData2 = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 0; i < 16000; i++) {
+        for (int i = 0; i < 1600; i++) {
             //yData1.add((float) Math.sin(i));
             yData1.add(i);
         }
 
-        for (int i = 0; i < 16000; i++) {
+        for (int i = 0; i < 1600; i++) {
             yData2.add(i);
         }
 
-        for (int i = 0; i < 16000; i++) {
+        for (int i = 0; i < 1600; i++) {
             xData.add(i);
         }
 
