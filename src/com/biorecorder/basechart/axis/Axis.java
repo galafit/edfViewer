@@ -21,13 +21,15 @@ import java.util.List;
  * {@link #setConfig(AxisConfig)}
  */
 public abstract class Axis {
-    private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16, 20, 32, 40, 64, 80, 100}; // used to skip ticks if they overlap
+    private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16,  32, 50, 64, 100, 128}; // used to skip ticks if they overlap
     private int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
+    private final double REQUIRED_SPACE_FOR_3_TICKS_RATIO = 2.2;
+
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
     // used to calculate ticks count. If <= 0 will not be taken into account
-    private int roundingAccuracyPct = 20; // percents for one side
+    private int roundingAccuracyPct = 0; // percents for min
 
     protected String title;
     private Scale scale;
@@ -236,8 +238,8 @@ public abstract class Axis {
         return scale.invert(value);
     }
 
-    public int getLength() {
-        return (int) Math.abs(getEnd() - getStart());
+    public double getLength() {
+        return  Math.abs(getEnd() - getStart());
     }
 
     public int getWidth(BCanvas canvas) {
@@ -279,21 +281,34 @@ public abstract class Axis {
         Tick tickMin = tickProvider.getLowerTick(min);
         Tick tickMinNext = tickProvider.getNextTick();
         Tick tickMax = tickProvider.getUpperTick(max);
+        // Calculate required space to avoid labels overlapping.
+        // Simplified algorithm assumes that the biggest tick size are on the axis edges
+        // (it is reasonable for all axis except the category one that at the moment not used)
+        String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
+        int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
 
         if(ticksSkipStep > 1) {
-            // adjust ticksSkipStep for "precise" ticks
-            // (when only min, max and may be middle ticks are displayed)
+            double tickPixelInterval =   Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
+            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
 
-            double ticksPixelInterval =  Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
-            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / ticksPixelInterval);
-            if(ticksSkipStep < tickIntervalCount - 2) { // 3 ticks: min, max and middle
-                if(tickIntervalCount % 2 != 0) {
-                    tickIntervalCount++;
-                    tickMax = tickProvider.getNextTick();
+            if(tickIntervalCount/ticksSkipStep <= 3) {
+                if( getLength() / requiredSpace  >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+                    if(tickIntervalCount % 2 != 0) {
+                        tickIntervalCount++;
+                        tickMax = tickProvider.getNextTick();
+                    }
+                    ticksSkipStep = tickIntervalCount / 2;
+                } else { // 2 ticks
+                    ticksSkipStep = tickIntervalCount;
                 }
-                ticksSkipStep = tickIntervalCount / 2;
             } else {
-               ticksSkipStep = tickIntervalCount; // 2 ticks: only min and max
+                int roundExtraTicksCount = ticksSkipStep - tickIntervalCount % ticksSkipStep;
+                if(roundExtraTicksCount < ticksSkipStep) {
+                    for (int i = 0; i < roundExtraTicksCount; i++) {
+                        tickMax = tickProvider.getNextTick();
+                        tickIntervalCount++;
+                    }
+                }
             }
         }
         scale.setDomain(tickMin.getValue(), tickMax.getValue());
@@ -372,7 +387,7 @@ public abstract class Axis {
     }
 
     private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
-        int labelsGap = (int)(2 * config.getTickLabelTextStyle().getSize()); // min gap between labels = 2 symbols size (roughly)
+        int labelsGap = (2 * config.getTickLabelTextStyle().getSize()); // min gap between labels = 2 symbols size (roughly)
         int labelSize = labelSizeForOverlap(tm, 0, label);
 
         int requiredSpace = labelSize  + labelsGap;
@@ -384,7 +399,7 @@ public abstract class Axis {
     }
 
     private void configTickProvider(TextMetric tm) {
-        int tickIntervalCount = 1;
+
         int tickIntervalCountByRoundingUncertainty = 0;
         if(roundingAccuracyPct > 0) {
             tickIntervalCountByRoundingUncertainty = (int)Math.round(100.0 / roundingAccuracyPct);
@@ -393,8 +408,8 @@ public abstract class Axis {
             tickProvider =  scale.getTickProviderByInterval(tickInterval, tickFormatInfo);
         } else {
             int fontFactor = 4;
-            int tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
-            tickIntervalCount = getLength() / tickPixelInterval;
+            double tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
+            int tickIntervalCount = (int)(getLength() / tickPixelInterval);
 
             // ensure that number of tick intervals is sufficient to get the specified rounding uncertainty
             tickIntervalCount = Math.max(tickIntervalCount, tickIntervalCountByRoundingUncertainty);
@@ -409,25 +424,28 @@ public abstract class Axis {
         double min = getMin();
         double max = getMax();
 
-        Tick tickMin = tickProvider.getLowerTick(min);
+        Tick tickMin = tickProvider.getUpperTick(min);
         Tick tickMinNext = tickProvider.getNextTick();
-        Tick tickMax = tickProvider.getUpperTick(max);
+        Tick tickMax = tickProvider.getLowerTick(max);
 
         // Calculate required space to avoid labels overlapping.
         // Simplified algorithm assumes that the biggest tick size are on the axis edges
         // (it is reasonable for all axis except the category one that at the moment not used)
         String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
-        int tickPixelInterval =  (int) Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
+        double tickPixelInterval = Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
+
+        // real resultant number of tick intervals
+        int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
 
         // Calculate how many ticks need to be skipped to avoid labels overlapping.
         // When ticksSkipStep = n, only every n'th label on the axis will be shown.
         // For example if ticksSkipStep = 2 every other label will be shown.
         ticksSkipStep = 1;
         if(tickPixelInterval < requiredSpace) {
-            ticksSkipStep =  requiredSpace / tickPixelInterval;
+            ticksSkipStep =  (int)(requiredSpace / tickPixelInterval);
             if(ticksSkipStep * tickPixelInterval < requiredSpace) {
-                ticksSkipStep ++;
+                ticksSkipStep++;
             }
 
             // choose "nice" ticksSkipStep from available ones
@@ -437,56 +455,29 @@ public abstract class Axis {
                     break;
                 }
             }
-            tickMin = tickProvider.getUpperTick(min);
-            tickMax = tickProvider.getLowerTick(max);
-            int resultantIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
 
-            if(ticksSkipStep > resultantIntervalCount) {
-                ticksSkipStep = resultantIntervalCount;
+            if(ticksSkipStep > tickIntervalCount) {
+                ticksSkipStep = tickIntervalCount;
             }
         }
 
         if(ticksSkipStep > 1) {
-            // check if increased tick interval will be ok for rounding with the specified uncertainty
-            boolean isIncreasedTickIntervalOk = false;
-            if(roundingAccuracyPct <= 0 || Math.round(100 * ticksSkipStep * tickPixelInterval/ getLength()) <= roundingAccuracyPct){
-                isIncreasedTickIntervalOk = true;
-            }
-
-            if(isTickIntervalSpecified() || isIncreasedTickIntervalOk) {
-                this.tickProvider.increaseTickInterval(ticksSkipStep);
+            if(isTickIntervalSpecified() || roundingAccuracyPct <= 0) {
+                tickProvider.increaseTickInterval(ticksSkipStep);
                 ticksSkipStep = 1;
             }
         }
 
-        // Means that increased tick interval is not ok for the
-        // specified rounding accuracy. So we create more precise ticks
-        // but then retain only min, max and may be middle tick
-        // (possible retain 2 middle ticks but at the moment we never do it)
-        if(ticksSkipStep > 1) {
-            // multiply by 2 because we can add 2 additional ticks on every axis side
-            // to get a number of ticks multiples of 2 or 3
-            tickIntervalCount = tickIntervalCountByRoundingUncertainty * 2;
+        if(tickIntervalCount/ticksSkipStep <= 3) {
+            if( getLength() / requiredSpace  >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+                ticksSkipStep = tickIntervalCount / 2;
+            } else { // 2 ticks
+                ticksSkipStep = tickIntervalCount;
+            }
+        }
 
-            tickProvider =  scale.getTickProviderByIntervalCount(tickIntervalCount, tickFormatInfo);
-
-            tickMin = tickProvider.getUpperTick(min);
-            tickMinNext = tickProvider.getNextTick();
-            tickMax = tickProvider.getLowerTick(max);
-
-
-            // check if there is enough space for 3 ticks
-            tickPixelInterval = (int) Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
-            int resultantIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
-
-            if(resultantIntervalCount > 1 && resultantIntervalCount * tickPixelInterval  >= requiredSpace * 2) {
-                // min max and middle ticks
-                ticksSkipStep = resultantIntervalCount / 2;
-
-            } else {
-                // only min and max ticks
-                ticksSkipStep = resultantIntervalCount;
-             }
+        if(ticksSkipStep < 1) {
+            ticksSkipStep = 1;
         }
     }
 
@@ -512,7 +503,6 @@ public abstract class Axis {
 
             // tick label
             tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
-
             for (int i = 0; i < ticksSkipStep; i++) {
                 nextTick = tickProvider.getNextTick();
             }
