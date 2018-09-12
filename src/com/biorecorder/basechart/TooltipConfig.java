@@ -1,7 +1,6 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.Margin;
 import com.biorecorder.basechart.graphics.TextStyle;
 
 
@@ -14,7 +13,7 @@ public class TooltipConfig {
     private BColor backgroundColor = new BColor(240, 235, 230);
     private BColor borderColor = new BColor(200, 200, 200);
     private int borderWidth = 1;
-    private Margin margin = new Margin((int)(getTextStyle().getSize() * 0.4),
+    private Insets margin = new Insets((int)(getTextStyle().getSize() * 0.4),
             (int)(getTextStyle().getSize() * 0.8),
             (int)(getTextStyle().getSize() * 0.4),
             (int)(getTextStyle().getSize() * 0.8));
@@ -55,11 +54,11 @@ public class TooltipConfig {
         this.borderWidth = borderWidth;
     }
 
-    public Margin getMargin() {
+    public Insets getMargin() {
         return margin;
     }
 
-    public void setMargin(Margin margin) {
+    public void setMargin(Insets margin) {
         this.margin = margin;
     }
 }

@@ -30,7 +30,7 @@ public class Title {
         String[] words = title.split(" ");
         StringBuilder stringBuilder = new StringBuilder(words[0]);
         TextMetric tm = canvas.getTextMetric(config.getTextStyle());
-        Margin margin = config.getMargin();
+        Insets margin = config.getMargin();
         int y = area.y + margin.top();
         int x;
         for (int i = 1; i < words.length; i++) {

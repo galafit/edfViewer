@@ -9,7 +9,7 @@ import com.biorecorder.basechart.graphics.TextStyle;
 public class TitleConfig {
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
     private BColor textColor = BColor.BLACK;
-    private Margin margin = new Margin(textStyle.getSize());
+    private Insets margin = new Insets(textStyle.getSize());
 
     public TitleConfig() {
     }
@@ -36,11 +36,11 @@ public class TitleConfig {
         this.textColor = textColor;
     }
 
-    public Margin getMargin() {
+    public Insets getMargin() {
         return margin;
     }
 
-    public void setMargin(Margin margin) {
+    public void setMargin(Insets margin) {
         this.margin = margin;
     }
 }

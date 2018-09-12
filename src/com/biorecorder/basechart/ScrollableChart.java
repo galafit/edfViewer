@@ -28,7 +28,7 @@ public class ScrollableChart {
     private boolean scrollsAtTheEnd = true;
 
     private int gap; // between Chart and Preview px
-    private Margin margin;
+    private Insets margin;
 
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling

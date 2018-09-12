@@ -14,7 +14,7 @@ public class LegendConfig {
   //  private int borderWidth = 1;
  //   private BColor borderColor = BColor.LIGHT_GRAY;
     private BColor backgroundColor = BColor.WHITE;
-    private Margin itemMargin = new Margin((int)(textStyle.getSize() * 0.2),
+    private Insets itemMargin = new Insets((int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2));
@@ -44,11 +44,11 @@ public class LegendConfig {
         this.backgroundColor = backgroundColor;
     }
 
-    public Margin getItemMargin() {
+    public Insets getItemMargin() {
         return itemMargin;
     }
 
-    public void setItemMargin(Margin itemMargin) {
+    public void setItemMargin(Insets itemMargin) {
         this.itemMargin = itemMargin;
     }
 }

@@ -12,7 +12,7 @@ public class SwitchButton {
     private String label = "";
     private BColor backgroundColor = BColor.LIGHT_GRAY;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
-    private Margin margin = new Margin((int)(textStyle.getSize() * 0.2),
+    private Insets margin = new Insets((int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2));
@@ -140,7 +140,7 @@ public class SwitchButton {
         bounds = null;
     }
 
-    public void setMargin(Margin margin) {
+    public void setMargin(Insets margin) {
         this.margin = margin;
         bounds = null;
     }

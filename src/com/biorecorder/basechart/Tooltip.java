@@ -61,7 +61,7 @@ public class Tooltip {
      * https://stackoverflow.com/questions/27706197/how-can-i-center-graphics-drawstring-in-java
      */
     private void drawTooltipInfo(BCanvas canvas, BRectangle area, TooltipInfo tooltipInfo) {
-        Margin margin = tooltipConfig.getMargin();
+        Insets margin = tooltipConfig.getMargin();
         int stringHeght = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
         int lineSpace = getInterLineSpace();
         int x = area.x + margin.left();
@@ -139,7 +139,7 @@ public class Tooltip {
         if (tooltipInfo.getHeader() != null) {
             textWidth = Math.max(textWidth, getItemWidth(canvas, tooltipInfo.getHeader()));
         }
-        Margin margin = tooltipConfig.getMargin();
+        Insets margin = tooltipConfig.getMargin();
         textWidth += margin.left() + margin.right();
         int strHeight = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
         int textHeight = margin.top() + margin.bottom() + amountOfItems * strHeight;

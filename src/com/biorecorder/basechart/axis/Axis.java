@@ -21,7 +21,9 @@ import java.util.List;
  * {@link #setConfig(AxisConfig)}
  */
 public abstract class Axis {
-    private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16,  32, 50, 64, 100, 128}; // used to skip ticks if they overlap
+   // private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16,  32, 50, 64, 100, 128}; // used to skip ticks if they overlap
+    private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 8, 16,  32,  64, 128}; // used to skip ticks if they overlap
+
     private int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
     private final double REQUIRED_SPACE_FOR_3_TICKS_RATIO = 2.2;
 
@@ -29,12 +31,12 @@ public abstract class Axis {
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
     // used to calculate ticks count. If <= 0 will not be taken into account
-    private int roundingAccuracyPct = 0; // percents for min
+    private int roundingAccuracyPct = 5; // percents for min
 
     protected String title;
     private Scale scale;
     protected AxisConfig config;
-    protected boolean isTickLabelInside = true;
+    protected boolean isTickLabelInside = false;
 
     private double tickInterval = -1; // in axis domain units
 
@@ -57,6 +59,7 @@ public abstract class Axis {
         this.scale = scale.copy();
         this.config = axisConfig;
     }
+
 
     private void setDirty() {
         tickProvider = null;
@@ -89,8 +92,12 @@ public abstract class Axis {
         setDirty();
     }
 
+    public boolean isTickLabelInside() {
+        return isTickLabelInside;
+    }
+
     /**
-     * Specify maximum distance between axis start and minTick (or axis end and maxTick)
+     * Specify maximum distance between axis start and minTick
      * in relation to axis length (percents)
      * Ticks count is calculated on the base of the given rounding accuracy.
      * If rounding accuracy <= 0 it will not be taken into account!!!
@@ -250,15 +257,15 @@ public abstract class Axis {
             width += config.getTickMarkOutsideSize();
 
             if (!isTickLabelInside) {
-                TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-                if(tickProvider == null) {
-                    configTickProvider(tm);
+                if(isDirty) {
+                    createAxisElements(canvas);
                 }
 
-                Tick minTick = tickProvider.getUpperTick(getMin());
-                Tick maxTick = tickProvider.getLowerTick(getMax());
+                TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+                String minTickLabel = tickLabels.get(0).getText();
+                String maxTickLabel = tickLabels.get(tickLabels.size() - 1).getText();
 
-                String longestLabel = minTick.getLabel().length() > maxTick.getLabel().length() ? minTick.getLabel() : maxTick.getLabel();
+                String longestLabel = minTickLabel.length() > maxTickLabel.length() ? maxTickLabel : maxTickLabel;
                 width += config.getTickPadding() + labelSizeForWidth(tm, 0, longestLabel);
             }
             if (title != null) {
@@ -290,8 +297,7 @@ public abstract class Axis {
         if(ticksSkipStep > 1) {
             double tickPixelInterval =   Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
             int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
-
-            if(tickIntervalCount/ticksSkipStep <= 3) {
+            if(tickIntervalCount/ticksSkipStep < 3) {
                 if( getLength() / requiredSpace  >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
                     if(tickIntervalCount % 2 != 0) {
                         tickIntervalCount++;
@@ -468,7 +474,7 @@ public abstract class Axis {
             }
         }
 
-        if(tickIntervalCount/ticksSkipStep <= 3) {
+        if(tickIntervalCount/ticksSkipStep < 3) {
             if( getLength() / requiredSpace  >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
                 ticksSkipStep = tickIntervalCount / 2;
             } else { // 2 ticks

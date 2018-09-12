@@ -12,8 +12,6 @@ public class ChartConfig {
     private BColor backgroundColor;
     private BColor marginColor;
 
-    private Margin margin;
-
     private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();
@@ -31,7 +29,6 @@ public class ChartConfig {
         traceColors = chartConfig.traceColors;
         backgroundColor = chartConfig.backgroundColor;
         marginColor = chartConfig.marginColor;
-        margin = chartConfig.margin;
         titleConfig = new TitleConfig(chartConfig.titleConfig);
         legendConfig = new LegendConfig(chartConfig.legendConfig);
         tooltipConfig = chartConfig.tooltipConfig;
@@ -80,14 +77,6 @@ public class ChartConfig {
 
     public CrossHairConfig getCrossHairConfig() {
         return crossHairConfig;
-    }
-
-    public Margin getMargin() {
-        return margin;
-    }
-
-    public void setMargin(Margin margin) {
-        this.margin = margin;
     }
 
     public AxisConfig getLeftAxisConfig() {
