@@ -56,7 +56,7 @@ public class TraceDataManager {
             croppedSeries = traceDataSeries.copy();
         }
         if (processingConfig.isCropEnabled()) {
-            croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getLength());
+            croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getSize());
         } else {
             isFullGrouping = true;
         }
@@ -65,8 +65,21 @@ public class TraceDataManager {
             return croppedSeries;
         }
 
+
         // calculate best avg number of points in each group
-        int pointsInGroup = (int) Math.round((double) (subRange.getLength() * pixelsInDataPoint) / width);
+        int pointsInGroup = 1;
+        if(subRange.getSize() > 0) {
+            Range dataMinMax = croppedSeries.getXExtremes();
+            double dataWidth  = (width * dataMinMax.length() / (xMax - xMin));
+            pointsInGroup = (int) Math.round((double) (subRange.getSize() * pixelsInDataPoint) / dataWidth);
+        }
+        if(pointsInGroup < 1) {
+            pointsInGroup = 1;
+        }
+
+        // add shoulder: 2 grouped points from both sides
+        subRange = new SubRange(subRange.getStartIndex() - 2 * pointsInGroup, subRange.getSize() + 4 * pointsInGroup);
+        croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getSize());
         double groupingInterval = getGroupingInterval(pointsInGroup);
         if (pointsInGroup < 2) { // no grouping
             groupedSeries = null;
@@ -75,7 +88,6 @@ public class TraceDataManager {
 
         // first grouping
         if (groupedSeries == null) {
-            System.out.println("first grouping " + groupingInterval + " " + xMin + " " + xMax);
             groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             if (processingConfig.isDataExpensive() || isFullGrouping) {
                 groupedSeries.enableCaching(false);
@@ -93,10 +105,8 @@ public class TraceDataManager {
             }
         } else {
             if (factor == 1) { // scrolling
-                System.out.println(" scrolling " + xMin + " " + xMax);
                 groupedSeries.onDataChanged();
             } else { // simple regrouping
-                System.out.println(groupingInterval + " re grouping " + factor);
                 groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
             }
         }

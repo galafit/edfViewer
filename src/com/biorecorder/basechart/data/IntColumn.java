@@ -29,7 +29,7 @@ class IntColumn extends NumberColumn {
 
             @Override
             public int get(long index) {
-                return data[(int)index];
+                return data[(int) index];
             }
         });
     }
@@ -43,7 +43,7 @@ class IntColumn extends NumberColumn {
 
             @Override
             public int get(long index) {
-                return data.get((int)index);
+                return data.get((int) index);
             }
         });
     }
@@ -56,7 +56,7 @@ class IntColumn extends NumberColumn {
 
     @Override
     public void disableCaching() {
-        if( series instanceof CachedSeries) {
+        if (series instanceof CachedSeries) {
             series = ((CachedSeries) series).getOriginalSeries();
         }
     }
@@ -92,7 +92,7 @@ class IntColumn extends NumberColumn {
             String errorMessage = "Extremes can not be find if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.minMaxRange(series, 0, (int)length);
+        return DataManipulator.minMaxRange(series, 0, (int) length);
     }
 
     @Override
@@ -101,16 +101,16 @@ class IntColumn extends NumberColumn {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.upperBound(series, value, 0, (int)length);
+        return DataManipulator.upperBound(series, value, 0, (int) length);
     }
 
     @Override
-    public long lowerBound(double value,  long length) {
+    public long lowerBound(double value, long length) {
         if (length > Integer.MAX_VALUE) {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.lowerBound(series, value, 0, (int)length);
+        return DataManipulator.lowerBound(series, value, 0, (int) length);
     }
 
     @Override
@@ -139,15 +139,15 @@ class IntColumn extends NumberColumn {
         }
 
         private long groupsCount() {
-            return  groupStartIndexes.size() - 1;
+            return groupStartIndexes.size() - 1;
         }
 
         private int[] getGroupValues(long groupIndex) {
-int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
-          // if(groupIndex > groupsCount() - 4)
-          //  System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
+            int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex));
+            // if(groupIndex > groupsCount() - 4)
+            //  System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
 
-return value;
+            return value;
             // return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
         }
 
@@ -163,7 +163,7 @@ return value;
 
                     @Override
                     public int get(long index) {
-                       return getGroupValues(index)[seriesNumber];
+                        return getGroupValues(index)[seriesNumber];
                     }
                 };
                 resultantColumns[i] = new IntColumn(groupedSeries) {
@@ -182,7 +182,7 @@ return value;
                 resultantColumns[i].setName(name);
                 resultantColumns[i].setGroupingType(groupingType);
             }
-            if(resultantColumns.length == 2) { // intersect-join
+            if (resultantColumns.length == 2) { // intersect-join
                 resultantColumns[0].setGroupingType(GroupingType.MIN);
                 resultantColumns[1].setGroupingType(GroupingType.MAX);
             }
@@ -193,7 +193,9 @@ return value;
 
     public interface SeriesRangeViewer extends IntSeries {
         void setViewRange(long startIndex, long length);
+
         void clear();
+
         void cache(NumberColumn column);
 
     }
@@ -206,7 +208,7 @@ return value;
         public CachedSeries(SeriesRangeViewer series, boolean isLastElementCacheable) {
             this.series = series;
             this.isLastElementCacheable = isLastElementCacheable;
-            cache = new IntArrayList((int)series.size());
+            cache = new IntArrayList((int) series.size());
         }
 
         @Override
@@ -216,13 +218,13 @@ return value;
 
         @Override
         public int get(long index) {
-            if(!isLastElementCacheable && index == series.size() - 1) {
+            if (!isLastElementCacheable && index == series.size() - 1) {
                 return series.get(index);
             }
 
-            if(index >= cache.size()) {
+            if (index >= cache.size()) {
                 for (long i = cache.size(); i <= index; i++) {
-                   cache.add(series.get(i));
+                    cache.add(series.get(i));
                 }
             }
             return cache.get(index);
@@ -247,10 +249,10 @@ return value;
         public void cache(NumberColumn column) {
             cache.clear();
             for (int i = 0; i < column.size() - 1; i++) {
-                cache.add((int)column.value(i));
+                cache.add((int) column.value(i));
             }
-            if(isLastElementCacheable) {
-                cache.add((int)column.value(column.size() - 1));
+            if (isLastElementCacheable) {
+                cache.add((int) column.value(column.size() - 1));
             }
         }
     }
@@ -268,20 +270,20 @@ return value;
         public void setViewRange(long startIndex1, long length1) {
             startIndex = startIndex1;
             length = length1;
-            if(startIndex < 0) {
+            if (startIndex < 0) {
                 startIndex = 0;
             }
-            if(startIndex >= series.size()) {
+            if (startIndex >= series.size()) {
                 length = 0;
             }
-            if(length > series.size() - startIndex) {
+            if (length > series.size() - startIndex) {
                 length = series.size() - startIndex;
             }
         }
 
         @Override
         public long size() {
-            if(length < 0) {
+            if (length < 0) {
                 return series.size();
             }
             return length;

@@ -2,6 +2,7 @@ package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.TickFormatInfo;
 
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class LinearScale implements Scale {
 
     @Override
     public double scale(double value) {
-        return (float) (range[0] + (value - domain[0]) * (range[range.length - 1] - range[0]) / (domain[domain.length - 1] - domain[0]));
+        return (range[0] + (value - domain[0]) * (range[range.length - 1] - range[0]) / (domain[domain.length - 1] - domain[0]));
     }
 
     @Override
@@ -118,6 +119,7 @@ public class LinearScale implements Scale {
 
         }
         df = new DecimalFormat(formatPattern);
+        df.setRoundingMode(RoundingMode.HALF_UP);
         return df;
     }
 
@@ -168,7 +170,7 @@ public class LinearScale implements Scale {
                 lastTick = getLowerTick(min);
             } else {
                 double tickValue = lastTick.getValue() + tickInterval;
-                lastTick = new Tick(tickValue, labelFormat.format(tickValue));
+                lastTick = new Tick(tickValue, format(tickValue));
             }
             return lastTick;
         }
@@ -180,7 +182,7 @@ public class LinearScale implements Scale {
                 lastTick = getLowerTick(min);
             } else {
                 double tickValue = lastTick.getValue() - tickInterval;
-                lastTick = new Tick(tickValue, labelFormat.format(tickValue));
+                lastTick = new Tick(tickValue, format(tickValue));
             }
             return lastTick;
         }
@@ -188,15 +190,24 @@ public class LinearScale implements Scale {
         @Override
         public Tick getUpperTick(double value) {
             double tickValue = Math.ceil(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, labelFormat.format(tickValue));
+            lastTick = new Tick(tickValue, format(tickValue));
             return lastTick;
         }
 
         @Override
         public Tick getLowerTick(double value) {
             double tickValue = Math.floor(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, labelFormat.format(tickValue));
+            lastTick = new Tick(tickValue, format(tickValue));
             return lastTick;
+        }
+
+
+
+        public String format(double value) {
+            String formattedValue = labelFormat.format(value);
+            // truncate the negative sign when the result returns zero: -0.0 and so on
+            formattedValue = formattedValue.replaceAll("^-(?=0(.0*)?$)", "");
+            return formattedValue;
         }
 
 

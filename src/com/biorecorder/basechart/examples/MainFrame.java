@@ -77,7 +77,7 @@ public class MainFrame extends JFrame {
         XYData bandData = new XYData();
         bandData.setYData(bandYData);*/
 
-        ScrollableChart chart = new ScrollableChart(true);
+        ScrollableChart chart = new ScrollableChart();
 
         chart.addChartStack();
 

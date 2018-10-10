@@ -6,18 +6,21 @@ package com.biorecorder.basechart.data;
  */
 public class SubRange {
     private long startIndex;
-    private long length;
+    private long size;
 
-    public SubRange(long startIndex, long length) {
+    public SubRange(long startIndex, long size) {
         this.startIndex = startIndex;
-        this.length = length;
+        if(this.startIndex < 0) {
+            this.startIndex = 0;
+        }
+        this.size = size;
     }
 
     public long getStartIndex() {
         return startIndex;
     }
 
-    public long getLength() {
-        return length;
+    public long getSize() {
+        return size;
     }
 }

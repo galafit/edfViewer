@@ -81,6 +81,9 @@ public class RegularColumn extends NumberColumn {
     @Override
     public void setViewRange(long from, long length) {
         startIndex = from;
+        if(startIndex < 0) {
+            startIndex = 0;
+        }
         size = length;
     }
 

@@ -7,6 +7,8 @@ import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.themes.Theme;
 import com.biorecorder.basechart.traces.Trace;
 import com.biorecorder.basechart.data.DataSeries;
 
@@ -17,7 +19,7 @@ import java.util.List;
  * Created by hdablin on 24.03.17.
  */
 public class Chart {
-    private String title;
+    private String title ;
     private static final int DEFAULT_WEIGHT = 10;
 
     private HorizontalAlign legendHAlign = HorizontalAlign.RIGHT;
@@ -68,6 +70,10 @@ public class Chart {
 
     private ButtonGroup buttonGroup = new ButtonGroup();
 
+    public Chart() {
+        this((new DarkTheme()).getChartConfig());
+    }
+
     public Chart(ChartConfig chartConfig1) {
         this.chartConfig = new ChartConfig(chartConfig1);
         dataManager = new DataManager(dataProcessingConfig);
@@ -75,6 +81,8 @@ public class Chart {
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(false);
         topAxis.setRoundingEnabled(false);
+        topAxis.setRoundingAccuracyPct(-1);
+        bottomAxis.setRoundingAccuracyPct(-1);
         if (isBottomAxisPrimary) {
             bottomAxis.setGridVisible(true);
         } else {
@@ -191,6 +199,7 @@ public class Chart {
     }
     
     void setMargin(Insets margin) {
+        System.out.println("set margins");
         this.margin = margin;
         setYStartEnd(fullArea.y + margin.top(), fullArea.height - margin.top() - margin.bottom());
         setXStartEnd(fullArea.x + margin.left(), fullArea.width - margin.left() - margin.right());
@@ -206,6 +215,7 @@ public class Chart {
 
 
     void calculateMarginsAndAreas(BCanvas canvas) {
+        System.out.println("calculate margins");
         if (dataDirty) {
             initiateTraceData();
         }
@@ -427,28 +437,36 @@ public class Chart {
         }
     }
 
-    public void setXAxisRoundingEnabled(boolean isRoundingEnabled) {
+    /**
+     * if true all x axis will start and end on tick
+     *
+     */
+    public void setXRoundingEnabled(boolean isRoundingEnabled) {
         for (AxisWrapper axis : xAxisList) {
             axis.setRoundingEnabled(isRoundingEnabled);
         }
         setAreasDirty();
     }
 
-    public void setYAxisRoundingEnabled(boolean isRoundingEnabled) {
+    /**
+     * if true all y axis will start and end on tick
+     *
+     */
+    public void setYRoundingEnabled(boolean isRoundingEnabled) {
         for (AxisWrapper axis : yAxisList) {
             axis.setRoundingEnabled(isRoundingEnabled);
         }
         setAreasDirty();
     }
 
-    public void setXAxisLabelsInside(boolean isInside) {
+    public void setXLabelsInside(boolean isInside) {
         for (AxisWrapper axis : xAxisList) {
             axis.setTickLabelInside(isInside);
         }
         setAreasDirty();
     }
 
-    public void setYAxisLabelsInside(boolean isInside) {
+    public void setYLabelsInside(boolean isInside) {
         for (AxisWrapper axis : yAxisList) {
             axis.setTickLabelInside(isInside);
         }
@@ -554,7 +572,7 @@ public class Chart {
         trace.setXAxisIndex(xIndex);
         trace.setYAxisIndex(yAxisIndex);
         yAxisList.get(yAxisIndex).setVisible(true);
-        // xAxisList.get(xIndex).setVisible(true);
+        xAxisList.get(xIndex).setVisible(true);
 
         if (trace.getName() == null) {
             trace.setName("Trace " + traces.size());
@@ -749,10 +767,7 @@ public class Chart {
             }
         }
         if (tracesMinMax != null) {
-            xAxisList.get(xIndex).setMinMax(tracesMinMax.getMin(), tracesMinMax.getMax());
-            if(! xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
-                setAreasDirty();
-            }
+            setXMinMax(xIndex, tracesMinMax.getMin(), tracesMinMax.getMax());
         }
         dataDirty = false;
     }
@@ -789,8 +804,12 @@ public class Chart {
         return false;
     }
 
+
     public boolean hoverOn(int x, int y, int traceIndex) {
         if (!graphArea.contains(x, y)) {
+            if(hoverOff()) {
+                return true;
+            }
             return false;
         }
         if (traceIndex >= 0) {
@@ -853,7 +872,11 @@ public class Chart {
             roundingDirty = true;
             axis.setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
         }
-        
+
+        public void setRoundingAccuracyPct(int roundingAccuracyPct) {
+            axis.setRoundingAccuracyPct(roundingAccuracyPct);
+            setRoundingDirty();
+        }
 
         private boolean isDirty() {
             if (isRoundingEnabled && roundingDirty) {

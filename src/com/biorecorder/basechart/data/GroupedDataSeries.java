@@ -62,7 +62,6 @@ public class GroupedDataSeries extends DataSeries {
             }
         }
         calculateSize();
-        System.out.println(inDataSeries.size() + " grouped "+size());
     }
 
     /**
@@ -118,7 +117,6 @@ public class GroupedDataSeries extends DataSeries {
 
     @Override
     public void onDataChanged() {
-        System.out.println(inDataSeries.size() + "  "+groupStartIndexes.size() +" create "+groupStartIndexes.get(groupStartIndexes.size() - 1));
         groupStartIndexes.clear();
         xColumn.clear();
         if(inDataSeries.isRegular()) {
@@ -129,8 +127,6 @@ public class GroupedDataSeries extends DataSeries {
         }
 
         calculateSize();
-        //  System.out.println(groupStartIndexes.size() +" update "+groupStartIndexes.get(groupStartIndexes.size() - 1));
-
     }
 
     private double pointsNumberToGroupingInterval(int numberOfPointsInGroup) {
@@ -189,7 +185,6 @@ public class GroupedDataSeries extends DataSeries {
             } else {
                 size = inDataSize / groupPointsNumber + 2;
             }
-            System.out.println(size + " size "+ inDataSeries.size() + " "+groupPointsNumber);
             return size;
         }
 

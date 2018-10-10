@@ -19,4 +19,17 @@ public class BPoint {
     public int getY() {
         return y;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof BPoint)) {
+            return false;
+        }
+        BPoint point = (BPoint) o;
+        return point.x == x &&
+                point.y == y;
+    }
+
+
 }
