@@ -10,8 +10,16 @@ public class Range {
     private double max;
 
     public Range(double min, double max) {
-        if (min > max){
-            String errorMessage = "Range Error. Expected Min <= Max. Min = {0}, Max = {1}.";
+        if(Double.isInfinite(min)) {
+            String errMsg = "Min is infinity";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(Double.isInfinite(max)) {
+            String errMsg = "Max is infinity";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if (min > max) {
+            String errorMessage = "Expected Min <= Max. Min = {0}, Max = {1}.";
             String formattedError = MessageFormat.format(errorMessage, min, max);
             throw new IllegalArgumentException(formattedError);
         }

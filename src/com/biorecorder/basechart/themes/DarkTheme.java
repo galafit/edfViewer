@@ -65,6 +65,6 @@ public class DarkTheme extends Theme {
         previewConfig.getCrossHairConfig().setLineColor(crosshairColor);
         previewConfig.getLegendConfig().setBackgroundColor(chartBgColor);
 
-        scrollConfig.setScrollColor(scrollColor);
+        scrollConfig.setColor(scrollColor);
     }
 }

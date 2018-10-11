@@ -7,31 +7,40 @@ import com.biorecorder.basechart.graphics.BColor;
  * Created by galafit on 1/10/17.
  */
 public class ScrollConfig {
-    private BColor scrollColor = BColor.RED;
-    private int scrollMinWidth = 10; //px
+    private BColor color = BColor.RED;
+    private int activeExtraSpace = 5; //px
+    private int borderWidth = 2; // px
 
     public ScrollConfig() {
     }
 
     public ScrollConfig(ScrollConfig scrollConfig) {
-        scrollColor = scrollConfig.scrollColor;
-        scrollMinWidth = scrollConfig.scrollMinWidth;
+        color = scrollConfig.color;
+        activeExtraSpace = scrollConfig.activeExtraSpace;
     }
 
-    public void setScrollColor(BColor scrollColor) {
-        this.scrollColor = scrollColor;
+    public int getBorderWidth() {
+        return borderWidth;
     }
 
-    public void setScrollMinWidth(int scrollMinWidth) {
-        this.scrollMinWidth = scrollMinWidth;
+    public void setBorderWidth(int borderWidth) {
+        this.borderWidth = borderWidth;
     }
 
-    public BColor getScrollColor() {
-        return scrollColor;
+    public void setColor(BColor color) {
+        this.color = color;
     }
 
-    public int getScrollMinWidth() {
-        return scrollMinWidth;
+    public void setActiveExtraSpace(int activeExtraSpace) {
+        this.activeExtraSpace = activeExtraSpace;
+    }
+
+    public BColor getColor() {
+        return color;
+    }
+
+    public int getActiveExtraSpace() {
+        return activeExtraSpace;
     }
 
 }

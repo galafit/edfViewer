@@ -870,7 +870,7 @@ public class Chart {
 
         private void setRoundingDirty() {
             roundingDirty = true;
-            axis.setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
+            axis.setMinMax(rowMinMax);
         }
 
         public void setRoundingAccuracyPct(int roundingAccuracyPct) {
@@ -934,14 +934,14 @@ public class Chart {
 
         public Scale zoom(double zoomFactor) {
             // to have smooth zooming we do it on row domain values instead of rounded ones !!!
-            axis.setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
+            axis.setMinMax(rowMinMax);
             return axis.zoom(zoomFactor);
         }
 
 
         public Scale translate(int translation) {
             // to have smooth translating we do it on row domain values instead of rounded ones !!!
-            axis.setMinMax(rowMinMax.getMin(), rowMinMax.getMax());
+            axis.setMinMax(rowMinMax);
             Scale scale = axis.translate(translation);
             return scale;
         }

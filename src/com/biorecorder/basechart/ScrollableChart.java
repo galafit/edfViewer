@@ -2,7 +2,10 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
+import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.graphics.BStroke;
+import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.themes.DarkTheme;
@@ -20,6 +23,8 @@ public class ScrollableChart {
     private Chart preview;
     private int previewHeightPct = 30; // The height of the preview as a percent of full height
     private int previewHeightPixels = 80; // The height of the preview in pixels
+    private int previewXIndex = 0;
+
 
     private BRectangle fullArea;
     private BRectangle chartArea;
@@ -42,12 +47,15 @@ public class ScrollableChart {
 
     private void createScrolls() {
         updatePreviewMinMax();
-        double xMin = preview.getXMinMax(0).getMin();
+        Range previewXRange = preview.getXMinMax(previewXIndex);
+        double xMin = previewXRange.getMin();
         for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
             if (chart.isXAxisUsed(xIndex)) {
                 double xExtent = chart.getBestExtent(xIndex);
-                Scroll scroll = new Scroll(xExtent, theme.getScrollConfig(), preview.getXAxisScale(0));
-
+                Scroll scroll = new Scroll();
+                scroll.setMinMax(previewXRange);
+                scroll.setValue(xMin);
+                scroll.setExtent(xExtent);
                 double xMax = xMin + xExtent;
                 chart.setXMinMax(xIndex, xMin, xMax);
                 for (int i = 0; i < chart.yAxisCount(); i++) {
@@ -72,6 +80,7 @@ public class ScrollableChart {
             //   scrollToEnd();
         }
     }
+
 
     private void autoScaleChartY() {
         for (int i = 0; i < chartYAxisCount(); i++) {
@@ -135,7 +144,7 @@ public class ScrollableChart {
             createScrolls();
         }
         for (Integer key : scrolls.keySet()) {
-            scrolls.get(key).draw(canvas, preview.getGraphArea(canvas));
+            drawScroll(canvas, scrolls.get(key));
         }
 
         chart.draw(canvas);
@@ -176,14 +185,75 @@ public class ScrollableChart {
 
 
     /**
+     * =========================== Scrolls
+     **/
+
+
+    public Range getScrollRange(Scroll scroll) {
+        Scale scale = preview.getXAxisScale(previewXIndex);
+        double scrollStart = scale.scale(scroll.getValue());
+        double scrollEnd = scale.scale(scroll.getValue() + scroll.getExtent());
+        return new Range(scrollStart, scrollEnd);
+    }
+
+
+    boolean isPointInsideScroll(Scroll scroll, int x, int y) {
+        return previewArea.contains(x, y) && getScrollActiveRange(scroll).contains(x);
+    }
+
+    private Range getScrollActiveRange(Scroll scroll) {
+        ScrollConfig scrollConfig = theme.getScrollConfig();
+        Range scrollRange = getScrollRange(scroll);
+        return new Range(scrollRange.getMin() - scrollConfig.getActiveExtraSpace(), scrollRange.getMax() + scrollConfig.getActiveExtraSpace());
+    }
+
+    /**
+     * @return true if value was changed and false if newValue = current scroll value
+     */
+    public boolean setScrollPosition(Scroll scroll, double x) {
+        Scale scale = preview.getXAxisScale(previewXIndex);
+        double value = scale.invert(x);
+        return scroll.setValue(value);
+    }
+
+    public double getScrollPosition(Scroll scroll) {
+        Scale scale = preview.getXAxisScale(previewXIndex);
+        return scale.scale(scroll.getValue());
+    }
+
+
+    public void drawScroll(BCanvas canvas, Scroll scroll) {
+        BRectangle area = preview.getGraphArea(canvas);
+        ScrollConfig scrollConfig = theme.getScrollConfig();
+        Range scrollRange = getScrollRange(scroll);
+
+        int borderWidth = scrollConfig.getBorderWidth();
+
+        int scrollX = (int)scrollRange.getMin();
+        int scrollY = area.y + borderWidth/2;
+        int scrollHeight = area.height - borderWidth;
+        int scrollWidth = Math.max(1, (int)scrollRange.length());
+
+
+        BColor scrollColor = scrollConfig.getColor();
+        BColor fillColor = new BColor(scrollColor.getRed(), scrollColor.getGreen(), scrollColor.getBlue(), 70);
+        canvas.setColor(fillColor);
+        canvas.fillRect(scrollX, scrollY, scrollWidth, scrollHeight);
+
+        BColor borderColor = new BColor(scrollColor.getRed(), scrollColor.getGreen(), scrollColor.getBlue(), 130);
+        canvas.setColor(borderColor);
+        canvas.setStroke(new BStroke(borderWidth));
+        canvas.drawRect(scrollX, scrollY, scrollWidth, scrollHeight);
+    }
+
+
+
+    /**
      * =======================Base methods to interact==========================
      **/
     public void setTheme(Theme theme) {
         chart.setConfig(theme.getChartConfig());
         preview.setConfig(theme.getPreviewConfig());
-        for (Integer key : scrolls.keySet()) {
-            scrolls.get(key).setConfig(theme.getScrollConfig());
-        }
     }
 
 
@@ -194,6 +264,10 @@ public class ScrollableChart {
 
     public void update() {
         updatePreviewMinMax();
+        for (Integer xAxis : scrolls.keySet()) {
+            scrolls.get(xAxis).setMinMax(preview.getXMinMax(previewXIndex));
+        }
+
         if (autoScrollEnable && scrollsAtTheEnd) {
             scrollToEnd();
         }
@@ -261,11 +335,8 @@ public class ScrollableChart {
     }
 
     public boolean isPointInsideScroll(int x, int y) {
-        if (!previewContains(x, y)) {
-            return false;
-        }
         for (Integer key : scrolls.keySet()) {
-            if (scrolls.get(key).isPointInsideScroll(x)) {
+            if (isPointInsideScroll(scrolls.get(key), x, y)) {
                 return true;
             }
         }
@@ -292,7 +363,7 @@ public class ScrollableChart {
         }
         boolean scrollsMoved = false;
         for (Integer key : scrolls.keySet()) {
-            scrollsMoved = scrolls.get(key).setPosition(x) || scrollsMoved;
+            scrollsMoved = setScrollPosition(scrolls.get(key), x) || scrollsMoved;
         }
         return scrollsMoved;
     }
@@ -300,7 +371,7 @@ public class ScrollableChart {
     public boolean translateScrolls(double dx) {
         Double maxScrollsPosition = null;
         for (Integer key : scrolls.keySet()) {
-            maxScrollsPosition = (maxScrollsPosition == null) ? scrolls.get(key).getPosition() : Math.max(maxScrollsPosition, scrolls.get(key).getPosition());
+            maxScrollsPosition = (maxScrollsPosition == null) ? getScrollPosition(scrolls.get(key)) : Math.max(maxScrollsPosition, getScrollPosition(scrolls.get(key)));
         }
         return setScrollsPosition(maxScrollsPosition + dx, previewArea.y);
     }
@@ -308,7 +379,7 @@ public class ScrollableChart {
 
     public void translateChartX(int xAxisIndex, int dx) {
         if (scrolls.get(xAxisIndex) != null) {
-            double scrollTranslation = dx * scrolls.get(xAxisIndex).getWidth() / chartArea.width;
+            double scrollTranslation = dx * getScrollRange(scrolls.get(xAxisIndex)).length() / chartArea.width;
             translateScrolls(scrollTranslation);
         }
     }

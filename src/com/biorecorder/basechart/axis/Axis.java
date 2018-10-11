@@ -1,5 +1,6 @@
 package com.biorecorder.basechart.axis;
 
+import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.Text;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BStroke;
@@ -203,24 +204,12 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public void setMinMax(double min, double max) {
-        if (min == getMin() && max == getMax()) {
+    public void setMinMax(Range minMax) {
+        if (minMax.getMin() == getMin() && minMax.getMax() == getMax()) {
             return;
         }
-        if(Double.isInfinite(min)) {
-            String errMsg = "Min is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if(Double.isInfinite(max)) {
-            String errMsg = "Max is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (min > max) {
-            String errorMessage = "Expected Min < Max. Min = {0}, Max = {1}.";
-            String formattedError = MessageFormat.format(errorMessage, min, max);
-            throw new IllegalArgumentException(formattedError);
-        }
-        scale.setDomain(min, max);
+
+        scale.setDomain(minMax.getMin(), minMax.getMax());
         setDirty();
     }
 
