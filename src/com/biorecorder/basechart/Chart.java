@@ -8,7 +8,6 @@ import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.themes.Theme;
 import com.biorecorder.basechart.traces.Trace;
 import com.biorecorder.basechart.data.DataSeries;
 
@@ -20,7 +19,7 @@ import java.util.List;
  */
 public class Chart {
     private String title ;
-    private static final int DEFAULT_WEIGHT = 10;
+    private int defaultWeight = 4;
 
     private HorizontalAlign legendHAlign = HorizontalAlign.RIGHT;
     private VerticalAlign legendVAlign = VerticalAlign.TOP;
@@ -416,9 +415,15 @@ public class Chart {
     }
 
 
+
+
     /**
      * =======================Base methods to interact==========================
      **/
+
+    public void setDefaultWeight(int defaultWeight) {
+        this.defaultWeight = defaultWeight;
+    }
 
     public void setSpacing(int top, int right, int bottom, int left) {
         this.spacing = new Insets(top, right, bottom, left);
@@ -537,7 +542,7 @@ public class Chart {
     }
 
     public void addStack() {
-        addStack(DEFAULT_WEIGHT);
+        addStack(defaultWeight);
     }
 
 
