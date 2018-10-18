@@ -2,7 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.ScrollableChart;
 import com.biorecorder.basechart.data.XYData;
-import com.biorecorder.basechart.lists.IntArrayList;
+import com.biorecorder.util.lists.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.traces.LineTrace;
 

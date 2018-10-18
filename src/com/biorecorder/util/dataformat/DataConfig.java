@@ -1,4 +1,4 @@
-package com.biorecorder.dataformat;
+package com.biorecorder.util.dataformat;
 
 /**
  * This interface describes data format similar to the European Data Format (EDF)

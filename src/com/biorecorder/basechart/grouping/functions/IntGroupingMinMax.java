@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.grouping.functions;
 
-import com.biorecorder.basechart.series.IntSeries;
+import com.biorecorder.util.series.IntSeries;
 
 /**
  * Created by galafit on 6/7/18.

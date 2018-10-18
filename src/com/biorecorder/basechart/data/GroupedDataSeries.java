@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.data;
 
-import com.biorecorder.basechart.lists.LongArrayList;
-import com.biorecorder.basechart.series.LongSeries;
+import com.biorecorder.util.lists.LongArrayList;
+import com.biorecorder.util.series.LongSeries;
 
 /**
  * This class potentially permits for every grouped point (bin)

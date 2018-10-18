@@ -1,4 +1,4 @@
-package com.biorecorder.dataformat;
+package com.biorecorder.util.dataformat;
 
 /**
  * The listener interface for receiving data records.

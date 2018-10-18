@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
-import com.biorecorder.basechart.series.IntSeries;
-import com.biorecorder.basechart.series.StringSeries;
+import com.biorecorder.util.series.IntSeries;
+import com.biorecorder.util.series.StringSeries;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -133,6 +133,7 @@ public class DataSeries  {
         for (NumberColumn yColumn : yColumns) {
             yColumn.clear();
         }
+        calculateSize();
     }
 
     /**
@@ -257,7 +258,7 @@ public class DataSeries  {
 
 
     public void addYData(int[] data) {
-        yColumns.add(new IntColumn(data));
+        addYData(new IntColumn(data));
     }
 
   /*  public void addYData(float[] data) {

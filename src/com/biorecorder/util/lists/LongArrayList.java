@@ -1,7 +1,7 @@
-package com.biorecorder.basechart.lists;
+package com.biorecorder.util.lists;
 
 
-import com.biorecorder.basechart.series.LongSeries;
+import com.biorecorder.util.series.LongSeries;
 
 /**
  * based on openjdk ArrayList.java -

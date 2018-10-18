@@ -1,0 +1,10 @@
+package com.biorecorder.util.series;
+
+/**
+ * Interface that represents a set of indexed data of type #e# (like array)
+ * that can be accessed but can not be modified
+ */
+public interface #E#Series {
+    public long size();
+    public #e# get(long index);
+}

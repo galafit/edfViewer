@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.grouping.functions;
 
 
-import com.biorecorder.basechart.series.IntSeries;
+import com.biorecorder.util.series.IntSeries;
 
 public class IntGroupingAvg implements IntGroupingFunction {
     long lastFrom = -1;

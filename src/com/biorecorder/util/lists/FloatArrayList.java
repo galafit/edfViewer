@@ -1,7 +1,6 @@
-package com.biorecorder.basechart.lists;
+package com.biorecorder.util.lists;
 
-
-import com.biorecorder.basechart.series.IntSeries;
+import com.biorecorder.util.series.FloatSeries;
 
 /**
  * based on openjdk ArrayList.java -
@@ -10,8 +9,8 @@ import com.biorecorder.basechart.series.IntSeries;
  * and trove ArrayListTemplate -
  * https://bitbucket.org/trove4j/trove/src/24dd57f48bf385fa41a878f8fad7ac44d8b1d53a/core/src/main/templates/gnu/trove/list/array/_E_ArrayList.template?at=master&fileviewer=file-view-default
  */
-public class IntArrayList implements IntSeries {
-    private int[] data;
+public class FloatArrayList implements FloatSeries {
+    private float[] data;
     private int size;
     /**
      * The maximum size of array to allocate.
@@ -21,20 +20,20 @@ public class IntArrayList implements IntSeries {
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    public IntArrayList(int initialCapacity) {
+    public FloatArrayList(int initialCapacity) {
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("Illegal Capacity: "+ initialCapacity);
         }
-        data = new int[initialCapacity];
+        data = new float[initialCapacity];
     }
 
-    public IntArrayList() {
+    public FloatArrayList() {
         this(10);
     }
 
-    public IntArrayList(int[] source) {
+    public FloatArrayList(float[] source) {
         size = source.length;
-        data = new int[size];
+        data = new float[size];
         System.arraycopy(source, 0, data, 0, size);
     }
 
@@ -44,7 +43,7 @@ public class IntArrayList implements IntSeries {
     }
 
     @Override
-    public int get(long index) {
+    public float get(long index) {
         rangeCheck(index);
         return data[(int)index];
     }
@@ -52,8 +51,8 @@ public class IntArrayList implements IntSeries {
     /**
      * Remove an element from the specified index
      */
-    public int remove(int index) {
-        int old = data[index];
+    public float remove(int index) {
+        float old = data[index];
         remove(index, 1);
         return old;
     }
@@ -82,7 +81,7 @@ public class IntArrayList implements IntSeries {
         size = 0;
     }
 
-    public void set( int index, int value) {
+    public void set(int index, float value) {
         rangeCheck(index);
         data[index] = value;
     }
@@ -90,50 +89,18 @@ public class IntArrayList implements IntSeries {
     /**
      * Add a new element to the list.
      */
-    public void add(int value) {
+    public void add(float value) {
         ensureCapacity(size + 1);  // Increments modCount!!
         data[size] = value;
         size++;
     }
 
 
-    public void add(int[] values) {
+    public void add(float[] values) {
         int numNew = values.length;
         ensureCapacity(size + numNew);  // Increments modCount
         System.arraycopy(values, 0, data, size, numNew);
         size += numNew;
-    }
-
-
-    /**
-     * Inserts all of the elements from the given array into the
-     * list, starting at the given position.  Shifts the element
-     * currently at that position (if any) and any subsequent elements to
-     * the right (increases their indices).
-     *
-     * @param index index at which to insert the first element from the
-     *              given array
-     * @param values array containing elements to be added to the list
-     * @throws IndexOutOfBoundsException
-     * @throws NullPointerException if the given array is null
-     */
-
-    public void add(int index, int[] values) {
-        rangeCheckForAdd(index);
-
-        int numNew = values.length;
-        ensureCapacity(size + numNew);  // Increments modCount
-        int numMoved = size - index;
-        if (numMoved > 0)
-            System.arraycopy(data, index, data, index + numNew,
-                    numMoved);
-        System.arraycopy(values, 0, data, index, numNew);
-        size += numNew;
-    }
-
-    private void rangeCheckForAdd(int index) {
-        if (index > size || index < 0)
-            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
     }
 
     /**
@@ -143,7 +110,7 @@ public class IntArrayList implements IntSeries {
      */
     public void trimToSize() {
         if ( data.length > size ) {
-            int[] tmp = new int[size];
+            float[] tmp = new float[size];
             System.arraycopy( data, 0, tmp, 0, size );
             data = tmp;
         }
@@ -162,7 +129,7 @@ public class IntArrayList implements IntSeries {
                 newCapacity = hugeCapacity(minCapacity);
 
             // minCapacity is usually close to size, so this is a win:
-            int[] tmp = new int[newCapacity];
+            float[] tmp = new float[newCapacity];
             System.arraycopy( data, 0, tmp, 0, data.length );
             data = tmp;
         }

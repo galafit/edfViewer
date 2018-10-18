@@ -1,9 +1,9 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
-import com.biorecorder.basechart.lists.LongArrayList;
-import com.biorecorder.basechart.series.FloatSeries;
-import com.biorecorder.basechart.series.IntSeries;
+import com.biorecorder.util.lists.LongArrayList;
+import com.biorecorder.util.series.FloatSeries;
+import com.biorecorder.util.series.IntSeries;
 
 /**
  * Created by galafit on 24/9/17.

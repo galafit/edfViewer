@@ -1,4 +1,4 @@
-package com.biorecorder.dataformat;
+package com.biorecorder.util.dataformat;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

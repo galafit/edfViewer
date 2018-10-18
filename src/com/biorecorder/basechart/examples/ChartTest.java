@@ -1,15 +1,14 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.Chart;
+import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.data.XYData;
-import com.biorecorder.basechart.lists.IntArrayList;
+import com.biorecorder.util.lists.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.traces.LineTrace;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by galafit on 21/9/18.
@@ -72,6 +71,12 @@ public class ChartTest extends JFrame {
 
 
     public static void main(String[] args) {
-        ChartTest chartTest = new ChartTest();
+       // ChartTest chartTest = new ChartTest();
+        int arr[] = {1, 2, 3, 4, 5};
+        DataSeries dataSeries = new DataSeries();
+        dataSeries.addYData(arr);
+        for (int i = 0; i < dataSeries.size(); i++) {
+            System.out.println(i);
+        }
     }
 }

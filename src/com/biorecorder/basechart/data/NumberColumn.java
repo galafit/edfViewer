@@ -2,7 +2,7 @@ package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.grouping.GroupingType;
-import com.biorecorder.basechart.series.LongSeries;
+import com.biorecorder.util.series.LongSeries;
 
 /**
  * Created by galafit on 17/9/17.
