@@ -1,18 +1,18 @@
 package com.biorecorder.util.lists;
 
-import com.biorecorder.util.series.LongSeries;
+import com.biorecorder.util.series.DoubleSeries;
 
 
 /**
- * A resizable, array-backed list of long primitives.
+ * A resizable, array-backed list of double primitives.
  *<p>
  * Based on openjdk ArrayList.java -
  * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayList.java
  * <br> and trove ArrayListTemplate -
  * https://bitbucket.org/trove4j/trove/src/24dd57f48bf385fa41a878f8fad7ac44d8b1d53a/core/src/main/templates/gnu/trove/list/array/_E_ArrayList.template?at=master&fileviewer=file-view-default
  */
-public class LongArrayList implements LongSeries {
-    private long[] data;
+public class DoubleArrayList implements DoubleSeries {
+    private double[] data;
     private int size;
     /**
      * The maximum size of array to allocate.
@@ -22,20 +22,20 @@ public class LongArrayList implements LongSeries {
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
-    public LongArrayList(int initialCapacity) {
+    public DoubleArrayList(int initialCapacity) {
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("Illegal Capacity: "+ initialCapacity);
         }
-        data = new long[initialCapacity];
+        data = new double[initialCapacity];
     }
 
-    public LongArrayList() {
+    public DoubleArrayList() {
         this(10);
     }
 
-    public LongArrayList(long[] source) {
+    public DoubleArrayList(double[] source) {
         size = source.length;
-        data = new long[size];
+        data = new double[size];
         System.arraycopy(source, 0, data, 0, size);
     }
 
@@ -45,7 +45,7 @@ public class LongArrayList implements LongSeries {
     }
 
     @Override
-    public long get(long index) {
+    public double get(long index) {
         rangeCheck(index);
         return data[(int)index];
     }
@@ -53,8 +53,8 @@ public class LongArrayList implements LongSeries {
     /**
      * Remove an element from the specified index
      */
-    public long remove(int index) {
-        long old = data[index];
+    public double remove(int index) {
+        double old = data[index];
         remove(index, 1);
         return old;
     }
@@ -83,7 +83,7 @@ public class LongArrayList implements LongSeries {
         size = 0;
     }
 
-    public void set( int index, long value) {
+    public void set( int index, double value) {
         rangeCheck(index);
         data[index] = value;
     }
@@ -91,7 +91,7 @@ public class LongArrayList implements LongSeries {
     /**
      * Adds a new element to the to the end of the list
      */
-    public void add(long value) {
+    public void add(double value) {
         ensureCapacity(size + 1);  // Increments modCount!!
         data[size] = value;
         size++;
@@ -102,7 +102,7 @@ public class LongArrayList implements LongSeries {
      * Adds the values from the array <tt>values</tt> to the end of the
      * list, in order.
      */
-    public void add(long[] values) {
+    public void add(double[] values) {
         int numNew = values.length;
         ensureCapacity(size + numNew);  // Increments modCount
         System.arraycopy(values, 0, data, size, numNew);
@@ -123,7 +123,7 @@ public class LongArrayList implements LongSeries {
      * @throws NullPointerException if the given array is null
      */
 
-    public void add(int index, long[] values) {
+    public void add(int index, double[] values) {
         rangeCheckForAdd(index);
 
         int numNew = values.length;
@@ -148,7 +148,7 @@ public class LongArrayList implements LongSeries {
      */
     public void trimToSize() {
         if ( data.length > size ) {
-            long[] tmp = new long[size];
+            double[] tmp = new double[size];
             System.arraycopy( data, 0, tmp, 0, size );
             data = tmp;
         }
@@ -167,7 +167,7 @@ public class LongArrayList implements LongSeries {
                 newCapacity = hugeCapacity(minCapacity);
 
             // minCapacity is usually close to size, so this is a win:
-            long[] tmp = new long[newCapacity];
+            double[] tmp = new double[newCapacity];
             System.arraycopy( data, 0, tmp, 0, data.length );
             data = tmp;
         }

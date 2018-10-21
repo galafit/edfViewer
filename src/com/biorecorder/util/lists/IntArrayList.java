@@ -1,13 +1,14 @@
 package com.biorecorder.util.lists;
 
-
 import com.biorecorder.util.series.IntSeries;
 
+
 /**
- * based on openjdk ArrayList.java -
+ * A resizable, array-backed list of int primitives.
+ *<p>
+ * Based on openjdk ArrayList.java -
  * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/util/ArrayList.java
- * <br>
- * and trove ArrayListTemplate -
+ * <br> and trove ArrayListTemplate -
  * https://bitbucket.org/trove4j/trove/src/24dd57f48bf385fa41a878f8fad7ac44d8b1d53a/core/src/main/templates/gnu/trove/list/array/_E_ArrayList.template?at=master&fileviewer=file-view-default
  */
 public class IntArrayList implements IntSeries {
@@ -88,7 +89,7 @@ public class IntArrayList implements IntSeries {
     }
 
     /**
-     * Add a new element to the list.
+     * Adds a new element to the to the end of the list
      */
     public void add(int value) {
         ensureCapacity(size + 1);  // Increments modCount!!
@@ -97,6 +98,10 @@ public class IntArrayList implements IntSeries {
     }
 
 
+     /**
+     * Adds the values from the array <tt>values</tt> to the end of the
+     * list, in order.
+     */
     public void add(int[] values) {
         int numNew = values.length;
         ensureCapacity(size + numNew);  // Increments modCount

@@ -1,5 +1,6 @@
 package com.biorecorder.basechart.data;
 
+import com.biorecorder.util.lists.SeriesUtil;
 import com.biorecorder.basechart.Range;
 import com.biorecorder.util.lists.IntArrayList;
 import com.biorecorder.basechart.grouping.GroupingType;
@@ -88,11 +89,24 @@ class IntColumn extends NumberColumn {
 
     @Override
     public Range extremes(long length) {
+        if(length == 0){
+            return null;
+        }
         if (length > Integer.MAX_VALUE) {
             String errorMessage = "Extremes can not be find if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.minMaxRange(series, 0, (int) length);
+
+        // invoke data.get(i) can be expensive in the case data is grouped data
+        int dataItem = series.get(0); //
+        int min = dataItem;
+        int max = dataItem;
+        for (long i = 1; i < length ; i++) {
+            dataItem = series.get(i);
+            min = Math.min(min, dataItem);
+            max = Math.max(max, dataItem);
+        }
+        return new Range(new Double(min), new Double(max));
     }
 
     @Override
@@ -101,7 +115,7 @@ class IntColumn extends NumberColumn {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.upperBound(series, value, 0, (int) length);
+        return SeriesUtil.upperBound(series, value, 0, (int) length);
     }
 
     @Override
@@ -110,7 +124,7 @@ class IntColumn extends NumberColumn {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return DataManipulator.lowerBound(series, value, 0, (int) length);
+        return SeriesUtil.lowerBound(series, value, 0, (int) length);
     }
 
     @Override

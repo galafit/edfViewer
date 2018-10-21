@@ -69,7 +69,7 @@ public class Generator {
             new WrapperInfo("float", "Float", "POSITIVE_INFINITY", "NEGATIVE_INFINITY"),
             new WrapperInfo("int", "Integer", "MAX_VALUE", "MIN_VALUE"),
             new WrapperInfo("long", "Long", "MAX_VALUE", "MIN_VALUE"),
-            new WrapperInfo("byte", "Byte", "MAX_VALUE", "MIN_VALUE"),
+            //new WrapperInfo("byte", "Byte", "MAX_VALUE", "MIN_VALUE"),
             //new WrapperInfo("char", "Character", "MAX_VALUE", "MIN_VALUE"),
             new WrapperInfo("short", "Short", "MAX_VALUE", "MIN_VALUE")};
 

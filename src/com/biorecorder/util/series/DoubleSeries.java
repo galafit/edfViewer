@@ -1,7 +1,8 @@
 package com.biorecorder.util.series;
 
 /**
- * Created by galafit on 13/7/18.
+ * Interface that represents a set of indexed data of type double (like array)
+ * that can be accessed but can not be modified
  */
 public interface DoubleSeries {
     public long size();
