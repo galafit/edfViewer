@@ -88,10 +88,10 @@ public class GroupedDataSeries extends DataSeries {
          if(inDataSeries.isRegular()) {
             xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
         } else {
-            xColumn.cache(resultantGroupedSeries.xColumn);
+            xColumn.enableCaching(false, resultantGroupedSeries.xColumn);
         }
         for (int i = 0; i < yColumns.size(); i++) {
-           yColumns.get(i).cache(resultantGroupedSeries.yColumns.get(i));
+           yColumns.get(i).enableCaching(false, resultantGroupedSeries.yColumns.get(i));
         }
         calculateSize();
     }

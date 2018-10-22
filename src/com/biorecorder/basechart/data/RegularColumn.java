@@ -40,13 +40,13 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public Range extremes(long length) {
+    public Range extremes(long from, long length) {
         return new Range(value(0), value(length - 1));
     }
 
     @Override
-    public long upperBound(double value, long length) {
-        long lowerBoundIndex = lowerBound(value, length);
+    public long upperBound(double value, long from, long length) {
+        long lowerBoundIndex = lowerBound(value, from, length);
         if(value == value(lowerBoundIndex)) {
             return lowerBoundIndex;
         }
@@ -54,8 +54,8 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public long lowerBound(double value, long length) {
-        long lowerBoundIndex = (long) ((value - value(0)) / dataInterval);
+    public long lowerBound(double value, long from, long length) {
+        long lowerBoundIndex = (long) ((value - value(from)) / dataInterval);
         if(lowerBoundIndex < 0) {
             lowerBoundIndex = 0;
         }
@@ -69,7 +69,12 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public void enableCaching(boolean isLastElementCacheable) {
+    public void enableCaching(boolean isLastElementCached) {
+        // do nothing
+    }
+
+    @Override
+    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
         // do nothing
     }
 
@@ -79,12 +84,12 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public void setViewRange(long from, long length) {
-        startIndex = from;
+    public void viewRange(long rangeStart, long rangeLength) {
+        startIndex = rangeStart;
         if(startIndex < 0) {
             startIndex = 0;
         }
-        size = length;
+        size = rangeLength;
     }
 
     @Override
@@ -92,16 +97,12 @@ public class RegularColumn extends NumberColumn {
         return new RegularColumn(startValue, dataInterval);
     }
 
+
     @Override
     public NumberColumn[] group(LongSeries groupIndexes) {
         return new NumberColumn[0];
     }
 
-
-    @Override
-    public void cache(NumberColumn column) {
-       // do nothing
-    }
 
 
 }

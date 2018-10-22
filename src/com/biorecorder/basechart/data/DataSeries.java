@@ -100,14 +100,14 @@ public class DataSeries  {
             return new Range(min, max);
         }
 
-        return xColumn.extremes(size);
+        return xColumn.extremes(0, size);
     }
 
     public Range getYExtremes(int yNumber) {
         if (size == 0) {
             return null;
         }
-        return yColumns.get(yNumber).extremes(size);
+        return yColumns.get(yNumber).extremes(0, size);
     }
 
     public long size() {
@@ -142,7 +142,7 @@ public class DataSeries  {
      */
     public long findNearestData(double xValue) {
 
-        long lowerBoundIndex = xColumn.lowerBound(xValue, size);
+        long lowerBoundIndex = xColumn.lowerBound(xValue, 0, size);
         if (lowerBoundIndex < 0) {
             return 0;
         }
@@ -170,9 +170,9 @@ public class DataSeries  {
     }
 
     public void setViewRange(long startIndex, long length) {
-        xColumn.setViewRange(startIndex, length);
+        xColumn.viewRange(startIndex, length);
         for (NumberColumn yColumn : yColumns) {
-            yColumn.setViewRange(startIndex, length);
+            yColumn.viewRange(startIndex, length);
         }
 
         if(annotationColumn != null) {
@@ -204,8 +204,8 @@ public class DataSeries  {
             return new SubRange(0, size);
         }
 
-        long startIndex = xColumn.upperBound(startXValue, size);
-        long endIndex = xColumn.lowerBound(endXValue, size);
+        long startIndex = xColumn.upperBound(startXValue, 0, size);
+        long endIndex = xColumn.lowerBound(endXValue, 0, size);
         long length;
 
         if (startIndex < 0) {

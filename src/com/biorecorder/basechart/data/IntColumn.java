@@ -15,10 +15,12 @@ import java.util.List;
  * Created by galafit on 27/9/17.
  */
 class IntColumn extends NumberColumn {
-    private SeriesRangeViewer series;
+    private final IntSeries series;
+    private SeriesRangeViewer seriesViewer;
 
     public IntColumn(IntSeries series) {
-        this.series = new SeriesViewer(series);
+        this.series = series;
+        this.seriesViewer = new SeriesRangeViewer();
     }
 
     public IntColumn(int[] data) {
@@ -50,21 +52,32 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public void enableCaching(boolean isLastElementCacheable) {
-        disableCaching();
-        series = new CachedSeries(series, isLastElementCacheable);
+    public void enableCaching(boolean isLastElementCached) {
+        SeriesCachingRangeViewer seriesViewer1 = new SeriesCachingRangeViewer(isLastElementCached);
+        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
+        seriesViewer = seriesViewer1;
+    }
+
+    @Override
+    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
+        SeriesCachingRangeViewer seriesViewer1 = new SeriesCachingRangeViewer(isLastElementCached);
+        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
+        seriesViewer1.cache(column);
+        seriesViewer = seriesViewer1;
     }
 
     @Override
     public void disableCaching() {
-        if (series instanceof CachedSeries) {
-            series = ((CachedSeries) series).getOriginalSeries();
-        }
+        SeriesRangeViewer seriesViewer1 = new SeriesRangeViewer();
+        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
+        seriesViewer = seriesViewer1;
     }
 
     @Override
     public void clear() {
-        series.clear();
+        if(seriesViewer instanceof SeriesCachingRangeViewer) {
+            ((SeriesCachingRangeViewer) seriesViewer).clear();
+        }
     }
 
     @Override
@@ -73,22 +86,22 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public void setViewRange(long from, long length) {
-        series.setViewRange(from, length);
+    public void viewRange(long rangeStart, long rangeLength) {
+        seriesViewer.setViewRange(rangeStart, rangeLength);
     }
 
     @Override
     public long size() {
-        return series.size();
+        return seriesViewer.size();
     }
 
     @Override
     public double value(long index) {
-        return series.get(index);
+        return seriesViewer.get(index);
     }
 
     @Override
-    public Range extremes(long length) {
+    public Range extremes(long from, long length) {
         if(length == 0){
             return null;
         }
@@ -98,33 +111,35 @@ class IntColumn extends NumberColumn {
         }
 
         // invoke data.get(i) can be expensive in the case data is grouped data
-        int dataItem = series.get(0); //
+        int dataItem = seriesViewer.get(from); //
         int min = dataItem;
         int max = dataItem;
-        for (long i = 1; i < length ; i++) {
-            dataItem = series.get(i);
+        for (long i = from + 1; i < from + length ; i++) {
+            dataItem = seriesViewer.get(i);
             min = Math.min(min, dataItem);
             max = Math.max(max, dataItem);
         }
-        return new Range(new Double(min), new Double(max));
+        return new Range(min, max);
     }
 
+
+
     @Override
-    public long upperBound(double value, long length) {
+    public long upperBound(double value, long from, long length) {
         if (length > Integer.MAX_VALUE) {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.upperBound(series, value, 0, (int) length);
+        return SeriesUtil.upperBound(seriesViewer, (int) value, 0, (int) length);
     }
 
     @Override
-    public long lowerBound(double value, long length) {
+    public long lowerBound(double value, long from, long length) {
         if (length > Integer.MAX_VALUE) {
             String errorMessage = "Binary search can not be done if data size > Integer.MAX_VALUE. Size = " + length;
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.lowerBound(series, value, 0, (int) length);
+        return SeriesUtil.lowerBound(seriesViewer, (int) value, from, (int) length);
     }
 
     @Override
@@ -135,10 +150,6 @@ class IntColumn extends NumberColumn {
         return newColumn;
     }
 
-    @Override
-    public void cache(NumberColumn column) {
-        series.cache(column);
-    }
 
     class GroupingManager {
         private GroupingType groupingType;
@@ -157,12 +168,7 @@ class IntColumn extends NumberColumn {
         }
 
         private int[] getGroupValues(long groupIndex) {
-            int[] value = groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex));
-            // if(groupIndex > groupsCount() - 4)
-            //  System.out.println(groupIndex +" index  size " +groupsCount() + "   " +groupStartIndexes.get(groupIndex)+" group bounds " + groupStartIndexes.get(groupIndex+1)+ " value "+value[0]);
-
-            return value;
-            // return groupingFunction.group(series, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex+1) - groupStartIndexes.get(groupIndex));
+            return groupingFunction.group(seriesViewer, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex));
         }
 
         public NumberColumn[] groupedColumns() {
@@ -188,8 +194,8 @@ class IntColumn extends NumberColumn {
                     }
 
                     @Override
-                    public void cache(NumberColumn column) {
-                        super.cache(column);
+                    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
+                        super.enableCaching(isLastElementCached, column);
                         groupingFunction.reset();
                     }
                 };
@@ -205,63 +211,82 @@ class IntColumn extends NumberColumn {
         }
     }
 
-    public interface SeriesRangeViewer extends IntSeries {
-        void setViewRange(long startIndex, long length);
+    class  SeriesRangeViewer implements IntSeries {
+        private long rangeStart = 0;
+        private long rangeLength = -1;
 
-        void clear();
+        public void setViewRange(long rangeStart1, long rangeLength1) {
+            rangeStart = rangeStart1;
+            rangeLength = rangeLength1;
+            if (rangeStart < 0) {
+                rangeStart = 0;
+            }
+            if (rangeStart >= series.size()) {
+                rangeLength = 0;
+            }
+            if (rangeLength > series.size() - rangeStart) {
+                rangeLength = series.size() - rangeStart;
+            }
+        }
 
-        void cache(NumberColumn column);
+        public long getRangeStart() {
+            return rangeStart;
+        }
 
-    }
-
-    class CachedSeries implements SeriesRangeViewer {
-        private SeriesRangeViewer series;
-        private IntArrayList cache;
-        private boolean isLastElementCacheable;
-
-        public CachedSeries(SeriesRangeViewer series, boolean isLastElementCacheable) {
-            this.series = series;
-            this.isLastElementCacheable = isLastElementCacheable;
-            cache = new IntArrayList((int) series.size());
+        public long getRangeLength() {
+            return rangeLength;
         }
 
         @Override
         public long size() {
-            return series.size();
+            if (rangeLength < 0) {
+                return series.size() - rangeStart;
+            }
+            return rangeLength;
         }
 
         @Override
         public int get(long index) {
-            if (!isLastElementCacheable && index == series.size() - 1) {
-                return series.get(index);
+            return series.get(index + rangeStart);
+        }
+    }
+
+
+    class SeriesCachingRangeViewer extends SeriesRangeViewer {
+        private IntArrayList cache;
+        private boolean isLastElementCacheable;
+
+        public SeriesCachingRangeViewer(boolean isLastElementCacheable) {
+            this.isLastElementCacheable = isLastElementCacheable;
+            cache = new IntArrayList();
+        }
+
+        @Override
+        public int get(long index) {
+            if (!isLastElementCacheable && index == size() - 1) {
+                return super.get(index);
             }
 
             if (index >= cache.size()) {
                 for (long i = cache.size(); i <= index; i++) {
-                    cache.add(series.get(i));
+                    cache.add(super.get(index));
                 }
             }
+
             return cache.get(index);
         }
 
-        public SeriesRangeViewer getOriginalSeries() {
-            return series;
-        }
-
         @Override
-        public void setViewRange(long startIndex, long length) {
-            series.setViewRange(startIndex, length);
+        public void setViewRange(long rangeStart1, long rangeLength1) {
+            super.setViewRange(rangeStart1, rangeLength1);
             cache.clear();
         }
 
-        @Override
         public void clear() {
             cache.clear();
         }
 
-        @Override
         public void cache(NumberColumn column) {
-            cache.clear();
             for (int i = 0; i < column.size() - 1; i++) {
                 cache.add((int) column.value(i));
             }
@@ -270,53 +295,4 @@ class IntColumn extends NumberColumn {
             }
         }
     }
-
-    class SeriesViewer implements SeriesRangeViewer {
-        private IntSeries series;
-        private long startIndex = 0;
-        private long length = -1;
-
-        public SeriesViewer(IntSeries series) {
-            this.series = series;
-        }
-
-        @Override
-        public void setViewRange(long startIndex1, long length1) {
-            startIndex = startIndex1;
-            length = length1;
-            if (startIndex < 0) {
-                startIndex = 0;
-            }
-            if (startIndex >= series.size()) {
-                length = 0;
-            }
-            if (length > series.size() - startIndex) {
-                length = series.size() - startIndex;
-            }
-        }
-
-        @Override
-        public long size() {
-            if (length < 0) {
-                return series.size();
-            }
-            return length;
-        }
-
-        @Override
-        public int get(long index) {
-            return series.get(index + startIndex);
-        }
-
-        @Override
-        public void clear() {
-            // do nothing
-        }
-
-        @Override
-        public void cache(NumberColumn column) {
-            // do nothing;
-        }
-    }
-
 }

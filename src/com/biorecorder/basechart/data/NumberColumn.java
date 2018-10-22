@@ -19,9 +19,6 @@ public abstract class NumberColumn {
         this.name = name;
     }
 
-    public GroupingType getGroupingType() {
-        return groupingType;
-    }
 
     public void setGroupingType(GroupingType groupingType) {
         this.groupingType = groupingType;
@@ -31,18 +28,20 @@ public abstract class NumberColumn {
     public abstract double value(long index);
 
     // if length == -1 real size will be used
-    public abstract void setViewRange(long from, long length);
+    public abstract void viewRange(long rangeStart, long rangeLength);
 
-    public abstract Range extremes(long length);
-    public abstract long upperBound(double value, long length);
-    public abstract long lowerBound(double value, long length);
-    public abstract void enableCaching(boolean isLastElementCacheable);
+    public abstract Range extremes(long from, long length);
+    public abstract long upperBound(double value, long from, long length);
+    public abstract long lowerBound(double value, long from, long length);
+
+    public abstract void enableCaching(boolean isLastElementCached);
+    public abstract void enableCaching(boolean isLastElementCached, NumberColumn column);
     public abstract void disableCaching();
     public abstract void clear();
 
     public abstract NumberColumn[] group(LongSeries groupIndexes);
 
     public abstract NumberColumn copy();
-    public abstract void cache(NumberColumn column);
+
 }
 
