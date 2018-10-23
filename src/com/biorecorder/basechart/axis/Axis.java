@@ -545,7 +545,7 @@ public abstract class Axis {
         }
 
         if (minorTickIntervalCount > 0) {
-            // add minor ticks that are located between minorTick and min
+            // add1 minor ticks that are located between minorTick and min
             currentTick = tickProvider.getUpperTick(min);
             Tick previousTick = null;
             for (int i = 0; i < ticksSkipStep; i++) {

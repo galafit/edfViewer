@@ -62,6 +62,10 @@ public class RegularColumn extends NumberColumn {
         return lowerBoundIndex;
     }
 
+    @Override
+    public long binarySearch(double value, long from, int length) {
+        return 0;
+    }
 
     @Override
     public void clear() {

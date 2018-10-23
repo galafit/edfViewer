@@ -547,7 +547,7 @@ public class Chart {
 
 
     /**
-     * add trace to the stack with the given number
+     * add1 trace to the stack with the given number
      *
      * @param stackNumber
      * @param trace
@@ -595,7 +595,7 @@ public class Chart {
             trace.setData(dataManager.getProcessedTraceData(traces.size() - 1, xMin, xMax));
         }
 
-        // add trace legend button
+        // add1 trace legend button
         SwitchButton legendButton = new SwitchButton(trace.getMainColor(), trace.getName());
         final int traceIndex = traces.size() - 1;
         legendButton.addListener(new StateListener() {

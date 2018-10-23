@@ -118,7 +118,7 @@ public class HeaderRecord {
         String startTimeOfRecording = new SimpleDateFormat("HH.mm.ss").format(new Date(edfHeader.getRecordingStartTimeMs()));
 
         StringBuilder headerBuilder = new StringBuilder();
-        headerBuilder.append(adjustLength(edfHeader.getDataFormat().getVersion(), VERSION_LENGTH - 1));  // -1 because first non ascii byte (or "0" for edf) we will add later
+        headerBuilder.append(adjustLength(edfHeader.getDataFormat().getVersion(), VERSION_LENGTH - 1));  // -1 because first non ascii byte (or "0" for edf) we will add1 later
         headerBuilder.append(adjustLength(edfHeader.getPatientIdentification(), PATIENT_ID_LENGTH));
         headerBuilder.append(adjustLength(edfHeader.getRecordingIdentification(), RECORD_ID_LENGTH));
         headerBuilder.append(startDateOfRecording);

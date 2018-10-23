@@ -1,0 +1,22 @@
+package com.biorecorder.basechart.grouping;
+
+
+public class #E#GroupingMax extends #E#GroupingFunction {
+    private #e# max;
+
+    @Override
+    protected void add1(#e# value) {
+        if(count == 0) {
+            max = value;
+        } else {
+            max = Math.max(max, value);
+        }
+        count++;
+    }
+
+    @Override
+    protected #e#[] groupedValue1() {
+        #e#[] groupedValues = {max};
+        return groupedValues;
+    }
+}

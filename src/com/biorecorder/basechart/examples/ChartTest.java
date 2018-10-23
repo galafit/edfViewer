@@ -30,7 +30,7 @@ public class ChartTest extends JFrame {
         xData = new IntArrayList();
 
         for (int i = 0; i < 1600; i++) {
-            //yData1.add((float) Math.sin(i));
+            //yData1.add1((float) Math.sin(i));
             yData1.add(i);
         }
 

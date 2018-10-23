@@ -1,0 +1,20 @@
+package com.biorecorder.basechart.grouping;
+
+
+public class #E#GroupingFirst extends #E#GroupingFunction {
+    private #e# first;
+
+    @Override
+    protected void add1(#e# value) {
+        if(count == 0) {
+            first = value;
+        }
+        count++;
+    }
+
+    @Override
+    protected #e#[] groupedValue1() {
+        #e#[] groupedValues = {first};
+        return groupedValues;
+    }
+}

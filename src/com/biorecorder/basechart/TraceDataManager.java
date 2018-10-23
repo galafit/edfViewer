@@ -77,7 +77,7 @@ public class TraceDataManager {
             pointsInGroup = 1;
         }
 
-        // add shoulder: 2 grouped points from both sides
+        // add1 shoulder: 2 grouped points from both sides
         subRange = new SubRange(subRange.getStartIndex() - 2 * pointsInGroup, subRange.getSize() + 4 * pointsInGroup);
         croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getSize());
         double groupingInterval = getGroupingInterval(pointsInGroup);

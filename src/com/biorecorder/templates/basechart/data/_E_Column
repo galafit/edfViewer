@@ -2,11 +2,11 @@ package com.biorecorder.basechart.data;
 
 import com.biorecorder.util.lists.SeriesUtil;
 import com.biorecorder.basechart.Range;
-import com.biorecorder.util.lists.IntArrayList;
-import com.biorecorder.basechart.grouping.GroupingFunction;
-import com.biorecorder.basechart.grouping.IntGroupingAvg;
-import com.biorecorder.basechart.grouping.IntGroupingFunction;
-import com.biorecorder.util.series.IntSeries;
+import com.biorecorder.util.lists.#E#ArrayList;
+import com.biorecorder.basechart.grouping.GroupingType;
+import com.biorecorder.basechart.grouping.functions.#E#GroupingAvg;
+import com.biorecorder.basechart.grouping.functions.#E#GroupingFunction;
+import com.biorecorder.util.series.#E#Series;
 import com.biorecorder.util.series.LongSeries;
 
 import java.util.List;
@@ -160,12 +160,12 @@ class IntColumn extends NumberColumn {
 
 
     class GroupingManager {
-        private GroupingFunction groupingType;
+        private GroupingType groupingType;
         private LongSeries groupStartIndexes;
 
         private final IntGroupingFunction groupingFunction;
 
-        public GroupingManager(GroupingFunction groupingType, LongSeries groupStartIndexes) {
+        public GroupingManager(GroupingType groupingType, LongSeries groupStartIndexes) {
             this.groupingType = groupingType;
             groupingFunction = new IntGroupingAvg();
             this.groupStartIndexes = groupStartIndexes;
@@ -211,8 +211,8 @@ class IntColumn extends NumberColumn {
                 resultantColumns[i].setGroupingType(groupingType);
             }
             if (resultantColumns.length == 2) { // intersect-join
-                resultantColumns[0].setGroupingType(GroupingFunction.MIN);
-                resultantColumns[1].setGroupingType(GroupingFunction.MAX);
+                resultantColumns[0].setGroupingType(GroupingType.MIN);
+                resultantColumns[1].setGroupingType(GroupingType.MAX);
             }
 
             return resultantColumns;

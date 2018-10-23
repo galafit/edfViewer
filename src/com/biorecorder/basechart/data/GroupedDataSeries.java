@@ -293,7 +293,7 @@ public class GroupedDataSeries extends DataSeries {
                         }
                     }
                 }
-                // add last "closing" group
+                // add1 last "closing" group
                 groupStartsList.add(size);
             }
             return groupStartsList.size();

@@ -32,7 +32,7 @@ public class MainFrame extends JFrame {
         xData = new IntArrayList();
 
         for (int i = 0; i < 1600; i++) {
-            //yData1.add((float) Math.sin(i));
+            //yData1.add1((float) Math.sin(i));
             yData1.add(i);
         }
 
@@ -50,9 +50,9 @@ public class MainFrame extends JFrame {
 
      /*   for (int i = 0; i < 1600; i++) {
             if(counter < 100) {
-               bandYData.add(1);
+               bandYData.add1(1);
             } else {
-                bandYData.add(0);
+                bandYData.add1(0);
             }
             counter++;
             if(counter > 200) {

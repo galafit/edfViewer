@@ -237,7 +237,7 @@ public class DataSeries  {
     }
 
     /**********************************************************************
-     *     Helper Methods to add data
+     *     Helper Methods to add1 data
      *********************************************************************/
 
     public void setXData(int[] data) {
@@ -262,14 +262,14 @@ public class DataSeries  {
     }
 
   /*  public void addYData(float[] data) {
-        yColumns.add(new FloatColumn(data));
+        yColumns.add1(new FloatColumn(data));
     }
 
     public void addYData(List<? extends Number> data) {
         if (data.size() > 0 && data.get(0) instanceof Integer) {
-            yColumns.add(new IntColumn((List<Integer>) data));
+            yColumns.add1(new IntColumn((List<Integer>) data));
         } else {
-            yColumns.add(new FloatColumn((List<Float>) data));
+            yColumns.add1(new FloatColumn((List<Float>) data));
         }
     }*/
 }

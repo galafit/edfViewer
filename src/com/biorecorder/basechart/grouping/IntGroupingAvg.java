@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.grouping.functions;
+package com.biorecorder.basechart.grouping;
 
 
 import com.biorecorder.util.series.IntSeries;
