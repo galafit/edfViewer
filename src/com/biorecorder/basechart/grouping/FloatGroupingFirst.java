@@ -1,8 +1,6 @@
 package com.biorecorder.basechart.grouping;
 
-/**
- * Created by galafit on 23/10/18.
- */
+
 public class FloatGroupingFirst extends FloatGroupingFunction {
     private float first;
 

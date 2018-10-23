@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.grouping;
 
 
-public class #E#GroupingAvg extends #E#GroupingFunction {
-    private #e# sum;
+public class DoubleGroupingAvg extends DoubleGroupingFunction {
+    private double sum;
 
     @Override
     public void reset() {
@@ -11,14 +11,14 @@ public class #E#GroupingAvg extends #E#GroupingFunction {
     }
 
     @Override
-    protected void add1(#e# value) {
+    protected void add1(double value) {
         super.add1(value);
         sum += value;
     }
 
     @Override
-    protected #e#[] groupedValue1() {
-        #e#[] groupedValues = {sum / count};
+    protected double[] groupedValue1() {
+        double[] groupedValues = {(double)(sum / count)};
         return groupedValues;
     }
 }

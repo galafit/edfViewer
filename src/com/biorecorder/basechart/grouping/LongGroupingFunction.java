@@ -1,14 +1,14 @@
 package com.biorecorder.basechart.grouping;
 
-import com.biorecorder.util.series.#E#Series;
+import com.biorecorder.util.series.LongSeries;
 
 /**
  * Created by galafit on 22/10/18.
  */
-public abstract class #E#GroupingFunction {
+public abstract class LongGroupingFunction {
     protected long count;
 
-    public #e#[] addToGroup(#E#Series series, long from, long length) {
+    public long[] addToGroup(LongSeries series, long from, long length) {
         for (int i = 0; i < length; i++) {
            add1(series.get(from + i));
         }
@@ -19,7 +19,7 @@ public abstract class #E#GroupingFunction {
         count = 0;
     }
 
-    public #e#[] groupedValue() {
+    public long[] groupedValue() {
         if(count == 0) {
             String errMsg = "No elements was added to group. Grouping function can not be calculated.";
             throw new IllegalStateException(errMsg);
@@ -27,9 +27,9 @@ public abstract class #E#GroupingFunction {
         return groupedValue1();
     }
 
-    protected void add1(#e# value) {
+    protected void add1(long value) {
        count++;
     }
 
-    protected abstract #e#[] groupedValue1();
+    protected abstract long[] groupedValue1();
 }

@@ -1,11 +1,11 @@
 package com.biorecorder.basechart.grouping;
 
 
-public class #E#GroupingFirst extends #E#GroupingFunction {
-    private #e# first;
+public class IntGroupingFirst extends IntGroupingFunction {
+    private int first;
 
     @Override
-    protected void add1(#e# value) {
+    protected void add1(int value) {
         if(count == 0) {
             first = value;
         }
@@ -13,8 +13,8 @@ public class #E#GroupingFirst extends #E#GroupingFunction {
     }
 
     @Override
-    protected #e#[] groupedValue1() {
-        #e#[] groupedValues = {first};
+    protected int[] groupedValue1() {
+        int[] groupedValues = {first};
         return groupedValues;
     }
 }

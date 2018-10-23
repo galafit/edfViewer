@@ -1,20 +1,22 @@
 package com.biorecorder.basechart.grouping;
 
 
-public class DoubleGroupingFirst extends DoubleGroupingFunction {
-    private double first;
+public class DoubleGroupingMax extends DoubleGroupingFunction {
+    private double max;
 
     @Override
     protected void add1(double value) {
         if(count == 0) {
-            first = value;
+            max = value;
+        } else {
+            max = (double) Math.max(max, value);
         }
         count++;
     }
 
     @Override
     protected double[] groupedValue1() {
-        double[] groupedValues = {first};
+        double[] groupedValues = {max};
         return groupedValues;
     }
 }

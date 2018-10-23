@@ -160,14 +160,16 @@ class IntColumn extends NumberColumn {
 
 
     class GroupingManager {
-        private GroupingFunction groupingType;
+        private GroupingFunction groupingApproximation;
         private LongSeries groupStartIndexes;
+        private long lastGroupStart = -1;
+        private long lastGroupLength;
 
         private final IntGroupingFunction groupingFunction;
 
-        public GroupingManager(GroupingFunction groupingType, LongSeries groupStartIndexes) {
-            this.groupingType = groupingType;
-            groupingFunction = new IntGroupingAvg();
+        public GroupingManager(GroupingFunction groupingApproximation, LongSeries groupStartIndexes) {
+            this.groupingApproximation = groupingApproximation;
+            groupingFunction = (IntGroupingFunction) groupingApproximation.getGroupingFunction("int");
             this.groupStartIndexes = groupStartIndexes;
         }
 
@@ -176,11 +178,19 @@ class IntColumn extends NumberColumn {
         }
 
         private int[] getGroupValues(long groupIndex) {
-            return groupingFunction.group(seriesViewer, groupStartIndexes.get(groupIndex), groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex));
+            if(lastGroupStart != groupStartIndexes.get(groupIndex)) {
+               groupingFunction.reset();
+               lastGroupLength = 0;
+            }
+            int[] groupedValues = groupingFunction.addToGroup(seriesViewer, groupStartIndexes.get(groupIndex) + lastGroupLength, groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex) - lastGroupLength);
+
+            lastGroupStart = groupStartIndexes.get(groupIndex);
+            lastGroupLength = groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex);
+            return groupedValues;
         }
 
         public NumberColumn[] groupedColumns() {
-            NumberColumn[] resultantColumns = new NumberColumn[groupingType.getDimension()];
+            NumberColumn[] resultantColumns = new NumberColumn[groupingApproximation.getDimension()];
             for (int i = 0; i < resultantColumns.length; i++) {
                 final int seriesNumber = i;
                 IntSeries groupedSeries = new IntSeries() {
@@ -208,7 +218,7 @@ class IntColumn extends NumberColumn {
                     }
                 };
                 resultantColumns[i].setName(name);
-                resultantColumns[i].setGroupingType(groupingType);
+                resultantColumns[i].setGroupingType(groupingApproximation);
             }
             if (resultantColumns.length == 2) { // intersect-join
                 resultantColumns[0].setGroupingType(GroupingFunction.MIN);

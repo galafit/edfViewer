@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.grouping;
 
 
-public class FloatGroupingAvg extends FloatGroupingFunction {
-    private float sum;
+public class LongGroupingAvg extends LongGroupingFunction {
+    private long sum;
 
     @Override
     public void reset() {
@@ -11,14 +11,14 @@ public class FloatGroupingAvg extends FloatGroupingFunction {
     }
 
     @Override
-    protected void add1(float value) {
+    protected void add1(long value) {
         super.add1(value);
         sum += value;
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {(float)(sum / count)};
+    protected long[] groupedValue1() {
+        long[] groupedValues = {(long)(sum / count)};
         return groupedValues;
     }
 }

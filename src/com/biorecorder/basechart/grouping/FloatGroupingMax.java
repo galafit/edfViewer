@@ -1,9 +1,7 @@
 package com.biorecorder.basechart.grouping;
 
-/**
- * Created by galafit on 22/10/18.
- */
-public class FloatGroupingMax extends  FloatGroupingFunction {
+
+public class FloatGroupingMax extends FloatGroupingFunction {
     private float max;
 
     @Override
@@ -11,7 +9,7 @@ public class FloatGroupingMax extends  FloatGroupingFunction {
         if(count == 0) {
             max = value;
         } else {
-            max = Math.max(max, value);
+            max = (float) Math.max(max, value);
         }
         count++;
     }

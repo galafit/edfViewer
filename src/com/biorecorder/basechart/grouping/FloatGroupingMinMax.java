@@ -1,8 +1,5 @@
 package com.biorecorder.basechart.grouping;
 
-/**
- * Created by galafit on 23/10/18.
- */
 public class FloatGroupingMinMax extends FloatGroupingFunction {
     private float max;
     private float min;
@@ -13,8 +10,8 @@ public class FloatGroupingMinMax extends FloatGroupingFunction {
             max = value;
             min = value;
         } else {
-            max = Math.max(max, value);
-            max = Math.min(min, value);
+            max = (float)Math.max(max, value);
+            max = (float)Math.min(min, value);
         }
         count++;
     }

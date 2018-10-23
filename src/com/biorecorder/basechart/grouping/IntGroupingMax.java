@@ -1,37 +1,22 @@
 package com.biorecorder.basechart.grouping;
 
-import com.biorecorder.util.series.IntSeries;
 
-public class IntGroupingMax implements IntGroupingFunction {
-    long lastFrom = -1;
-    long lastLength;
-    int[] max = new int[1];
+public class IntGroupingMax extends IntGroupingFunction {
+    private int max;
 
     @Override
-    public int[] group(IntSeries series, long from, long length) {
-        if(length == 0) {
-            throw new IllegalArgumentException("Number of grouping elements: "+length);
-        }
-        long start;
-        long end;
-        if(from == lastFrom) {
-            start = from + lastLength;
-            end = from + length;
+    protected void add1(int value) {
+        if(count == 0) {
+            max = value;
         } else {
-            max[0] = series.get(from);
-            start = from + 1;
-            end = from + length;
+            max = (int) Math.max(max, value);
         }
-        for (long i = start; i < end; i++) {
-            max[0] = Math.max(series.get(i), max[0]);
-        }
-        lastFrom = from;
-        lastLength = length;
-        return max;
+        count++;
     }
 
     @Override
-    public void reset() {
-        lastFrom = -1;
+    protected int[] groupedValue1() {
+        int[] groupedValues = {max};
+        return groupedValues;
     }
 }

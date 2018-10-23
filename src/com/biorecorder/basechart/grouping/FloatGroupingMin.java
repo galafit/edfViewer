@@ -1,8 +1,6 @@
 package com.biorecorder.basechart.grouping;
 
-/**
- * Created by galafit on 23/10/18.
- */
+
 public class FloatGroupingMin extends FloatGroupingFunction {
     private float min;
 
@@ -11,7 +9,7 @@ public class FloatGroupingMin extends FloatGroupingFunction {
         if(count == 0) {
             min = value;
         } else {
-            min = Math.min(min, value);
+            min = (float)Math.min(min, value);
         }
         count++;
     }
@@ -21,5 +19,4 @@ public class FloatGroupingMin extends FloatGroupingFunction {
         float[] groupedValues = {min};
         return groupedValues;
     }
-
 }
