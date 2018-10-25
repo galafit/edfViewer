@@ -170,9 +170,9 @@ public class DataSeries  {
     }
 
     public void setViewRange(long startIndex, long length) {
-        xColumn.viewRange(startIndex, length);
+        xColumn.setViewRange(startIndex, length);
         for (NumberColumn yColumn : yColumns) {
-            yColumn.viewRange(startIndex, length);
+            yColumn.setViewRange(startIndex, length);
         }
 
         if(annotationColumn != null) {

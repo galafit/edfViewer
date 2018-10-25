@@ -115,15 +115,15 @@ class IntColumn extends NumberColumn {
         int max = dataItem;
         for (long i = from + 1; i < from + length ; i++) {
             dataItem = seriesViewer.get(i);
-            min = Math.min(min, dataItem);
-            max = Math.max(max, dataItem);
+            min = (int)Math.min(min, dataItem);
+            max = (int)Math.max(max, dataItem);
         }
         return new Range(min, max);
     }
 
     @Override
     public long binarySearch(double value, long from, int length) {
-        if (length > Integer.MAX_VALUE) {
+        if (length >Integer.MAX_VALUE) {
             String errorMessage = "Binary search can not be done if length > Integer.MAX_VALUE. Length = " + length;
             throw new IllegalArgumentException(errorMessage);
         }

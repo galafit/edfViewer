@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
-import com.biorecorder.basechart.grouping.GroupingFunction;
+import com.biorecorder.basechart.grouping.GroupingApproximation;
 import com.biorecorder.util.series.LongSeries;
 
 /**
@@ -9,7 +9,7 @@ import com.biorecorder.util.series.LongSeries;
  */
 public abstract class NumberColumn {
     protected String name;
-    protected GroupingFunction groupingType = GroupingFunction.AVG;
+    protected GroupingApproximation groupingType = GroupingApproximation.AVG;
 
     public String getName() {
         return name;
@@ -20,7 +20,7 @@ public abstract class NumberColumn {
     }
 
 
-    public void setGroupingType(GroupingFunction groupingType) {
+    public void setGroupingType(GroupingApproximation groupingType) {
         this.groupingType = groupingType;
     }
 
@@ -28,7 +28,7 @@ public abstract class NumberColumn {
     public abstract double value(long index);
 
     // if length == -1 real size will be used
-    public abstract void viewRange(long rangeStart, long rangeLength);
+    public abstract void setViewRange(long rangeStart, long rangeLength);
 
     public abstract Range extremes(long from, long length);
     public abstract long upperBound(double value, long from, long length);

@@ -3,7 +3,7 @@ package com.biorecorder.basechart.grouping;
 /**
  * Created by galafit on 25/11/17.
  */
-public enum GroupingFunction {
+public enum GroupingApproximation {
     AVG(1, "Avg"),
     MIN(1, "Min"),
     MAX(1, "Max"),
@@ -13,7 +13,7 @@ public enum GroupingFunction {
     private int dimension;
     private String functionName;
 
-    GroupingFunction(int dimension, String functionName) {
+    GroupingApproximation(int dimension, String functionName) {
         this.dimension = dimension;
         this.functionName = functionName;
     }
