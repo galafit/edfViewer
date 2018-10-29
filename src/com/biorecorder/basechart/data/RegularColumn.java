@@ -9,12 +9,38 @@ import com.biorecorder.util.series.LongSeries;
 public class RegularColumn extends NumberColumn {
     private double startValue;
     private double dataInterval;
-    private long startIndex = 0;
     private long size = Long.MAX_VALUE;
+
+    public RegularColumn(double startValue, double dataInterval, long size) {
+        this.startValue = startValue;
+        this.dataInterval = dataInterval;
+        this.size = size;
+    }
 
     public RegularColumn(double startValue, double dataInterval) {
         this.startValue = startValue;
         this.dataInterval = dataInterval;
+    }
+
+    @Override
+    public void add(double value) throws UnsupportedOperationException {
+        if(size < Long.MAX_VALUE) {
+            size++;
+        }
+    }
+
+    @Override
+    public void add(double[] values) throws UnsupportedOperationException {
+        if(size < Long.MAX_VALUE - values.length) {
+            size += values.length;
+        }
+    }
+
+    @Override
+    public void remove(int index) {
+        if(size < Long.MAX_VALUE) {
+            size--;
+        }
     }
 
     public RegularColumn() {
@@ -29,6 +55,10 @@ public class RegularColumn extends NumberColumn {
         return startValue;
     }
 
+    public void setSize(long size) {
+        this.size = size;
+    }
+
     @Override
     public long size() {
         return size;
@@ -36,17 +66,17 @@ public class RegularColumn extends NumberColumn {
 
     @Override
     public double value(long index) {
-        return startValue + dataInterval * (index + startIndex);
+        return startValue + dataInterval * index;
     }
 
     @Override
-    public Range extremes(long from, long length) {
-        return new Range(value(0), value(length - 1));
+    public Range extremes() {
+        return new Range(value(0), value(size - 1));
     }
 
     @Override
-    public long upperBound(double value, long from, long length) {
-        long lowerBoundIndex = lowerBound(value, from, length);
+    public long upperBound(double value) {
+        long lowerBoundIndex = lowerBound(value);
         if(value == value(lowerBoundIndex)) {
             return lowerBoundIndex;
         }
@@ -54,8 +84,8 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public long lowerBound(double value, long from, long length) {
-        long lowerBoundIndex = (long) ((value - value(from)) / dataInterval);
+    public long lowerBound(double value) {
+        long lowerBoundIndex = (long) ((value - value(0)) / dataInterval);
         if(lowerBoundIndex < 0) {
             lowerBoundIndex = 0;
         }
@@ -63,42 +93,23 @@ public class RegularColumn extends NumberColumn {
     }
 
     @Override
-    public long binarySearch(double value, long from, int length) {
+    public long binarySearch(double value) {
         return 0;
     }
 
     @Override
-    public void clear() {
-        // do nothing
+    public NumberColumn subColumn(long fromIndex, long length) {
+        return new RegularColumn(value(fromIndex), dataInterval, length);
     }
 
     @Override
-    public void enableCaching(boolean isLastElementCached) {
-        // do nothing
-    }
-
-    @Override
-    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
-        // do nothing
-    }
-
-    @Override
-    public void disableCaching() {
-       // do nothing
-    }
-
-    @Override
-    public void setViewRange(long rangeStart, long rangeLength) {
-        startIndex = rangeStart;
-        if(startIndex < 0) {
-            startIndex = 0;
-        }
-        size = rangeLength;
+    public NumberColumn cache() {
+        return copy();
     }
 
     @Override
     public NumberColumn copy() {
-        return new RegularColumn(startValue, dataInterval);
+        return new RegularColumn(startValue, dataInterval, size);
     }
 
 

@@ -15,11 +15,9 @@ import java.util.List;
  */
 class IntColumn extends NumberColumn {
     private final IntSeries series;
-    private SeriesRangeViewer seriesViewer;
 
     public IntColumn(IntSeries series) {
         this.series = series;
-        this.seriesViewer = new SeriesRangeViewer();
     }
 
     public IntColumn(int[] data) {
@@ -51,32 +49,31 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public void enableCaching(boolean isLastElementCached) {
-        SeriesCachingRangeViewer seriesViewer1 = new SeriesCachingRangeViewer(isLastElementCached);
-        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
-        seriesViewer = seriesViewer1;
-    }
-
-    @Override
-    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
-        SeriesCachingRangeViewer seriesViewer1 = new SeriesCachingRangeViewer(isLastElementCached);
-        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
-        seriesViewer1.cache(column);
-        seriesViewer = seriesViewer1;
-    }
-
-    @Override
-    public void disableCaching() {
-        SeriesRangeViewer seriesViewer1 = new SeriesRangeViewer();
-        seriesViewer1.setViewRange(seriesViewer.getRangeStart(), seriesViewer.getRangeLength());
-        seriesViewer = seriesViewer1;
-    }
-
-    @Override
-    public void clear() {
-        if(seriesViewer instanceof SeriesCachingRangeViewer) {
-            ((SeriesCachingRangeViewer) seriesViewer).clear();
+    public void add(double value) throws UnsupportedOperationException {
+        if(series instanceof IntArrayList) {
+            ((IntArrayList) series).add((int) value);
         }
+        throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
+    }
+
+    @Override
+    public void remove(int index) {
+        if(series instanceof IntArrayList) {
+            ((IntArrayList) series).remove(index);
+        }
+        throw  new UnsupportedOperationException("Value can be removed from the column only if that column wraps ArrayList");
+    }
+
+    @Override
+    public void add(double[] values) throws UnsupportedOperationException {
+        if(series instanceof IntArrayList) {
+            int[] intValues = new int[values.length];
+            for (int i = 0; i < values.length; i++) {
+               intValues[i] = (int) values[i];
+            }
+            ((IntArrayList)series).add(intValues);
+        }
+        throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
     }
 
     @Override
@@ -85,36 +82,50 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public void setViewRange(long rangeStart, long rangeLength) {
-        seriesViewer.setViewRange(rangeStart, rangeLength);
-    }
-
-    @Override
     public long size() {
-        return seriesViewer.size();
+        return series.size();
     }
 
     @Override
     public double value(long index) {
-        return seriesViewer.get(index);
+        return series.get(index);
     }
 
     @Override
-    public Range extremes(long from, long length) {
-        if(length == 0){
+    public NumberColumn subColumn(long fromIndex, long length) {
+        IntSeries subSeries = new IntSeries() {
+            @Override
+            public long size() {
+                if(length < 0) {
+                    return series.size() - fromIndex;
+                }
+                return length;
+            }
+
+            @Override
+            public int get(long index) {
+                return series.get(index + fromIndex);
+            }
+        };
+        return new IntColumn(subSeries);
+    }
+
+    @Override
+    public Range extremes() {
+        if(series.size() == 0){
             return null;
         }
-        if (length > Integer.MAX_VALUE) {
-            String errorMessage = "Extremes can not be find if length > Integer.MAX_VALUE. Length = " + length;
+        if (series.size() > Integer.MAX_VALUE) {
+            String errorMessage = "Extremes can not be find if size > Integer.MAX_VALUE. Size = " + size();
             throw new IllegalArgumentException(errorMessage);
         }
 
         // invoke data.get(i) can be expensive in the case data is grouped data
-        int dataItem = seriesViewer.get(from); //
+        int dataItem = series.get(0); //
         int min = dataItem;
         int max = dataItem;
-        for (long i = from + 1; i < from + length ; i++) {
-            dataItem = seriesViewer.get(i);
+        for (long i = 1; i < series.size() ; i++) {
+            dataItem = series.get(i);
             min = Math.min(min, dataItem);
             max = Math.max(max, dataItem);
         }
@@ -122,31 +133,31 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public long binarySearch(double value, long from, int length) {
-        if (length > Integer.MAX_VALUE) {
-            String errorMessage = "Binary search can not be done if length > Integer.MAX_VALUE. Length = " + length;
+    public long binarySearch(double value) {
+        if (series.size() > Integer.MAX_VALUE) {
+            String errorMessage = "Binary search can not be done if size > Integer.MAX_VALUE. Size = " + series.size();
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.upperBound(seriesViewer, (int) value, 0, (int) length);
+        return SeriesUtil.upperBound(series, (int) value, 0, (int) series.size());
 
     }
 
     @Override
-    public long upperBound(double value, long from, long length) {
-        if (length > Integer.MAX_VALUE) {
-            String errorMessage = "Upper bound binary search not be done if length > Integer.MAX_VALUE. length = " + length;
+    public long upperBound(double value) {
+        if (series.size() > Integer.MAX_VALUE) {
+            String errorMessage = "Upper bound binary search not be done if size > Integer.MAX_VALUE. Size = " + series.size();
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.upperBound(seriesViewer, (int) value, 0, (int) length);
+        return SeriesUtil.upperBound(series, (int) value, 0, (int) series.size());
     }
 
     @Override
-    public long lowerBound(double value, long from, long length) {
-        if (length > Integer.MAX_VALUE) {
-            String errorMessage = "Lower bound binary search not be done if length > Integer.MAX_VALUE. Length = " + length;
+    public long lowerBound(double value) {
+        if (series.size() > Integer.MAX_VALUE) {
+            String errorMessage = "Lower bound binary search not be done if size > Integer.MAX_VALUE. Size = " + series.size();
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.lowerBound(seriesViewer, (int) value, from, (int) length);
+        return SeriesUtil.lowerBound(series, (int) value, 0, (int) series.size());
     }
 
     @Override
@@ -155,6 +166,20 @@ class IntColumn extends NumberColumn {
         newColumn.name = name;
         newColumn.groupingType = groupingType;
         return newColumn;
+    }
+
+    @Override
+    public NumberColumn cache() {
+        long size = size();
+        if (size > Integer.MAX_VALUE) {
+            String errorMessage = "Column can not be cached if its size > Integer.MAX_VALUE. Size = " + size;
+            throw new IllegalArgumentException(errorMessage);
+        }
+        IntArrayList intList = new IntArrayList((int) size);
+        for (int i = 0; i < size; i++) {
+            intList.add(series.get(i));
+        }
+        return new IntColumn(intList);
     }
 
 
@@ -181,7 +206,7 @@ class IntColumn extends NumberColumn {
                groupingFunction.reset();
                lastGroupValueLength = 0;
             }
-            int[] groupedValues = groupingFunction.addToGroup(seriesViewer, groupStartIndexes.get(groupIndex) + lastGroupValueLength, groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex) - lastGroupValueLength);
+            int[] groupedValues = groupingFunction.addToGroup(series, groupStartIndexes.get(groupIndex) + lastGroupValueLength, groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex) - lastGroupValueLength);
 
             lastGroupValueStart = groupStartIndexes.get(groupIndex);
             lastGroupValueLength = groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex);
@@ -203,19 +228,7 @@ class IntColumn extends NumberColumn {
                         return getGroupValues(index)[seriesNumber];
                     }
                 };
-                resultantColumns[i] = new IntColumn(groupedSeries) {
-                    @Override
-                    public void clear() {
-                        super.clear();
-                        groupingFunction.reset();
-                    }
-
-                    @Override
-                    public void enableCaching(boolean isLastElementCached, NumberColumn column) {
-                        super.enableCaching(isLastElementCached, column);
-                        groupingFunction.reset();
-                    }
-                };
+                resultantColumns[i] = new IntColumn(groupedSeries);
                 resultantColumns[i].setName(name);
                 resultantColumns[i].setGroupingType(groupingApproximation);
             }
@@ -225,91 +238,6 @@ class IntColumn extends NumberColumn {
             }
 
             return resultantColumns;
-        }
-    }
-
-    class  SeriesRangeViewer implements IntSeries {
-        private long rangeStart = 0;
-        private long rangeLength = -1;
-
-        public void setViewRange(long rangeStart1, long rangeLength1) {
-            rangeStart = rangeStart1;
-            rangeLength = rangeLength1;
-            if (rangeStart < 0) {
-                rangeStart = 0;
-            }
-            if (rangeStart >= series.size()) {
-                rangeLength = 0;
-            }
-            if (rangeLength > series.size() - rangeStart) {
-                rangeLength = series.size() - rangeStart;
-            }
-        }
-
-        public long getRangeStart() {
-            return rangeStart;
-        }
-
-        public long getRangeLength() {
-            return rangeLength;
-        }
-
-        @Override
-        public long size() {
-            if (rangeLength < 0) {
-                return series.size() - rangeStart;
-            }
-            return rangeLength;
-        }
-
-        @Override
-        public int get(long index) {
-            return series.get(index + rangeStart);
-        }
-    }
-
-
-    class SeriesCachingRangeViewer extends SeriesRangeViewer {
-        private IntArrayList cache;
-        private boolean isLastElementCached;
-
-        public SeriesCachingRangeViewer(boolean isLastElementCached) {
-            this.isLastElementCached = isLastElementCached;
-            cache = new IntArrayList();
-        }
-
-        @Override
-        public int get(long index) {
-            if (!isLastElementCached && index == size() - 1) {
-                return super.get(index);
-            }
-
-            if (index >= cache.size()) {
-                for (long i = cache.size(); i <= index; i++) {
-                    cache.add(super.get(index));
-                }
-            }
-
-            return cache.get(index);
-        }
-
-        @Override
-        public void setViewRange(long rangeStart1, long rangeLength1) {
-            super.setViewRange(rangeStart1, rangeLength1);
-            cache.clear();
-        }
-
-        public void clear() {
-            cache.clear();
-        }
-
-        public void cache(NumberColumn column) {
-            for (int i = 0; i < column.size() - 1; i++) {
-                cache.add((int) column.value(i));
-            }
-            if (isLastElementCached) {
-                cache.add((int) column.value(column.size() - 1));
-            }
         }
     }
 }

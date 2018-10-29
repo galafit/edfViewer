@@ -4,28 +4,25 @@ import com.biorecorder.basechart.data.SubRange;
 import com.biorecorder.basechart.data.DataSeries;
 import com.biorecorder.basechart.data.GroupedDataSeries;
 
-import java.util.ArrayList;
-
 
 /**
  * Created by galafit on 9/7/18.
  */
 public class TraceDataManager {
     private DataSeries traceDataSeries;
-    private ArrayList<GroupedDataSeries> fullyGroupedSeries = new ArrayList<>(0);
     private DataProcessingConfig processingConfig;
-    private int pixelsInDataPoint = 1;
+    private int pixelsPerDataPoint = 1;
     private int width = 500;
 
-    private DataSeries croppedSeries;
-    private GroupedDataSeries groupedSeries;
+    private GroupedDataSeries fullGroupedSeries;
+    private DataSeries groupedSeriesCache;
 
-    public TraceDataManager(DataSeries traceDataSeries, DataProcessingConfig processingConfig, int pixelsInDataPoint) {
+    public TraceDataManager(DataSeries traceDataSeries, DataProcessingConfig processingConfig, int pixelsPerDataPoint) {
         this.traceDataSeries = traceDataSeries;
-        this.pixelsInDataPoint = pixelsInDataPoint;
+        this.pixelsPerDataPoint = pixelsPerDataPoint;
         this.processingConfig = processingConfig;
-        if (this.pixelsInDataPoint <= 0) {
-            this.pixelsInDataPoint = 1;
+        if (this.pixelsPerDataPoint <= 0) {
+            this.pixelsPerDataPoint = 1;
         }
     }
 
@@ -37,83 +34,77 @@ public class TraceDataManager {
         return traceDataSeries;
     }
 
-    public DataSeries getProcessedData_(Double xMin, Double xMax) {
-        return traceDataSeries;
-    }
 
     public DataSeries getProcessedData(Double xMin, Double xMax) {
-        if (traceDataSeries.size() == 0) {
+        traceDataSeries.onDataAdded();
+        if(fullGroupedSeries != null) {
+            fullGroupedSeries.onDataAdded();
+            groupedSeriesCache.removeDataPoint((int) groupedSeriesCache.size() - 1);
+            for (long i = groupedSeriesCache.size() - 1; i < fullGroupedSeries.size(); i++) {
+                groupedSeriesCache.addDataPoint(fullGroupedSeries.getDataPoint(i));
+            }
+        }
+
+        if (traceDataSeries.size() <= 1) {
             return traceDataSeries;
         }
 
-        if (!processingConfig.isCropEnabled() && !processingConfig.isGroupingEnabled()) {
-            return traceDataSeries;
-        }
-        SubRange subRange = traceDataSeries.getSubRange(xMin, xMax);
 
-        boolean isFullGrouping = false;
-        if (croppedSeries == null) {
-            croppedSeries = traceDataSeries.copy();
-        }
-        if (processingConfig.isCropEnabled()) {
-            croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getSize());
-        } else {
-            isFullGrouping = true;
+        long pointsInGroup = 1;
+        if(processingConfig.isGroupEnabled()) {
+            // calculate best avg number of points in each group
+            long pointsInMinMaxInterval = Math.round((xMax - xMin) / traceDataSeries.getDataInterval());
+            pointsInGroup =  pointsInMinMaxInterval * pixelsPerDataPoint / width;
         }
 
-        if (!processingConfig.isGroupingEnabled()) {
+
+        // no grouping only crop
+        if(pointsInGroup <= 1) { // < processingConfig.getGroupStep()
+            if(!processingConfig.isCropEnabled()) {
+                return traceDataSeries;
+            }
+            int cropShoulder = 1;
+            SubRange subRange = traceDataSeries.getSubRange(xMin, xMax);
+            DataSeries croppedSeries = traceDataSeries.subSeries(subRange.getStartIndex() - cropShoulder, subRange.getSize() + 2 * cropShoulder);
             return croppedSeries;
         }
 
+        // crop and then group
+        if(!processingConfig.isGroupAll() && processingConfig.isCropEnabled()) {
+            long cropShoulder = 1 * pointsInGroup;
+            SubRange subRange = traceDataSeries.getSubRange(xMin, xMax);
+            DataSeries croppedSeries = traceDataSeries.subSeries(subRange.getStartIndex() - cropShoulder, subRange.getSize() + 2 * cropShoulder);
+            // grouping and caching cropped series
 
-        // calculate best avg number of points in each group
-        int pointsInGroup = 1;
-        if(subRange.getSize() > 0) {
-            Range dataMinMax = croppedSeries.getXExtremes();
-            double dataWidth  = (width * dataMinMax.length() / (xMax - xMin));
-            pointsInGroup = (int) Math.round((double) (subRange.getSize() * pixelsInDataPoint) / dataWidth);
-        }
-        if(pointsInGroup < 1) {
-            pointsInGroup = 1;
+            return new DataSeries(new GroupedDataSeries(croppedSeries, getGroupingInterval(pointsInGroup)));
         }
 
-        // add1 shoulder: 2 grouped points from both sides
-        subRange = new SubRange(subRange.getStartIndex() - 2 * pointsInGroup, subRange.getSize() + 4 * pointsInGroup);
-        croppedSeries.setViewRange(subRange.getStartIndex(), subRange.getSize());
-        double groupingInterval = getGroupingInterval(pointsInGroup);
-        if (pointsInGroup < 2) { // no grouping
-            groupedSeries = null;
-            return croppedSeries;
+        // full group and then crop
+        if(fullGroupedSeries == null) {
+            fullGroupedSeries = new GroupedDataSeries(traceDataSeries, getGroupingInterval(pointsInGroup));
+            groupedSeriesCache = new DataSeries(fullGroupedSeries);
+        } else if(fullGroupedSeries.getNumberOfPointsInGroup() / pointsInGroup >= processingConfig.getGroupStep()) {
+            fullGroupedSeries = new GroupedDataSeries(traceDataSeries, getGroupingInterval(pointsInGroup));
+            groupedSeriesCache = new DataSeries(fullGroupedSeries);
+        } else if(pointsInGroup / fullGroupedSeries.getNumberOfPointsInGroup() >= processingConfig.getGroupStep()) {
+            fullGroupedSeries = new GroupedDataSeries(traceDataSeries, getGroupingInterval(pointsInGroup));
+            groupedSeriesCache = new DataSeries(fullGroupedSeries);
+        }
+        if(!processingConfig.isCropEnabled()) {
+           return groupedSeriesCache;
         }
 
-        // first grouping
-        if (groupedSeries == null) {
-            groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
-            if (processingConfig.isDataExpensive() || isFullGrouping) {
-                groupedSeries.enableCaching(false);
-            }
-            return groupedSeries;
-        }
+        int cropShoulder = 1;
+        SubRange subRange = groupedSeriesCache.getSubRange(xMin, xMax);
+        DataSeries croppedSeries = groupedSeriesCache.subSeries(subRange.getStartIndex() - cropShoulder, subRange.getSize() + 2 * cropShoulder);
+        return croppedSeries;
 
-        // re-grouping
-        double previousGroupingInterval = groupedSeries.getDataInterval();
-        int factor = (int) Math.round(groupingInterval / previousGroupingInterval);
-        if (isFullGrouping) {
-            // new grouping on the base of previously grouped data
-            if (factor > 1) {
-                groupedSeries.multiplyGroupingInterval(factor);
-            }
-        } else {
-            if (factor == 1) { // scrolling
-                groupedSeries.onDataChanged();
-            } else { // simple regrouping
-                groupedSeries = new GroupedDataSeries(croppedSeries, groupingInterval);
-            }
-        }
-        return groupedSeries;
     }
 
-    private double getGroupingInterval(int pointsInGroup) {
-        return pointsInGroup * traceDataSeries.getXExtremes().length() / traceDataSeries.size();
+
+    private double getGroupingInterval(long pointsInGroup) {
+        return (pointsInGroup - 1) * traceDataSeries.getDataInterval();
     }
+
+
 }

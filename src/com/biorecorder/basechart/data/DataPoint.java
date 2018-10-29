@@ -20,7 +20,7 @@ public class DataPoint {
         return yValues;
     }
 
-    public void setYValues(double... yValues) {
+    public void setYValues(double[] yValues) {
         this.yValues = yValues;
     }
 

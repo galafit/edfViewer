@@ -5,19 +5,26 @@ package com.biorecorder.basechart;
  */
 public class DataProcessingConfig {
     private boolean isCropEnabled = true;
-    private boolean isGroupingEnabled = true;
-
-    private boolean isDataExpensive = false;
+    private boolean isGroupEnabled = true;
 
 
-
-    // These 2 properties work together.
     // If grouping superposition enabled we can make
-    // grouping of ALL points not only visible ones (full grouping) are grouped
-    // and copy the result to use it as a base
-    // for further quick groupings
-    private boolean isGroupingSuperpositionEnabled = true;
-    private int fullGroupingFactor = 64;
+    // further grouping on the base of previously grouped points
+    // (if also isGroupAll = true)
+    private boolean isGroupSuperpositionEnabled = true;
+
+    // whether group ALL points or only visible ones (cropped to x axis min-max range)
+    private boolean isGroupAll = false;
+
+    private int groupStep = 2;
+
+    public boolean isGroupAll() {
+        return isGroupAll;
+    }
+
+    public void setGroupAll(boolean isGroupAll) {
+        this.isGroupAll = isGroupAll;
+    }
 
     public boolean isCropEnabled() {
         return isCropEnabled;
@@ -28,35 +35,28 @@ public class DataProcessingConfig {
     }
 
 
-    public boolean isGroupingEnabled() {
-        return isGroupingEnabled;
+    public boolean isGroupEnabled() {
+        return isGroupEnabled;
     }
 
-    public void setGroupingEnabled(boolean groupingEnabled) {
-        isGroupingEnabled = groupingEnabled;
+    public void setGroupEnabled(boolean groupEnabled) {
+        isGroupEnabled = groupEnabled;
     }
 
-    public boolean isDataExpensive() {
-        return isDataExpensive;
+
+    public boolean isGroupSuperpositionEnabled() {
+        return isGroupSuperpositionEnabled;
     }
 
-    public void setDataExpensive(boolean dataExpensive) {
-        isDataExpensive = dataExpensive;
+    public void setGroupSuperpositionEnabled(boolean groupSuperpositionEnabled) {
+        isGroupSuperpositionEnabled = groupSuperpositionEnabled;
     }
 
-    public boolean isGroupingSuperpositionEnabled() {
-        return isGroupingSuperpositionEnabled;
+    public int getGroupStep() {
+        return groupStep;
     }
 
-    public void setGroupingSuperpositionEnabled(boolean groupingSuperpositionEnabled) {
-        isGroupingSuperpositionEnabled = groupingSuperpositionEnabled;
-    }
-
-    public int getFullGroupingFactor() {
-        return fullGroupingFactor;
-    }
-
-    public void setFullGroupingFactor(int fullGroupingFactor) {
-        this.fullGroupingFactor = fullGroupingFactor;
+    public void setGroupStep(int groupStep) {
+        this.groupStep = groupStep;
     }
 }

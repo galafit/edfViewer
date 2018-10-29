@@ -8,7 +8,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 
 /**
- * Created by galafit on 19/9/17.
+ * Simplified analogue of data table which
+ * in fact is simply a collection of columns
  */
 public class DataSeries  {
     protected boolean isOrdered = true;
@@ -16,6 +17,22 @@ public class DataSeries  {
     protected NumberColumn xColumn = new RegularColumn();
     protected StringColumn annotationColumn;
     private long size;
+
+
+    public DataSeries() {
+    }
+
+    public DataSeries(DataSeries dataSeries) {
+        xColumn = dataSeries.xColumn.cache();
+        for (NumberColumn yColumn : dataSeries.yColumns) {
+            yColumns.add(yColumn.cache());
+        }
+
+        if(dataSeries.annotationColumn != null) {
+            annotationColumn = dataSeries.annotationColumn.cache();
+        }
+        calculateSize();
+    }
 
     public boolean isRegular() {
         if(xColumn instanceof RegularColumn) {
@@ -39,6 +56,40 @@ public class DataSeries  {
     private void addYData(NumberColumn column) {
         yColumns.add(column);
         calculateSize();
+    }
+
+    public void addDataPoint(DataPoint data) throws UnsupportedOperationException {
+        xColumn.add(data.getXValue());
+        for (int i = 0; i < yColumns.size(); i++) {
+            yColumns.get(i).add(data.getYValues()[i]);
+        }
+        if(annotationColumn != null) {
+            annotationColumn.add(data.getLabel());
+        }
+    }
+
+    public void removeDataPoint(int index) {
+        xColumn.remove(index);
+        for (int i = 0; i < yColumns.size(); i++) {
+            yColumns.get(i).remove(index);
+        }
+        if(annotationColumn != null) {
+            annotationColumn.remove(index);
+        }
+    }
+
+    public DataPoint getDataPoint(long index) {
+        DataPoint dataPoint = new DataPoint();
+        dataPoint.setXValue(xColumn.value(index));
+        double[] yValues = new double[yColumns.size()];
+        for (int i = 0; i < yColumns.size(); i++) {
+            yValues[i] = yColumns.get(i).value(index);
+        }
+        dataPoint.setYValues(yValues);
+        if(annotationColumn != null) {
+            dataPoint.setLabel(annotationColumn.getString(index));
+        }
+        return dataPoint;
     }
 
     public void setXData(double xStartValue, double xInterval) {
@@ -96,18 +147,21 @@ public class DataSeries  {
         }
         if (isOrdered()) {
             double min = xColumn.value(0);
-            double max = xColumn.value(size() - 1);
+            double max = xColumn.value(size - 1);
             return new Range(min, max);
         }
 
-        return xColumn.extremes(0, size);
+        NumberColumn subColumn = xColumn.subColumn(0, size);
+        return subColumn.extremes();
     }
 
     public Range getYExtremes(int yNumber) {
         if (size == 0) {
             return null;
         }
-        return yColumns.get(yNumber).extremes(0, size);
+
+        NumberColumn subColumn = yColumns.get(yNumber).subColumn(0, size);
+        return subColumn.extremes();
     }
 
     public long size() {
@@ -129,10 +183,6 @@ public class DataSeries  {
     }
 
     public void onDataChanged() {
-        xColumn.clear();
-        for (NumberColumn yColumn : yColumns) {
-            yColumn.clear();
-        }
         calculateSize();
     }
 
@@ -141,8 +191,7 @@ public class DataSeries  {
      * @return index of nearest data item
      */
     public long findNearestData(double xValue) {
-
-        long lowerBoundIndex = xColumn.lowerBound(xValue, 0, size);
+        long lowerBoundIndex = xColumn.lowerBound(xValue);
         if (lowerBoundIndex < 0) {
             return 0;
         }
@@ -155,31 +204,28 @@ public class DataSeries  {
         return nearestIndex;
     }
 
-    public void enableCaching(boolean isLastElementCacheable) {
-        xColumn.enableCaching(isLastElementCacheable);
-        for (NumberColumn yColumn : yColumns) {
-            yColumn.enableCaching(isLastElementCacheable);
+    public DataSeries subSeries(long fromIndex, long length) {
+        if (fromIndex < 0) {
+            fromIndex = 0;
         }
-    }
-
-    public void disableCaching() {
-        xColumn.disableCaching();
-        for (NumberColumn yColumn : yColumns) {
-            yColumn.disableCaching();
+        if (fromIndex >= size) {
+            length = 0;
         }
-    }
-
-    public void setViewRange(long startIndex, long length) {
-        xColumn.setViewRange(startIndex, length);
-        for (NumberColumn yColumn : yColumns) {
-            yColumn.setViewRange(startIndex, length);
+        if (length > size - fromIndex) {
+            length = size - fromIndex;
         }
-
+        DataSeries subSeries = new DataSeries();
+        subSeries.xColumn = xColumn.subColumn(fromIndex, length);
+        for (NumberColumn yColumn : yColumns) {
+            subSeries.yColumns.add(yColumn.subColumn(fromIndex, length));
+        }
         if(annotationColumn != null) {
-            annotationColumn.setViewRange(startIndex, length);
+            subSeries.annotationColumn = annotationColumn.subColumn(fromIndex, length);
         }
-        calculateSize();
+        subSeries.calculateSize();
+        return subSeries;
     }
+
 
     public SubRange getSubRange(Double startXValue, Double endXValue) {
         if (startXValue != null && endXValue != null && endXValue < startXValue) {
@@ -204,8 +250,8 @@ public class DataSeries  {
             return new SubRange(0, size);
         }
 
-        long startIndex = xColumn.upperBound(startXValue, 0, size);
-        long endIndex = xColumn.lowerBound(endXValue, 0, size);
+        long startIndex = xColumn.upperBound(startXValue);
+        long endIndex = xColumn.lowerBound(endXValue);
         long length;
 
         if (startIndex < 0) {
@@ -229,11 +275,17 @@ public class DataSeries  {
         return copySeries;
     }
 
-    public double getDataInterval() {
-        if (size > 1) {
-            return getXExtremes().length() / (size - 1);
+    public double getDataInterval() throws IllegalStateException {
+        if(xColumn instanceof RegularColumn) {
+            return ((RegularColumn) xColumn).getDataInterval();
         }
-        return -1;
+
+        if(size <= 1) {
+            String errMsg = "Data interval can not be calculated. DataSeries size = " + size;
+            throw new IllegalStateException(errMsg);
+        }
+
+        return getXExtremes().length() / (size - 1);
     }
 
     /**********************************************************************

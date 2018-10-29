@@ -64,38 +64,6 @@ public class GroupedDataSeries extends DataSeries {
         calculateSize();
     }
 
-    /**
-     * This method can be used only if grouping superposition
-     * is permitted for the grouping function. For example:
-     * Min, Max, First, Last. Superposition for Average available
-     * only for regular series (when each group has the same number of points)
-     * @param factor - multiply factor
-     */
-    public void multiplyGroupingInterval(int factor) {
-        GroupedDataSeries resultantGroupedSeries = new GroupedDataSeries(this, getGroupingInterval() * factor);
-        resultantGroupedSeries.enableCaching(false);
-
-        // force calculating and caching all grouped elements
-        long lastElement = resultantGroupedSeries.size() - 1;
-        for (int i = 0; i < resultantGroupedSeries.yCount(); i++) {
-            resultantGroupedSeries.getYValue(i, lastElement);
-        }
-        resultantGroupedSeries.getXValue(lastElement);
-
-        // make group indexes superposition and copy grouped data
-        groupStartIndexes.superposition(resultantGroupedSeries.getGroupStartIndexes());
-
-         if(inDataSeries.isRegular()) {
-            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
-        } else {
-            xColumn.enableCaching(false, resultantGroupedSeries.xColumn);
-        }
-        for (int i = 0; i < yColumns.size(); i++) {
-           yColumns.get(i).enableCaching(false, resultantGroupedSeries.yColumns.get(i));
-        }
-        calculateSize();
-    }
-
     public GroupStartIndexes getGroupStartIndexes() {
         return groupStartIndexes;
     }
@@ -118,12 +86,8 @@ public class GroupedDataSeries extends DataSeries {
     @Override
     public void onDataChanged() {
         groupStartIndexes.clear();
-        xColumn.clear();
         if(inDataSeries.isRegular()) {
             xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
-        }
-        for (NumberColumn yColumn : yColumns) {
-            yColumn.clear();
         }
 
         calculateSize();
