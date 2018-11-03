@@ -1,14 +1,14 @@
 package com.biorecorder.util.series;
 
-/**
- * based on:
- * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
- */
+
 public class SeriesUtil {
     /******************************************************************
      *                         BINARY SEARCH
      ******************************************************************/
     /**
+     * based on:
+     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
+     *<p>
      * Searches a range of
      * the specified array of floats for the specified value using
      * the binary search algorithm.
@@ -17,24 +17,17 @@ public class SeriesUtil {
      * multiple elements with the specified value, there is no guarantee which
      * one will be found. This method considers all NaN values to be
      * equivalent and equal.
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
+     *
      * @return index of the search value, if it is contained in the array
      *         within the specified range;
      *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
      *         <i>insertion point</i> is defined as the point at which the
      *         key would be inserted into the array: the index of the first
      *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
+     *         or <tt>fromIndex + length - 1</tt> if all
      *         elements in the range are less than the specified key. Note
      *         that this guarantees that the return value will be &gt;= 0 if
      *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
      */
     public static long binarySearch(DoubleSeries data, double value, long fromIndex, int length) {
         long low = fromIndex;
@@ -62,6 +55,9 @@ public class SeriesUtil {
     }
 
     /**
+     * based on:
+     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
+     *<p>
      * Searches a range of
      * the specified array of floats for the specified value using
      * the binary search algorithm.
@@ -70,24 +66,17 @@ public class SeriesUtil {
      * multiple elements with the specified value, there is no guarantee which
      * one will be found. This method considers all NaN values to be
      * equivalent and equal.
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
+     *
      * @return index of the search value, if it is contained in the array
      *         within the specified range;
      *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
      *         <i>insertion point</i> is defined as the point at which the
      *         key would be inserted into the array: the index of the first
      *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
+     *         or <tt>fromIndex + length - 1</tt> if all
      *         elements in the range are less than the specified key. Note
      *         that this guarantees that the return value will be &gt;= 0 if
      *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
      */
     public static long binarySearch(FloatSeries data, float value, long fromIndex, int length) {
         long low = fromIndex;
@@ -115,6 +104,9 @@ public class SeriesUtil {
     }
 
     /**
+     * based on:
+     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
+     *<p>
      * Searches a range of
      * the specified array of floats for the specified value using
      * the binary search algorithm.
@@ -123,24 +115,17 @@ public class SeriesUtil {
      * multiple elements with the specified value, there is no guarantee which
      * one will be found. This method considers all NaN values to be
      * equivalent and equal.
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
+     *
      * @return index of the search value, if it is contained in the array
      *         within the specified range;
      *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
      *         <i>insertion point</i> is defined as the point at which the
      *         key would be inserted into the array: the index of the first
      *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
+     *         or <tt>fromIndex + length - 1</tt> if all
      *         elements in the range are less than the specified key. Note
      *         that this guarantees that the return value will be &gt;= 0 if
      *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
      */
     public static long binarySearch(IntSeries data, int value, long fromIndex, int length) {
         long low = fromIndex;
@@ -168,6 +153,9 @@ public class SeriesUtil {
     }
 
     /**
+     * based on:
+     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
+     *<p>
      * Searches a range of
      * the specified array of floats for the specified value using
      * the binary search algorithm.
@@ -176,24 +164,17 @@ public class SeriesUtil {
      * multiple elements with the specified value, there is no guarantee which
      * one will be found. This method considers all NaN values to be
      * equivalent and equal.
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
+     *
      * @return index of the search value, if it is contained in the array
      *         within the specified range;
      *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
      *         <i>insertion point</i> is defined as the point at which the
      *         key would be inserted into the array: the index of the first
      *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
+     *         or <tt>fromIndex + length - 1</tt> if all
      *         elements in the range are less than the specified key. Note
      *         that this guarantees that the return value will be &gt;= 0 if
      *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
      */
     public static long binarySearch(LongSeries data, long value, long fromIndex, int length) {
         long low = fromIndex;
@@ -221,6 +202,9 @@ public class SeriesUtil {
     }
 
     /**
+     * based on:
+     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
+     *<p>
      * Searches a range of
      * the specified array of floats for the specified value using
      * the binary search algorithm.
@@ -229,24 +213,17 @@ public class SeriesUtil {
      * multiple elements with the specified value, there is no guarantee which
      * one will be found. This method considers all NaN values to be
      * equivalent and equal.
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
+     *
      * @return index of the search value, if it is contained in the array
      *         within the specified range;
      *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
      *         <i>insertion point</i> is defined as the point at which the
      *         key would be inserted into the array: the index of the first
      *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
+     *         or <tt>fromIndex + length - 1</tt> if all
      *         elements in the range are less than the specified key. Note
      *         that this guarantees that the return value will be &gt;= 0 if
      *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
      */
     public static long binarySearch(ShortSeries data, short value, long fromIndex, int length) {
         long low = fromIndex;
@@ -275,31 +252,18 @@ public class SeriesUtil {
 
     /**
      * Lower bound search algorithm.<br>
-     * Lower bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns FIRST occurrence.<br>
-     * <p>
+     * Lower bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>FIRST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is less than the searched value</li>
+     *     <li>if all elements are bigger then the searched value
+     *     then (<b>fromIndex -1</b>) will be returned</li>
+      *
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long lowerBound(DoubleSeries data, double value, long fromIndex, int length) {
         long low = fromIndex;
@@ -326,38 +290,25 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return low;
+            return high;
         }
         return index;
     }
 
     /**
      * Lower bound search algorithm.<br>
-     * Lower bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns FIRST occurrence.<br>
-     * <p>
+     * Lower bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>FIRST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is less than the searched value</li>
+     *     <li>if all elements are bigger then the searched value
+     *     then (<b>fromIndex -1</b>) will be returned</li>
+      *
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long lowerBound(FloatSeries data, float value, long fromIndex, int length) {
         long low = fromIndex;
@@ -384,38 +335,25 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return low;
+            return high;
         }
         return index;
     }
 
     /**
      * Lower bound search algorithm.<br>
-     * Lower bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns FIRST occurrence.<br>
-     * <p>
+     * Lower bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>FIRST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is less than the searched value</li>
+     *     <li>if all elements are bigger then the searched value
+     *     then (<b>fromIndex -1</b>) will be returned</li>
+      *
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long lowerBound(IntSeries data, int value, long fromIndex, int length) {
         long low = fromIndex;
@@ -442,38 +380,25 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return low;
+            return high;
         }
         return index;
     }
 
     /**
      * Lower bound search algorithm.<br>
-     * Lower bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns FIRST occurrence.<br>
-     * <p>
+     * Lower bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>FIRST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is less than the searched value</li>
+     *     <li>if all elements are bigger then the searched value
+     *     then (<b>fromIndex -1</b>) will be returned</li>
+      *
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long lowerBound(LongSeries data, long value, long fromIndex, int length) {
         long low = fromIndex;
@@ -500,38 +425,25 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return low;
+            return high;
         }
         return index;
     }
 
     /**
      * Lower bound search algorithm.<br>
-     * Lower bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns FIRST occurrence.<br>
-     * <p>
+     * Lower bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>FIRST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is less than the searched value</li>
+     *     <li>if all elements are bigger then the searched value
+     *     then (<b>fromIndex -1</b>) will be returned</li>
+      *
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long lowerBound(ShortSeries data, short value, long fromIndex, int length) {
         long low = fromIndex;
@@ -558,38 +470,25 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return low;
+            return high;
         }
         return index;
     }
 
     /**
      * Upper bound search algorithm.<br>
-     * Upper bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns LAST occurrence.<br>
-     * <p>
+     * Upper bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>LAST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is bigger than the searched value</li>
+     *     <li>if all elements are less then the searched value
+     *     then (<b>fromIndex + length</b>) will be returned</li>
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
+     * <p>
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long upperBound(DoubleSeries data, double value, long fromIndex, int length) {
         long low = fromIndex;
@@ -616,7 +515,7 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return high;  // key not found.
+            return low;  // key not found.
         }
         return index;
     }
@@ -624,31 +523,18 @@ public class SeriesUtil {
 
     /**
      * Upper bound search algorithm.<br>
-     * Upper bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns LAST occurrence.<br>
-     * <p>
+     * Upper bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>LAST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is bigger than the searched value</li>
+     *     <li>if all elements are less then the searched value
+     *     then (<b>fromIndex + length</b>) will be returned</li>
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
+     * <p>
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long upperBound(FloatSeries data, float value, long fromIndex, int length) {
         long low = fromIndex;
@@ -675,7 +561,7 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return high;  // key not found.
+            return low;  // key not found.
         }
         return index;
     }
@@ -683,31 +569,18 @@ public class SeriesUtil {
 
     /**
      * Upper bound search algorithm.<br>
-     * Upper bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns LAST occurrence.<br>
-     * <p>
+     * Upper bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>LAST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is bigger than the searched value</li>
+     *     <li>if all elements are less then the searched value
+     *     then (<b>fromIndex + length</b>) will be returned</li>
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
+     * <p>
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long upperBound(IntSeries data, int value, long fromIndex, int length) {
         long low = fromIndex;
@@ -734,7 +607,7 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return high;  // key not found.
+            return low;  // key not found.
         }
         return index;
     }
@@ -742,31 +615,18 @@ public class SeriesUtil {
 
     /**
      * Upper bound search algorithm.<br>
-     * Upper bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns LAST occurrence.<br>
-     * <p>
+     * Upper bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>LAST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is bigger than the searched value</li>
+     *     <li>if all elements are less then the searched value
+     *     then (<b>fromIndex + length</b>) will be returned</li>
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
+     * <p>
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long upperBound(LongSeries data, long value, long fromIndex, int length) {
         long low = fromIndex;
@@ -793,7 +653,7 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return high;  // key not found.
+            return low;  // key not found.
         }
         return index;
     }
@@ -801,31 +661,18 @@ public class SeriesUtil {
 
     /**
      * Upper bound search algorithm.<br>
-     * Upper bound is kind of binary search algorithm but
-     * if there are many values equals searched value function returns LAST occurrence.<br>
-     * <p>
+     * Upper bound is kind of binary search algorithm but:
+     * <ul>
+     *     <li>If there are several elements equal to the searched value
+     *     function returns the <b>LAST</b> occurrence</li>
+     *     <li>If there is no element equal to the searched value function returns
+     *      index of the first element which is bigger than the searched value</li>
+     *     <li>if all elements are less then the searched value
+     *     then (<b>fromIndex + length</b>) will be returned</li>
+     * </ul>
      * Behaviour for unsorted arrays is unspecified.
+     * <p>
      * Complexity O(log n).
-     *
-     * @param data the Series to be searched
-     * @param fromIndex the index of the first element (inclusive) to be searched
-     * @param length number of element to be searched
-     * @param value the value to be searched for
-     * @return index of the search value, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
-     * @throws IllegalArgumentException
-     *         if {@code fromIndex > toIndex}
-     * @throws ArrayIndexOutOfBoundsException
-     *         if {@code fromIndex < 0 or toIndex > a.length}
-
      */
     public static long upperBound(ShortSeries data, short value, long fromIndex, int length) {
         long low = fromIndex;
@@ -852,7 +699,7 @@ public class SeriesUtil {
             }
         }
         if(index < 0) {
-            return high;  // key not found.
+            return low;  // key not found.
         }
         return index;
     }
@@ -896,24 +743,28 @@ public class SeriesUtil {
 
         long lower = SeriesUtil.lowerBound(data, 5, 0, (int)data.size());
         long upper = SeriesUtil.upperBound(data, 5, 0, (int)data.size());
+        long bs = SeriesUtil.binarySearch(data, 5, 0, (int)data.size());
 
-        System.out.println("lower(5)= "+lower + ",  upper(5) = "+ upper);
+        System.out.println("lower(5)= "+lower + ",  upper(5) = "+ upper + ",  binary search(5) = "+bs);
 
 
         lower = SeriesUtil.lowerBound(data, -1, 0, (int)data.size());
         upper = SeriesUtil.upperBound(data, -1, 0, (int)data.size());
+        bs = SeriesUtil.binarySearch(data, -1, 0, (int)data.size());
 
-        System.out.println("lower(-1) = "+lower + ",  upper(-1) = "+ upper);
+        System.out.println("lower(-1) = "+lower + ",  upper(-1) = "+ upper + ",  binary search(-1) = "+bs);
 
         lower = SeriesUtil.lowerBound(data, 3, 0, (int)data.size());
         upper = SeriesUtil.upperBound(data, 3, 0, (int)data.size());
+        bs = SeriesUtil.binarySearch(data, 3, 0, (int)data.size());
 
-        System.out.println("lower(3) = "+lower + ",  upper(3) = "+ upper);
+        System.out.println("lower(3) = "+lower + ",  upper(3) = "+ upper + ",  binary search(3) = "+bs);
 
         lower = SeriesUtil.lowerBound(data, -3, 0, (int)data.size());
-        upper = SeriesUtil.upperBound(data, 9, 0, (int)data.size());
+        upper = SeriesUtil.upperBound(data, -3, 0, (int)data.size());
+        bs = SeriesUtil.binarySearch(data, -3, 0, (int)data.size());
 
-        System.out.println("lower(-3) = "+lower + ",  upper(9) = "+ upper);
+        System.out.println("lower(-3) = "+lower + ",  upper(-3) = "+ upper + ",  binary search(-3) = "+bs);
 
         System.out.println();
 
@@ -941,22 +792,33 @@ public class SeriesUtil {
 
         lower = SeriesUtil.lowerBound(data1, 5.3f, 0, (int)data1.size());
         upper = SeriesUtil.upperBound(data1, 5.3f, 0, (int)data1.size());
+        bs = SeriesUtil.binarySearch(data1, 5.3f, 0, (int)data1.size());
 
-        System.out.println("lower(5.3)= "+lower + ",  upper(5.3) = "+ upper);
+        System.out.println("lower(5.3)= "+lower + ",  upper(5.3) = "+ upper + ",  binary search(5.3) = "+bs);
 
         lower = SeriesUtil.lowerBound(data1, 5.0f, 0, (int)data1.size());
         upper = SeriesUtil.upperBound(data1, 5.0f, 0, (int)data1.size());
+        bs = SeriesUtil.binarySearch(data1, 5.0f, 0, (int)data1.size());
 
-        System.out.println("lower(5.0)= "+lower + ",  upper(5.0) = "+ upper);
+        System.out.println("lower(5.0)= "+lower + ",  upper(5.0) = "+ upper + ",  binary search(5.0) = "+bs);
 
         lower = SeriesUtil.lowerBound(data1, -1.2f, 0, (int)data1.size());
         upper = SeriesUtil.upperBound(data1, -1.2f, 0, (int)data1.size());
+        bs = SeriesUtil.binarySearch(data1, -1.2f, 0, (int)data1.size());
 
-        System.out.println("lower(-1.2) = "+lower + ",  upper(-1.2) = "+ upper);
+        System.out.println("lower(-1.2) = "+lower + ",  upper(-1.2) = "+ upper + ",  binary search(-1.2) = "+bs);
 
         lower = SeriesUtil.lowerBound(data1, -3, 0, (int)data1.size());
-        upper = SeriesUtil.upperBound(data1, 9, 0, (int)data1.size());
+        upper = SeriesUtil.upperBound(data1, -3, 0, (int)data1.size());
+        bs = SeriesUtil.binarySearch(data1, -3, 0, (int)data1.size());
 
-        System.out.println("lower(-3) = "+lower + ",  upper(9) = "+ upper);
+        System.out.println("lower(-3) = "+lower + ",  upper(-3) = "+ upper + ",  binary search(-3) = "+bs);
+
+        lower = SeriesUtil.lowerBound(data1, 9, 0, (int)data1.size());
+        upper = SeriesUtil.upperBound(data1, 9, 0, (int)data1.size());
+        bs = SeriesUtil.binarySearch(data1, 9, 0, (int)data1.size());
+
+        System.out.println("lower(9) = "+lower + ",  upper(9) = "+ upper + ",  binary search(9) = "+bs);
+
     }
 }

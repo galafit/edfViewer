@@ -21,9 +21,10 @@ public class Test {
         testDoubleToFloat(2974815.78);
        // testDoubleToFloat(-2974815.78);
 
-        testDoubleToFloat1(2974815.78);
-       // testDoubleToFloat1(-2974815.78);
 
+        float f1 = 2974815.78f;
+        double d = f1;
+        testDoubleToFloat(d);
     }
 
     static void testDoubleToFloat(double d) {

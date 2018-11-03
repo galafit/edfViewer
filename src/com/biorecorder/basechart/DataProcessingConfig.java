@@ -14,17 +14,11 @@ public class DataProcessingConfig {
     private boolean isGroupSuperpositionEnabled = true;
 
     // whether group ALL points or only visible ones (cropped to x axis min-max range)
-    private boolean isGroupAll = false;
+    // private boolean isGroupAll = false;
+    // (at the moment not used. we make full grouping in preview when isCropEnabled = false)
 
     private int groupStep = 2;
 
-    public boolean isGroupAll() {
-        return isGroupAll;
-    }
-
-    public void setGroupAll(boolean isGroupAll) {
-        this.isGroupAll = isGroupAll;
-    }
 
     public boolean isCropEnabled() {
         return isCropEnabled;

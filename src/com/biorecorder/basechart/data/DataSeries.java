@@ -1,7 +1,9 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.grouping.GroupApproximation;
 import com.biorecorder.util.series.IntSeries;
+import com.biorecorder.util.series.LongSeries;
 import com.biorecorder.util.series.StringSeries;
 
 import java.text.MessageFormat;
@@ -17,22 +19,6 @@ public class DataSeries  {
     protected NumberColumn xColumn = new RegularColumn();
     protected StringColumn annotationColumn;
     private long size;
-
-
-    public DataSeries() {
-    }
-
-    public DataSeries(DataSeries dataSeries) {
-        xColumn = dataSeries.xColumn.cache();
-        for (NumberColumn yColumn : dataSeries.yColumns) {
-            yColumns.add(yColumn.cache());
-        }
-
-        if(dataSeries.annotationColumn != null) {
-            annotationColumn = dataSeries.annotationColumn.cache();
-        }
-        calculateSize();
-    }
 
     public boolean isRegular() {
         if(xColumn instanceof RegularColumn) {
@@ -50,12 +36,13 @@ public class DataSeries  {
 
     private void setXData(NumberColumn column) {
         xColumn = column;
-        calculateSize();
+        xColumn.setGroupApproximation(GroupApproximation.OPEN);
+        updateSize();
     }
 
     private void addYData(NumberColumn column) {
         yColumns.add(column);
-        calculateSize();
+        updateSize();
     }
 
     public void addDataPoint(DataPoint data) throws UnsupportedOperationException {
@@ -93,7 +80,7 @@ public class DataSeries  {
     }
 
     public void setXData(double xStartValue, double xInterval) {
-        xColumn = new RegularColumn(xStartValue, xInterval);
+        setXData(new RegularColumn(xStartValue, xInterval));
     }
 
     public void setXData(IntSeries series) {
@@ -114,12 +101,12 @@ public class DataSeries  {
 
     public void setAnnotations(StringSeries series) {
         annotationColumn = new StringColumn(series);
-        calculateSize();
+        updateSize();
     }
 
     public void removeYData(int yNumber) {
         yColumns.remove(yNumber);
-        calculateSize();
+        updateSize();
     }
 
     public int yCount() {
@@ -168,7 +155,7 @@ public class DataSeries  {
        return size;
     }
 
-    protected void calculateSize() {
+    public void updateSize() {
         size = xColumn.size();
         for (int i = 0; i < yColumns.size(); i++) {
             size = Math.min(size, yColumns.get(i).size());
@@ -176,14 +163,6 @@ public class DataSeries  {
         if(annotationColumn != null) {
             size = Math.min(size, annotationColumn.size());
         }
-    }
-
-    public void onDataAdded() {
-        calculateSize();
-    }
-
-    public void onDataChanged() {
-        calculateSize();
     }
 
     /**
@@ -222,7 +201,7 @@ public class DataSeries  {
         if(annotationColumn != null) {
             subSeries.annotationColumn = annotationColumn.subColumn(fromIndex, length);
         }
-        subSeries.calculateSize();
+        subSeries.updateSize();
         return subSeries;
     }
 
@@ -271,8 +250,38 @@ public class DataSeries  {
         for (NumberColumn yColumn : yColumns) {
             copySeries.yColumns.add(yColumn.copy());
         }
-        copySeries.onDataAdded();
+        if(annotationColumn != null) {
+            copySeries.annotationColumn = annotationColumn.copy();
+        }
+        copySeries.updateSize();
         return copySeries;
+    }
+
+    public DataSeries cache() {
+        DataSeries cacheSeries = new DataSeries();
+        cacheSeries.xColumn = xColumn.cache();
+        for (NumberColumn yColumn : yColumns) {
+            cacheSeries.yColumns.add(yColumn.cache());
+        }
+
+        if(annotationColumn != null) {
+            cacheSeries.annotationColumn = annotationColumn.cache();
+        }
+        cacheSeries.updateSize();
+        return cacheSeries;
+    }
+
+    public DataSeries group(LongSeries groupStartIndexes) {
+        DataSeries groupSeries = new DataSeries();
+        for (int i = 0; i < yColumns.size(); i++) {
+            NumberColumn[] groupedColumns = yColumns.get(i).group(groupStartIndexes);
+            for (NumberColumn column : groupedColumns) {
+                groupSeries.yColumns.add(column);
+            }
+        }
+        groupSeries.xColumn = xColumn.group(groupStartIndexes)[0];
+        groupSeries.updateSize();
+        return groupSeries;
     }
 
     public double getDataInterval() throws IllegalStateException {

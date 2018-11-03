@@ -36,13 +36,16 @@ public class ScrollableChart {
     private Insets spacing = new Insets(0, 0, 0, 0);
 
     private boolean autoScrollEnable = true;
-    private boolean autoScaleEnableDuringScroll = false; // chart Y auto scale during scrolling
+    private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
     private Theme theme;
 
     public ScrollableChart() {
         this.theme = new DarkTheme();
         chart = new Chart(theme.getChartConfig());
-        preview = new Chart(theme.getPreviewConfig());
+
+        DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
+        previewDataProcessingConfig.setCropEnabled(false);
+        preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
         preview.setDefaultWeight(2);
     }
 

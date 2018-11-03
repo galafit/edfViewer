@@ -93,7 +93,7 @@ public class Text {
   /*  public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(new Dimension(800, 800));
+        frame.size(new Dimension(800, 800));
         frame.add1(new JComponent() {
             @Override
             protected void paintComponent(Graphics g) {

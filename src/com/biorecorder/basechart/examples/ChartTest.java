@@ -71,12 +71,6 @@ public class ChartTest extends JFrame {
 
 
     public static void main(String[] args) {
-       // ChartTest chartTest = new ChartTest();
-        int arr[] = {1, 2, 3, 4, 5};
-        DataSeries dataSeries = new DataSeries();
-        dataSeries.addYData(arr);
-        for (int i = 0; i < dataSeries.size(); i++) {
-            System.out.println(i);
-        }
+       ChartTest chartTest = new ChartTest();
     }
 }

@@ -44,7 +44,6 @@ public class Chart {
     private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
 
     private ChartConfig chartConfig = new ChartConfig();
-    private DataProcessingConfig dataProcessingConfig = new DataProcessingConfig();
 
     private List<Trace> traces = new ArrayList<Trace>();
     private List<Legend> legends = new ArrayList<Legend>();
@@ -73,7 +72,12 @@ public class Chart {
         this((new DarkTheme()).getChartConfig());
     }
 
-    public Chart(ChartConfig chartConfig1) {
+    public Chart(ChartConfig chartConfig) {
+        this(chartConfig, new DataProcessingConfig());
+    }
+
+
+    public Chart(ChartConfig chartConfig1, DataProcessingConfig dataProcessingConfig) {
         this.chartConfig = new ChartConfig(chartConfig1);
         dataManager = new DataManager(dataProcessingConfig);
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
@@ -94,7 +98,6 @@ public class Chart {
         tooltip = new Tooltip(chartConfig.getTooltipConfig());
         crosshair = new Crosshair(chartConfig.getCrossHairConfig());
     }
-
 
     Double getBestExtent(int xIndex) {
         double maxExtent = 0;
@@ -198,7 +201,6 @@ public class Chart {
     }
     
     void setMargin(Insets margin) {
-        System.out.println("set margins");
         this.margin = margin;
         setYStartEnd(fullArea.y + margin.top(), fullArea.height - margin.top() - margin.bottom());
         setXStartEnd(fullArea.x + margin.left(), fullArea.width - margin.left() - margin.right());
@@ -214,7 +216,6 @@ public class Chart {
 
 
     void calculateMarginsAndAreas(BCanvas canvas) {
-        System.out.println("calculate margins");
         if (dataDirty) {
             initiateTraceData();
         }

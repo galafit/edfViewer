@@ -1,0 +1,28 @@
+package com.biorecorder.basechart.grouping;
+
+public class #E#GroupOhlc extends #E#GroupFunction {
+    private #e# max;
+    private #e# min;
+    private #e# first;
+    private #e# last;
+
+    @Override
+    protected void add1(#e# value) {
+        if(count == 0) {
+            max = value;
+            min = value;
+            first = value;
+        } else {
+            max = (#e#)Math.max(max, value);
+            max = (#e#)Math.min(min, value);
+        }
+        last = value;
+        count++;
+    }
+
+    @Override
+    protected #e#[] groupedValue1() {
+        #e#[] groupedValues = {first, max, min, last};
+        return groupedValues;
+    }
+}

@@ -257,7 +257,7 @@ public class SeriesUtil {
      * Lower bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>FIRST</b> occurrence</li>
+     *     function returns the <b>OPEN</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is less than the searched value</li>
      *     <li>if all elements are bigger then the searched value
@@ -302,7 +302,7 @@ public class SeriesUtil {
      * Lower bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>FIRST</b> occurrence</li>
+     *     function returns the <b>OPEN</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is less than the searched value</li>
      *     <li>if all elements are bigger then the searched value
@@ -347,7 +347,7 @@ public class SeriesUtil {
      * Lower bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>FIRST</b> occurrence</li>
+     *     function returns the <b>OPEN</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is less than the searched value</li>
      *     <li>if all elements are bigger then the searched value
@@ -392,7 +392,7 @@ public class SeriesUtil {
      * Lower bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>FIRST</b> occurrence</li>
+     *     function returns the <b>OPEN</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is less than the searched value</li>
      *     <li>if all elements are bigger then the searched value
@@ -437,7 +437,7 @@ public class SeriesUtil {
      * Lower bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>FIRST</b> occurrence</li>
+     *     function returns the <b>OPEN</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is less than the searched value</li>
      *     <li>if all elements are bigger then the searched value
@@ -482,7 +482,7 @@ public class SeriesUtil {
      * Upper bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>LAST</b> occurrence</li>
+     *     function returns the <b>CLOSE</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is bigger than the searched value</li>
      *     <li>if all elements are less then the searched value
@@ -528,7 +528,7 @@ public class SeriesUtil {
      * Upper bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>LAST</b> occurrence</li>
+     *     function returns the <b>CLOSE</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is bigger than the searched value</li>
      *     <li>if all elements are less then the searched value
@@ -574,7 +574,7 @@ public class SeriesUtil {
      * Upper bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>LAST</b> occurrence</li>
+     *     function returns the <b>CLOSE</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is bigger than the searched value</li>
      *     <li>if all elements are less then the searched value
@@ -620,7 +620,7 @@ public class SeriesUtil {
      * Upper bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>LAST</b> occurrence</li>
+     *     function returns the <b>CLOSE</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is bigger than the searched value</li>
      *     <li>if all elements are less then the searched value
@@ -666,7 +666,7 @@ public class SeriesUtil {
      * Upper bound is kind of binary search algorithm but:
      * <ul>
      *     <li>If there are several elements equal to the searched value
-     *     function returns the <b>LAST</b> occurrence</li>
+     *     function returns the <b>CLOSE</b> occurrence</li>
      *     <li>If there is no element equal to the searched value function returns
      *      index of the first element which is bigger than the searched value</li>
      *     <li>if all elements are less then the searched value

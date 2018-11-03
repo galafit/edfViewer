@@ -3,8 +3,8 @@ package com.biorecorder.basechart.data;
 import com.biorecorder.util.lists.SeriesUtil;
 import com.biorecorder.basechart.Range;
 import com.biorecorder.util.lists.IntArrayList;
-import com.biorecorder.basechart.grouping.GroupingApproximation;
-import com.biorecorder.basechart.grouping.IntGroupingFunction;
+import com.biorecorder.basechart.grouping.GroupApproximation;
+import com.biorecorder.basechart.grouping.IntGroupFunction;
 import com.biorecorder.util.series.IntSeries;
 import com.biorecorder.util.series.LongSeries;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * Created by galafit on 27/9/17.
  */
 class IntColumn extends NumberColumn {
-    private final IntSeries series;
+    protected IntSeries series;
 
     public IntColumn(IntSeries series) {
         this.series = series;
@@ -52,33 +52,36 @@ class IntColumn extends NumberColumn {
     public void add(double value) throws UnsupportedOperationException {
         if(series instanceof IntArrayList) {
             ((IntArrayList) series).add((int) value);
+        } else {
+            throw  new UnsupportedOperationException("Value can be added to the column only if that column wraps ArrayList");
         }
-        throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
     }
 
     @Override
     public void remove(int index) {
         if(series instanceof IntArrayList) {
             ((IntArrayList) series).remove(index);
+        } else {
+            throw  new UnsupportedOperationException("Value can be removed from the column only if that column wraps ArrayList");
         }
-        throw  new UnsupportedOperationException("Value can be removed from the column only if that column wraps ArrayList");
     }
 
     @Override
     public void add(double[] values) throws UnsupportedOperationException {
         if(series instanceof IntArrayList) {
-            int[] intValues = new int[values.length];
+            int[] castedValues = new int[values.length];
             for (int i = 0; i < values.length; i++) {
-               intValues[i] = (int) values[i];
+               castedValues[i] = (int) values[i];
             }
-            ((IntArrayList)series).add(intValues);
+            ((IntArrayList)series).add(castedValues);
+        } else {
+            throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
         }
-        throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
     }
 
     @Override
     public NumberColumn[] group(LongSeries groupIndexes) {
-        return new GroupingManager(groupingType, groupIndexes).groupedColumns();
+        return new GroupingManager(groupApproximation, groupIndexes).groupedColumns();
     }
 
     @Override
@@ -112,10 +115,11 @@ class IntColumn extends NumberColumn {
 
     @Override
     public Range extremes() {
-        if(series.size() == 0){
+        long size = series.size();
+        if(size == 0){
             return null;
         }
-        if (series.size() > Integer.MAX_VALUE) {
+        if (size > Integer.MAX_VALUE) {
             String errorMessage = "Extremes can not be find if size > Integer.MAX_VALUE. Size = " + size();
             throw new IllegalArgumentException(errorMessage);
         }
@@ -124,76 +128,79 @@ class IntColumn extends NumberColumn {
         int dataItem = series.get(0); //
         int min = dataItem;
         int max = dataItem;
-        for (long i = 1; i < series.size() ; i++) {
+        for (long i = 1; i < size ; i++) {
             dataItem = series.get(i);
-            min = Math.min(min, dataItem);
-            max = Math.max(max, dataItem);
+            min = (int)Math.min(min, dataItem);
+            max = (int)Math.max(max, dataItem);
         }
         return new Range(min, max);
     }
 
     @Override
     public long binarySearch(double value) {
-        if (series.size() > Integer.MAX_VALUE) {
-            String errorMessage = "Binary search can not be done if size > Integer.MAX_VALUE. Size = " + series.size();
+        long size = series.size();
+        if (size > Integer.MAX_VALUE) {
+            String errorMessage = "Binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.upperBound(series, (int) value, 0, (int) series.size());
+        return SeriesUtil.upperBound(series, (int) value, 0, (int) size);
 
     }
 
     @Override
     public long upperBound(double value) {
-        if (series.size() > Integer.MAX_VALUE) {
-            String errorMessage = "Upper bound binary search not be done if size > Integer.MAX_VALUE. Size = " + series.size();
+        long size = series.size();
+        if (size > Integer.MAX_VALUE) {
+            String errorMessage = "Upper bound binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.upperBound(series, (int) value, 0, (int) series.size());
+        return SeriesUtil.upperBound(series, (int) value, 0, (int) size);
     }
 
     @Override
     public long lowerBound(double value) {
-        if (series.size() > Integer.MAX_VALUE) {
-            String errorMessage = "Lower bound binary search not be done if size > Integer.MAX_VALUE. Size = " + series.size();
+        long size = series.size();
+        if (size > Integer.MAX_VALUE) {
+            String errorMessage = "Lower bound binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
             throw new IllegalArgumentException(errorMessage);
         }
-        return SeriesUtil.lowerBound(series, (int) value, 0, (int) series.size());
+        return SeriesUtil.lowerBound(series, (int) value, 0, (int) size);
     }
 
     @Override
     public NumberColumn copy() {
         IntColumn newColumn = new IntColumn(series);
         newColumn.name = name;
-        newColumn.groupingType = groupingType;
+        newColumn.groupApproximation = groupApproximation;
         return newColumn;
     }
 
     @Override
     public NumberColumn cache() {
-        long size = size();
+        long size = series.size();
         if (size > Integer.MAX_VALUE) {
             String errorMessage = "Column can not be cached if its size > Integer.MAX_VALUE. Size = " + size;
             throw new IllegalArgumentException(errorMessage);
         }
-        IntArrayList intList = new IntArrayList((int) size);
+        IntArrayList list = new IntArrayList((int) size);
         for (int i = 0; i < size; i++) {
-            intList.add(series.get(i));
+            list.add(series.get(i));
         }
-        return new IntColumn(intList);
+        return new IntColumn(list);
     }
 
 
     class GroupingManager {
-        private GroupingApproximation groupingApproximation;
+        private GroupApproximation groupingApproximation;
         private LongSeries groupStartIndexes;
         private long lastGroupValueStart = -1;
         private long lastGroupValueLength;
 
-        private final IntGroupingFunction groupingFunction;
+        private final IntGroupFunction groupingFunction;
 
-        public GroupingManager(GroupingApproximation groupingApproximation, LongSeries groupStartIndexes) {
+        public GroupingManager(GroupApproximation groupingApproximation, LongSeries groupStartIndexes) {
             this.groupingApproximation = groupingApproximation;
-            groupingFunction = (IntGroupingFunction) groupingApproximation.getGroupingFunction("int");
+            groupingFunction = (IntGroupFunction) groupingApproximation.getGroupingFunction("int");
             this.groupStartIndexes = groupStartIndexes;
         }
 
@@ -206,7 +213,8 @@ class IntColumn extends NumberColumn {
                groupingFunction.reset();
                lastGroupValueLength = 0;
             }
-            int[] groupedValues = groupingFunction.addToGroup(series, groupStartIndexes.get(groupIndex) + lastGroupValueLength, groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex) - lastGroupValueLength);
+            long groupEnd = Math.min(groupStartIndexes.get(groupIndex + 1), size());
+            int[] groupedValues = groupingFunction.addToGroup(series, groupStartIndexes.get(groupIndex) + lastGroupValueLength, groupEnd - groupStartIndexes.get(groupIndex) - lastGroupValueLength);
 
             lastGroupValueStart = groupStartIndexes.get(groupIndex);
             lastGroupValueLength = groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex);
@@ -230,12 +238,18 @@ class IntColumn extends NumberColumn {
                 };
                 resultantColumns[i] = new IntColumn(groupedSeries);
                 resultantColumns[i].setName(name);
-                resultantColumns[i].setGroupingType(groupingApproximation);
+                resultantColumns[i].setGroupApproximation(groupingApproximation);
             }
-            if (resultantColumns.length == 2) { // MinMAx
-                resultantColumns[0].setGroupingType(GroupingApproximation.MIN);
-                resultantColumns[1].setGroupingType(GroupingApproximation.MAX);
+            if (resultantColumns.length == 2) { // LowHigh
+                resultantColumns[0].setGroupApproximation(GroupApproximation.LOW);
+                resultantColumns[1].setGroupApproximation(GroupApproximation.HIGH);
             }
+           if (resultantColumns.length == 4) { // OHLC
+                resultantColumns[0].setGroupApproximation(GroupApproximation.OPEN);
+                resultantColumns[1].setGroupApproximation(GroupApproximation.HIGH);
+                resultantColumns[2].setGroupApproximation(GroupApproximation.OPEN);
+                resultantColumns[3].setGroupApproximation(GroupApproximation.OPEN);
+           }
 
             return resultantColumns;
         }

@@ -4,8 +4,9 @@ import com.biorecorder.util.lists.LongArrayList;
 import com.biorecorder.util.series.LongSeries;
 
 /**
- * This class potentially permits for every grouped point (bin)
- * take its start, end and all original points the group includes (if we will need it)
+ * This class potentially permits (if we will need it)
+ * take start and end of every grouped point (bin) and
+ * also all original points that group includes
  * <p>
  * Data grouping or binning (banding)
  * serves to reduce large number of data.
@@ -42,7 +43,7 @@ import com.biorecorder.util.series.LongSeries;
  */
 public class GroupedDataSeries extends DataSeries {
     private DataSeries inDataSeries;
-    private GroupStartIndexes groupStartIndexes;
+    private GroupStartIndexes1 groupStartIndexes;
 
     public GroupedDataSeries(DataSeries inDataSeries, double groupingInterval) {
         this.inDataSeries = inDataSeries;
@@ -61,10 +62,10 @@ public class GroupedDataSeries extends DataSeries {
                 yColumns.add(column);
             }
         }
-        calculateSize();
+        updateSize();
     }
 
-    public GroupStartIndexes getGroupStartIndexes() {
+    public GroupStartIndexes1 getGroupStartIndexes() {
         return groupStartIndexes;
     }
 
@@ -83,16 +84,6 @@ public class GroupedDataSeries extends DataSeries {
         return groupStartIndexes.getNumberOfPointsInGroup();
     }
 
-    @Override
-    public void onDataChanged() {
-        groupStartIndexes.clear();
-        if(inDataSeries.isRegular()) {
-            xColumn = new RegularColumn(inDataSeries.getXValue(0), inDataSeries.getDataInterval() * groupStartIndexes.getNumberOfPointsInGroup());
-        }
-
-        calculateSize();
-    }
-
     private double pointsNumberToGroupingInterval(int numberOfPointsInGroup) {
         return numberOfPointsInGroup * inDataSeries.getDataInterval();
     }
@@ -101,16 +92,16 @@ public class GroupedDataSeries extends DataSeries {
         return (int)Math.round(groupingInterval / inDataSeries.getDataInterval());
     }
 
-    interface GroupStartIndexes extends LongSeries {
+    interface GroupStartIndexes1 extends LongSeries {
         void setGroupingInterval(double groupingInterval);
         double getGroupingInterval();
         int getNumberOfPointsInGroup();
         void clear();
         void setGroupStart(int groupIndex, long groupStartIndex);
-        void superposition(GroupStartIndexes upperLevelGroupStartIndexes);
+        void superposition(GroupStartIndexes1 upperLevelGroupStartIndexes);
     }
 
-    class RegularGroupStartIndexes implements GroupStartIndexes {
+    class RegularGroupStartIndexes implements GroupStartIndexes1 {
         private int groupPointsNumber;
         private long size;
 
@@ -172,12 +163,12 @@ public class GroupedDataSeries extends DataSeries {
         }
 
         @Override
-        public void superposition(GroupStartIndexes upperLevelGroupStartIndexes) {
+        public void superposition(GroupStartIndexes1 upperLevelGroupStartIndexes) {
             setGroupingInterval(groupingIntervalToPointsNumber(upperLevelGroupStartIndexes.getGroupingInterval()));
         }
     }
 
-    class IrregularGroupStartIndexes implements GroupStartIndexes {
+    class IrregularGroupStartIndexes implements GroupStartIndexes1 {
         private double groupingInterval;
         LongArrayList groupStartsList = new LongArrayList();
 
@@ -187,7 +178,7 @@ public class GroupedDataSeries extends DataSeries {
         }
 
         @Override
-        public void superposition(GroupStartIndexes upperLevelGroupStartIndexes) {
+        public void superposition(GroupStartIndexes1 upperLevelGroupStartIndexes) {
             // superposition
             for (int i = 0; i < upperLevelGroupStartIndexes.size(); i++) {
                upperLevelGroupStartIndexes.setGroupStart(i, groupStartsList.get(upperLevelGroupStartIndexes.get(i)));
