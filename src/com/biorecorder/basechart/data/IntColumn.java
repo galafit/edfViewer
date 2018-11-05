@@ -189,11 +189,11 @@ class IntColumn extends NumberColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes) {
+    public NumberColumn[] group(LongSeries groupStartIndexes) {
         NumberColumn[] resultantColumns = new NumberColumn[groupApproximations.length];
 
         for (int i = 0; i < groupApproximations.length; i++) {
-            resultantColumns[i] = new IntColumn(groupSeries(groupApproximations[i], groupIndexes));
+            resultantColumns[i] = new IntColumn(new GroupedSeries(groupApproximations[i], groupStartIndexes));
             String resultantName = name;
             if(groupApproximations.length > 1) {
                 resultantName = name + " "+groupApproximations[i].name();
@@ -202,10 +202,6 @@ class IntColumn extends NumberColumn {
             resultantColumns[i].setGroupApproximations(groupApproximations[i]);
         }
         return resultantColumns;
-    }
-
-    protected IntSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
-        return new GroupedSeries(groupApproximation, groupStartIndexes);
     }
 
     class GroupedSeries implements IntSeries {
@@ -231,11 +227,11 @@ class IntColumn extends NumberColumn {
                 groupFunction.reset();
                 lastGroupValueLength = 0;
             }
-            long groupEnd = Math.min(groupStartIndexes.get(index + 1), size());
-            int groupValue = groupFunction.addToGroup(series, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
+            long groupEnd = Math.min(groupStartIndexes.get(index + 1), series.size());
 
+            int groupValue = groupFunction.addToGroup(series, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
             lastGroupValueStart = groupStartIndexes.get(index);
-            lastGroupValueLength = groupStartIndexes.get(index + 1) - groupStartIndexes.get(index);
+            lastGroupValueLength = groupEnd - groupStartIndexes.get(index);
             return groupValue;
         }
     }

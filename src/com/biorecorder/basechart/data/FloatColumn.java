@@ -189,11 +189,11 @@ class FloatColumn extends NumberColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes) {
+    public NumberColumn[] group(LongSeries groupStartIndexes) {
         NumberColumn[] resultantColumns = new NumberColumn[groupApproximations.length];
 
         for (int i = 0; i < groupApproximations.length; i++) {
-            resultantColumns[i] = new FloatColumn(groupSeries(groupApproximations[i], groupIndexes));
+            resultantColumns[i] = new FloatColumn(new GroupedSeries(groupApproximations[i], groupStartIndexes));
             String resultantName = name;
             if(groupApproximations.length > 1) {
                 resultantName = name + " "+groupApproximations[i].name();
@@ -202,10 +202,6 @@ class FloatColumn extends NumberColumn {
             resultantColumns[i].setGroupApproximations(groupApproximations[i]);
         }
         return resultantColumns;
-    }
-
-    protected FloatSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
-        return new GroupedSeries(groupApproximation, groupStartIndexes);
     }
 
     class GroupedSeries implements FloatSeries {

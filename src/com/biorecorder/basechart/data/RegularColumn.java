@@ -89,18 +89,27 @@ public class RegularColumn extends DoubleColumn {
     }
 
     @Override
-    protected DoubleSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
+    public NumberColumn[] group(LongSeries groupStartIndexes) {
         if(groupStartIndexes instanceof LongRegularSeries) {
             long numberOfGroupedIntervals = ((LongRegularSeries) groupStartIndexes).getDataInterval();
-            double resultantInterval = getDataInterval() * numberOfGroupedIntervals;
+            double resultantGroupInterval = getDataInterval() * numberOfGroupedIntervals;
 
-            DoubleGroupFunction groupFunction = (DoubleGroupFunction) groupApproximation.getGroupingFunction("double");
-            double groupedStartValue = groupFunction.addToGroup(series, 0, numberOfGroupedIntervals);
+            NumberColumn[] resultantColumns = new NumberColumn[groupApproximations.length];
 
-            return new DoubleRegularSeries(groupedStartValue, resultantInterval);
-
+            for (int i = 0; i < groupApproximations.length; i++) {
+                DoubleGroupFunction groupFunction = (DoubleGroupFunction) groupApproximations[i].getGroupingFunction("double");
+                double groupedStartValue = groupFunction.addToGroup(series, 0, numberOfGroupedIntervals);
+                resultantColumns[i] = new RegularColumn(groupedStartValue, resultantGroupInterval);
+                String resultantName = name;
+                if(groupApproximations.length > 1) {
+                    resultantName = name + " "+groupApproximations[i].name();
+                }
+                resultantColumns[i].setName(resultantName);
+                resultantColumns[i].setGroupApproximations(groupApproximations[i]);
+            }
+            return resultantColumns;
         } else {
-            return super.groupSeries(groupApproximation, groupStartIndexes);
+            return super.group(groupStartIndexes);
         }
     }
 

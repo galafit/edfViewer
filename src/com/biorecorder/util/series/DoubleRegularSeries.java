@@ -27,7 +27,7 @@ public class DoubleRegularSeries implements DoubleSeries {
     @Override
     public double get(long index) {
         rangeCheck(index);
-        return (double)(startValue + dataInterval * index);
+        return startValue + dataInterval * index;
     }
 
     public double getDataInterval() {

@@ -189,11 +189,11 @@ class DoubleColumn extends NumberColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes) {
+    public NumberColumn[] group(LongSeries groupStartIndexes) {
         NumberColumn[] resultantColumns = new NumberColumn[groupApproximations.length];
 
         for (int i = 0; i < groupApproximations.length; i++) {
-            resultantColumns[i] = new DoubleColumn(groupSeries(groupApproximations[i], groupIndexes));
+            resultantColumns[i] = new DoubleColumn(new GroupedSeries(groupApproximations[i], groupStartIndexes));
             String resultantName = name;
             if(groupApproximations.length > 1) {
                 resultantName = name + " "+groupApproximations[i].name();
@@ -202,10 +202,6 @@ class DoubleColumn extends NumberColumn {
             resultantColumns[i].setGroupApproximations(groupApproximations[i]);
         }
         return resultantColumns;
-    }
-
-    protected DoubleSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
-        return new GroupedSeries(groupApproximation, groupStartIndexes);
     }
 
     class GroupedSeries implements DoubleSeries {

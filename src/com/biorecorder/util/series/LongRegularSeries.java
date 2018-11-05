@@ -1,6 +1,8 @@
 package com.biorecorder.util.series;
 
-public class LongRegularSeries implements LongSeries {
+import com.biorecorder.basechart.data.RegularColumn;
+
+public class LongRegularSeries implements LongSeries{
     protected long dataInterval;
     protected long startValue;
     protected long size = Long.MAX_VALUE;
@@ -30,7 +32,7 @@ public class LongRegularSeries implements LongSeries {
     @Override
     public long get(long index) {
         rangeCheck(index);
-        return (long)(startValue + dataInterval * index);
+        return startValue + dataInterval * index;
     }
 
     public long getDataInterval() {
