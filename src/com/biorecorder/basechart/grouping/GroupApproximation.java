@@ -5,27 +5,19 @@ package com.biorecorder.basechart.grouping;
  * Created by galafit on 25/11/17.
  */
 public enum GroupApproximation {
-    AVERAGE(1, "Average"),
-    SUM(1, "Sum"),
-    LOW(1, "Min"),
-    HIGH(1, "High"),
-    OPEN(1, "Open"),
-    CLOSE(1, "Close"),
-    LOW_HIGH(2, "LowHigh"),
-    OHLC(4, "Ohlc"); //open, high, low and close values within the grouped data
+    AVERAGE("Average"),
+    SUM("Sum"),
+    LOW("Min"),
+    HIGH("High"),
+    OPEN("Open"),
+    CLOSE("Close");
 
-    private int dimension;
+
     private String functionName;
 
-    GroupApproximation(int dimension, String functionName) {
-        this.dimension = dimension;
+    GroupApproximation(String functionName) {
         this.functionName = functionName;
     }
-
-    public int getDimension() {
-        return dimension;
-    }
-
 
     /**
      *

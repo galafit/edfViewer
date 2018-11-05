@@ -17,8 +17,7 @@ public class DoubleGroupAverage extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {(double)(sum / count)};
-        return groupedValues;
+    protected double groupValue1() {
+        return (double)(sum / count);
     }
 }

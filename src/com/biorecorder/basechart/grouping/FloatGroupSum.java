@@ -17,8 +17,7 @@ public class FloatGroupSum extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {sum};
-        return groupedValues;
+    protected float groupValue1() {
+        return sum;
     }
 }

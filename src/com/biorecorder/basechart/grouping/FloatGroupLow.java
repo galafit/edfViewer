@@ -15,8 +15,7 @@ public class FloatGroupLow extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {min};
-        return groupedValues;
+    protected float groupValue1() {
+        return min;
     }
 }

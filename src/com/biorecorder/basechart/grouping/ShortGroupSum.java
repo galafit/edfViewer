@@ -17,8 +17,7 @@ public class ShortGroupSum extends ShortGroupFunction {
     }
 
     @Override
-    protected short[] groupedValue1() {
-        short[] groupedValues = {sum};
-        return groupedValues;
+    protected short groupValue1() {
+        return sum;
     }
 }

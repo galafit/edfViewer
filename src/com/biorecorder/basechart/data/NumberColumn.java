@@ -13,7 +13,7 @@ import com.biorecorder.util.series.LongSeries;
  */
 public abstract class NumberColumn {
     protected String name;
-    protected GroupApproximation groupApproximation = GroupApproximation.AVERAGE;
+    protected GroupApproximation[] groupApproximations = {GroupApproximation.AVERAGE};
 
     public String getName() {
         return name;
@@ -44,9 +44,26 @@ public abstract class NumberColumn {
      */
     public abstract void remove(int index);
 
+    /**
+     * Set approximations that will be used when data are grouped
+     * In most cases only one group approximation is required
+     * But there are some exceptions: low-high, or ohls (open, high, low, close)
+     *
+     * @param groupApproximations approximations used when data are grouped
+     */
+    public void setGroupApproximations(GroupApproximation... groupApproximations) {
+        this.groupApproximations = groupApproximations;
+    }
 
-    public void setGroupApproximation(GroupApproximation groupApproximation) {
-        this.groupApproximation = groupApproximation;
+    /**
+     * Get array of approximations used during data grouping
+     * In most cases only one group approximation is used
+     * But there are some exceptions: low-high, or ohls (open, high, low, close)
+     *
+     * @return array of approximations used during data grouping
+     */
+    public GroupApproximation[] getGroupApproximations() {
+        return groupApproximations;
     }
 
     public abstract long size();

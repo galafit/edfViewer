@@ -13,8 +13,7 @@ public class ShortGroupOpen extends ShortGroupFunction {
     }
 
     @Override
-    protected short[] groupedValue1() {
-        short[] groupedValues = {first};
-        return groupedValues;
+    protected short groupValue1() {
+        return first;
     }
 }

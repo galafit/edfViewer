@@ -17,8 +17,7 @@ public class FloatGroupAverage extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {(float)(sum / count)};
-        return groupedValues;
+    protected float groupValue1() {
+        return (float)(sum / count);
     }
 }

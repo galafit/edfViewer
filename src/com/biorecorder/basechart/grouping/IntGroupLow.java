@@ -15,8 +15,7 @@ public class IntGroupLow extends IntGroupFunction {
     }
 
     @Override
-    protected int[] groupedValue1() {
-        int[] groupedValues = {min};
-        return groupedValues;
+    protected int groupValue1() {
+        return min;
     }
 }

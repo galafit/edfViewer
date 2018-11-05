@@ -17,8 +17,7 @@ public class IntGroupSum extends IntGroupFunction {
     }
 
     @Override
-    protected int[] groupedValue1() {
-        int[] groupedValues = {sum};
-        return groupedValues;
+    protected int groupValue1() {
+        return sum;
     }
 }

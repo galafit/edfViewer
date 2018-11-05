@@ -7,10 +7,14 @@ public class DataProcessingConfig {
     private boolean isCropEnabled = true;
     private boolean isGroupEnabled = true;
 
+    // In case of GroupType.AUTO regular DataSeries will be grouped by equal points number
+    // and non-regular by equal intervals
+    private GroupType groupType = GroupType.AUTO;
+
 
     // If grouping superposition enabled we can make
     // further grouping on the base of previously grouped points
-    // (if also isGroupAll = true)
+    // (in the case of grouped by equal points number and full grouping)
     private boolean isGroupSuperpositionEnabled = true;
 
     // whether group ALL points or only visible ones (cropped to x axis min-max range)

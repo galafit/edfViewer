@@ -8,28 +8,28 @@ import com.biorecorder.util.series.FloatSeries;
 public abstract class FloatGroupFunction {
     protected long count;
 
-    public float[] addToGroup(FloatSeries series, long from, long length) {
+    public float addToGroup(FloatSeries series, long from, long length) {
         for (int i = 0; i < length; i++) {
            add1(series.get(from + i));
         }
-        return groupedValue();
+        return groupValue();
     }
 
     public void reset() {
         count = 0;
     }
 
-    public float[] groupedValue() {
+    public float groupValue() {
         if(count == 0) {
             String errMsg = "No elements was added to group. Grouping function can not be calculated.";
             throw new IllegalStateException(errMsg);
         }
-        return groupedValue1();
+        return groupValue1();
     }
 
     protected void add1(float value) {
        count++;
     }
 
-    protected abstract float[] groupedValue1();
+    protected abstract float groupValue1();
 }

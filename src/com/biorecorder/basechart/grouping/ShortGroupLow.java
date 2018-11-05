@@ -15,8 +15,7 @@ public class ShortGroupLow extends ShortGroupFunction {
     }
 
     @Override
-    protected short[] groupedValue1() {
-        short[] groupedValues = {min};
-        return groupedValues;
+    protected short groupValue1() {
+        return min;
     }
 }

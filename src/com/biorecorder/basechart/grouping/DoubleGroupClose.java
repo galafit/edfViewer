@@ -10,8 +10,7 @@ public class DoubleGroupClose extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {last};
-        return groupedValues;
+    protected double groupValue1() {
+        return last;
     }
 }

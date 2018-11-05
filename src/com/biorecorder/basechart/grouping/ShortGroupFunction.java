@@ -8,28 +8,28 @@ import com.biorecorder.util.series.ShortSeries;
 public abstract class ShortGroupFunction {
     protected long count;
 
-    public short[] addToGroup(ShortSeries series, long from, long length) {
+    public short addToGroup(ShortSeries series, long from, long length) {
         for (int i = 0; i < length; i++) {
            add1(series.get(from + i));
         }
-        return groupedValue();
+        return groupValue();
     }
 
     public void reset() {
         count = 0;
     }
 
-    public short[] groupedValue() {
+    public short groupValue() {
         if(count == 0) {
             String errMsg = "No elements was added to group. Grouping function can not be calculated.";
             throw new IllegalStateException(errMsg);
         }
-        return groupedValue1();
+        return groupValue1();
     }
 
     protected void add1(short value) {
        count++;
     }
 
-    protected abstract short[] groupedValue1();
+    protected abstract short groupValue1();
 }

@@ -15,8 +15,7 @@ public class DoubleGroupLow extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {min};
-        return groupedValues;
+    protected double groupValue1() {
+        return min;
     }
 }

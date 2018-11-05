@@ -15,8 +15,7 @@ public class DoubleGroupHigh extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {max};
-        return groupedValues;
+    protected double groupValue1() {
+        return max;
     }
 }

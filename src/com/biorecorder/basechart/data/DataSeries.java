@@ -36,7 +36,7 @@ public class DataSeries  {
 
     private void setXData(NumberColumn column) {
         xColumn = column;
-        xColumn.setGroupApproximation(GroupApproximation.OPEN);
+        xColumn.setGroupApproximations(GroupApproximation.OPEN);
         updateSize();
     }
 

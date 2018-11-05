@@ -13,8 +13,7 @@ public class DoubleGroupOpen extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {first};
-        return groupedValues;
+    protected double groupValue1() {
+        return first;
     }
 }

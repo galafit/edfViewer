@@ -15,8 +15,7 @@ public class LongGroupHigh extends LongGroupFunction {
     }
 
     @Override
-    protected long[] groupedValue1() {
-        long[] groupedValues = {max};
-        return groupedValues;
+    protected long groupValue1() {
+        return max;
     }
 }

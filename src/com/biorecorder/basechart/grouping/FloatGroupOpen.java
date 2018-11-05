@@ -13,8 +13,7 @@ public class FloatGroupOpen extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {first};
-        return groupedValues;
+    protected float groupValue1() {
+        return first;
     }
 }

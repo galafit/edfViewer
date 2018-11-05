@@ -15,8 +15,7 @@ public class LongGroupLow extends LongGroupFunction {
     }
 
     @Override
-    protected long[] groupedValue1() {
-        long[] groupedValues = {min};
-        return groupedValues;
+    protected long groupValue1() {
+        return min;
     }
 }

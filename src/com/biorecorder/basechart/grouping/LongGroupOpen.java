@@ -13,8 +13,7 @@ public class LongGroupOpen extends LongGroupFunction {
     }
 
     @Override
-    protected long[] groupedValue1() {
-        long[] groupedValues = {first};
-        return groupedValues;
+    protected long groupValue1() {
+        return first;
     }
 }

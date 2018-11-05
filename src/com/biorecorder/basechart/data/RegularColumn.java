@@ -1,7 +1,11 @@
 package com.biorecorder.basechart.data;
 
 import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.grouping.DoubleGroupFunction;
+import com.biorecorder.basechart.grouping.GroupApproximation;
+import com.biorecorder.basechart.grouping.IntGroupFunction;
 import com.biorecorder.util.series.DoubleRegularSeries;
+import com.biorecorder.util.series.DoubleSeries;
 import com.biorecorder.util.series.LongRegularSeries;
 import com.biorecorder.util.series.LongSeries;
 
@@ -10,8 +14,12 @@ import com.biorecorder.util.series.LongSeries;
  */
 public class RegularColumn extends DoubleColumn {
 
+    public RegularColumn(DoubleRegularSeries regularSeries) {
+        super(regularSeries);
+    }
+
     public RegularColumn(double startValue, double dataInterval, long size) {
-        super(new DoubleRegularSeries(startValue, dataInterval, size));
+        this(new DoubleRegularSeries(startValue, dataInterval, size));
     }
 
     public RegularColumn(double startValue, double dataInterval) {
@@ -81,37 +89,19 @@ public class RegularColumn extends DoubleColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes) {
-        if(groupIndexes instanceof LongRegularSeries) {
-            long numberOfGroupedIntervals = ((LongRegularSeries) groupIndexes).getDataInterval();
+    protected DoubleSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
+        if(groupStartIndexes instanceof LongRegularSeries) {
+            long numberOfGroupedIntervals = ((LongRegularSeries) groupStartIndexes).getDataInterval();
             double resultantInterval = getDataInterval() * numberOfGroupedIntervals;
-            double groupedStartValue = value(0);
 
-            switch (groupApproximation) {
-                case HIGH:
-                case CLOSE: {
-                    groupedStartValue += resultantInterval;
-                    NumberColumn[] groupedColumns = {new RegularColumn(groupedStartValue, resultantInterval)};
-                    return groupedColumns;
-                }
-                case AVERAGE: {
-                    groupedStartValue += resultantInterval / 2;
-                    NumberColumn[] groupedColumns = {new RegularColumn(groupedStartValue, resultantInterval)};
-                    return groupedColumns;
-                }
-                case LOW_HIGH: {
-                    double groupedStartValueMin = groupedStartValue;
-                    double groupedStartValueMax = groupedStartValue + resultantInterval;
-                    NumberColumn[] groupedColumns = {new RegularColumn(groupedStartValueMin, resultantInterval), new RegularColumn(groupedStartValueMax, resultantInterval)};
-                    return groupedColumns;
-                }
-                default: {
-                    NumberColumn[] groupedColumns = {new RegularColumn(groupedStartValue, resultantInterval)};
-                    return groupedColumns;
-                }
-            }
+            DoubleGroupFunction groupFunction = (DoubleGroupFunction) groupApproximation.getGroupingFunction("double");
+            double groupedStartValue = groupFunction.addToGroup(series, 0, numberOfGroupedIntervals);
+
+            return new DoubleRegularSeries(groupedStartValue, resultantInterval);
+
+        } else {
+            return super.groupSeries(groupApproximation, groupStartIndexes);
         }
-        return super.group(groupIndexes);
     }
 
     @Override

@@ -80,11 +80,6 @@ class FloatColumn extends NumberColumn {
     }
 
     @Override
-    public NumberColumn[] group(LongSeries groupIndexes) {
-        return new GroupingManager(groupApproximation, groupIndexes).groupedColumns();
-    }
-
-    @Override
     public long size() {
         return series.size();
     }
@@ -169,11 +164,12 @@ class FloatColumn extends NumberColumn {
 
     @Override
     public NumberColumn copy() {
-        FloatColumn newColumn = new FloatColumn(series);
-        newColumn.name = name;
-        newColumn.groupApproximation = groupApproximation;
-        return newColumn;
+        FloatColumn copyColumn = new FloatColumn(series);
+        copyColumn.name = name;
+        copyColumn.groupApproximations = groupApproximations;
+        return copyColumn;
     }
+
 
     @Override
     public NumberColumn cache() {
@@ -186,72 +182,61 @@ class FloatColumn extends NumberColumn {
         for (int i = 0; i < size; i++) {
             list.add(series.get(i));
         }
-        return new FloatColumn(list);
+        FloatColumn cacheColumn = new FloatColumn(list);
+        cacheColumn.name = name;
+        cacheColumn.groupApproximations = groupApproximations;
+        return cacheColumn;
     }
 
+    @Override
+    public NumberColumn[] group(LongSeries groupIndexes) {
+        NumberColumn[] resultantColumns = new NumberColumn[groupApproximations.length];
 
-    class GroupingManager {
-        private GroupApproximation groupingApproximation;
+        for (int i = 0; i < groupApproximations.length; i++) {
+            resultantColumns[i] = new FloatColumn(groupSeries(groupApproximations[i], groupIndexes));
+            String resultantName = name;
+            if(groupApproximations.length > 1) {
+                resultantName = name + " "+groupApproximations[i].name();
+            }
+            resultantColumns[i].setName(resultantName);
+            resultantColumns[i].setGroupApproximations(groupApproximations[i]);
+        }
+        return resultantColumns;
+    }
+
+    protected FloatSeries groupSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
+        return new GroupedSeries(groupApproximation, groupStartIndexes);
+    }
+
+    class GroupedSeries implements FloatSeries {
         private LongSeries groupStartIndexes;
         private long lastGroupValueStart = -1;
         private long lastGroupValueLength;
 
-        private final FloatGroupFunction groupingFunction;
+        private final FloatGroupFunction groupFunction;
 
-        public GroupingManager(GroupApproximation groupingApproximation, LongSeries groupStartIndexes) {
-            this.groupingApproximation = groupingApproximation;
-            groupingFunction = (FloatGroupFunction) groupingApproximation.getGroupingFunction("float");
+        public GroupedSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
             this.groupStartIndexes = groupStartIndexes;
+            groupFunction = (FloatGroupFunction) groupApproximation.getGroupingFunction("float");
         }
 
-        private long groupsCount() {
+        @Override
+        public long size() {
             return groupStartIndexes.size() - 1;
         }
 
-        private float[] getGroupValues(long groupIndex) {
-            if(lastGroupValueStart != groupStartIndexes.get(groupIndex)) {
-               groupingFunction.reset();
-               lastGroupValueLength = 0;
+        @Override
+        public float get(long index) {
+            if(lastGroupValueStart != groupStartIndexes.get(index)) {
+                groupFunction.reset();
+                lastGroupValueLength = 0;
             }
-            long groupEnd = Math.min(groupStartIndexes.get(groupIndex + 1), size());
-            float[] groupedValues = groupingFunction.addToGroup(series, groupStartIndexes.get(groupIndex) + lastGroupValueLength, groupEnd - groupStartIndexes.get(groupIndex) - lastGroupValueLength);
+            long groupEnd = Math.min(groupStartIndexes.get(index + 1), size());
+            float groupValue = groupFunction.addToGroup(series, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
 
-            lastGroupValueStart = groupStartIndexes.get(groupIndex);
-            lastGroupValueLength = groupStartIndexes.get(groupIndex + 1) - groupStartIndexes.get(groupIndex);
-            return groupedValues;
-        }
-
-        public NumberColumn[] groupedColumns() {
-            NumberColumn[] resultantColumns = new NumberColumn[groupingApproximation.getDimension()];
-            for (int i = 0; i < resultantColumns.length; i++) {
-                final int seriesNumber = i;
-                FloatSeries groupedSeries = new FloatSeries() {
-                    @Override
-                    public long size() {
-                        return groupsCount();
-                    }
-
-                    @Override
-                    public float get(long index) {
-                        return getGroupValues(index)[seriesNumber];
-                    }
-                };
-                resultantColumns[i] = new FloatColumn(groupedSeries);
-                resultantColumns[i].setName(name);
-                resultantColumns[i].setGroupApproximation(groupingApproximation);
-            }
-            if (resultantColumns.length == 2) { // LowHigh
-                resultantColumns[0].setGroupApproximation(GroupApproximation.LOW);
-                resultantColumns[1].setGroupApproximation(GroupApproximation.HIGH);
-            }
-           if (resultantColumns.length == 4) { // OHLC
-                resultantColumns[0].setGroupApproximation(GroupApproximation.OPEN);
-                resultantColumns[1].setGroupApproximation(GroupApproximation.HIGH);
-                resultantColumns[2].setGroupApproximation(GroupApproximation.OPEN);
-                resultantColumns[3].setGroupApproximation(GroupApproximation.OPEN);
-           }
-
-            return resultantColumns;
+            lastGroupValueStart = groupStartIndexes.get(index);
+            lastGroupValueLength = groupStartIndexes.get(index + 1) - groupStartIndexes.get(index);
+            return groupValue;
         }
     }
 }

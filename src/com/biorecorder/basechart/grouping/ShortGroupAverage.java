@@ -17,8 +17,7 @@ public class ShortGroupAverage extends ShortGroupFunction {
     }
 
     @Override
-    protected short[] groupedValue1() {
-        short[] groupedValues = {(short)(sum / count)};
-        return groupedValues;
+    protected short groupValue1() {
+        return (short)(sum / count);
     }
 }

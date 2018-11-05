@@ -15,8 +15,7 @@ public class IntGroupHigh extends IntGroupFunction {
     }
 
     @Override
-    protected int[] groupedValue1() {
-        int[] groupedValues = {max};
-        return groupedValues;
+    protected int groupValue1() {
+        return max;
     }
 }

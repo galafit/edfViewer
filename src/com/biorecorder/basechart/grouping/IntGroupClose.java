@@ -10,8 +10,7 @@ public class IntGroupClose extends IntGroupFunction {
     }
 
     @Override
-    protected int[] groupedValue1() {
-        int[] groupedValues = {last};
-        return groupedValues;
+    protected int groupValue1() {
+        return last;
     }
 }

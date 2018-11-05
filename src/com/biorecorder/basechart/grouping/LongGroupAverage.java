@@ -17,8 +17,7 @@ public class LongGroupAverage extends LongGroupFunction {
     }
 
     @Override
-    protected long[] groupedValue1() {
-        long[] groupedValues = {(long)(sum / count)};
-        return groupedValues;
+    protected long groupValue1() {
+        return (long)(sum / count);
     }
 }

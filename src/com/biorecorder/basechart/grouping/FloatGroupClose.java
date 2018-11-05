@@ -10,8 +10,7 @@ public class FloatGroupClose extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {last};
-        return groupedValues;
+    protected float groupValue1() {
+        return last;
     }
 }

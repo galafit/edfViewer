@@ -17,8 +17,7 @@ public class DoubleGroupSum extends DoubleGroupFunction {
     }
 
     @Override
-    protected double[] groupedValue1() {
-        double[] groupedValues = {sum};
-        return groupedValues;
+    protected double groupValue1() {
+        return sum;
     }
 }

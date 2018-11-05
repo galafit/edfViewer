@@ -17,8 +17,7 @@ public class IntGroupAverage extends IntGroupFunction {
     }
 
     @Override
-    protected int[] groupedValue1() {
-        int[] groupedValues = {(int)(sum / count)};
-        return groupedValues;
+    protected int groupValue1() {
+        return (int)(sum / count);
     }
 }

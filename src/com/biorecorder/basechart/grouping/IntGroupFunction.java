@@ -8,28 +8,28 @@ import com.biorecorder.util.series.IntSeries;
 public abstract class IntGroupFunction {
     protected long count;
 
-    public int[] addToGroup(IntSeries series, long from, long length) {
+    public int addToGroup(IntSeries series, long from, long length) {
         for (int i = 0; i < length; i++) {
            add1(series.get(from + i));
         }
-        return groupedValue();
+        return groupValue();
     }
 
     public void reset() {
         count = 0;
     }
 
-    public int[] groupedValue() {
+    public int groupValue() {
         if(count == 0) {
             String errMsg = "No elements was added to group. Grouping function can not be calculated.";
             throw new IllegalStateException(errMsg);
         }
-        return groupedValue1();
+        return groupValue1();
     }
 
     protected void add1(int value) {
        count++;
     }
 
-    protected abstract int[] groupedValue1();
+    protected abstract int groupValue1();
 }

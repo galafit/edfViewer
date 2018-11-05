@@ -15,8 +15,7 @@ public class FloatGroupHigh extends FloatGroupFunction {
     }
 
     @Override
-    protected float[] groupedValue1() {
-        float[] groupedValues = {max};
-        return groupedValues;
+    protected float groupValue1() {
+        return max;
     }
 }

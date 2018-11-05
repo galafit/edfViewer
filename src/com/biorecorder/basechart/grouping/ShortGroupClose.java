@@ -10,8 +10,7 @@ public class ShortGroupClose extends ShortGroupFunction {
     }
 
     @Override
-    protected short[] groupedValue1() {
-        short[] groupedValues = {last};
-        return groupedValues;
+    protected short groupValue1() {
+        return last;
     }
 }
