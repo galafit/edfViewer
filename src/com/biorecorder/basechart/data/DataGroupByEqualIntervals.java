@@ -8,13 +8,13 @@ import com.biorecorder.util.lists.LongArrayList;
  * each group/bin has the same interval between starting and end values
  */
 public class DataGroupByEqualIntervals extends DataGroup {
-    private final double interval;
+    private final GroupInterval interval;
 
-    public DataGroupByEqualIntervals(double interval) {
+    public DataGroupByEqualIntervals(GroupInterval interval) {
         this.interval = interval;
     }
 
-    public double getInterval() {
+    public GroupInterval getInterval() {
         return interval;
     }
 
@@ -39,7 +39,11 @@ public class DataGroupByEqualIntervals extends DataGroup {
         @Override
         public void updateSize() {
             long size = inDataSeries.size();
-            long from = groupStartsList.get(groupStartsList.size() - 1);
+            long from = 0;
+            if(groupStartsList.size() > 0) {
+                from = groupStartsList.get(groupStartsList.size() - 1);
+            }
+
 
             if(size > from) {
                 if(from > 0) {
@@ -47,17 +51,18 @@ public class DataGroupByEqualIntervals extends DataGroup {
                     groupStartsList.remove((int) groupStartsList.size() - 1);
                     from = groupStartsList.get(groupStartsList.size() - 1);
                 }
+                double intervalValue = interval.getIntervalAsNumber();
 
-                double groupStart = (int)((inDataSeries.xColumn.value(from) / interval)) * interval;
-                groupStart += interval;
+                double groupStart = (int)((inDataSeries.xColumn.value(from) / intervalValue)) * intervalValue;
+                groupStart += intervalValue;
                 for (long i = from;  i < size; i++) {
                     if (inDataSeries.xColumn.value(i) >= groupStart) {
                         groupStartsList.add(i);
-                        groupStart += interval; // often situation
+                        groupStart += intervalValue; // often situation
 
                         if(inDataSeries.xColumn.value(i) > groupStart) { // rare situation
-                            groupStart = (int)((inDataSeries.xColumn.value(from) / interval)) * interval;
-                            groupStart += interval;
+                            groupStart = (int)((inDataSeries.xColumn.value(from) / intervalValue)) * intervalValue;
+                            groupStart += intervalValue;
                         }
                     }
                 }

@@ -214,6 +214,10 @@ class IntColumn extends NumberColumn {
         public GroupedSeries(GroupApproximation groupApproximation, LongSeries groupStartIndexes) {
             this.groupStartIndexes = groupStartIndexes;
             groupFunction = (IntGroupFunction) groupApproximation.getGroupingFunction("int");
+            System.out.println("groups indexes");
+            for (int i = 0; i < groupStartIndexes.size(); i++) {
+                System.out.println(i + "  "+groupStartIndexes.get(i));
+            }
         }
 
         @Override
@@ -228,7 +232,7 @@ class IntColumn extends NumberColumn {
                 lastGroupValueLength = 0;
             }
             long groupEnd = Math.min(groupStartIndexes.get(index + 1), series.size());
-
+            System.out.println(index+" get grouped "+(groupStartIndexes.get(index)) + "  "+groupStartIndexes.get(index + 1));
             int groupValue = groupFunction.addToGroup(series, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
             lastGroupValueStart = groupStartIndexes.get(index);
             lastGroupValueLength = groupEnd - groupStartIndexes.get(index);

@@ -52,6 +52,7 @@ public class Chart {
     private BRectangle graphArea;
     private Insets margin;
     private DataManager dataManager;
+    private boolean isYAxisRoundingEnabled = false;
 
     /**
      * Dirty data in js means that the data have been changed recently and
@@ -459,6 +460,7 @@ public class Chart {
      *
      */
     public void setYRoundingEnabled(boolean isRoundingEnabled) {
+        isYAxisRoundingEnabled = isRoundingEnabled;
         for (AxisWrapper axis : yAxisList) {
             axis.setRoundingEnabled(isRoundingEnabled);
         }
@@ -527,8 +529,8 @@ public class Chart {
     public void addStack(int weight) {
         AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), chartConfig.getLeftAxisConfig()));
         AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig()));
-        leftAxis.setRoundingEnabled(true);
-        rightAxis.setRoundingEnabled(true);
+        leftAxis.setRoundingEnabled(isYAxisRoundingEnabled);
+        rightAxis.setRoundingEnabled(isYAxisRoundingEnabled);
         if (isLeftAxisPrimary) {
             leftAxis.setGridVisible(true);
         } else {
