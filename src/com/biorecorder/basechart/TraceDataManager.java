@@ -59,7 +59,7 @@ public class TraceDataManager {
 
 
     public DataSeries getProcessedData(Double xMin, Double xMax) {
-        System.out.println(xMin + " get processed data " +xMax);
+       // System.out.println(xMin + " get processed data " +xMax);
 
         traceDataSeries.updateSize();
 
@@ -102,6 +102,7 @@ public class TraceDataManager {
             resultantDataSeries = traceDataSeries.subSeries(subRange.getStartIndex() - cropShoulder, subRange.getSize() + 2 * cropShoulder);
 
             if(pointsInGroup > 1) { // group only visible
+                System.out.println(pointsInGroup +" group cropped "+groupInterval.getIntervalAsNumber());
                 if(isGroupByPoints) {
                     dataGroup = new DataGroupByEqualPointsNumber(pointsInGroup);
                 } else {

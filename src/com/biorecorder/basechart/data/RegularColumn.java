@@ -16,6 +16,7 @@ public class RegularColumn extends DoubleColumn {
 
     public RegularColumn(DoubleRegularSeries regularSeries) {
         super(regularSeries);
+        setGroupApproximations(GroupApproximation.OPEN);
     }
 
     public RegularColumn(double startValue, double dataInterval, long size) {
@@ -115,7 +116,10 @@ public class RegularColumn extends DoubleColumn {
 
     @Override
     public NumberColumn subColumn(long fromIndex, long length) {
-        return new RegularColumn(value(fromIndex), getDataInterval(), length);
+        NumberColumn subColumn = new RegularColumn(value(fromIndex), getDataInterval(), length);
+        subColumn.name = name;
+        subColumn.groupApproximations = groupApproximations;
+        return subColumn;
     }
 
     @Override

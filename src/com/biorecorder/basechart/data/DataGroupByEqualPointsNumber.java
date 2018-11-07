@@ -27,8 +27,8 @@ public class DataGroupByEqualPointsNumber extends DataGroup {
 
 
     class RegularGroupStartIndexes extends LongRegularSeries implements GroupStartIndexes{
-        public RegularGroupStartIndexes(long dataInterval, long startValue) {
-            super(dataInterval, startValue);
+        public RegularGroupStartIndexes(long startValue, long dataInterval) {
+            super(startValue, dataInterval);
         }
 
         @Override

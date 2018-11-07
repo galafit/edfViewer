@@ -20,6 +20,7 @@ public class DataSeries  {
     protected StringColumn annotationColumn;
     private long size;
 
+
     public boolean isRegular() {
         if(xColumn instanceof RegularColumn) {
             return true;

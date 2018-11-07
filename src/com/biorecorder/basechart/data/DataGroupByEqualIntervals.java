@@ -38,37 +38,35 @@ public class DataGroupByEqualIntervals extends DataGroup {
 
         @Override
         public void updateSize() {
-            long size = inDataSeries.size();
-            long from = 0;
-            if(groupStartsList.size() > 0) {
-                from = groupStartsList.get(groupStartsList.size() - 1);
+            if(inDataSeries.size() == 0 || (groupStartsList.size() > 0 && groupStartsList.get(groupStartsList.size() - 1) == inDataSeries.size())) {
+                return;
             }
 
+            if(groupStartsList.size() == 0) {
+                groupStartsList.add(0);
+            } else {
+                // delete last "closing" group
+                groupStartsList.remove((int) groupStartsList.size() - 1);
+            }
 
-            if(size > from) {
-                if(from > 0) {
-                    // delete last "closing" group
-                    groupStartsList.remove((int) groupStartsList.size() - 1);
-                    from = groupStartsList.get(groupStartsList.size() - 1);
-                }
-                double intervalValue = interval.getIntervalAsNumber();
+            long from = groupStartsList.get(groupStartsList.size() - 1);
+            double intervalValue = interval.getIntervalAsNumber();
 
-                double groupStart = (int)((inDataSeries.xColumn.value(from) / intervalValue)) * intervalValue;
-                groupStart += intervalValue;
-                for (long i = from;  i < size; i++) {
-                    if (inDataSeries.xColumn.value(i) >= groupStart) {
-                        groupStartsList.add(i);
-                        groupStart += intervalValue; // often situation
+            double groupStart = (int)((inDataSeries.xColumn.value(from) / intervalValue)) * intervalValue;
+            groupStart += intervalValue;
+            for (long i = from + 1;  i < inDataSeries.size(); i++) {
+                if (inDataSeries.xColumn.value(i) >= groupStart) {
+                    groupStartsList.add(i);
+                    groupStart += intervalValue; // often situation
 
-                        if(inDataSeries.xColumn.value(i) > groupStart) { // rare situation
-                            groupStart = (int)((inDataSeries.xColumn.value(from) / intervalValue)) * intervalValue;
-                            groupStart += intervalValue;
-                        }
+                    if(inDataSeries.xColumn.value(i) > groupStart) { // rare situation
+                        groupStart = (int)((inDataSeries.xColumn.value(i) / intervalValue)) * intervalValue;
+                        groupStart += intervalValue;
                     }
                 }
-                // add last "closing" group
-                groupStartsList.add(size);
             }
+            // add last "closing" group
+            groupStartsList.add(inDataSeries.size());
         }
     }
 }
