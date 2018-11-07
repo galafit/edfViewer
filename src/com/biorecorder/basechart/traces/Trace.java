@@ -1,8 +1,7 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.axis.Axis;
-import com.biorecorder.basechart.data.DataSeries;
+import com.biorecorder.data.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPoint;

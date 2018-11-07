@@ -1,7 +1,7 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.data.GroupInterval;
-import com.biorecorder.basechart.data.IntervalUnit;
+import com.biorecorder.data.transformation.GroupInterval;
+import com.biorecorder.data.transformation.IntervalUnit;
 
 /**
  * Created by galafit on 9/7/18.

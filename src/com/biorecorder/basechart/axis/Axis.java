@@ -5,7 +5,7 @@ import com.biorecorder.basechart.graphics.Text;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.graphics.TextMetric;
-import com.biorecorder.util.lists.IntArrayList;
+import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.scales.TickProvider;

@@ -1,12 +1,12 @@
-package com.biorecorder.basechart.data;
+package com.biorecorder.data;
 
-import com.biorecorder.util.lists.SeriesUtil;
+import com.biorecorder.data.list.SeriesUtil;
 import com.biorecorder.basechart.Range;
-import com.biorecorder.util.lists.IntArrayList;
-import com.biorecorder.basechart.grouping.GroupApproximation;
-import com.biorecorder.basechart.grouping.IntGroupFunction;
-import com.biorecorder.util.series.IntSeries;
-import com.biorecorder.util.series.LongSeries;
+import com.biorecorder.data.list.IntArrayList;
+import com.biorecorder.data.grouping.GroupApproximation;
+import com.biorecorder.data.grouping.IntGroupFunction;
+import com.biorecorder.data.series.IntSeries;
+import com.biorecorder.data.series.LongSeries;
 
 import java.util.List;
 

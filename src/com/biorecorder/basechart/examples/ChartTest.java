@@ -1,9 +1,8 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.Chart;
-import com.biorecorder.basechart.data.DataSeries;
-import com.biorecorder.basechart.data.XYData;
-import com.biorecorder.util.lists.IntArrayList;
+import com.biorecorder.data.XYData;
+import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.traces.LineTrace;
 

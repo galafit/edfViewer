@@ -1,6 +1,10 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.data.*;
+import com.biorecorder.data.*;
+import com.biorecorder.data.transformation.DataGroup;
+import com.biorecorder.data.transformation.DataGroupByEqualIntervals;
+import com.biorecorder.data.transformation.DataGroupByEqualPointsNumber;
+import com.biorecorder.data.transformation.GroupInterval;
 
 
 /**

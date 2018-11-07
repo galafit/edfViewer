@@ -9,7 +9,7 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.basechart.data.DataSeries;
+import com.biorecorder.data.DataSeries;
 
 import java.util.*;
 import java.util.List;
