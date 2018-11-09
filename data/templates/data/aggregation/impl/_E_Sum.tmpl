@@ -1,0 +1,28 @@
+package com.biorecorder.data.aggregation.impl;
+
+import com.biorecorder.data.sequence.#E#Sequence;
+
+
+public class #E#Sum extends #E#AggregateFunction {
+    private #e# sum;
+
+    @Override
+    public void reset() {
+        super.reset();
+        sum = 0;
+    }
+
+    @Override
+    protected void addToGroup1(#E#Sequence sequence, long from, long length) {
+        super.addToGroup1(sequence, from, length);
+        long till = from + length;
+        for (long i = from; i < till; i++) {
+            sum += sequence.get(i);
+        }
+    }
+
+    @Override
+    protected #e# groupValue1() {
+        return sum;
+    }
+}

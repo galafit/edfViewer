@@ -1,0 +1,19 @@
+package com.biorecorder.data.aggregation.impl;
+
+import com.biorecorder.data.sequence.#E#Sequence;
+
+
+public class #E#Close extends #E#AggregateFunction {
+    private #e# last;
+
+    @Override
+    protected void addToGroup1(#E#Sequence sequence, long from, long length) {
+        super.addToGroup1(sequence, from, length);
+        last = sequence.get(from + length - 1);
+    }
+
+    @Override
+    protected #e# groupValue1() {
+        return last;
+    }
+}
