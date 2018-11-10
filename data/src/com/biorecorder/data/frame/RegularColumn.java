@@ -3,8 +3,6 @@ package com.biorecorder.data.frame;
 import com.biorecorder.basecharts.Range;
 import com.biorecorder.data.aggregation.impl.DoubleAggregateFunction;
 import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.sequence.DoubleRegularSequence;
-import com.biorecorder.data.sequence.LongRegularSequence;
 import com.biorecorder.data.sequence.LongSequence;
 
 /**

@@ -1,17 +1,22 @@
 package com.biorecorder.data.sequence;
 
-public class IntRegularSequence implements IntSequence {
-    protected int dataInterval;
-    protected int startValue;
+/**
+* At the moment only used for long and double.
+* So it is deactivated to not generate unnecessary classes
+**/
+
+public class #E#RegularSequence implements #E#Sequence {
+    protected #e# dataInterval;
+    protected #e# startValue;
     protected long size = Long.MAX_VALUE;
 
-    public IntRegularSequence(int startValue, int dataInterval, long size) {
+    public #E#RegularSequence(#e# startValue, #e# dataInterval, long size) {
         this.dataInterval = dataInterval;
         this.startValue = startValue;
         this.size = size;
     }
 
-    public IntRegularSequence(int startValue, int dataInterval) {
+    public #E#RegularSequence(#e# startValue, #e# dataInterval) {
         this(startValue, dataInterval, Long.MAX_VALUE);
     }
 
@@ -25,12 +30,12 @@ public class IntRegularSequence implements IntSequence {
     }
 
     @Override
-    public int get(long index) {
+    public #e# get(long index) {
         rangeCheck(index);
-        return (int)(startValue + dataInterval * index);
+        return (#e#)(startValue + dataInterval * index);
     }
 
-    public int getDataInterval() {
+    public #e# getDataInterval() {
         return dataInterval;
     }
 

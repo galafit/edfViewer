@@ -1,17 +1,19 @@
-package com.biorecorder.data.sequence;
+package com.biorecorder.data.frame;
 
-public class ShortRegularSequence implements ShortSequence {
-    protected short dataInterval;
-    protected short startValue;
+import com.biorecorder.data.sequence.DoubleSequence;
+
+public class DoubleRegularSequence implements DoubleSequence {
+    protected double dataInterval;
+    protected double startValue;
     protected long size = Long.MAX_VALUE;
 
-    public ShortRegularSequence(short startValue, short dataInterval, long size) {
+    public DoubleRegularSequence(double startValue, double dataInterval, long size) {
         this.dataInterval = dataInterval;
         this.startValue = startValue;
         this.size = size;
     }
 
-    public ShortRegularSequence(short startValue, short dataInterval) {
+    public DoubleRegularSequence(double startValue, double dataInterval) {
         this(startValue, dataInterval, Long.MAX_VALUE);
     }
 
@@ -25,12 +27,12 @@ public class ShortRegularSequence implements ShortSequence {
     }
 
     @Override
-    public short get(long index) {
+    public double get(long index) {
         rangeCheck(index);
-        return (short)(startValue + dataInterval * index);
+        return (double)(startValue + dataInterval * index);
     }
 
-    public short getDataInterval() {
+    public double getDataInterval() {
         return dataInterval;
     }
 

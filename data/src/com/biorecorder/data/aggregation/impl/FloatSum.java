@@ -1,10 +1,10 @@
 package com.biorecorder.data.aggregation.impl;
 
-import com.biorecorder.data.sequence.#E#Sequence;
+import com.biorecorder.data.sequence.FloatSequence;
 
 
-public class #E#Sum extends #E#AggregateFunction {
-    private #e# sum;
+public class FloatSum extends FloatAggregateFunction {
+    protected float sum;
 
     @Override
     public void reset() {
@@ -13,7 +13,7 @@ public class #E#Sum extends #E#AggregateFunction {
     }
 
     @Override
-    protected void addToGroup1(#E#Sequence sequence, long from, long length) {
+    protected void addToGroup1(FloatSequence sequence, long from, long length) {
         super.addToGroup1(sequence, from, length);
         long till = from + length;
         for (long i = from; i < till; i++) {
@@ -22,7 +22,7 @@ public class #E#Sum extends #E#AggregateFunction {
     }
 
     @Override
-    protected #e# groupValue1() {
-        return sum;
+    protected float groupValue1() {
+        return (float) sum;
     }
 }

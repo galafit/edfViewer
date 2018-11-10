@@ -230,11 +230,13 @@ class LongColumn extends NumberColumn {
                 aggregateFunction.reset();
                 lastGroupValueLength = 0;
             }
-            long groupEnd = Math.min(groupStartIndexes.get(index + 1), size());
+
+            long groupEnd = Math.min(groupStartIndexes.get(index + 1), sequence.size());
+
             long groupValue = aggregateFunction.addToGroup(sequence, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
 
             lastGroupValueStart = groupStartIndexes.get(index);
-            lastGroupValueLength = groupStartIndexes.get(index + 1) - groupStartIndexes.get(index);
+            lastGroupValueLength = groupEnd - groupStartIndexes.get(index);
             return groupValue;
         }
     }

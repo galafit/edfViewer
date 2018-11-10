@@ -2,7 +2,7 @@ package com.biorecorder.data.transformation;
 
 
 import com.biorecorder.data.frame.DataSeries;
-import com.biorecorder.data.sequence.LongRegularSequence;
+import com.biorecorder.data.frame.LongRegularSequence;
 
 /**
  * Equal frequencies [equal height] grouping(binning)
