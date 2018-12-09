@@ -1,0 +1,26 @@
+package com.biorecorder.data.aggregation.impl;
+
+import com.biorecorder.data.sequence.#E#Sequence;
+
+
+public class #E#Low extends #E#AggregateFunction {
+    private #e# min;
+
+    @Override
+    protected void addToGroup1(#E#Sequence sequence, long from, long length) {
+        if(count == 0) {
+            min = sequence.get(from);
+        }
+        long till = from + length;
+        for (long i = from; i < till; i++) {
+            min = (#e#) Math.min(min, sequence.get(i));
+        }
+        count += length;
+    }
+
+
+    @Override
+    protected #e# groupValue1() {
+        return min;
+    }
+}
