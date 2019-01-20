@@ -1,39 +1,37 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.frame.DataSeries;
-
 /**
  * Created by galafit on 2/11/17.
  */
 public class XYViewer {
-    DataSeries dataSeries;
+    ChartData data;
 
-    public void setData(DataSeries dataSeries) {
-        this.dataSeries = dataSeries;
+    public void setData(ChartData data) {
+        this.data = data;
     }
 
     public int size() {
-        return (int)dataSeries.size();
+        return data.rowCount();
     }
 
     public double getX(int index) {
-        return dataSeries.getXValue(index);
+        return data.getValue(index, 0);
     }
 
     public double getY(int index) {
-        return dataSeries.getYValue(0, index);
+        return data.getValue(index, 1);
     }
 
-    public Range getYExtremes() {
-        return dataSeries.getYExtremes(0);
+    public BRange getYRange() {
+        return data.getColumnRange(1);
     }
 
-    public Range getXExtremes() {
-        return dataSeries.getXExtremes();
+    public BRange getXRange() {
+        return data.getColumnRange(0);
     }
 
-    public long findNearest(double xValue) {
-        return dataSeries.findNearestData(xValue);
+    public long nearest(double xValue) {
+        return data.nearest(0, xValue);
     }
 
 }

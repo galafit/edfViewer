@@ -1,36 +1,35 @@
 package com.biorecorder.data.frame;
 
+import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.aggregation.impl.IntAggregateFunction;
+import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
-import com.biorecorder.data.sequence.LongSequence;
-import com.biorecorder.basechart.Range;
-;
 import com.biorecorder.data.sequence.SequenceUtils;
 
 import java.util.List;
 
 /**
- * Created by galafit on 27/9/17.
+ * Created by galafit on 15/1/19.
  */
-class IntColumn extends NumberColumn {
-    protected IntSequence sequence;
+public class IntColumn implements Column {
+    protected final static int NAN = Integer.MAX_VALUE;
+    protected IntSequence dataSequence;
 
-    public IntColumn(IntSequence sequence) {
-        this.sequence = sequence;
+    public IntColumn(IntSequence data) {
+        this.dataSequence = data;
     }
 
     public IntColumn(int[] data) {
         this(new IntSequence() {
             @Override
-            public long size() {
+            public int size() {
                 return data.length;
             }
 
             @Override
-            public int get(long index) {
-                return data[(int) index];
+            public int get(int index) {
+                return data[index];
             }
         });
     }
@@ -38,207 +37,200 @@ class IntColumn extends NumberColumn {
     public IntColumn(List<Integer> data) {
         this(new IntSequence() {
             @Override
-            public long size() {
+            public int size() {
                 return data.size();
             }
 
             @Override
-            public int get(long index) {
-                return data.get((int) index);
+            public int get(int index) {
+                return data.get(index);
             }
         });
     }
 
     @Override
-    public void add(double value) throws UnsupportedOperationException {
-        if(sequence instanceof IntArrayList) {
-            ((IntArrayList) sequence).add((int) value);
-        } else {
-            throw  new UnsupportedOperationException("Value can be added to the column only if that column wraps ArrayList");
+    public int size() {
+        return dataSequence.size();
+    }
+
+    @Override
+    public double value(int index) {
+        int value = dataSequence.get(index);
+        if(value == NAN) {
+            return Double.NaN;
         }
+        return value;
     }
 
     @Override
-    public void remove(int index) {
-        if(sequence instanceof IntArrayList) {
-            ((IntArrayList) sequence).remove(index);
-        } else {
-            throw  new UnsupportedOperationException("Value can be removed from the column only if that column wraps ArrayList");
+    public String label(int index) {
+        int value = dataSequence.get(index);
+        if(value == NAN) {
+            return null;
         }
+        return Integer.toString(value);
     }
 
     @Override
-    public void add(double[] values) throws UnsupportedOperationException {
-        if(sequence instanceof IntArrayList) {
-            int[] castedValues = new int[values.length];
-            for (int i = 0; i < values.length; i++) {
-               castedValues[i] = (int) values[i];
-            }
-            ((IntArrayList)sequence).add(castedValues);
-        } else {
-            throw  new UnsupportedOperationException("Values can be added to the column only if that column wraps ArrayList");
-        }
+    public DataType dataType() {
+        return DataType.NUMBER;
     }
 
     @Override
-    public long size() {
-        return sequence.size();
-    }
-
-    @Override
-    public double value(long index) {
-        return sequence.get(index);
-    }
-
-    @Override
-    public NumberColumn subColumn(long fromIndex, long length) {
+    public Column view(int from, int length) {
         IntSequence subSequence = new IntSequence() {
             @Override
-            public long size() {
+            public int size() {
                 if(length < 0) {
-                    return sequence.size() - fromIndex;
+                    return dataSequence.size() - from;
                 }
                 return length;
             }
 
             @Override
-            public int get(long index) {
-                return sequence.get(index + fromIndex);
+            public int get(int index) {
+                return dataSequence.get(index + from);
             }
         };
-        IntColumn subColumn = new IntColumn(subSequence);
-        subColumn.name = name;
-        subColumn.aggregateFunctions = aggregateFunctions;
-        return subColumn;
+        return new IntColumn(subSequence);
     }
 
     @Override
-    public Range extremes() {
-        long size = sequence.size();
-        if(size == 0){
-            return null;
+    public Column slice(int from, int length) {
+        int[] slicedData = new int[length];
+        for (int i = 0; i < length; i++) {
+            slicedData[i] = dataSequence.get(from + i);
         }
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Extremes can not be find if size > Integer.MAX_VALUE. Size = " + size();
-            throw new IllegalArgumentException(errorMessage);
+        return new IntColumn(slicedData);
+    }
+
+    @Override
+    public void cache(int nLastExcluded) {
+        if(! (dataSequence instanceof CachingIntSequence)) {
+            dataSequence = new CachingIntSequence(dataSequence, nLastExcluded);
+        }
+    }
+
+    @Override
+    public void disableCaching() {
+        if(dataSequence instanceof CachingIntSequence) {
+            dataSequence = ((CachingIntSequence) dataSequence).getInnerData();
+        }
+    }
+
+
+    @Override
+    public int nearest(double value, int from, int length) {
+        return SequenceUtils.binarySearch(dataSequence, (int)Math.round(value), from,  length);
+
+    }
+
+    @Override
+    public BRange range(int from, int length) {
+        if(length == 0){
+            return null;
         }
 
         // invoke data.get(i) can be expensive in the case data is grouped data
-        int dataItem = sequence.get(0); //
+        int dataItem = dataSequence.get(from); //
         int min = dataItem;
         int max = dataItem;
-        for (long i = 1; i < size ; i++) {
-            dataItem = sequence.get(i);
-            min = (int)Math.min(min, dataItem);
-            max = (int)Math.max(max, dataItem);
+        int till = from + length;
+        for (int i = from + 1; i < till ; i++) {
+            dataItem = dataSequence.get(i);
+            min = Math.min(min, dataItem);
+            max = Math.max(max, dataItem);
         }
-        return new Range(min, max);
+        return new BRange(min, max);
     }
 
+
     @Override
-    public long binarySearch(double value) {
-        long size = sequence.size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
+    public IntSequence group(double interval) {
+        int sequenceSize = dataSequence.size();
+        if(sequenceSize > Integer.MAX_VALUE) {
+            String errorMessage = "Grouping can not be done if rowCount > Integer.MAX_VALUE. Size = " + size();
             throw new IllegalArgumentException(errorMessage);
-        }
-        return SequenceUtils.upperBound(sequence, (int) value, 0, (int) size);
 
-    }
-
-    @Override
-    public long upperBound(double value) {
-        long size = sequence.size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Upper bound binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
-            throw new IllegalArgumentException(errorMessage);
-        }
-        return SequenceUtils.upperBound(sequence, (int) value, 0, (int) size);
-    }
-
-    @Override
-    public long lowerBound(double value) {
-        long size = sequence.size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Lower bound binary search can not be done if size > Integer.MAX_VALUE. Size = " + size;
-            throw new IllegalArgumentException(errorMessage);
-        }
-        return SequenceUtils.lowerBound(sequence, (int) value, 0, (int) size);
-    }
-
-    @Override
-    public NumberColumn copy() {
-        IntColumn copyColumn = new IntColumn(sequence);
-        copyColumn.name = name;
-        copyColumn.aggregateFunctions = aggregateFunctions;
-        return copyColumn;
-    }
-
-
-    @Override
-    public NumberColumn cache() {
-        long size = sequence.size();
-        if (size > Integer.MAX_VALUE) {
-            String errorMessage = "Column can not be cached if its size > Integer.MAX_VALUE. Size = " + size;
-            throw new IllegalArgumentException(errorMessage);
-        }
-        IntArrayList list = new IntArrayList((int) size);
-        for (int i = 0; i < size; i++) {
-            list.add(sequence.get(i));
-        }
-        IntColumn cacheColumn = new IntColumn(list);
-        cacheColumn.name = name;
-        cacheColumn.aggregateFunctions = aggregateFunctions;
-        return cacheColumn;
-    }
-
-    @Override
-    public NumberColumn[] group(LongSequence groupStartIndexes) {
-        NumberColumn[] resultantColumns = new NumberColumn[aggregateFunctions.length];
-
-        for (int i = 0; i < aggregateFunctions.length; i++) {
-            resultantColumns[i] = new IntColumn(new GroupedSequence(aggregateFunctions[i], groupStartIndexes));
-            String resultantName = name;
-            if(aggregateFunctions.length > 1) {
-                resultantName = name + " "+aggregateFunctions[i].name();
-            }
-            resultantColumns[i].setName(resultantName);
-            resultantColumns[i].setAggregateFunctions(aggregateFunctions[i]);
-        }
-        return resultantColumns;
-    }
-
-    class GroupedSequence implements IntSequence {
-        private LongSequence groupStartIndexes;
-        private long lastGroupValueStart = -1;
-        private long lastGroupValueLength;
-
-        private final IntAggregateFunction aggregateFunction;
-
-        public GroupedSequence(AggregateFunction aggregateFunction, LongSequence groupStartIndexes) {
-            this.groupStartIndexes = groupStartIndexes;
-            this.aggregateFunction = (IntAggregateFunction) aggregateFunction.getFunctionImpl("int");
         }
 
-        @Override
-        public long size() {
-            return groupStartIndexes.size() - 1;
-        }
-
-        @Override
-        public int get(long index) {
-            if(lastGroupValueStart != groupStartIndexes.get(index)) {
-                aggregateFunction.reset();
-                lastGroupValueLength = 0;
+        IntSequence groupIndexes = new IntSequence() {
+            int intervalValue = (int) interval;
+            IntArrayList groupIndexesList = new IntArrayList(sequenceSize);
+            @Override
+            public int size() {
+                update();
+                return groupIndexesList.size();
             }
 
-            long groupEnd = Math.min(groupStartIndexes.get(index + 1), sequence.size());
+            @Override
+            public int get(int index) {
+                return groupIndexesList.get(index);
+            }
 
-            int groupValue = aggregateFunction.addToGroup(sequence, groupStartIndexes.get(index) + lastGroupValueLength, groupEnd - groupStartIndexes.get(index) - lastGroupValueLength);
+            private void update() {
+                int dataSize =  dataSequence.size();
+                int groupListSize =  groupIndexesList.size();
+                if(dataSize == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == dataSize)) {
+                    return;
+                }
 
-            lastGroupValueStart = groupStartIndexes.get(index);
-            lastGroupValueLength = groupEnd - groupStartIndexes.get(index);
-            return groupValue;
-        }
+                if(groupListSize == 0) {
+                    groupIndexesList.add(0);
+                } else {
+                    // delete last "closing" group
+                    groupIndexesList.remove(groupListSize - 1);
+                }
+
+                int from = groupIndexesList.get(groupListSize - 1);
+
+                int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
+                groupValue += intervalValue;
+                for (int i = from + 1;  i < dataSize; i++) {
+                    int data = dataSequence.get(i);
+                    if (dataSequence.get(i) >= groupValue) {
+                        groupIndexesList.add(i);
+                        groupValue += intervalValue; // often situation
+
+                        if(data > groupValue) { // rare situation
+                            groupValue = ((dataSequence.get(i) / intervalValue)) * intervalValue;
+                            groupValue += intervalValue;
+                        }
+                    }
+                }
+                // add last "closing" groupByEqualIntervals
+                groupIndexesList.add(dataSize);
+            }
+        };
+        return groupIndexes;
+    }
+
+    @Override
+    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
+        IntSequence resultantSequence = new IntSequence() {
+            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl("int");;
+            private int lastIndex = -1;
+
+            @Override
+            public int size() {
+                return groupIndexes.size() - 1;
+            }
+
+            @Override
+            public int get(int index) {
+                if(index != lastIndex) {
+                    aggFunction.reset();
+                    lastIndex = index;
+                }
+                int n = aggFunction.getN();
+                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
+                int from = groupIndexes.get(index) + n;
+                if(length > 0) {
+                    aggFunction.add(dataSequence, from, length);
+                }
+                return aggFunction.getValue();
+            }
+        };
+        return new IntColumn(resultantSequence);
     }
 }

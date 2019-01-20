@@ -9,7 +9,7 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.data.frame.DataSeries;
+import com.biorecorder.data.frame.DataFrame;
 
 import java.util.*;
 import java.util.List;
@@ -104,13 +104,16 @@ public class Chart {
         double maxExtent = 0;
         for (int i = 0; i < traces.size(); i++) {
             if (traces.get(i).getXAxisIndex() == xIndex) {
-                DataSeries traceData = dataManager.getOriginalTraceData(i);
-                if (traceData.size() > 1) {
+                ChartData traceData = dataManager.getOriginalTraceData(i);
+                if (traceData.rowCount() > 1) {
                     int pixelsInDataPoint = traces.get(i).getMarkSize();
                     if (pixelsInDataPoint == 0) {
                         pixelsInDataPoint = 1;
                     }
-                    double traceExtent = traceData.getDataInterval() * fullArea.width / pixelsInDataPoint;
+
+                    double dataAvgStep =  traceData.getColumnRange(0).length() / (traceData.rowCount() - 1);
+
+                    double traceExtent = dataAvgStep * fullArea.width / pixelsInDataPoint;
                     maxExtent = Math.max(maxExtent, traceExtent);
                 }
             }
@@ -118,15 +121,16 @@ public class Chart {
         return maxExtent;
     }
 
+
     // for all x axis
-    Range getOriginalDataMinMax() {
-        Range minMax = null;
+    BRange getOriginalDataMinMax() {
+        BRange minMax = null;
         for (int i = 0; i < traces.size(); i++) {
             Trace trace = traces.get(i);
-            DataSeries traceData = trace.getData();
+            ChartData traceData = trace.getData();
             trace.setData(dataManager.getOriginalTraceData(i));
-            Range traceMinMax = trace.getXExtremes();
-            minMax = Range.join(minMax, traceMinMax);
+            BRange traceMinMax = trace.getXRange();
+            minMax = BRange.join(minMax, traceMinMax);
             // restore data
             trace.setData(traceData);
         }
@@ -558,8 +562,8 @@ public class Chart {
      * @param isXAxisOpposite
      * @param isYAxisOpposite
      */
-    public void addTrace(int stackNumber, Trace trace, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        dataManager.addTrace(traceData.copy(), trace.getMarkSize());
+    public void addTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        dataManager.addTrace(traceData, trace.getMarkSize());
 
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
@@ -667,12 +671,12 @@ public class Chart {
         }
     }
 
-    public Range getXMinMax(int xIndex) {
-        return new Range(xAxisList.get(xIndex).getMin(), xAxisList.get(xIndex).getMax());
+    public BRange getXMinMax(int xIndex) {
+        return new BRange(xAxisList.get(xIndex).getMin(), xAxisList.get(xIndex).getMax());
     }
 
-    public Range getYMinMax(int yAxisIndex) {
-        return new Range(yAxisList.get(yAxisIndex).getMin(), yAxisList.get(yAxisIndex).getMax());
+    public BRange getYMinMax(int yAxisIndex) {
+        return new BRange(yAxisList.get(yAxisIndex).getMin(), yAxisList.get(yAxisIndex).getMax());
     }
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
@@ -766,12 +770,12 @@ public class Chart {
     }
 
     public void autoScaleX(int xIndex) {
-        Range tracesMinMax = null;
+        BRange tracesMinMax = null;
         for (int i = 0; i < traces.size(); i++) {
             if (getTraceXIndex(i) == xIndex) {
                 Trace trace = traces.get(i);
                 trace.setData(dataManager.getOriginalTraceData(i));
-                tracesMinMax = Range.join(tracesMinMax, traces.get(i).getXExtremes());
+                tracesMinMax = BRange.join(tracesMinMax, traces.get(i).getXRange());
             }
         }
         if (tracesMinMax != null) {
@@ -784,10 +788,10 @@ public class Chart {
         if (dataDirty) {
             initiateTraceData();
         }
-        Range tracesMinMax = null;
+        BRange tracesMinMax = null;
         for (int i = 0; i < traces.size(); i++) {
             if (getTraceYIndex(i) == yIndex) {
-                tracesMinMax = Range.join(tracesMinMax, traces.get(i).getYExtremes());
+                tracesMinMax = BRange.join(tracesMinMax, traces.get(i).getYExtremes());
             }
         }
         if (tracesMinMax != null) {
@@ -840,7 +844,7 @@ public class Chart {
             Scale xScale = xAxisList.get(trace.getXAxisIndex()).getScale();
             Scale yScale = yAxisList.get(trace.getYAxisIndex()).getScale();
 
-            int nearestIndex = (int) trace.findNearestData(x, y, xScale, yScale);
+            int nearestIndex = (int) trace.nearest(x, y, xScale, yScale);
             if (hoverPointIndex != nearestIndex) {
                 hoverPointIndex = nearestIndex;
                 if (hoverPointIndex >= 0) {
@@ -867,13 +871,13 @@ public class Chart {
         private boolean isGridVisible = false;
         private boolean isRoundingEnabled = false;
         // need this field to implement smooth zooming and translate when minMaxRounding enabled
-        private Range rowMinMax; // without rounding
+        private BRange rowMinMax; // without rounding
         private boolean roundingDirty = true;
 
 
         public AxisWrapper(Axis axis) {
             this.axis = axis;
-            rowMinMax = new Range(axis.getMin(), axis.getMax());
+            rowMinMax = new BRange(axis.getMin(), axis.getMax());
         }
 
         private void setRoundingDirty() {
@@ -955,7 +959,7 @@ public class Chart {
         }
 
         public void setMinMax(double min, double max) {
-            rowMinMax = new Range(min, max);
+            rowMinMax = new BRange(min, max);
             setRoundingDirty();
         }
 

@@ -8,10 +8,10 @@ public enum AggregateFunction {
     AVERAGE("Average"),
     SUM("Sum"),
     COUNT("Count"),
-    LOW("Low"),
-    HIGH("High"),
-    OPEN("Open"),
-    CLOSE("Close");
+    MIN("Min"),
+    MAX("Max"),
+    FIRST("First"),
+    LAST("Last");
 
     private String functionName;
 

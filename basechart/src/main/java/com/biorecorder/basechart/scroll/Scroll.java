@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scroll;
 
-import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.BRange;
 
 import java.util.*;
 import java.util.List;
@@ -48,7 +48,7 @@ public class Scroll {
         return value;
     }
 
-    public void setMinMax(Range minMax) {
+    public void setMinMax(BRange minMax) {
         this.min = minMax.getMin();
         this.max = minMax.getMax();
         double oldExtent = extent;

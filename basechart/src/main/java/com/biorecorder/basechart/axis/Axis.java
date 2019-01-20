@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.BRange;
 import com.biorecorder.basechart.graphics.Text;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BStroke;
@@ -204,7 +204,7 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public void setMinMax(Range minMax) {
+    public void setMinMax(BRange minMax) {
         if (minMax.getMin() == getMin() && minMax.getMax() == getMax()) {
             return;
         }
@@ -299,7 +299,7 @@ public abstract class Axis {
         Tick tickMinNext = tickProvider.getNextTick();
         Tick tickMax = tickProvider.getUpperTick(max);
         // Calculate required space to avoid labels overlapping.
-        // Simplified algorithm assumes that the biggest tick size are on the axis edges
+        // Simplified algorithm assumes that the biggest tick rowCount are on the axis edges
         // (it is reasonable for all axis except the category one that at the moment not used)
         String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
@@ -403,7 +403,7 @@ public abstract class Axis {
     }
 
     private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
-        int labelsGap = (2 * config.getTickLabelTextStyle().getSize()); // min gap between labels = 2 symbols size (roughly)
+        int labelsGap = (2 * config.getTickLabelTextStyle().getSize()); // min gap between labels = 2 symbols rowCount (roughly)
         int labelSize = labelSizeForOverlap(tm, 0, label);
 
         int requiredSpace = labelSize + labelsGap;
@@ -445,7 +445,7 @@ public abstract class Axis {
         Tick tickMax = tickProvider.getLowerTick(max);
 
         // Calculate required space to avoid labels overlapping.
-        // Simplified algorithm assumes that the biggest tick size are on the axis edges
+        // Simplified algorithm assumes that the biggest tick rowCount are on the axis edges
         // (it is reasonable for all axis except the category one that at the moment not used)
         String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);

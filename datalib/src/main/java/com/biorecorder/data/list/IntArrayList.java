@@ -14,10 +14,10 @@ public class IntArrayList implements IntSequence {
     private int[] data;
     private int size;
     /**
-     * The maximum size of array to allocate.
+     * The maximum rowCount of array to allocate.
      * Some VMs reserve some header words in an array.
      * Attempts to allocate larger arrays may result in
-     * OutOfMemoryError: Requested array size exceeds VM limit
+     * OutOfMemoryError: Requested array rowCount exceeds VM limit
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -39,14 +39,14 @@ public class IntArrayList implements IntSequence {
     }
 
     @Override
-    public long size() {
+    public int size() {
         return size;
     }
 
     @Override
-    public int get(long index) {
+    public int get(int index) {
         rangeCheck(index);
-        return data[(int)index];
+        return data[index];
     }
 
     /**
@@ -134,7 +134,7 @@ public class IntArrayList implements IntSequence {
 
     /**
      * Trims the capacity of this array list instance to be the
-     * list's current size.
+     * list's current rowCount.
      */
     public void trimToSize() {
         if ( data.length > size ) {
@@ -156,7 +156,7 @@ public class IntArrayList implements IntSequence {
 
                 newCapacity = hugeCapacity(minCapacity);
 
-            // minCapacity is usually close to size, so this is a win:
+            // minCapacity is usually close to rowCount, so this is a win:
             int[] tmp = new int[newCapacity];
             System.arraycopy( data, 0, tmp, 0, data.length );
             data = tmp;

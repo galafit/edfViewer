@@ -1,28 +1,23 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.frame.DataSeries;
-import com.biorecorder.data.transformation.DataGroup;
-import com.biorecorder.data.transformation.DataGroupByEqualIntervals;
-import com.biorecorder.data.transformation.DataGroupByEqualPointsNumber;
-import com.biorecorder.data.transformation.GroupInterval;
-
 
 /**
  * Created by galafit on 9/7/18.
  */
 public class TraceDataManager {
     private int CROP_SHOULDER = 2; // number of additional points that we leave on every side during crop
-    private final DataSeries traceDataSeries;
+    private final ChartData traceData;
     private final DataProcessingConfig processingConfig;
     private final int pixelsPerDataPoint;
-    private final boolean isGroupByPoints;
+    private final boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
 
     private int width = 500;
-    private DataGroup dataGroup;
+
+    private ChartData groupedData;
 
 
-    public TraceDataManager(DataSeries traceDataSeries, DataProcessingConfig processingConfig, int pixelsPerDataPoint) {
-        this.traceDataSeries = traceDataSeries;
+    public TraceDataManager(ChartData traceData, DataProcessingConfig processingConfig, int pixelsPerDataPoint) {
+        this.traceData = traceData;
         this.processingConfig = processingConfig;
         if (pixelsPerDataPoint > 0) {
             this.pixelsPerDataPoint = pixelsPerDataPoint;
@@ -30,150 +25,118 @@ public class TraceDataManager {
             this.pixelsPerDataPoint = 1;
         }
 
-        switch (processingConfig.getGroupType()) {
+        switch (processingConfig.getGroupingType()) {
             case EQUAL_POINTS_NUMBER:
-                isGroupByPoints = true;
+                isEqualFrequencyGrouping = true;
                 break;
 
             case EQUAL_INTERVALS:
-                isGroupByPoints = false;
+                isEqualFrequencyGrouping = false;
                 break;
 
             case AUTO:
-                if(traceDataSeries.isRegular()) {
-                    isGroupByPoints = true;
+                if(traceData.isRegular(0)) {
+                    isEqualFrequencyGrouping = true;
                 } else {
-                    isGroupByPoints = false;
+                    isEqualFrequencyGrouping = false;
                 }
                 break;
 
             default:
-                isGroupByPoints = true;
+                isEqualFrequencyGrouping = true;
                 break;
         }
     }
 
-    public Range getDataExtremes() {
-       return traceDataSeries.getXExtremes();
+
+    public ChartData getOriginalData() {
+        return traceData;
     }
 
-    public DataSeries getOriginalData() {
-        return traceDataSeries;
-    }
+    public ChartData getProcessedData(Double xMin, Double xMax) {
+        traceData.update();
 
-
-    public DataSeries getProcessedData(Double xMin, Double xMax) {
-        traceDataSeries.updateSize();
-
-        if (traceDataSeries.size() <= 1) {
-            return traceDataSeries;
+        if (traceData.rowCount() <= 1) {
+            return traceData;
         }
 
-        GroupInterval groupInterval = null;
+        double groupInterval = 0;
         // calculate best grouping interval
         double bestInterval = (xMax - xMin) * pixelsPerDataPoint / width;
-        long pointsInGroup = Math.round(groupIntervalToPointsNumber(bestInterval));
+        int pointsInGroup = groupIntervalToPointsNumber(traceData, bestInterval);
         if(processingConfig.isGroupEnabled()  && pointsInGroup > 1) {
 
-
             // if available intervals are specified we choose the interval among the available ones
-            GroupInterval[] availableIntervals = processingConfig.getGroupIntervals();
+            double[] availableIntervals = processingConfig.getGroupIntervals();
             if(availableIntervals != null) {
                 for (int i = 0; i < availableIntervals.length; i++) {
-                    if(availableIntervals[i].getIntervalAsNumber() >= bestInterval) {
+                    if(availableIntervals[i] >= bestInterval) {
                         groupInterval = availableIntervals[i];
                         break;
                     }
                 }
-                if(groupInterval == null) {
+                if(groupInterval == 0) {
                     groupInterval = availableIntervals[availableIntervals.length - 1];
-                } // if there is no available intervals use the best grouping interval
-                pointsInGroup = (long)Math.round(groupIntervalToPointsNumber(groupInterval.getIntervalAsNumber()));
-            } else {
-                // if available intervals are NOT specified we take interval close to the
-                // "best grouping interval" but including "integer" (rounded) number of points
-                groupInterval = new GroupInterval(pointsNumberToGroupInterval(pointsInGroup));
+                }
+                pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
             }
          }
 
         // if crop enabled
         if(processingConfig.isCropEnabled()) {
-            DataSeries resultantDataSeries = traceDataSeries;
-            long cropShoulder = CROP_SHOULDER * pointsInGroup;
-            SubRange subRange = traceDataSeries.getSubRange(xMin, xMax);
-            resultantDataSeries = traceDataSeries.subSeries(subRange.getStartIndex() - cropShoulder, subRange.getSize() + 2 * cropShoulder);
+            int cropShoulder = CROP_SHOULDER * pointsInGroup;
 
-            if(pointsInGroup > 1) { // group only visible
-   //             System.out.println(pointsInGroup +" group cropped "+groupInterval.getIntervalAsNumber());
-                if(isGroupByPoints) {
-                    dataGroup = new DataGroupByEqualPointsNumber(pointsInGroup);
-                } else {
-                    dataGroup = new DataGroupByEqualIntervals(groupInterval);
-                }
-                dataGroup.setInputData(resultantDataSeries);
-                resultantDataSeries = dataGroup.getTransformedData();
+            int minIndex = traceData.nearest(0, xMin) - cropShoulder;
+            int maxIndex = traceData.nearest(0, xMax) + cropShoulder;
+
+            ChartData resultantData = traceData.slice(minIndex, maxIndex - minIndex);
+
+            if(pointsInGroup > 1) { // group only visible data
+                resultantData = resultantData.resample(0, groupInterval, isEqualFrequencyGrouping);
             }
 
-            return resultantDataSeries;
+            return resultantData;
         }
 
-        // if crop disabled (mostly preview case) we group ALL points
+        // if crop disabled (mostly preview case) we group ALL data
         // (so we do regroup only when it is actually needed)
         if(pointsInGroup > 1) {
-            if(isGroupByPoints) { // group by equal points number
-                long previousPointsInGroup = 1;
-                if(dataGroup != null) {
-                    previousPointsInGroup = ((DataGroupByEqualPointsNumber) dataGroup).getPointsNumber();
+            if(isEqualFrequencyGrouping) { // group by equal points number
+                if(groupedData != null) {
+                    int pointsInGroup1 = groupIntervalToPointsNumber(groupedData, groupInterval);
+                    if(pointsInGroup1 > 1) {
+                        ChartData regroupedData = groupedData.resample(0, groupInterval, isEqualFrequencyGrouping);
+                        // force "lazy" grouping
+                        int rowCount = regroupedData.rowCount();
+                        for (int i = 0; i < regroupedData.columnCount(); i++) {
+                            regroupedData.getValue(rowCount - 1, i);
+                        }
+                        groupedData.disableCache();
+                        groupedData = regroupedData;
+                    }
+                } else {
+                    groupedData = traceData.resample(0, groupInterval, isEqualFrequencyGrouping);
                 }
-
-                boolean isRegroupRequired = false;
-                if(previousPointsInGroup == 1 // no grouping before
-                        // grouping before was with interval from the specified ones and != current interval
-                        || processingConfig.getGroupIntervals() != null && pointsInGroup != previousPointsInGroup
-                        // grouping before was with interval that is sufficient different from the current one
-                        || pointsInGroup / previousPointsInGroup > processingConfig.getGroupStep()
-                        || previousPointsInGroup / pointsInGroup > processingConfig.getGroupStep()) {
-                    isRegroupRequired = true;
-                }
-
-                if(isRegroupRequired) {
-                    dataGroup = new DataGroupByEqualPointsNumber(pointsInGroup);
-                    dataGroup.setInputData(traceDataSeries);
-                }
-            } else { // group by equal intervals
-                GroupInterval previousInterval = null;
-                if(dataGroup != null) {
-                    previousInterval = ((DataGroupByEqualIntervals) dataGroup).getInterval();
-                }
-
-                boolean isRegroupRequired = false;
-                if(previousInterval == null // no grouping before
-                        // grouping before was with interval from the specified ones and != current interval
-                        || processingConfig.getGroupIntervals() != null && previousInterval != groupInterval // reference comparison is ok here course interval is from the array
-                        // grouping before was with interval that is sufficient different from the current one
-                        || groupInterval.getIntervalAsNumber() / previousInterval.getIntervalAsNumber() > processingConfig.getGroupStep()
-                        || previousInterval.getIntervalAsNumber() / groupInterval.getIntervalAsNumber() > processingConfig.getGroupStep()) {
-                    isRegroupRequired = true;
-                }
-
-                if(isRegroupRequired) {
-               //     System.out.println(pointsInGroup + " grouping by interval "+groupInterval.getIntervalAsNumber());
-                    dataGroup = new DataGroupByEqualIntervals(groupInterval);
-                    dataGroup.setInputData(traceDataSeries);
-                }
+                return groupedData;
+            } else {
+                return traceData.resample(0, groupInterval, isEqualFrequencyGrouping);
             }
-            return dataGroup.getTransformedData();
         }
 
         // disabled crop and no grouping
-        return traceDataSeries;
+        return traceData;
     }
 
-    private double pointsNumberToGroupInterval(double pointsInGroup) {
-        return pointsInGroup  * traceDataSeries.getDataInterval();
+    private double pointsNumberToGroupInterval(ChartData data, double pointsInGroup) {
+        return pointsInGroup  * getDataAvgStep(data);
     }
 
-    private double groupIntervalToPointsNumber(double groupInterval) {
-        return groupInterval / traceDataSeries.getDataInterval();
+    private int groupIntervalToPointsNumber(ChartData data, double groupInterval) {
+        return (int) Math.round(groupInterval / getDataAvgStep(data));
+    }
+
+    double getDataAvgStep(ChartData data) {
+        int dataSize = data.rowCount();
+        return (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
     }
 }

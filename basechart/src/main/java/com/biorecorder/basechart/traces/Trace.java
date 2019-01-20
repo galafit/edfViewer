@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.data.frame.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPoint;
@@ -15,13 +14,13 @@ public abstract class Trace {
     private int xAxisIndex;
     private int yAxisIndex;
     private String name;
-    private DataSeries data;
+    private ChartData data;
 
-    public void setData(DataSeries data) {
+    public void setData(ChartData data) {
         this.data = data;
     }
 
-    public DataSeries getData() {
+    public ChartData getData() {
         return data;
     }
 
@@ -49,12 +48,12 @@ public abstract class Trace {
         this.name = name;
     }
 
-    public Range getXExtremes() {
-        return data.getXExtremes();
+    public BRange getXRange() {
+        return data.getColumnRange(0);
     }
 
-    public long findNearestData(int x, int y, Scale xScale, Scale yScale) {
-        return data.findNearestData(xScale.invert(x));
+    public long nearest(int x, int y, Scale xScale, Scale yScale) {
+        return data.nearest(0, xScale.invert(x));
 
     }
 
@@ -64,7 +63,7 @@ public abstract class Trace {
 
     public abstract void setMainColor(BColor color);
 
-    public abstract Range getYExtremes();
+    public abstract BRange getYExtremes();
 
     public abstract BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale);
 

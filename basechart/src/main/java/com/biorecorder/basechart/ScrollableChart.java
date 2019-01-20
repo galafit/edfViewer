@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.frame.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
@@ -51,7 +50,7 @@ public class ScrollableChart {
 
     private void createScrolls() {
         updatePreviewMinMax();
-        Range previewXRange = preview.getXMinMax(previewXIndex);
+        BRange previewXRange = preview.getXMinMax(previewXIndex);
         double xMin = previewXRange.getMin();
         for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisUsed(xIndex)) {
@@ -70,7 +69,7 @@ public class ScrollableChart {
                 scroll.addListener(new ScrollListener() {
                     @Override
                     public void onScrollChanged(double scrollValue, double scrollExtent) {
-                        Range xRange = new Range(scrollValue, scrollValue + scrollExtent);
+                        BRange xRange = new BRange(scrollValue, scrollValue + scrollExtent);
                         chart.setXMinMax(scrollXIndex, xRange.getMin(), xRange.getMax());
                         scrollsAtTheEnd = isScrollAtTheEnd(scrollXIndex);
                         if (autoScaleEnableDuringScroll) {
@@ -93,19 +92,19 @@ public class ScrollableChart {
     }
 
     private void updatePreviewMinMax() {
-        Range previewMinMax = preview.getXMinMax(0);
-        Range chartMinMax = chart.getOriginalDataMinMax();
+        BRange previewMinMax = preview.getXMinMax(0);
+        BRange chartMinMax = chart.getOriginalDataMinMax();
         for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
-            chartMinMax = Range.join(chartMinMax, chart.getXMinMax(xAxisIndex));
+            chartMinMax = BRange.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
         if (!previewMinMax.contains(chartMinMax)) {
-            previewMinMax = Range.join(previewMinMax, chartMinMax);
+            previewMinMax = BRange.join(previewMinMax, chartMinMax);
             preview.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
         }
     }
 
     private boolean scrollToEnd() {
-        Range dataMinMax = chart.getOriginalDataMinMax();
+        BRange dataMinMax = chart.getOriginalDataMinMax();
         double minExtent = 0;
 
         for (Integer xAxisIndex : scrolls.keySet()) {
@@ -117,7 +116,7 @@ public class ScrollableChart {
 
 
     private boolean isScrollAtTheEnd(int xAxisIndex) {
-        Range dataRange = chart.getOriginalDataMinMax();
+        BRange dataRange = chart.getOriginalDataMinMax();
         if (dataRange != null) {
             double dataMax = dataRange.getMax();
             double scrollEnd = scrolls.get(xAxisIndex).getValue() + scrolls.get(xAxisIndex).getExtent();
@@ -193,11 +192,11 @@ public class ScrollableChart {
      **/
 
 
-    public Range getScrollRange(Scroll scroll) {
+    public BRange getScrollRange(Scroll scroll) {
         Scale scale = preview.getXAxisScale(previewXIndex);
         double scrollStart = scale.scale(scroll.getValue());
         double scrollEnd = scale.scale(scroll.getValue() + scroll.getExtent());
-        return new Range(scrollStart, scrollEnd);
+        return new BRange(scrollStart, scrollEnd);
     }
 
 
@@ -205,10 +204,10 @@ public class ScrollableChart {
         return previewArea.contains(x, y) && getScrollActiveRange(scroll).contains(x);
     }
 
-    private Range getScrollActiveRange(Scroll scroll) {
+    private BRange getScrollActiveRange(Scroll scroll) {
         ScrollConfig scrollConfig = theme.getScrollConfig();
-        Range scrollRange = getScrollRange(scroll);
-        return new Range(scrollRange.getMin() - scrollConfig.getActiveExtraSpace(), scrollRange.getMax() + scrollConfig.getActiveExtraSpace());
+        BRange scrollRange = getScrollRange(scroll);
+        return new BRange(scrollRange.getMin() - scrollConfig.getActiveExtraSpace(), scrollRange.getMax() + scrollConfig.getActiveExtraSpace());
     }
 
     /**
@@ -229,7 +228,7 @@ public class ScrollableChart {
     public void drawScroll(BCanvas canvas, Scroll scroll) {
         BRectangle area = preview.getGraphArea(canvas);
         ScrollConfig scrollConfig = theme.getScrollConfig();
-        Range scrollRange = getScrollRange(scroll);
+        BRange scrollRange = getScrollRange(scroll);
 
         int borderWidth = scrollConfig.getBorderWidth();
 
@@ -391,7 +390,7 @@ public class ScrollableChart {
     public void zoomChartX(int xAxisIndex, double zoomFactor) {
         chart.zoomX(xAxisIndex, zoomFactor);
         if (chart.getXMinMax(xAxisIndex).length() > preview.getXMinMax(0).length()) {
-            Range previewXMinMax = preview.getXMinMax(0);
+            BRange previewXMinMax = preview.getXMinMax(0);
             chart.setXMinMax(xAxisIndex, previewXMinMax.getMin(), previewXMinMax.getMax());
         }
         scrolls.get(xAxisIndex).setExtent(chart.getXMinMax(xAxisIndex).length());
@@ -405,7 +404,7 @@ public class ScrollableChart {
         }
     }
 
-    public Range getXMinMax() {
+    public BRange getXMinMax() {
         return preview.getXMinMax(0);
     }
 
@@ -432,7 +431,7 @@ public class ScrollableChart {
         chart.addStack(weight);
     }
 
-    public void addChartTrace(int stackNumber, Trace trace, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addChartTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         chart.addTrace(stackNumber, trace, traceData, isXAxisOpposite, isYAxisOpposite);
         isScrollDirty = true;
     }
@@ -467,7 +466,7 @@ public class ScrollableChart {
         chart.setYMinMax(yAxisIndex, min, max);
     }
 
-    public Range getChartYMinMax(int yAxisIndex) {
+    public BRange getChartYMinMax(int yAxisIndex) {
         return chart.getYMinMax(yAxisIndex);
     }
 
@@ -528,7 +527,7 @@ public class ScrollableChart {
         preview.addStack(weight);
     }
 
-    public void addPreviewTrace(int stackNumber, Trace trace, DataSeries traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addPreviewTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         preview.addTrace(stackNumber, trace, traceData, isXAxisOpposite, isYAxisOpposite);
     }
 

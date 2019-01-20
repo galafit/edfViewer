@@ -1,7 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.frame.DataSeries;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +14,15 @@ public class DataManager {
         this.processingConfig = processingConfig;
     }
 
-    public void addTrace(DataSeries traceData, int pixelsInDataPoint) {
+    public void addTrace(ChartData traceData, int pixelsInDataPoint) {
         traceDataManagers.add(new TraceDataManager(traceData, processingConfig, pixelsInDataPoint));
     }
 
-    public DataSeries getOriginalTraceData(int traceNumber) {
+    public ChartData getOriginalTraceData(int traceNumber) {
         return traceDataManagers.get(traceNumber).getOriginalData();
     }
 
-    public DataSeries getProcessedTraceData(int traceNumber, Double min, Double max) {
+    public ChartData getProcessedTraceData(int traceNumber, Double min, Double max) {
        return traceDataManagers.get(traceNumber).getProcessedData(min, max);
     }
 }

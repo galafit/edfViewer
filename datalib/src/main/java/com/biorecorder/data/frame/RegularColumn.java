@@ -1,130 +1,224 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.basechart.Range;
+import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.aggregation.impl.DoubleAggregateFunction;
-import com.biorecorder.data.sequence.LongSequence;
+import com.biorecorder.data.sequence.DoubleSequence;
+import com.biorecorder.data.sequence.IntSequence;
 
 /**
- * Created by galafit on 1/11/17.
+ * Created by galafit on 20/1/19.
  */
-public class RegularColumn extends DoubleColumn {
+public class RegularColumn implements Column {
+    private double startValue;
+    private double step;
+    private int size;
+    private boolean isInt;
 
-    public RegularColumn(DoubleRegularSequence regularSeries) {
-        super(regularSeries);
-        setAggregateFunctions(AggregateFunction.OPEN);
+    public RegularColumn(double startValue, double step) {
+        this(startValue, step, Integer.MAX_VALUE);
     }
 
-    public RegularColumn(double startValue, double dataInterval, long size) {
-        this(new DoubleRegularSequence(startValue, dataInterval, size));
-    }
-
-    public RegularColumn(double startValue, double dataInterval) {
-        this(startValue, dataInterval, Long.MAX_VALUE);
-    }
-
-    public RegularColumn() {
-        this(0, 1);
-    }
-
-    public double getDataInterval() {
-        return ((DoubleRegularSequence) sequence).getDataInterval();
-    }
-
-    @Override
-    public void add(double value) throws UnsupportedOperationException {
-        if(size() < Long.MAX_VALUE) {
-            setSize(size() + 1);
+    public RegularColumn(double startValue, double step, int size) {
+        this.startValue = startValue;
+        this.step = step;
+        this.size = size;
+        if((long) startValue == startValue && (long) step == step) {
+            isInt = true;
         }
     }
 
-    @Override
-    public void add(double[] values) throws UnsupportedOperationException {
-        if(size() < Long.MAX_VALUE - values.length) {
-            setSize(size() + values.length);
-        }
-        setSize(Long.MAX_VALUE);
+    public double getStartValue() {
+        return startValue;
+    }
+
+    public double getStep() {
+        return step;
     }
 
     @Override
-    public void remove(int index) {
-        if(size() < Long.MAX_VALUE) {
-            setSize(size() - 1);
-        }
-    }
-
-    public void setSize(long size) {
-        ((DoubleRegularSequence) sequence).size(size);
+    public int size() {
+        return size;
     }
 
     @Override
-    public Range extremes() {
-        return new Range(value(0), value(size() - 1));
+    public double value(int index) {
+        return startValue + step * index;
     }
 
     @Override
-    public long upperBound(double value) {
-        return lowerBound(value) + 1;
-    }
-
-    @Override
-    public long lowerBound(double value) {
-        long lowerBoundIndex = (long) ((value - value(0)) / getDataInterval());
-        return lowerBoundIndex;
-    }
-
-    @Override
-    public long binarySearch(double value) {
-        long lowerBoundIndex = lowerBound(value);
-        if(Double.doubleToLongBits(value) == Double.doubleToLongBits(value(lowerBoundIndex))) {
-            return lowerBoundIndex;
-        }
-        long insertionPoint = lowerBoundIndex + 1;
-
-        return  -insertionPoint - 1;
-
-    }
-
-    @Override
-    public NumberColumn[] group(LongSequence groupStartIndexes) {
-        if(groupStartIndexes instanceof LongRegularSequence) {
-            long numberOfGroupedIntervals = ((LongRegularSequence) groupStartIndexes).getDataInterval();
-            double resultantGroupInterval = getDataInterval() * numberOfGroupedIntervals;
-
-            NumberColumn[] resultantColumns = new NumberColumn[aggregateFunctions.length];
-
-            for (int i = 0; i < aggregateFunctions.length; i++) {
-                DoubleAggregateFunction groupFunction = (DoubleAggregateFunction) aggregateFunctions[i].getFunctionImpl("double");
-                double groupedStartValue = groupFunction.addToGroup(sequence, 0, numberOfGroupedIntervals);
-                resultantColumns[i] = new RegularColumn(groupedStartValue, resultantGroupInterval);
-                String resultantName = name;
-                if(aggregateFunctions.length > 1) {
-                    resultantName = name + " "+ aggregateFunctions[i].name();
-                }
-                resultantColumns[i].setName(resultantName);
-                resultantColumns[i].setAggregateFunctions(aggregateFunctions[i]);
-            }
-            return resultantColumns;
+    public String label(int index) {
+        if(isInt) {
+            return Long.toString((long)value(index));
         } else {
-            return super.group(groupStartIndexes);
+           return Double.toString(value(index));
         }
     }
 
     @Override
-    public NumberColumn subColumn(long fromIndex, long length) {
-        NumberColumn subColumn = new RegularColumn(value(fromIndex), getDataInterval(), length);
-        subColumn.name = name;
-        subColumn.aggregateFunctions = aggregateFunctions;
-        return subColumn;
+    public DataType dataType() {
+        return DataType.NUMBER;
     }
 
     @Override
-    public NumberColumn cache() {
-        return copy();
+    public Column slice(int from, int length) {
+        return new RegularColumn(value(from), step, length);
     }
 
     @Override
-    public NumberColumn copy() {
-        return new RegularColumn(value(0), getDataInterval(), size());
+    public Column view(int from, int length) {
+        return slice(from, length);
+    }
+
+    @Override
+    public void cache(int nLastExcluded) {
+        // do nothing
+    }
+
+    @Override
+    public void disableCaching() {
+       // do nothing
+    }
+
+    @Override
+    public int nearest(double value, int from, int length) {
+        int index = (int) ((value - value(0)) / step);
+        if(index < from) {
+            return from - 1;
+        } else if(index > from + length) {
+            index = from + length + 1;
+        }
+        return index;
+    }
+
+    @Override
+    public IntSequence group(double interval) {
+        return null;
+    }
+
+    public Column aggregate(AggregateFunction aggregateFunction, int numberOfPoints) {
+        switch (aggregateFunction) {
+            case MIN:
+            case FIRST: {
+                double startNew = startValue;
+                double stepNew = step * numberOfPoints;
+                return new RegularColumn(startNew, stepNew);
+            }
+            case MAX:
+            case LAST: {
+                double startNew = startValue + step * numberOfPoints;
+                double stepNew = step * numberOfPoints;
+                return new RegularColumn(startNew, stepNew);
+            }
+            case COUNT: {
+                double startNew = numberOfPoints;
+                double stepNew = 0;
+                return new RegularColumn(startNew, stepNew);
+            }
+            case SUM:{
+                double startNew = sum(0, numberOfPoints);
+                double stepNew = step * numberOfPoints * numberOfPoints;
+                return new RegularColumn(startNew, stepNew);
+            }
+            case AVERAGE:{
+                double startNew = avg(0, numberOfPoints);
+                double stepNew = step * numberOfPoints;
+                return new RegularColumn(startNew, stepNew);
+            }
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
+        switch (aggregateFunction) {
+            case MIN:
+            case FIRST: {
+                DoubleSequence resultantSequence = new DoubleSequence() {
+                    @Override
+                    public int size() {
+                        return groupIndexes.size() - 1;
+                    }
+
+                    @Override
+                    public double get(int index) {
+                        return value(groupIndexes.get(index));
+                    }
+                };
+                return null;
+            }
+            case MAX:
+            case LAST: {
+                DoubleSequence resultantSequence = new DoubleSequence() {
+                    @Override
+                    public int size() {
+                        return groupIndexes.size() - 1;
+                    }
+
+                    @Override
+                    public double get(int index) {
+                        return value(groupIndexes.get(index + 1) - 1);
+                    }
+                };
+                return null;
+            }
+            case COUNT: {
+                DoubleSequence resultantSequence = new DoubleSequence() {
+                    @Override
+                    public int size() {
+                        return groupIndexes.size() - 1;
+                    }
+
+                    @Override
+                    public double get(int index) {
+                        return groupIndexes.get(index + 1) - groupIndexes.get(index);
+                    }
+                };
+                return null;
+            }
+            case SUM: {
+                DoubleSequence resultantSequence = new DoubleSequence() {
+                    @Override
+                    public int size() {
+                        return groupIndexes.size() - 1;
+                    }
+
+                    @Override
+                    public double get(int index) {
+                        return sum(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    }
+                };
+                return null;
+            }
+            case AVERAGE: {
+                DoubleSequence resultantSequence = new DoubleSequence() {
+                    @Override
+                    public int size() {
+                        return groupIndexes.size() - 1;
+                    }
+
+                    @Override
+                    public double get(int index) {
+                        return avg(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    }
+                };
+                return null;
+            }
+            default:
+                return null;
+        }
+    }
+
+    private double sum(int from, int length) {
+        return (value(from) + value(from + length - 1)) * length / 2;
+    }
+
+    private double avg(int from, int length) {
+        return sum(from, length) / length;
+    }
+
+    @Override
+    public BRange range(int from, int length) {
+        return new BRange(value(from), value(from + length));
     }
 }

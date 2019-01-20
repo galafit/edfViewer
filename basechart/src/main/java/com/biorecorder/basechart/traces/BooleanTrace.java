@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.data.frame.DataSeries;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPoint;
@@ -19,7 +18,7 @@ public class BooleanTrace extends Trace {
     }
 
     @Override
-    public void setData(DataSeries dataSet) {
+    public void setData(ChartData dataSet) {
         super.setData(dataSet);
         xyData = new XYViewer();
         xyData.setData(dataSet);
@@ -53,7 +52,7 @@ public class BooleanTrace extends Trace {
     }
 
     @Override
-    public Range getYExtremes() {
+    public BRange getYExtremes() {
         return null;
     }
 
