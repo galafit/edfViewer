@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.scales.Scale;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class DataManager {
         return traceDataManagers.get(traceNumber).getOriginalData();
     }
 
-    public ChartData getProcessedTraceData(int traceNumber, Double min, Double max) {
-       return traceDataManagers.get(traceNumber).getProcessedData(min, max);
+    public ChartData getProcessedTraceData(int traceNumber, Scale scale) {
+       return traceDataManagers.get(traceNumber).getProcessedData(scale);
     }
 }

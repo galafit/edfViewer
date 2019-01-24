@@ -42,17 +42,20 @@ public class ScrollableChartTest extends JFrame{
             xData.add(i);
         }
 
-        XYData xyData1 = new XYData();
-        xyData1.setYData(yData1);
+        XYData xyData1 = new XYData(0, 1);
+        xyData1.addColumn(yData1);
 
         XYData xyData2 = new XYData();
-        xyData2.setYData(yData2);
-        xyData2.setXData(xData);
+        xyData2.addColumn(xData);
+        xyData2.addColumn(yData2);
 
         ScrollableChart chart = new ScrollableChart();
         chart.addChartStack();
         chart.addChartTrace(0, new LineTrace(), xyData1, false, false);
         chart.addChartTrace(0, new LineTrace(), xyData2, false, false);
+        chart.addChartStack();
+        chart.addChartTrace(1, new LineTrace(), xyData1, false, false);
+
 
         chart.addPreviewStack();
         chart.addPreviewTrace(0, new LineTrace(), xyData1, false, false);

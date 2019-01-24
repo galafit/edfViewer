@@ -6,11 +6,11 @@ import com.biorecorder.data.sequence.IntSequence;
  * Created by galafit on 16/1/19.
  */
 public class IntFirst implements IntAggFunction {
-    protected long count;
+    protected int count;
     private int first;
 
     @Override
-    public long add(IntSequence sequence, long from, long length) {
+    public int add(IntSequence sequence, int from, int length) {
         if(count == 0) {
             first = sequence.get(from);
         }
@@ -25,7 +25,7 @@ public class IntFirst implements IntAggFunction {
     }
 
     @Override
-    public long getN() {
+    public int getN() {
         return count;
     }
 

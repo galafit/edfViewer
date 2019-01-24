@@ -11,6 +11,8 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
     private final ScrollableChart chart;
     private BPoint currentPoint;
     private boolean isScrollbarMoved;
+    private boolean isInsideScroll = false;
+    private BPoint lastStartPoint;
 
 
     public InteractiveScrollableChart(ScrollableChart chart) {
@@ -140,9 +142,15 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
 
     @Override
     public boolean onScrollY(BPoint startPoint, int dy) {
+        System.out.println("scroll y");
         if(dy == 0 || startPoint == null) {
             return false;
         }
+
+
+
+
+
 
         if (chart.chartContains(startPoint.getX(), startPoint.getY())) {
             if(chart.chartTraceCount() == 0) {
@@ -156,7 +164,16 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             chart.translateChartY(chart.getChartTraceYIndex(selectedTraceIndex), dy);
             return true;
         } else {
-            if(chart.previewTraceCount() == 0) {
+            if(!startPoint.equals(lastStartPoint)) {
+                lastStartPoint = startPoint;
+                if(chart.isPointInsideScroll(startPoint.getX(), startPoint.getY())) {
+                    isInsideScroll = true;
+                } else {
+                    isInsideScroll = false;
+                }
+            }
+
+            if(chart.previewTraceCount() == 0 || isInsideScroll) {
                 return false;
             }
             int selectedTraceIndex = chart.getPreviewSelectedTraceIndex();

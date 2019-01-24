@@ -8,7 +8,7 @@ import com.biorecorder.data.sequence.IntSequence;
 /**
  * Created by galafit on 20/1/19.
  */
-public class RegularColumn implements Column {
+public class RegularColumn extends IntColumn {
     private double startValue;
     private double step;
     private int size;
@@ -19,6 +19,17 @@ public class RegularColumn implements Column {
     }
 
     public RegularColumn(double startValue, double step, int size) {
+        super(new IntSequence() {
+            @Override
+            public int size() {
+                return size;
+            }
+
+            @Override
+            public int get(int index) {
+                return (int)(startValue + step * index);
+            }
+        });
         this.startValue = startValue;
         this.step = step;
         this.size = size;
@@ -69,15 +80,6 @@ public class RegularColumn implements Column {
         return slice(from, length);
     }
 
-    @Override
-    public void cache(int nLastExcluded) {
-        // do nothing
-    }
-
-    @Override
-    public void disableCaching() {
-       // do nothing
-    }
 
     @Override
     public int nearest(double value, int from, int length) {
@@ -90,12 +92,8 @@ public class RegularColumn implements Column {
         return index;
     }
 
-    @Override
-    public IntSequence group(double interval) {
-        return null;
-    }
 
-    public Column aggregate(AggregateFunction aggregateFunction, int numberOfPoints) {
+    public Column aggregate(AggregateFunction aggregateFunction, int numberOfPoints) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
@@ -125,87 +123,89 @@ public class RegularColumn implements Column {
                 return new RegularColumn(startNew, stepNew);
             }
             default:
-                return null;
+                String errMsg = "Unsupported Aggregate function: "+aggregateFunction;
+                throw new IllegalArgumentException(errMsg);
         }
     }
 
     @Override
-    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
+    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
-                DoubleSequence resultantSequence = new DoubleSequence() {
+                IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
                         return groupIndexes.size() - 1;
                     }
 
                     @Override
-                    public double get(int index) {
-                        return value(groupIndexes.get(index));
+                    public int get(int index) {
+                        return (int)value(groupIndexes.get(index));
                     }
                 };
-                return null;
+                return new IntColumn(resultantSequence);
             }
             case MAX:
             case LAST: {
-                DoubleSequence resultantSequence = new DoubleSequence() {
+                IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
                         return groupIndexes.size() - 1;
                     }
 
                     @Override
-                    public double get(int index) {
-                        return value(groupIndexes.get(index + 1) - 1);
+                    public int get(int index) {
+                        return (int)value(groupIndexes.get(index + 1) - 1);
                     }
                 };
-                return null;
+                return new IntColumn(resultantSequence);
             }
             case COUNT: {
-                DoubleSequence resultantSequence = new DoubleSequence() {
+                IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
                         return groupIndexes.size() - 1;
                     }
 
                     @Override
-                    public double get(int index) {
+                    public int get(int index) {
                         return groupIndexes.get(index + 1) - groupIndexes.get(index);
                     }
                 };
-                return null;
+                return new IntColumn(resultantSequence);
             }
             case SUM: {
-                DoubleSequence resultantSequence = new DoubleSequence() {
+                IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
                         return groupIndexes.size() - 1;
                     }
 
                     @Override
-                    public double get(int index) {
-                        return sum(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    public int get(int index) {
+                        return (int)sum(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
                     }
                 };
-                return null;
+                return new IntColumn(resultantSequence);
             }
             case AVERAGE: {
-                DoubleSequence resultantSequence = new DoubleSequence() {
+                IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
                         return groupIndexes.size() - 1;
                     }
 
                     @Override
-                    public double get(int index) {
-                        return avg(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    public int get(int index) {
+                        return (int)avg(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
                     }
                 };
-                return null;
+                return new IntColumn(resultantSequence);
             }
             default:
-                return null;
+                String errMsg = "Unsupported Aggregate function: "+aggregateFunction;
+                throw new IllegalArgumentException(errMsg);
         }
     }
 

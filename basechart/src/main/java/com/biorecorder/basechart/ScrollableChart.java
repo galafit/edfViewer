@@ -41,6 +41,7 @@ public class ScrollableChart {
     public ScrollableChart() {
         this.theme = new DarkTheme();
         chart = new Chart(theme.getChartConfig());
+        chart.setYRoundingEnabled(true);
 
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
@@ -200,9 +201,6 @@ public class ScrollableChart {
     }
 
 
-    boolean isPointInsideScroll(Scroll scroll, int x, int y) {
-        return previewArea.contains(x, y) && getScrollActiveRange(scroll).contains(x);
-    }
 
     private BRange getScrollActiveRange(Scroll scroll) {
         ScrollConfig scrollConfig = theme.getScrollConfig();
@@ -338,8 +336,12 @@ public class ScrollableChart {
     }
 
     public boolean isPointInsideScroll(int x, int y) {
+        if(!previewArea.contains(x, y)) {
+            return false;
+        }
+
         for (Integer key : scrolls.keySet()) {
-            if (isPointInsideScroll(scrolls.get(key), x, y)) {
+            if (getScrollActiveRange(scrolls.get(key)).contains(x)) {
                 return true;
             }
         }

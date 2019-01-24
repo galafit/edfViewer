@@ -14,8 +14,6 @@ public interface ChartData {
 
     boolean isNumberColumn(int columnNumber);
 
-    boolean isStringColumn(int columnNumber);
-
     boolean isRegular(int columnNumber);
 
     double getValue(int rowNumber, int columnNumber);
@@ -26,12 +24,12 @@ public interface ChartData {
 
     int nearest(int columnNumber, double value);
 
-    ChartData slice(int fromRowNumber, int length);
+    ChartData view(int fromRowNumber, int length);
 
-    ChartData resample(int columnNumber, double interval, boolean isEqualFrequencyGrouping);
+    ChartData resample(int columnNumber, double interval, GroupingType groupingType);
 
-    ChartData cache();
-    void disableCache();
+    void cache();
+    void disableCaching();
 
     void update();
 }

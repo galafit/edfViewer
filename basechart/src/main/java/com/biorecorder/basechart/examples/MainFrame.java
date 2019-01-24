@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.ScrollableChart;
+import com.biorecorder.basechart.XYData;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.traces.LineTrace;
@@ -60,12 +61,13 @@ public class MainFrame extends JFrame {
         }*/
 
 
-        XYData xyData1 = new XYData();
-        xyData1.setYData(yData1);
+        XYData xyData1 = new XYData(1, 1);
+        xyData1.addColumn(yData1);
 
         XYData xyData2 = new XYData();
-        xyData2.setYData(yData2);
-        xyData2.setXData(xData);
+        xyData2.addColumn(xData);
+        xyData2.addColumn(yData2);
+
 
       /*  XYData xyData3 = new XYData();
         xyData3.setYData(yData2);

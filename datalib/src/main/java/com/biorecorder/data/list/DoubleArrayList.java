@@ -39,12 +39,12 @@ public class DoubleArrayList implements DoubleSequence {
     }
 
     @Override
-    public long size() {
+    public int size() {
         return size;
     }
 
     @Override
-    public double get(long index) {
+    public double get(int index) {
         rangeCheck(index);
         return data[(int)index];
     }

@@ -19,13 +19,27 @@ public class DataFrame {
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
 
-    private void addColumn(Column column) {
-        columns.add(column);
-        columnNames.add("Column "+ (columns.size() - 1));
-        AggregateFunction[] agg = new AggregateFunction[1];
-        agg[0] = AggregateFunction.FIRST;
-        columnAggFunctions.add(agg);
-        update();
+
+  /*  public DataFrame(DataFrame dataFrame, int[] columnsOrder) {
+        for (int i = 0; i < columnsOrder.length; i++) {
+            columns.add(dataFrame.columns.get(columnsOrder[i]));
+            columnNames.add(dataFrame.columnNames.get(columnsOrder[i]));
+            columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnsOrder[i]));
+        }
+    }*/
+
+    public void reorderColumns(int[] columnsOrder) {
+        List<Column> columnsNew = new ArrayList<>(columns);
+        List<String> columnNamesNew = new ArrayList<>(columnNames);
+        List<AggregateFunction[]> columnAggFunctionsNew = new ArrayList<>(columnAggFunctions);
+        for (int i = 0; i < columnsOrder.length; i++) {
+            columnsNew.set(i, columns.get(columnsOrder[i]));
+            columnNamesNew.set(i, columnNames.get(columnsOrder[i]));
+            columnAggFunctionsNew.set(i, columnAggFunctions.get(columnsOrder[i]));
+        }
+        columns = columnsNew;
+        columnNames = columnNamesNew;
+        columnAggFunctions = columnAggFunctionsNew;
     }
 
     public void removeColumn(int columnNumber) {
@@ -35,8 +49,35 @@ public class DataFrame {
         update();
     }
 
+    private void addColumn(Column column) {
+        columns.add(column);
+        columnNames.add("Column "+ (columns.size() - 1));
+        AggregateFunction[] agg = new AggregateFunction[1];
+        agg[0] = AggregateFunction.FIRST;
+        columnAggFunctions.add(agg);
+        update();
+    }
+
     public void addColumn(IntSequence columnData) {
         addColumn(new IntColumn(columnData));
+    }
+
+    public void addColumn(double start, double step) {
+        addColumn(new RegularColumn(start, step));
+    }
+
+    public void addColumn(List<Integer> columnData) {
+        addColumn(new IntSequence() {
+            @Override
+            public int size() {
+                return columnData.size();
+            }
+
+            @Override
+            public int get(int index) {
+                return columnData.get(index);
+            }
+        });
     }
 
     public void addColumn(int[] columnData) {
@@ -53,12 +94,21 @@ public class DataFrame {
         });
     }
 
+
+    public boolean isRegularColumn(int columnNumber) {
+        return columns.get(columnNumber) instanceof RegularColumn;
+    }
+
     public int rowCount() {
         return length;
     }
 
     public int columnCount() {
         return columns.size();
+    }
+
+    public void setColumnAggFunctions(int columnNumber, AggregateFunction... aggFunctions) {
+        columnAggFunctions.set(columnNumber, aggFunctions);
     }
 
     public String getColumnName(int columnNumber) {
@@ -69,11 +119,11 @@ public class DataFrame {
         columnNames.set(columnNumber, name);
     }
 
-    DataType getColumnType(int columnNumber) {
+    public DataType getColumnType(int columnNumber) {
         return columns.get(columnNumber).dataType();
     }
 
-    double getValue(int rowNumber, int columnNumber) {
+    public double getValue(int rowNumber, int columnNumber) {
         return columns.get(columnNumber).value(rowNumber);
     }
 
@@ -101,7 +151,6 @@ public class DataFrame {
         if(isEqualPoints) {
             double dataAvgStep = (getValue(length - 1, columnNumber) - getValue(0, columnNumber)) / (length - 1);
             int pointsNumber = (int) Math.round(interval / dataAvgStep);
-
             IntSequence groupIndexes = new IntSequence() {
                 @Override
                 public int size() {
@@ -154,6 +203,7 @@ public class DataFrame {
                 }
             }
         }
+        resultantFrame.update();
         return resultantFrame;
     }
 
@@ -165,6 +215,7 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+        resultantFrame.update();
         return resultantFrame;
     }
 
@@ -175,6 +226,7 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+        resultantFrame.update();
         return resultantFrame;
     }
 
@@ -190,8 +242,12 @@ public class DataFrame {
     }
 
     public void update() {
-        for (Column column : columns) {
-            length = Math.max(length, column.size());
+        if(columns.size() == 0) {
+            return;
+        }
+        length = columns.get(0).size();
+        for (int i = 1; i < columns.size(); i++) {
+            length = Math.min(length, columns.get(i).size());
         }
     }
 }

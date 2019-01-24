@@ -28,7 +28,7 @@ public enum AggregateFunction {
     public Object getFunctionImpl(String dataType) {
         // Capitalize the first letter of dataType string
         String type = dataType.substring(0, 1).toUpperCase() + dataType.substring(1);
-        String functionClassName = "com.biorecorder.data.aggregation.impl."+type + functionName;
+        String functionClassName = "com.biorecorder.data.aggregation."+type + functionName;
         try {
             return  (Class.forName(functionClassName)).newInstance();
         } catch (Throwable e) {

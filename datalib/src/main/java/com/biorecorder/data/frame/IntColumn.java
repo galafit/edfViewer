@@ -126,13 +126,23 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public BRange range(int from, int length) {
-        if(length == 0){
+    public BRange range(int from1, int length1) {
+        int from = from1;
+        int length = length1;
+        int dataSize = dataSequence.size();
+
+        if(dataSize == 0 || length <= 0 || from >= dataSize){
             return null;
+        }
+        if(from < 0) {
+            from = 0;
+        }
+        if(length + from > dataSize) {
+            length = dataSize - from;
         }
 
         // invoke data.get(i) can be expensive in the case data is grouped data
-        int dataItem = dataSequence.get(from); //
+        int dataItem = dataSequence.get(from);
         int min = dataItem;
         int max = dataItem;
         int till = from + length;
@@ -141,6 +151,7 @@ public class IntColumn implements Column {
             min = Math.min(min, dataItem);
             max = Math.max(max, dataItem);
         }
+
         return new BRange(min, max);
     }
 
@@ -148,11 +159,6 @@ public class IntColumn implements Column {
     @Override
     public IntSequence group(double interval) {
         int sequenceSize = dataSequence.size();
-        if(sequenceSize > Integer.MAX_VALUE) {
-            String errorMessage = "Grouping can not be done if rowCount > Integer.MAX_VALUE. Size = " + size();
-            throw new IllegalArgumentException(errorMessage);
-
-        }
 
         IntSequence groupIndexes = new IntSequence() {
             int intervalValue = (int) interval;
@@ -182,8 +188,10 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                 }
 
-                int from = groupIndexesList.get(groupListSize - 1);
-
+                int from = 0;
+                if(groupListSize > 0) {
+                   from = groupIndexesList.get(groupListSize - 1);
+                }
                 int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
                 groupValue += intervalValue;
                 for (int i = from + 1;  i < dataSize; i++) {

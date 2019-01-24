@@ -9,7 +9,7 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.data.frame.DataFrame;
+import com.biorecorder.data.frame.Range;
 
 import java.util.*;
 import java.util.List;
@@ -137,11 +137,13 @@ public class Chart {
         return minMax;
     }
 
+
     private void updateTraceData(int xIndex) {
         AxisWrapper xAxis = xAxisList.get(xIndex);
         for (int i = 0; i < traces.size(); i++) {
-            if (traces.get(i).getXAxisIndex() == xIndex) {
-                traces.get(i).setData(dataManager.getProcessedTraceData(i, xAxis.getMin(), xAxis.getMax()));
+            Trace trace = traces.get(i);
+            if (trace.getXAxisIndex() == xIndex) {
+                trace.setData(dataManager.getProcessedTraceData(i, xAxis.getScale()));
             }
         }
     }
@@ -149,8 +151,7 @@ public class Chart {
     private void initiateTraceData() {
         for (int i = 0; i < traces.size(); i++) {
             Trace trace = traces.get(i);
-            AxisWrapper xAxis = xAxisList.get(trace.getXAxisIndex());
-            trace.setData(dataManager.getProcessedTraceData(i, xAxis.getMin(), xAxis.getMax()));
+            trace.setData(dataManager.getProcessedTraceData(i, xAxisList.get(trace.getXAxisIndex()).getScale()));
         }
         dataDirty = false;
     }
@@ -595,11 +596,8 @@ public class Chart {
         }
 
         traces.add(trace);
-
-        double xMin = xAxisList.get(xIndex).getMin();
-        double xMax = xAxisList.get(xIndex).getMax();
         if (!dataDirty) {
-            trace.setData(dataManager.getProcessedTraceData(traces.size() - 1, xMin, xMax));
+            trace.setData(dataManager.getProcessedTraceData(traces.size() - 1, xAxisList.get(xIndex).getScale()));
         }
 
         // add1 trace legend button
