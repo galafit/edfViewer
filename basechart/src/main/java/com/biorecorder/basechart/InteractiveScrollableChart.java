@@ -9,11 +9,8 @@ import com.biorecorder.basechart.graphics.BRectangle;
  */
 public class InteractiveScrollableChart implements InteractiveDrawable {
     private final ScrollableChart chart;
-    private BPoint currentPoint;
-    private boolean isScrollbarMoved;
-    private boolean isInsideScroll = false;
     private BPoint lastStartPoint;
-
+    private boolean isScrollMoving;
 
     public InteractiveScrollableChart(ScrollableChart chart) {
         this.chart = chart;
@@ -121,6 +118,17 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if(dx == 0) {
             return false;
         }
+        if(startPoint != null && chart.previewContains(startPoint.getX(), startPoint.getY())) {
+            if(!startPoint.equals(lastStartPoint)){
+                lastStartPoint = startPoint;
+                isScrollMoving = chart.isPointInsideScroll(startPoint.getX(), startPoint.getY());
+            }
+
+            if(isScrollMoving) {
+                chart.translateScrolls(-dx);
+                return true;
+            }
+        }
 
         if(startPoint == null || chart.chartContains(startPoint.getX(), startPoint.getY())) {
             double scrollTranslation = 0;
@@ -142,15 +150,9 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
 
     @Override
     public boolean onScrollY(BPoint startPoint, int dy) {
-        System.out.println("scroll y");
         if(dy == 0 || startPoint == null) {
             return false;
         }
-
-
-
-
-
 
         if (chart.chartContains(startPoint.getX(), startPoint.getY())) {
             if(chart.chartTraceCount() == 0) {
@@ -164,16 +166,7 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             chart.translateChartY(chart.getChartTraceYIndex(selectedTraceIndex), dy);
             return true;
         } else {
-            if(!startPoint.equals(lastStartPoint)) {
-                lastStartPoint = startPoint;
-                if(chart.isPointInsideScroll(startPoint.getX(), startPoint.getY())) {
-                    isInsideScroll = true;
-                } else {
-                    isInsideScroll = false;
-                }
-            }
-
-            if(chart.previewTraceCount() == 0 || isInsideScroll) {
+            if(chart.previewTraceCount() == 0) {
                 return false;
             }
             int selectedTraceIndex = chart.getPreviewSelectedTraceIndex();
@@ -184,24 +177,6 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             chart.translatePreviewY(chart.getPreviewTraceYIndex(selectedTraceIndex), dy);
             return true;
         }
-    }
-
-    /**
-     * Used to move scrollbar only
-     */
-    public boolean onDrag(BPoint startPoint, int dx, int dy) {
-        if(startPoint != null && chart.previewContains(startPoint.getX(), startPoint.getY())) {
-            if(!startPoint.equals(currentPoint)){
-                currentPoint = startPoint;
-                isScrollbarMoved = chart.isPointInsideScroll(startPoint.getX(), startPoint.getY());
-            }
-
-            if(isScrollbarMoved) {
-                chart.translateScrolls(dx);
-                return true;
-            }
-        }
-        return false;
     }
 
 

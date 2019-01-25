@@ -73,7 +73,11 @@ public class TraceDataManager {
         double dataEnd = xScale.scale(dataMinMax.getMax());
 
 
-        int width = (int) BRange.intersect(new BRange(xStart, xEnd), new BRange(dataStart, dataEnd)).length();
+        int width = 0;
+        BRange intersection = BRange.intersect(new BRange(xStart, xEnd), new BRange(dataStart, dataEnd));
+        if(intersection != null) {
+            width = (int)intersection.length();
+        }
         BRange minMax = BRange.intersect(dataMinMax, new BRange(xMin, xMax));
 
         if(width == 0) {

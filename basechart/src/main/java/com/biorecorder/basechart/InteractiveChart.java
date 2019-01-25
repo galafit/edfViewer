@@ -129,11 +129,6 @@ public class InteractiveChart implements InteractiveDrawable {
         return true;
     }
 
-    @Override
-    public boolean onDrag(BPoint startPoint, int dx, int dy) {
-        // do nothing. this method used to move scrollbar only
-        return false;
-    }
 
     @Override
     public void draw(BCanvas canvas) {

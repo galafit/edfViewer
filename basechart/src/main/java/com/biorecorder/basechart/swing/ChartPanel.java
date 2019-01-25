@@ -20,6 +20,8 @@ public class ChartPanel extends JPanel implements KeyListener {
     private BPoint pressPoint;
     private int pastX;
     private int pastY;
+    private boolean isXDirection;
+    private boolean isYDirection;
 
 
     public ChartPanel(Chart chart1) {
@@ -45,10 +47,17 @@ public class ChartPanel extends JPanel implements KeyListener {
                     }
                 } else {
                     int dy = pastY - e.getY();
-                    int dx = e.getX() - pastX;
+                    int dx = pastX - e.getX();
 
                     pastX = e.getX();
                     pastY = e.getY();
+                    if(!isXDirection && !isYDirection) {
+                        if(Math.abs(dy) >= Math.abs(dx)) {
+                            isYDirection = true;
+                        } else {
+                            isXDirection = true;
+                        }
+                    }
 
                     if (e.isAltDown()
                             || e.isControlDown()
@@ -59,11 +68,14 @@ public class ChartPanel extends JPanel implements KeyListener {
                             repaint();
                         }
                     } else { // scroll
-                        if(chart.onScrollY(pressPoint, dy)) {
-                            repaint();
-                        }
-                        if(chart.onDrag(pressPoint, dx, dy)) {
-                            repaint();
+                        if(isYDirection) {
+                            if(chart.onScrollY(pressPoint, dy)) {
+                                repaint();
+                            }
+                        } else {
+                            if(chart.onScrollX(pressPoint, dx)) {
+                                repaint();
+                            }
                         }
                     }
                 }
@@ -95,6 +107,8 @@ public class ChartPanel extends JPanel implements KeyListener {
                     pastX = e.getX();
                     pastY = e.getY();
                     pressPoint = new BPoint(e.getX(), e.getY());
+                    isXDirection = false;
+                    isYDirection = false;
                 }
             }
 

@@ -27,12 +27,6 @@ public interface InteractiveDrawable {
     public boolean onScrollX(BPoint startPoint, int dx);
     public boolean onScrollY(BPoint startPoint, int dy);
 
-    /**
-     * Костыль для работы co скроллбаром. Пока не придумается
-     * лучший вариант
-     */
-    public boolean onDrag(BPoint startPoint, int dx, int dy);
-
 
     public boolean update();
 
