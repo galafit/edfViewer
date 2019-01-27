@@ -14,7 +14,9 @@ import java.util.List;
  */
 public class IntColumn implements Column {
     protected final static int NAN = Integer.MAX_VALUE;
+    protected final static DataType dataType = DataType.INT;
     protected IntSequence dataSequence;
+    protected MinMaxAgg minMaxAgg = new MinMaxAgg();
 
     public IntColumn(IntSequence data) {
         this.dataSequence = data;
@@ -73,7 +75,7 @@ public class IntColumn implements Column {
 
     @Override
     public DataType dataType() {
-        return DataType.NUMBER;
+        return dataType;
     }
 
     @Override
@@ -96,6 +98,23 @@ public class IntColumn implements Column {
     }
 
     @Override
+    public Column view(int[] elementsOrder) {
+        IntSequence subSequence = new IntSequence() {
+            @Override
+            public int size() {
+                return elementsOrder.length;
+            }
+
+            @Override
+            public int get(int index) {
+                return dataSequence.get(elementsOrder[index]);
+            }
+        };
+        return new IntColumn(subSequence);
+    }
+
+
+    @Override
     public Column slice(int from, int length) {
         int[] slicedData = new int[length];
         for (int i = 0; i < length; i++) {
@@ -106,15 +125,15 @@ public class IntColumn implements Column {
 
     @Override
     public void cache(int nLastExcluded) {
-        if(! (dataSequence instanceof CachingIntSequence)) {
-            dataSequence = new CachingIntSequence(dataSequence, nLastExcluded);
+        if(! (dataSequence instanceof IntCachingSequence)) {
+            dataSequence = new IntCachingSequence(dataSequence, nLastExcluded);
         }
     }
 
     @Override
     public void disableCaching() {
-        if(dataSequence instanceof CachingIntSequence) {
-            dataSequence = ((CachingIntSequence) dataSequence).getInnerData();
+        if(dataSequence instanceof IntCachingSequence) {
+            dataSequence = ((IntCachingSequence) dataSequence).getInnerData();
         }
     }
 
@@ -126,35 +145,76 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public BRange range(int from1, int length1) {
-        int from = from1;
-        int length = length1;
-        int dataSize = dataSequence.size();
-
-        if(dataSize == 0 || length <= 0 || from >= dataSize){
+    public BRange minMax(int length) {
+        if(length <= 0 ){
             return null;
         }
-        if(from < 0) {
-            from = 0;
-        }
-        if(length + from > dataSize) {
-            length = dataSize - from;
-        }
-
-        // invoke data.get(i) can be expensive in the case data is grouped data
-        int dataItem = dataSequence.get(from);
-        int min = dataItem;
-        int max = dataItem;
-        int till = from + length;
-        for (int i = from + 1; i < till ; i++) {
-            dataItem = dataSequence.get(i);
-            min = Math.min(min, dataItem);
-            max = Math.max(max, dataItem);
-        }
-
-        return new BRange(min, max);
+        recalculateAgg(length);
+        return new BRange(minMaxAgg.getMin(), minMaxAgg.getMax());
     }
 
+    @Override
+    public boolean isIncreasing(int length) {
+        if(length <= 0 ){
+            return true;
+        }
+        recalculateAgg(length);
+        return minMaxAgg.isIncreasing();
+    }
+
+    @Override
+    public boolean isDecreasing(int length) {
+        if(length <= 0 ){
+            return true;
+        }
+        recalculateAgg(length);
+        return minMaxAgg.isDecreasing();
+    }
+
+    private void recalculateAgg(int length) {
+        int n = minMaxAgg.getN();
+        if(n < length) {
+            minMaxAgg.add(dataSequence, n, length - n);
+        }
+    }
+
+    @Override
+    public int[] sort(int length) {
+        int[] orderedIndexes = new int[length];
+        if(isDecreasing(length)) {
+            for (int i = 0; i < length; i++) {
+                orderedIndexes[i]  = length - 1 - i;
+            }
+            return orderedIndexes;
+        }
+
+        for (int i = 0; i < length; i++) {
+           orderedIndexes[i]  = i;
+        }
+
+        if(isIncreasing(length)) {
+            return orderedIndexes;
+        }
+
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int index1, int index2) {
+                return Comparators.compareInt(dataSequence.get(orderedIndexes[index1]), dataSequence.get(orderedIndexes[index2]));
+            }
+        };
+        Swapper swapper = new Swapper() {
+            @Override
+            public void swap(int index1, int index2) {
+                int v1 = orderedIndexes[index1];
+                int v2 = orderedIndexes[index2];
+                orderedIndexes[index1] = v2;
+                orderedIndexes[index2] = v1;
+            }
+        };
+        SortAlgorithm.getDefault(false).sort(0, length, comparator, swapper);
+
+        return orderedIndexes;
+    }
 
     @Override
     public IntSequence group(double interval) {
@@ -216,7 +276,7 @@ public class IntColumn implements Column {
     @Override
     public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
         IntSequence resultantSequence = new IntSequence() {
-            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl("int");;
+            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);;
             private int lastIndex = -1;
 
             @Override
@@ -240,5 +300,82 @@ public class IntColumn implements Column {
             }
         };
         return new IntColumn(resultantSequence);
+    }
+
+    class MinMaxAgg {
+        protected int count;
+        private int min;
+        private int max;
+        private boolean isIncreasing = true;
+        private boolean isDecreasing = true;
+
+        public int add(IntSequence sequence, int from, int length) {
+            if(count == 0) {
+                min = sequence.get(from);
+                max = min;
+            }
+            int till = from + length;
+            for (int i = from + 1; i < till; i++) {
+              min = Math.min(min, sequence.get(i));
+              max = Math.max(max, sequence.get(i));
+              if(isIncreasing || isDecreasing) {
+                  int diff = sequence.get(i) - sequence.get(i - 1);
+                  if(isDecreasing && diff > 0) {
+                      isDecreasing = false;
+                  }
+                  if(isIncreasing && diff < 0) {
+                      isIncreasing = false;
+                  }
+              }
+            }
+            count +=length;
+            return count;
+        }
+
+        public int getMin() {
+            checkIfEmpty();
+            return min;
+        }
+
+        public int getMax() {
+            checkIfEmpty();
+            return max;
+        }
+
+        public boolean isIncreasing() {
+            checkIfEmpty();
+            return isIncreasing;
+        }
+
+        public boolean isDecreasing() {
+            checkIfEmpty();
+            return isDecreasing;
+        }
+
+        public int getN() {
+            return count;
+        }
+
+        public void reset() {
+            count = 0;
+        }
+
+        private void checkIfEmpty() {
+            if(count == 0) {
+                String errMsg = "No elements was added to group. Grouping function can not be calculated.";
+                throw new IllegalStateException(errMsg);
+            }
+        }
+    }
+
+    public static void main(String [ ] args) {
+        int[] arr = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
+        IntColumn col = new IntColumn(arr);
+
+        int[] sorted = col.sort(arr.length);
+        for (int i = 0; i < sorted.length; i++) {
+            System.out.println(i + "  "+ arr[sorted[i]]);
+        }
+
     }
 }

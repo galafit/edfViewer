@@ -197,7 +197,7 @@ public abstract class Axis {
     }
 
     /**
-     * Format domain value according to the range one "point precision"
+     * Format domain value according to the minMax one "point precision"
      * cutting unnecessary double digits that exceeds that "point precision"
      */
     public String formatDomainValue(double value) {

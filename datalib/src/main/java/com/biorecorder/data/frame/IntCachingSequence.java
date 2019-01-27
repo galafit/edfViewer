@@ -10,13 +10,13 @@ import com.biorecorder.data.sequence.IntSequence;
  * Input data could be a filter, function and so on
  */
 
-public class CachingIntSequence implements IntSequence {
+public class IntCachingSequence implements IntSequence {
     private IntSequence innerData;
     private IntArrayList cachedData;
     private int nLastExcluded;
 
 
-    public CachingIntSequence(IntSequence data, int nLastExcluded) {
+    public IntCachingSequence(IntSequence data, int nLastExcluded) {
         this.innerData = data;
         this.nLastExcluded = nLastExcluded;
         cachedData = new IntArrayList(innerData.size() - nLastExcluded);

@@ -20,26 +20,16 @@ public class DataFrame {
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
 
 
-  /*  public DataFrame(DataFrame dataFrame, int[] columnsOrder) {
+    public DataFrame() {
+    }
+
+    public DataFrame(DataFrame dataFrame, int[] columnsOrder) {
         for (int i = 0; i < columnsOrder.length; i++) {
             columns.add(dataFrame.columns.get(columnsOrder[i]));
             columnNames.add(dataFrame.columnNames.get(columnsOrder[i]));
             columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnsOrder[i]));
         }
-    }*/
-
-    public void reorderColumns(int[] columnsOrder) {
-        List<Column> columnsNew = new ArrayList<>(columns);
-        List<String> columnNamesNew = new ArrayList<>(columnNames);
-        List<AggregateFunction[]> columnAggFunctionsNew = new ArrayList<>(columnAggFunctions);
-        for (int i = 0; i < columnsOrder.length; i++) {
-            columnsNew.set(i, columns.get(columnsOrder[i]));
-            columnNamesNew.set(i, columnNames.get(columnsOrder[i]));
-            columnAggFunctionsNew.set(i, columnAggFunctions.get(columnsOrder[i]));
-        }
-        columns = columnsNew;
-        columnNames = columnNamesNew;
-        columnAggFunctions = columnAggFunctionsNew;
+        update();
     }
 
     public void removeColumn(int columnNumber) {
@@ -132,7 +122,7 @@ public class DataFrame {
     }
 
     public BRange getColumnRange(int columnNumber) {
-        return columns.get(columnNumber).range(0, length);
+        return columns.get(columnNumber).minMax(length);
     }
 
     public int nearest(int columnNumber, double value) {

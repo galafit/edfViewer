@@ -42,7 +42,7 @@ public class BColor {
             badComponentString = badComponentString + " Green";
         }
         if (rangeError == true) {
-            throw new IllegalArgumentException("Color parameter outside of expected range:"
+            throw new IllegalArgumentException("Color parameter outside of expected minMax:"
                             + badComponentString);
         }
         this.r = r;

@@ -2,7 +2,6 @@ package com.biorecorder.data.frame;
 
 import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.sequence.DoubleSequence;
 import com.biorecorder.data.sequence.IntSequence;
 
 /**
@@ -67,19 +66,8 @@ public class RegularColumn extends IntColumn {
 
     @Override
     public DataType dataType() {
-        return DataType.NUMBER;
+        return DataType.DOUBLE;
     }
-
-    @Override
-    public Column slice(int from, int length) {
-        return new RegularColumn(value(from), step, length);
-    }
-
-    @Override
-    public Column view(int from, int length) {
-        return slice(from, length);
-    }
-
 
     @Override
     public int nearest(double value, int from, int length) {
@@ -90,6 +78,35 @@ public class RegularColumn extends IntColumn {
             index = from + length + 1;
         }
         return index;
+    }
+
+    @Override
+    public BRange minMax(int length) {
+        return new BRange(value(0), value(length - 1));
+    }
+
+    @Override
+    public boolean isMonotonic(int length) {
+        return true;
+    }
+
+    @Override
+    public int[] sort(int length) {
+        int[] orderedIndexes = new int[length];
+        for (int i = 0; i < length; i++) {
+            orderedIndexes[i] = i;
+        }
+        return orderedIndexes;
+    }
+
+    @Override
+    public Column slice(int from, int length) {
+        return new RegularColumn(value(from), step, length);
+    }
+
+    @Override
+    public Column view(int from, int length) {
+        return slice(from, length);
     }
 
 
@@ -217,8 +234,4 @@ public class RegularColumn extends IntColumn {
         return sum(from, length) / length;
     }
 
-    @Override
-    public BRange range(int from, int length) {
-        return new BRange(value(from), value(from + length));
-    }
 }

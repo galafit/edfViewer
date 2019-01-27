@@ -54,7 +54,7 @@ public class BRange {
     }
 
     /**
-     * Create a range so that its:
+     * Create a minMax so that its:
      * min = min(range1.min, range2.min)
      * length = min(range1.length, range2.length) if both lengths > 0
      */

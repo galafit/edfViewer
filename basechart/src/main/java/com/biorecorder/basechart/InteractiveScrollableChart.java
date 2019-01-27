@@ -26,7 +26,13 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if (chart.chartContains(x, y)) {
             return chart.selectChartTrace(x, y);
         } else {
-            return chart.selectPreviewTrace(x, y);
+            if(chart.selectPreviewTrace(x, y)) {
+                return true;
+            }
+            if(chart.setScrollsPosition(x, y)) {
+               return true;
+            }
+            return false;
         }
     }
 

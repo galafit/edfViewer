@@ -16,18 +16,29 @@ public interface Column {
 
     DataType dataType();
 
-    // if length == -1 real rowCount will be used
+    BRange minMax(int length);
+
+    public boolean isIncreasing(int length);
+
+    public boolean isDecreasing(int length);
+
+    /**
+     * Returns a sorted version of the column without modifying the order
+     * of the underlying data.
+     *
+     * @return array of indexes representing sorted view of the underlying data
+     */
+    int[] sort(int length);
+
     Column slice(int from, int length);
     Column view(int from, int length);
+    Column view(int[] elementsOrder);
 
     void cache(int nLastExcluded);
     void disableCaching();
-
 
     int nearest(double value, int from, int length);
 
     IntSequence group(double interval);
     Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes);
-
-    BRange range(int from, int length);
 }

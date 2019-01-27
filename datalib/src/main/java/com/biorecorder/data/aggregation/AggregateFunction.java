@@ -1,6 +1,8 @@
 package com.biorecorder.data.aggregation;
 
 
+import com.biorecorder.data.frame.DataType;
+
 /**
  * Created by galafit on 25/11/17.
  */
@@ -25,9 +27,9 @@ public enum AggregateFunction {
      * @return grouping function Object corresponding
      * to the given type of data (IntGroupingAvg, FloatGroupingMin and so on)
      */
-    public Object getFunctionImpl(String dataType) {
+    public Object getFunctionImpl(DataType dataType) {
         // Capitalize the first letter of dataType string
-        String type = dataType.substring(0, 1).toUpperCase() + dataType.substring(1);
+        String type = dataType.toString().substring(0, 1).toUpperCase() + dataType.toString().substring(1);
         String functionClassName = "com.biorecorder.data.aggregation."+type + functionName;
         try {
             return  (Class.forName(functionClassName)).newInstance();
