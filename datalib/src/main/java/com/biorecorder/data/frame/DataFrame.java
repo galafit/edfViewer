@@ -84,6 +84,14 @@ public class DataFrame {
         });
     }
 
+    public boolean isColumnIncreasing(int columnNumber) {
+        return columns.get(columnNumber).isIncreasing(length);
+    }
+
+    public boolean isColumnDecreasing(int columnNumber) {
+        return columns.get(columnNumber).isDecreasing(length);
+    }
+
 
     public boolean isRegularColumn(int columnNumber) {
         return columns.get(columnNumber) instanceof RegularColumn;
@@ -209,6 +217,18 @@ public class DataFrame {
         return resultantFrame;
     }
 
+    public DataFrame sortedView(int columnNumber) {
+       int[] sorted = columns.get(columnNumber).sort(length);
+        DataFrame resultantFrame = new DataFrame();
+        for (int i = 0; i < columns.size(); i++) {
+            resultantFrame.columns.add(columns.get(i).view(sorted));
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        resultantFrame.update();
+        return resultantFrame;
+    }
+
     public DataFrame slice(int fromRowNumber, int length) {
         DataFrame resultantFrame = new DataFrame();
         for (int i = 0; i < columns.size(); i++) {
@@ -238,6 +258,27 @@ public class DataFrame {
         length = columns.get(0).size();
         for (int i = 1; i < columns.size(); i++) {
             length = Math.min(length, columns.get(i).size());
+        }
+    }
+
+    public static void main(String [ ] args) {
+        System.out.println("Sort test");
+
+        int[] arr = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
+
+        DataFrame frame = new DataFrame();
+        frame.addColumn(arr);
+
+        System.out.println("\nOriginal frame:");
+        for (int i = 0; i < frame.rowCount(); i++) {
+            System.out.println(i + "  "+ frame.getValue(i, 0));
+        }
+        int from = 2;
+        int length = 8;
+        DataFrame sortedSubFrame = frame.view(from,  length).sortedView(0);
+        System.out.println("\nResultant sorted sub frame: "+ "from = "+ from + "  length = " + length);
+        for (int i = 0; i < sortedSubFrame.rowCount(); i++) {
+            System.out.println(i + "  "+ sortedSubFrame.getValue(i, 0));
         }
     }
 }

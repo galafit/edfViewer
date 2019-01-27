@@ -16,6 +16,8 @@ public interface ChartData {
 
     boolean isRegular(int columnNumber);
 
+    boolean isDecreasing(int columnNumber);
+
     double getValue(int rowNumber, int columnNumber);
 
     String getLabel(int rowNumber, int columnNumber);
@@ -25,6 +27,8 @@ public interface ChartData {
     int nearest(int columnNumber, double value);
 
     ChartData view(int fromRowNumber, int length);
+
+    ChartData sortedView(int columnNumber);
 
     ChartData resample(int columnNumber, double interval, GroupingType groupingType);
 

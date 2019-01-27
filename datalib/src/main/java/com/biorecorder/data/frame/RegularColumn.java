@@ -86,8 +86,13 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public boolean isMonotonic(int length) {
+    public boolean isIncreasing(int length) {
         return true;
+    }
+
+    @Override
+    public boolean isDecreasing(int length) {
+        return false;
     }
 
     @Override

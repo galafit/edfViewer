@@ -75,6 +75,16 @@ public class XYData implements ChartData {
     }
 
     @Override
+    public boolean isDecreasing(int columnNumber) {
+        return dataFrame.isColumnDecreasing(columnNumber);
+    }
+
+    @Override
+    public ChartData sortedView(int columnNumber) {
+        return new XYData(dataFrame.sortedView(columnNumber));
+    }
+
+    @Override
     public double getValue(int rowNumber, int columnNumber) {
         return dataFrame.getValue(rowNumber, columnNumber);
     }

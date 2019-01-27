@@ -367,15 +367,4 @@ public class IntColumn implements Column {
             }
         }
     }
-
-    public static void main(String [ ] args) {
-        int[] arr = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
-        IntColumn col = new IntColumn(arr);
-
-        int[] sorted = col.sort(arr.length);
-        for (int i = 0; i < sorted.length; i++) {
-            System.out.println(i + "  "+ arr[sorted[i]]);
-        }
-
-    }
 }
