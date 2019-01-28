@@ -1,45 +1,119 @@
 package com.biorecorder.data.sequence;
 
 
+import com.biorecorder.data.frame.IntComparator;
+import com.biorecorder.data.frame.Swapper;
 
+/**
+ * Based on:
+ * <br><a href="https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/search/UpperBound.java">github UpperBound.java</a>
+ * <br><a href="https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/search/LowerBound.java">github LowerBound.java</a>
+ * <br><a href="https://rosettacode.org/wiki/Binary_search">Binary search</a>
+ */
 public class SequenceUtils {
+
+    public static int[] sort(boolean isParallel, IntSequence dataSequence, int length) {
+        int[] orderedIndexes = new int[length];
+
+        for (int i = 0; i < length; i++) {
+            orderedIndexes[i]  = i;
+        }
+
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int index1, int index2) {
+                return Comparators.compareInt(dataSequence.get(orderedIndexes[index1]), dataSequence.get(orderedIndexes[index2]));
+            }
+        };
+        Swapper swapper = new Swapper() {
+            @Override
+            public void swap(int index1, int index2) {
+                int v1 = orderedIndexes[index1];
+                int v2 = orderedIndexes[index2];
+                orderedIndexes[index1] = v2;
+                orderedIndexes[index2] = v1;
+            }
+        };
+        SortAlgorithm.getDefault(isParallel).sort(0, length, comparator, swapper);
+
+        return orderedIndexes;
+    }
+
+
     /**
-     * based on:
-     * http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/9b8c96f96a0f/src/share/classes/java/util/Arrays.java
-     *<p>
-     * Searches a minMax of
-     * the specified array of floats for the specified value using
-     * the binary search algorithm.
-     * The minMax must be sorted. If
-     * it is not sorted, the results are undefined. If the minMax contains
-     * multiple elements with the specified value, there is no guarantee which
-     * one will be found. This method considers all NaN values to be
-     * equivalent and equal.
+     * Binary search algorithm. The sequence must be sorted! Find some occurrence
+     * (if there are multiples, it returns some arbitrary one)
+     * or the insertion point for value in data sequence to maintain sorted order.
+     * If the sequence is not sorted, the results are undefined.
+     * @return returned index i satisfies a[i-1] < v <= a[i]. If there is no suitable index, return <b>from</b>
      *
-     * @return index of the search value, if it is contained in the array
-     *         within the specified minMax;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>. The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the minMax greater than the key,
-     *         or <tt>fromIndex + length - 1</tt> if all
-     *         elements in the minMax are less than the specified key. Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
+     * Complexity O(log n).
      */
-    public static int binarySearch(IntSequence data, int value, int fromIndex, int length) {
+    public static int bisect(IntSequence dataSequence, int value, int fromIndex, int length) {
         int low = fromIndex;
-        int high = fromIndex + length -1;
-        while (low <= high) {
+        int high = fromIndex + length;
+        while (low < high) {
             int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (value > data.get(mid)) {
+            if (Comparators.compareInt(value, dataSequence.get(mid)) > 0) {
                 low = mid + 1;
-            } else if (value < data.get(mid)) {
-                high = mid - 1;
+            } else if (Comparators.compareInt(value, dataSequence.get(mid)) < 0) {
+                high = mid;
             } else { //  Values are equal but for float and double additional checks is needed
                 return mid; // Key found
             }
         }
-        return -(low + 1);  // key not found.
+        return low;  // key not found.
     }
+
+
+
+    /**
+     * Lower bound binary search algorithm. The sequence must be sorted! Find the FIRST occurrence
+     * or the insertion point for value in data sequence to maintain sorted order.
+     * If the sequence is not sorted, the results are undefined.
+     * @return returned index i satisfies a[i-1] < v <= a[i]. If there is no suitable index, return <b>from</b>
+     *
+     * Complexity O(log n).
+     */
+    public static int bisectLeft(FloatSequence dataSequence, float value, int from, int length) {
+        int low = from;
+        int high = from + length;
+        while (low < high) {
+            final int mid = (low + high) >>> 1; // the same as (low + high) / 2
+            if (Comparators.compareFloat(value, dataSequence.get(mid)) <= 0) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return low;
+    }
+
+
+    /**
+     * Upper bound search algorithm. The sequence must be sorted. Find the LAST occurrence
+     * or the insertion point for value in data sequence to maintain sorted order.
+     * If the sequence is not sorted, the results are undefined.
+     * @return returned index i satisfies a[i-1] <= v < a[i]. If there is no suitable index, return <b>from + length</b>
+     *
+     * Complexity O(log n).
+     */
+    public static int bisectRight(FloatSequence dataSequence, float value, int from, int length) {
+        int low = from;
+        int high = from + length;
+        while (low < high) {
+            final int mid = (low + high) >>> 1; // the same as (low + high) / 2
+            if (Comparators.compareFloat(value, dataSequence.get(mid)) >= 0) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        if(low > from && Comparators.compareFloat(dataSequence.get(low - 1), value) == 0) {
+            return low - 1;
+        }
+        return low;
+    }
+
 }

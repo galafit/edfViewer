@@ -1,4 +1,4 @@
-package com.biorecorder.data.frame;
+package com.biorecorder.data.sequence;
 
 /**
  * A class that defines "compare" methods for different types

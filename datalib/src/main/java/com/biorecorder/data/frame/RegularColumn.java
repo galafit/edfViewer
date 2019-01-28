@@ -96,7 +96,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public int[] sort(int length) {
+    public int[] sort(boolean isParallel, int length) {
         int[] orderedIndexes = new int[length];
         for (int i = 0; i < length; i++) {
             orderedIndexes[i] = i;

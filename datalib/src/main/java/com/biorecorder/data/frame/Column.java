@@ -28,7 +28,7 @@ public interface Column {
      *
      * @return array of indexes representing sorted view of the underlying data
      */
-    int[] sort(int length);
+    int[] sort(boolean isParallel, int length);
 
     Column slice(int from, int length);
     Column view(int from, int length);

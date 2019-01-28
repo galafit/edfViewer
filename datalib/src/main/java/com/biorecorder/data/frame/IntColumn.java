@@ -4,8 +4,10 @@ import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.list.IntArrayList;
+import com.biorecorder.data.sequence.Comparators;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.SequenceUtils;
+import com.biorecorder.data.sequence.SortAlgorithm;
 
 import java.util.List;
 
@@ -140,7 +142,7 @@ public class IntColumn implements Column {
 
     @Override
     public int nearest(double value, int from, int length) {
-        return SequenceUtils.binarySearch(dataSequence, (int)Math.round(value), from,  length);
+        return SequenceUtils.bisect(dataSequence, (int)Math.round(value), from,  length);
 
     }
 
@@ -179,7 +181,7 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public int[] sort(int length) {
+    public int[] sort(boolean isParallel, int length) {
         int[] orderedIndexes = new int[length];
         if(isDecreasing(length)) {
             for (int i = 0; i < length; i++) {
@@ -188,32 +190,14 @@ public class IntColumn implements Column {
             return orderedIndexes;
         }
 
-        for (int i = 0; i < length; i++) {
-           orderedIndexes[i]  = i;
-        }
-
         if(isIncreasing(length)) {
+            for (int i = 0; i < length; i++) {
+                orderedIndexes[i]  = i;
+            }
             return orderedIndexes;
         }
 
-        IntComparator comparator = new IntComparator() {
-            @Override
-            public int compare(int index1, int index2) {
-                return Comparators.compareInt(dataSequence.get(orderedIndexes[index1]), dataSequence.get(orderedIndexes[index2]));
-            }
-        };
-        Swapper swapper = new Swapper() {
-            @Override
-            public void swap(int index1, int index2) {
-                int v1 = orderedIndexes[index1];
-                int v2 = orderedIndexes[index2];
-                orderedIndexes[index1] = v2;
-                orderedIndexes[index2] = v1;
-            }
-        };
-        SortAlgorithm.getDefault(false).sort(0, length, comparator, swapper);
-
-        return orderedIndexes;
+        return SequenceUtils.sort(isParallel, dataSequence, length);
     }
 
     @Override

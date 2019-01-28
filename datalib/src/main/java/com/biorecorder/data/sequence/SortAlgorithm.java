@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.biorecorder.data.frame;
+package com.biorecorder.data.sequence;
+
+import com.biorecorder.data.frame.IntComparator;
+import com.biorecorder.data.frame.Swapper;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;

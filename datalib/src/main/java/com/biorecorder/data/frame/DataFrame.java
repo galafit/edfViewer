@@ -41,7 +41,7 @@ public class DataFrame {
 
     private void addColumn(Column column) {
         columns.add(column);
-        columnNames.add("Column "+ (columns.size() - 1));
+        columnNames.add("Column " + (columns.size() - 1));
         AggregateFunction[] agg = new AggregateFunction[1];
         agg[0] = AggregateFunction.FIRST;
         columnAggFunctions.add(agg);
@@ -141,18 +141,18 @@ public class DataFrame {
         DataFrame resultantFrame = new DataFrame();
         Column baseColumn = columns.get(columnNumber);
         boolean isEqualPoints = false;
-        if(groupingType == GroupingType.EQUAL_POINTS_NUMBER ||
+        if (groupingType == GroupingType.EQUAL_POINTS_NUMBER ||
                 groupingType == GroupingType.AUTO && baseColumn instanceof RegularColumn) {
             isEqualPoints = true;
         }
 
-        if(isEqualPoints) {
+        if (isEqualPoints) {
             double dataAvgStep = (getValue(length - 1, columnNumber) - getValue(0, columnNumber)) / (length - 1);
             int pointsNumber = (int) Math.round(interval / dataAvgStep);
             IntSequence groupIndexes = new IntSequence() {
                 @Override
                 public int size() {
-                    if(length % pointsNumber == 0) {
+                    if (length % pointsNumber == 0) {
                         return length / pointsNumber + 1;
                     } else {
                         return length / pointsNumber + 2;
@@ -161,7 +161,7 @@ public class DataFrame {
 
                 @Override
                 public int get(int index) {
-                    if(index == size() - 1) {
+                    if (index == size() - 1) {
                         return length;
                     } else {
                         return index * pointsNumber;
@@ -172,9 +172,9 @@ public class DataFrame {
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
                 AggregateFunction[] aggregations = columnAggFunctions.get(i);
-                if(i == columnNumber && column instanceof RegularColumn) {
+                if (i == columnNumber && column instanceof RegularColumn) {
                     for (AggregateFunction aggregation : aggregations) {
-                        resultantFrame.columns.add(((RegularColumn)column).aggregate(aggregation, pointsNumber));
+                        resultantFrame.columns.add(((RegularColumn) column).aggregate(aggregation, pointsNumber));
                         resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                         AggregateFunction[] resultantAgg = {aggregation};
                         resultantFrame.columnAggFunctions.add(resultantAgg);
@@ -218,7 +218,8 @@ public class DataFrame {
     }
 
     public DataFrame sortedView(int columnNumber) {
-       int[] sorted = columns.get(columnNumber).sort(length);
+        boolean isParallel = false;
+        int[] sorted = columns.get(columnNumber).sort(isParallel, length);
         DataFrame resultantFrame = new DataFrame();
         for (int i = 0; i < columns.size(); i++) {
             resultantFrame.columns.add(columns.get(i).view(sorted));
@@ -252,7 +253,7 @@ public class DataFrame {
     }
 
     public void update() {
-        if(columns.size() == 0) {
+        if (columns.size() == 0) {
             return;
         }
         length = columns.get(0).size();
@@ -261,7 +262,7 @@ public class DataFrame {
         }
     }
 
-    public static void main(String [ ] args) {
+    public static void main(String[] args) {
         System.out.println("Sort test");
 
         int[] arr = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
@@ -271,14 +272,14 @@ public class DataFrame {
 
         System.out.println("\nOriginal frame:");
         for (int i = 0; i < frame.rowCount(); i++) {
-            System.out.println(i + "  "+ frame.getValue(i, 0));
+            System.out.println(i + "  " + frame.getValue(i, 0));
         }
         int from = 2;
         int length = 8;
-        DataFrame sortedSubFrame = frame.view(from,  length).sortedView(0);
-        System.out.println("\nResultant sorted sub frame: "+ "from = "+ from + "  length = " + length);
+        DataFrame sortedSubFrame = frame.view(from, length).sortedView(0);
+        System.out.println("\nResultant sorted sub frame: " + "from = " + from + "  length = " + length);
         for (int i = 0; i < sortedSubFrame.rowCount(); i++) {
-            System.out.println(i + "  "+ sortedSubFrame.getValue(i, 0));
+            System.out.println(i + "  " + sortedSubFrame.getValue(i, 0));
         }
     }
 }
