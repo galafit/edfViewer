@@ -70,18 +70,18 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public boolean isRegular(int columnNumber) {
-        return dataFrame.isRegularColumn(columnNumber);
+    public boolean isColumnRegular(int columnNumber) {
+        return dataFrame.isColumnRegular(columnNumber);
     }
 
     @Override
-    public boolean isDecreasing(int columnNumber) {
-        return dataFrame.isColumnDecreasing(columnNumber);
+    public boolean isColumnIncreasing(int columnNumber) {
+        return dataFrame.isColumnIncreasing(columnNumber);
     }
 
     @Override
-    public ChartData sortedView(int columnNumber) {
-        return new XYData(dataFrame.sortedView(columnNumber));
+    public ChartData sort(int sortColumn) {
+        return new XYData(dataFrame.sort(sortColumn));
     }
 
     @Override
@@ -95,13 +95,13 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public BRange getColumnRange(int columnNumber) {
-        return dataFrame.getColumnRange(columnNumber);
+    public BRange getColumnMinMax(int columnNumber) {
+        return dataFrame.getColumnMinMax(columnNumber);
     }
 
     @Override
     public int nearest(int columnNumber, double value) {
-        return dataFrame.nearest(columnNumber, value);
+        return dataFrame.bisect(columnNumber, value);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class XYData implements ChartData {
     @Override
     public void cache() {
         for (int i = 0; i < dataFrame.columnCount(); i++) {
-            if(!dataFrame.isRegularColumn(i)) {
+            if(!dataFrame.isColumnRegular(i)) {
                 dataFrame.cacheColumn(i, 1);
             }
         }

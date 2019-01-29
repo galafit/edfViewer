@@ -14,15 +14,15 @@ public class SequenceUtils {
 
     /**
      * This method do not modifying the order of the underlying data!
-     * It just returns an array of sorted indexes which represents sorted version (view)
+     * It simply returns an array of sorted indexes which represents sorted version (view)
      * of the data.
      * @return array of sorted indexes. So that dataSequence.get(sorted[i]) will be sorted for i = 0, 1,..., length - 1
      */
-    public static int[] sort(IntSequence dataSequence, int length, boolean isParallel) {
+    public static int[] sort(IntSequence dataSequence, int from, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
 
         for (int i = 0; i < length; i++) {
-            orderedIndexes[i]  = i;
+            orderedIndexes[i]  = i + from;
         }
 
         IntComparator comparator = new IntComparator() {
@@ -81,12 +81,12 @@ public class SequenceUtils {
      *
      * Complexity O(log n).
      */
-    public static int bisectLeft(FloatSequence dataSequence, float value, int from, int length) {
+    public static int bisectLeft(IntSequence dataSequence, int value, int from, int length) {
         int low = from;
         int high = from + length;
         while (low < high) {
             final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (Comparators.compareFloat(value, dataSequence.get(mid)) <= 0) {
+            if (Comparators.compareInt(value, dataSequence.get(mid)) <= 0) {
                 high = mid;
             } else {
                 low = mid + 1;
@@ -104,19 +104,19 @@ public class SequenceUtils {
      *
      * Complexity O(log n).
      */
-    public static int bisectRight(FloatSequence dataSequence, float value, int from, int length) {
+    public static int bisectRight(IntSequence dataSequence, int value, int from, int length) {
         int low = from;
         int high = from + length;
         while (low < high) {
             final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (Comparators.compareFloat(value, dataSequence.get(mid)) >= 0) {
+            if (Comparators.compareInt(value, dataSequence.get(mid)) >= 0) {
                 low = mid + 1;
             } else {
                 high = mid;
             }
         }
 
-        if(low > from && Comparators.compareFloat(dataSequence.get(low - 1), value) == 0) {
+        if(low > from && Comparators.compareInt(dataSequence.get(low - 1), value) == 0) {
             return low - 1;
         }
         return low;
@@ -144,15 +144,13 @@ public class SequenceUtils {
         for (int i = 0; i < dataSequence.size(); i++) {
             System.out.println(i + "  " + dataSequence.get(i));
         }
-        int from = 0;
+        int from = 2;
         int length = 8;
-        int[] sorted = sort(dataSequence, length, false);
+        int[] sorted = sort(dataSequence, from, length, false);
 
         System.out.println("\nResultant sorted data: " + "from = " + from + "  length = " + length);
         for (int i = 0; i < sorted.length; i++) {
             System.out.println(i + "  " + dataSequence.get(sorted[i]));
         }
     }
-
-
 }

@@ -49,7 +49,7 @@ public abstract class Trace {
     }
 
     public BRange getXRange() {
-        return data.getColumnRange(0);
+        return data.getColumnMinMax(0);
     }
 
     public long nearest(int x, int y, Scale xScale, Scale yScale) {

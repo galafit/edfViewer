@@ -98,16 +98,16 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public Column view(int[] elementsOrder) {
+    public Column view(int[] order) {
         IntSequence subSequence = new IntSequence() {
             @Override
             public int size() {
-                return elementsOrder.length;
+                return order.length;
             }
 
             @Override
             public int get(int index) {
-                return dataSequence.get(elementsOrder[index]);
+                return dataSequence.get(order[index]);
             }
         };
         return new IntColumn(subSequence);
@@ -137,11 +137,19 @@ public class IntColumn implements Column {
         }
     }
 
+    @Override
+    public int bisect(double value, int from, int length) {
+        return SequenceUtils.bisect(dataSequence, (int) Math.round(value), from,  length);
+    }
 
     @Override
-    public int nearest(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, (int)Math.round(value), from,  length);
+    public int bisectLeft(double value, int from, int length) {
+        return SequenceUtils.bisectLeft(dataSequence, (int) Math.round(value), from,  length);
+    }
 
+    @Override
+    public int bisectRight(double value, int from, int length) {
+        return SequenceUtils.bisectRight(dataSequence, (int) Math.round(value), from,  length);
     }
 
     @Override
@@ -179,23 +187,23 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public int[] sort(boolean isParallel, int length) {
+    public int[] sort(int from, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
         if(isDecreasing(length)) {
             for (int i = 0; i < length; i++) {
-                orderedIndexes[i]  = length - 1 - i;
+                orderedIndexes[i]  = length + from - 1 - i;
             }
             return orderedIndexes;
         }
 
         if(isIncreasing(length)) {
             for (int i = 0; i < length; i++) {
-                orderedIndexes[i]  = i;
+                orderedIndexes[i]  = i + from;
             }
             return orderedIndexes;
         }
 
-        return SequenceUtils.sort(dataSequence, length, isParallel);
+        return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
 
     @Override

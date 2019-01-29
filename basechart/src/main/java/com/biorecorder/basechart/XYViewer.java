@@ -23,11 +23,11 @@ public class XYViewer {
     }
 
     public BRange getYRange() {
-        return data.getColumnRange(1);
+        return data.getColumnMinMax(1);
     }
 
     public BRange getXRange() {
-        return data.getColumnRange(0);
+        return data.getColumnMinMax(0);
     }
 
     public long nearest(double xValue) {

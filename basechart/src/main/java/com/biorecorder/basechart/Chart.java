@@ -9,7 +9,6 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.data.frame.Range;
 
 import java.util.*;
 import java.util.List;
@@ -111,7 +110,7 @@ public class Chart {
                         pixelsInDataPoint = 1;
                     }
 
-                    double dataAvgStep =  traceData.getColumnRange(0).length() / (traceData.rowCount() - 1);
+                    double dataAvgStep =  traceData.getColumnMinMax(0).length() / (traceData.rowCount() - 1);
 
                     double traceExtent = dataAvgStep * fullArea.width / pixelsInDataPoint;
                     maxExtent = Math.max(maxExtent, traceExtent);

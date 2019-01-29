@@ -19,15 +19,14 @@ public class DataFrame {
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
 
-
     public DataFrame() {
     }
 
-    public DataFrame(DataFrame dataFrame, int[] columnsOrder) {
-        for (int i = 0; i < columnsOrder.length; i++) {
-            columns.add(dataFrame.columns.get(columnsOrder[i]));
-            columnNames.add(dataFrame.columnNames.get(columnsOrder[i]));
-            columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnsOrder[i]));
+    public DataFrame(DataFrame dataFrame, int[] columnOrder) {
+        for (int i = 0; i < columnOrder.length; i++) {
+            columns.add(dataFrame.columns.get(columnOrder[i]));
+            columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
+            columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
         }
         update();
     }
@@ -93,7 +92,7 @@ public class DataFrame {
     }
 
 
-    public boolean isRegularColumn(int columnNumber) {
+    public boolean isColumnRegular(int columnNumber) {
         return columns.get(columnNumber) instanceof RegularColumn;
     }
 
@@ -129,12 +128,74 @@ public class DataFrame {
         return columns.get(columnNumber).label(rowNumber);
     }
 
-    public BRange getColumnRange(int columnNumber) {
+    public BRange getColumnMinMax(int columnNumber) {
         return columns.get(columnNumber).minMax(length);
     }
 
-    public int nearest(int columnNumber, double value) {
-        return columns.get(columnNumber).nearest(value, 0, length);
+    public int bisect(int columnNumber, double value) {
+        return columns.get(columnNumber).bisect(value, 0, length);
+    }
+
+    public int bisectLeft(int columnNumber, double value) {
+        return columns.get(columnNumber).bisect(value, 0, length);
+    }
+
+    public int bisectRight(int columnNumber, double value) {
+        return columns.get(columnNumber).bisect(value, 0, length);
+    }
+
+    /**
+     * This method returns a sorted view of the data frame
+     * without modifying the order of the underlying data.
+     * (like JTable sort in java)
+     */
+    public DataFrame sort(int sortColumn) {
+        return view(getSortedRows(sortColumn));
+    }
+
+    /**
+     * This method returns an array of row numbers
+     * which represent sorted version (view) of the given column.
+     * (Similar to google chart DataTable.getSortedRows -
+     * https://developers.google.com/chart/interactive/docs/reference#DataTable)
+     * @return array of sorted rows for the given column.
+     */
+    public int[] getSortedRows(int sortColumn) {
+        boolean isParallel = false;
+        return columns.get(sortColumn).sort(0, length, isParallel);
+    }
+
+    public DataFrame slice(int fromRowNumber, int length) {
+        DataFrame resultantFrame = new DataFrame();
+        for (int i = 0; i < columns.size(); i++) {
+            resultantFrame.columns.add(columns.get(i).slice(fromRowNumber, length));
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        resultantFrame.update();
+        return resultantFrame;
+    }
+
+    public DataFrame view(int fromRowNumber, int length) {
+        DataFrame resultantFrame = new DataFrame();
+        for (int i = 0; i < columns.size(); i++) {
+            resultantFrame.columns.add(columns.get(i).view(fromRowNumber, length));
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        resultantFrame.update();
+        return resultantFrame;
+    }
+
+    public DataFrame view(int[] rowOrder) {
+        DataFrame resultantFrame = new DataFrame();
+        for (int i = 0; i < columns.size(); i++) {
+            resultantFrame.columns.add(columns.get(i).view(rowOrder));
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        resultantFrame.update();
+        return resultantFrame;
     }
 
     public DataFrame resample(int columnNumber, double interval, GroupingType groupingType) {
@@ -200,42 +261,6 @@ public class DataFrame {
                     resultantFrame.columnAggFunctions.add(resultantAgg);
                 }
             }
-        }
-        resultantFrame.update();
-        return resultantFrame;
-    }
-
-
-    public DataFrame view(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame();
-        for (int i = 0; i < columns.size(); i++) {
-            resultantFrame.columns.add(columns.get(i).view(fromRowNumber, length));
-            resultantFrame.columnNames.add(columnNames.get(i));
-            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
-        }
-        resultantFrame.update();
-        return resultantFrame;
-    }
-
-    public DataFrame sortedView(int columnNumber) {
-        boolean isParallel = false;
-        int[] sorted = columns.get(columnNumber).sort(isParallel, length);
-        DataFrame resultantFrame = new DataFrame();
-        for (int i = 0; i < columns.size(); i++) {
-            resultantFrame.columns.add(columns.get(i).view(sorted));
-            resultantFrame.columnNames.add(columnNames.get(i));
-            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
-        }
-        resultantFrame.update();
-        return resultantFrame;
-    }
-
-    public DataFrame slice(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame();
-        for (int i = 0; i < columns.size(); i++) {
-            resultantFrame.columns.add(columns.get(i).slice(fromRowNumber, length));
-            resultantFrame.columnNames.add(columnNames.get(i));
-            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
         resultantFrame.update();
         return resultantFrame;

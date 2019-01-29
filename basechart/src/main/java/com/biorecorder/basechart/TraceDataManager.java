@@ -35,7 +35,7 @@ public class TraceDataManager {
                 break;
 
             case AUTO:
-                if(traceData.isRegular(0)) {
+                if(traceData.isColumnRegular(0)) {
                     isEqualFrequencyGrouping = true;
                 } else {
                     isEqualFrequencyGrouping = false;
@@ -68,7 +68,7 @@ public class TraceDataManager {
         double xStart =  xScale.getRange()[0];
         double xEnd =  xScale.getRange()[1];
 
-        BRange dataMinMax = traceData.getColumnRange(0);
+        BRange dataMinMax = traceData.getColumnMinMax(0);
         double dataStart = xScale.scale(dataMinMax.getMin());
         double dataEnd = xScale.scale(dataMinMax.getMax());
 

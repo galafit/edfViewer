@@ -70,12 +70,31 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public int nearest(double value, int from, int length) {
+    public int bisect(double value, int from, int length) {
         int index = (int) ((value - value(0)) / step);
         if(index < from) {
-            return from - 1;
+            return from;
         } else if(index > from + length) {
-            index = from + length + 1;
+            index = from + length;
+        }
+        return index;
+    }
+
+    @Override
+    public int bisectLeft(double value, int from, int length) {
+        return bisect(value, from, length);
+    }
+
+    @Override
+    public int bisectRight(double value, int from, int length) {
+        int index = (int) ((value - value(0)) / step);
+        if(value(index) < value) {
+            index++;
+        }
+        if(index < from) {
+            return from;
+        } else if(index > from + length) {
+            index = from + length;
         }
         return index;
     }
@@ -96,10 +115,10 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public int[] sort(boolean isParallel, int length) {
+    public int[] sort(int from, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
         for (int i = 0; i < length; i++) {
-            orderedIndexes[i] = i;
+            orderedIndexes[i] = i + from;
         }
         return orderedIndexes;
     }

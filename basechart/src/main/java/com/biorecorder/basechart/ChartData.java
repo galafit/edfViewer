@@ -14,21 +14,21 @@ public interface ChartData {
 
     boolean isNumberColumn(int columnNumber);
 
-    boolean isRegular(int columnNumber);
+    boolean isColumnRegular(int columnNumber);
 
-    boolean isDecreasing(int columnNumber);
+    boolean isColumnIncreasing(int columnNumber);
 
     double getValue(int rowNumber, int columnNumber);
 
     String getLabel(int rowNumber, int columnNumber);
 
-    BRange getColumnRange(int columnNumber);
+    BRange getColumnMinMax(int columnNumber);
 
     int nearest(int columnNumber, double value);
 
     ChartData view(int fromRowNumber, int length);
 
-    ChartData sortedView(int columnNumber);
+    ChartData sort(int sortColumn);
 
     ChartData resample(int columnNumber, double interval, GroupingType groupingType);
 
