@@ -261,25 +261,4 @@ public class DataFrame {
             length = Math.min(length, columns.get(i).size());
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println("Sort test");
-
-        int[] arr = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
-
-        DataFrame frame = new DataFrame();
-        frame.addColumn(arr);
-
-        System.out.println("\nOriginal frame:");
-        for (int i = 0; i < frame.rowCount(); i++) {
-            System.out.println(i + "  " + frame.getValue(i, 0));
-        }
-        int from = 2;
-        int length = 8;
-        DataFrame sortedSubFrame = frame.view(from, length).sortedView(0);
-        System.out.println("\nResultant sorted sub frame: " + "from = " + from + "  length = " + length);
-        for (int i = 0; i < sortedSubFrame.rowCount(); i++) {
-            System.out.println(i + "  " + sortedSubFrame.getValue(i, 0));
-        }
-    }
 }

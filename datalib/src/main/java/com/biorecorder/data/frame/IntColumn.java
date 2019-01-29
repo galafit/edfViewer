@@ -4,10 +4,8 @@ import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.list.IntArrayList;
-import com.biorecorder.data.sequence.Comparators;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.SequenceUtils;
-import com.biorecorder.data.sequence.SortAlgorithm;
 
 import java.util.List;
 
@@ -197,7 +195,7 @@ public class IntColumn implements Column {
             return orderedIndexes;
         }
 
-        return SequenceUtils.sort(isParallel, dataSequence, length);
+        return SequenceUtils.sort(dataSequence, length, isParallel);
     }
 
     @Override

@@ -12,7 +12,13 @@ import com.biorecorder.data.frame.Swapper;
  */
 public class SequenceUtils {
 
-    public static int[] sort(boolean isParallel, IntSequence dataSequence, int length) {
+    /**
+     * This method do not modifying the order of the underlying data!
+     * It just returns an array of sorted indexes which represents sorted version (view)
+     * of the data.
+     * @return array of sorted indexes. So that dataSequence.get(sorted[i]) will be sorted for i = 0, 1,..., length - 1
+     */
+    public static int[] sort(IntSequence dataSequence, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
 
         for (int i = 0; i < length; i++) {
@@ -115,5 +121,38 @@ public class SequenceUtils {
         }
         return low;
     }
+
+
+    public static void main(String[] args) {
+        System.out.println("Sort test");
+
+        int[] data = {5, 2, 4, 1, 3, 8, 100, 1, 5, 3, 20};
+        IntSequence dataSequence = new IntSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public int get(int index) {
+                return data[index];
+            }
+        };
+
+
+        System.out.println("\nOriginal data:");
+        for (int i = 0; i < dataSequence.size(); i++) {
+            System.out.println(i + "  " + dataSequence.get(i));
+        }
+        int from = 0;
+        int length = 8;
+        int[] sorted = sort(dataSequence, length, false);
+
+        System.out.println("\nResultant sorted data: " + "from = " + from + "  length = " + length);
+        for (int i = 0; i < sorted.length; i++) {
+            System.out.println(i + "  " + dataSequence.get(sorted[i]));
+        }
+    }
+
 
 }
