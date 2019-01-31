@@ -5,6 +5,7 @@ import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
 import java.util.List;
@@ -139,17 +140,7 @@ public class IntColumn implements Column {
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, (int) Math.round(value), from,  length);
-    }
-
-    @Override
-    public int bisectLeft(double value, int from, int length) {
-        return SequenceUtils.bisectLeft(dataSequence, (int) Math.round(value), from,  length);
-    }
-
-    @Override
-    public int bisectRight(double value, int from, int length) {
-        return SequenceUtils.bisectRight(dataSequence, (int) Math.round(value), from,  length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.doubleToInt(value), from,  length);
     }
 
     @Override

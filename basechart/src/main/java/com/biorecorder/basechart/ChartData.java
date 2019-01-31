@@ -24,7 +24,7 @@ public interface ChartData {
 
     BRange getColumnMinMax(int columnNumber);
 
-    int nearest(int columnNumber, double value);
+    int bisect(int columnNumber, double value);
 
     ChartData view(int fromRowNumber, int length);
 

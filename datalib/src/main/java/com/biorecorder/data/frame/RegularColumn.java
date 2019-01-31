@@ -81,25 +81,6 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public int bisectLeft(double value, int from, int length) {
-        return bisect(value, from, length);
-    }
-
-    @Override
-    public int bisectRight(double value, int from, int length) {
-        int index = (int) ((value - value(0)) / step);
-        if(value(index) < value) {
-            index++;
-        }
-        if(index < from) {
-            return from;
-        } else if(index > from + length) {
-            index = from + length;
-        }
-        return index;
-    }
-
-    @Override
     public BRange minMax(int length) {
         return new BRange(value(0), value(length - 1));
     }

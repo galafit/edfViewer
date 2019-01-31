@@ -100,7 +100,7 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public int nearest(int columnNumber, double value) {
+    public int bisect(int columnNumber, double value) {
         return dataFrame.bisect(columnNumber, value);
     }
 

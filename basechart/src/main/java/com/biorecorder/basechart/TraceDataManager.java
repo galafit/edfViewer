@@ -122,8 +122,8 @@ public class TraceDataManager {
         if(processingConfig.isCropEnabled()) {
             int cropShoulder = CROP_SHOULDER * pointsInGroup;
 
-            int minIndex = traceData.nearest(0, minMax.getMin()) - cropShoulder;
-            int maxIndex = traceData.nearest(0, minMax.getMax()) + cropShoulder;
+            int minIndex = traceData.bisect(0, minMax.getMin()) - cropShoulder;
+            int maxIndex = traceData.bisect(0, minMax.getMax()) + cropShoulder;
             if(minIndex < 0) {
                 minIndex = 0;
             }

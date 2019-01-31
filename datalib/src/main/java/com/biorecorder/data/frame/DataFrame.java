@@ -132,17 +132,18 @@ public class DataFrame {
         return columns.get(columnNumber).minMax(length);
     }
 
+    /**
+     * Binary search algorithm. The column data must be sorted!
+     * Find the index of the <b>value</b> in the given column. If the column contains
+     * multiple elements equal to the searched <b>value</b>, there is no guarantee which
+     * one will be found. If there is no element equal to the searched value function returns
+     * the insertion point for <b>value</b> in the column to maintain sorted order
+     * (i.e. index of the first element in the column which is less than the searched value).
+     */
     public int bisect(int columnNumber, double value) {
         return columns.get(columnNumber).bisect(value, 0, length);
     }
 
-    public int bisectLeft(int columnNumber, double value) {
-        return columns.get(columnNumber).bisect(value, 0, length);
-    }
-
-    public int bisectRight(int columnNumber, double value) {
-        return columns.get(columnNumber).bisect(value, 0, length);
-    }
 
     /**
      * This method returns a sorted view of the data frame

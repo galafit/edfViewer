@@ -3,7 +3,7 @@ package com.biorecorder.data.sequence;
 /**
  * A class that defines "compare" methods for different types
  */
-public class Comparators {
+public class PrimitiveUtils {
     public static int compareInt(int x, int y) {
         return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
@@ -39,4 +39,57 @@ public class Comparators {
                 (thisBits < anotherBits ? -1 : // (-0.0, 0.0) or (!NaN, NaN)
                         1));                          // (0.0, -0.0) or (NaN, !NaN)
     }
+
+    public static double doubleToDouble(double d) {
+        return d;
+    }
+
+    public static float doubleToFloat(double d) {
+        return (float) d;
+    }
+
+    public static long doubleToLong(double d) {
+        return (long)d;
+    }
+
+    public static int doubleToInt(double d) {
+        return (int) d;
+    }
+
+    public static short doubleToShort(double d) {
+        int i = (int) d;
+        if(i > Short.MAX_VALUE) {
+            return Short.MAX_VALUE;
+        }
+        if(i < Short.MIN_VALUE) {
+            return Short.MIN_VALUE;
+        }
+        return (short) i;
+    }
+
+    public static void main(String[] args) {
+
+        double d = 4786777867867868654674678346734763478673478654478967.77;
+        System.out.printf("float  %f\n", (float)d);
+        System.out.printf("long   %d\n", (long)d);
+        System.out.printf("int    %d\n", (int)d);
+        System.out.printf("short  %d\n", (short)d);
+
+        System.out.println();
+        System.out.printf("float  %f\n", doubleToFloat(d));
+        System.out.printf("long   %d\n", doubleToLong(d));
+        System.out.printf("int    %d\n", doubleToInt(d));
+        System.out.printf("short  %d\n", doubleToShort(d));
+
+        d = -4786777867867868654674678346734763478673478654478967.77;
+
+        System.out.println();
+        System.out.printf("float  %f\n", doubleToFloat(d));
+        System.out.printf("long   %d\n", doubleToLong(d));
+        System.out.printf("int    %d\n", doubleToInt(d));
+        System.out.printf("short  %d\n", doubleToShort(d));
+
+
+    }
+
 }

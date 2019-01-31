@@ -31,7 +31,7 @@ public class XYViewer {
     }
 
     public long nearest(double xValue) {
-        return data.nearest(0, xValue);
+        return data.bisect(0, xValue);
     }
 
 }

@@ -53,7 +53,7 @@ public abstract class Trace {
     }
 
     public long nearest(int x, int y, Scale xScale, Scale yScale) {
-        return data.nearest(0, xScale.invert(x));
+        return data.bisect(0, xScale.invert(x));
 
     }
 
