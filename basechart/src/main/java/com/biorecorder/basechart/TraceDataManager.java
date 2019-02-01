@@ -59,9 +59,15 @@ public class TraceDataManager {
 
     public ChartData getProcessedData(Scale xScale) {
         traceData.update();
-        if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled()) || traceData.rowCount() <= 1) {
+
+        if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
+                || traceData.rowCount() <= 1
+                || !traceData.isColumnIncreasing(0) ) // if data not sorted (not increasing)
+        {
+            // No processing
             return traceData;
         }
+
 
         Double xMin = xScale.getDomain()[0];
         Double xMax = xScale.getDomain()[1];
@@ -73,14 +79,14 @@ public class TraceDataManager {
         double dataEnd = xScale.scale(dataMinMax.getMax());
 
 
-        int width = 0;
+        int drawingAreaWidth = 0;
         BRange intersection = BRange.intersect(new BRange(xStart, xEnd), new BRange(dataStart, dataEnd));
         if(intersection != null) {
-            width = (int)intersection.length();
+            drawingAreaWidth = (int)intersection.length();
         }
         BRange minMax = BRange.intersect(dataMinMax, new BRange(xMin, xMax));
 
-        if(width == 0) {
+        if(drawingAreaWidth == 0) {
             if(processingConfig.isCropEnabled()) {
                 return traceData.view(0, 0);
             } else {
@@ -89,11 +95,10 @@ public class TraceDataManager {
         }
 
 
-        double groupInterval = 0;
         // calculate best grouping interval
-        double bestInterval = minMax.length() * pixelsPerDataPoint / width;
-        int pointsInGroup = groupIntervalToPointsNumber(traceData, bestInterval);
-
+        double bestInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;
+        double groupInterval = bestInterval;
+        int pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
 
         if(processingConfig.isGroupEnabled()  && pointsInGroup > 1) {
 
@@ -113,9 +118,6 @@ public class TraceDataManager {
             }
          }
 
-         if(groupInterval == 0) {
-            groupInterval = bestInterval;
-         }
         System.out.println("points in group "+pointsInGroup);
 
         // if crop enabled
@@ -134,20 +136,24 @@ public class TraceDataManager {
             ChartData resultantData = traceData.view(minIndex, maxIndex - minIndex);
 
             if(pointsInGroup > 1) { // group only visible data
-                resultantData = resultantData.resample(0, groupInterval, processingConfig.getGroupingType());
+                if(isEqualFrequencyGrouping) {
+                    resultantData = resultantData.resampleByEqualFrequency(pointsInGroup);
+                } else {
+                    resultantData = resultantData.resampleByEqualInterval(0, groupInterval);
+                }
             }
             return resultantData;
         }
 
 
         // if crop disabled (mostly preview case) we group ALL data
-        // (so we do regroup only when it is actually needed)
+        // (so when it is possible we use already grouped data for further grouping)
         if(pointsInGroup > 1) {
             if(isEqualFrequencyGrouping) { // group by equal points number
                 if(groupedData != null) {
                     int pointsInGroup1 = groupIntervalToPointsNumber(groupedData, groupInterval);
                     if(pointsInGroup1 > 1) {
-                        ChartData regroupedData = groupedData.resample(0, groupInterval, processingConfig.getGroupingType());
+                        ChartData regroupedData = groupedData.resampleByEqualFrequency(pointsInGroup1);
                         // force "lazy" grouping
                         int rowCount = regroupedData.rowCount();
                         for (int i = 0; i < regroupedData.columnCount(); i++) {
@@ -157,11 +163,11 @@ public class TraceDataManager {
                         groupedData = regroupedData;
                     }
                 } else {
-                    groupedData = traceData.resample(0, groupInterval, processingConfig.getGroupingType());
+                    groupedData = traceData.resampleByEqualFrequency(pointsInGroup);
                 }
                 return groupedData;
             } else {
-                return traceData.resample(0, groupInterval, processingConfig.getGroupingType());
+                return traceData.resampleByEqualInterval(0, groupInterval);
             }
         }
 

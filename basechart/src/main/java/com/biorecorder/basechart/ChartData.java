@@ -30,7 +30,9 @@ public interface ChartData {
 
     ChartData sort(int sortColumn);
 
-    ChartData resample(int columnNumber, double interval, GroupingType groupingType);
+    ChartData resampleByEqualFrequency(int points);
+
+    ChartData resampleByEqualInterval(int columnNumber, double interval);
 
     void cache();
     void disableCaching();

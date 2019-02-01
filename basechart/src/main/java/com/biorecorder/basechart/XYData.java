@@ -110,8 +110,13 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public ChartData resample(int columnNumber, double interval, GroupingType groupingType) {
-        return new XYData(dataFrame.resample(columnNumber, interval, groupingType));
+    public ChartData resampleByEqualFrequency(int points) {
+        return new XYData(dataFrame.resampleByEqualFrequency(points));
+    }
+
+    @Override
+    public ChartData resampleByEqualInterval(int columnNumber, double interval) {
+        return new XYData(dataFrame.resampleByEqualInterval(columnNumber, interval));
     }
 
     @Override
