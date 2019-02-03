@@ -1,6 +1,5 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
@@ -16,11 +15,13 @@ public interface Column {
 
     DataType dataType();
 
-    BRange minMax(int length);
+   double max(int length);
 
-    public boolean isIncreasing(int length);
+    double min(int length);
 
-    public boolean isDecreasing(int length);
+    boolean isIncreasing(int length);
+
+    boolean isDecreasing(int length);
 
     /**
      * Returns a sorted version of the column without modifying the order

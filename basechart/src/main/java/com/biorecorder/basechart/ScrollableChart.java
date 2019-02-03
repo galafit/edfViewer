@@ -94,7 +94,7 @@ public class ScrollableChart {
 
     private void updatePreviewMinMax() {
         BRange previewMinMax = preview.getXMinMax(0);
-        BRange chartMinMax = chart.getOriginalDataMinMax();
+        BRange chartMinMax = chart.getAllTracesFullMinMax();
         for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
             chartMinMax = BRange.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
@@ -105,7 +105,7 @@ public class ScrollableChart {
     }
 
     private boolean scrollToEnd() {
-        BRange dataMinMax = chart.getOriginalDataMinMax();
+        BRange dataMinMax = chart.getAllTracesFullMinMax();
         double minExtent = 0;
 
         for (Integer xAxisIndex : scrolls.keySet()) {
@@ -117,7 +117,7 @@ public class ScrollableChart {
 
 
     private boolean isScrollAtTheEnd(int xAxisIndex) {
-        BRange dataRange = chart.getOriginalDataMinMax();
+        BRange dataRange = chart.getAllTracesFullMinMax();
         if (dataRange != null) {
             double dataMax = dataRange.getMax();
             double scrollEnd = scrolls.get(xAxisIndex).getValue() + scrolls.get(xAxisIndex).getExtent();

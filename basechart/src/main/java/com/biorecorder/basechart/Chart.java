@@ -52,12 +52,6 @@ public class Chart {
     private Insets margin;
     private DataManager dataManager;
     private boolean isYAxisRoundingEnabled = false;
-
-    /**
-     * Dirty data in js means that the data have been changed recently and
-     * * DOM haven't been re-rendered according to this changes yet.
-     **/
-    private boolean dataDirty = true;
  
     private Crosshair crosshair;
     private Tooltip tooltip;
@@ -99,22 +93,11 @@ public class Chart {
         crosshair = new Crosshair(chartConfig.getCrossHairConfig());
     }
 
-    Double getBestExtent(int xIndex) {
+    double getBestExtent(int xIndex) {
         double maxExtent = 0;
         for (int i = 0; i < traces.size(); i++) {
             if (traces.get(i).getXAxisIndex() == xIndex) {
-                ChartData traceData = dataManager.getOriginalTraceData(i);
-                if (traceData.rowCount() > 1) {
-                    int pixelsInDataPoint = traces.get(i).getMarkSize();
-                    if (pixelsInDataPoint == 0) {
-                        pixelsInDataPoint = 1;
-                    }
-
-                    double dataAvgStep =  traceData.getColumnMinMax(0).length() / (traceData.rowCount() - 1);
-
-                    double traceExtent = dataAvgStep * fullArea.width / pixelsInDataPoint;
-                    maxExtent = Math.max(maxExtent, traceExtent);
-                }
+                maxExtent = Math.max(maxExtent, dataManager.getBestExtent(i, fullArea.width));
             }
         }
         return maxExtent;
@@ -122,37 +105,12 @@ public class Chart {
 
 
     // for all x axis
-    BRange getOriginalDataMinMax() {
+    BRange getAllTracesFullMinMax() {
         BRange minMax = null;
         for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            ChartData traceData = trace.getData();
-            trace.setData(dataManager.getOriginalTraceData(i));
-            BRange traceMinMax = trace.getXRange();
-            minMax = BRange.join(minMax, traceMinMax);
-            // restore data
-            trace.setData(traceData);
+            minMax = BRange.join(minMax, dataManager.getTraceFullXMinMax(i));
         }
         return minMax;
-    }
-
-
-    private void updateTraceData(int xIndex) {
-        AxisWrapper xAxis = xAxisList.get(xIndex);
-        for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            if (trace.getXAxisIndex() == xIndex) {
-                trace.setData(dataManager.getProcessedTraceData(i, xAxis.getScale()));
-            }
-        }
-    }
-
-    private void initiateTraceData() {
-        for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            trace.setData(dataManager.getProcessedTraceData(i, xAxisList.get(trace.getXAxisIndex()).getScale()));
-        }
-        dataDirty = false;
     }
 
 
@@ -221,9 +179,6 @@ public class Chart {
 
 
     void calculateMarginsAndAreas(BCanvas canvas) {
-        if (dataDirty) {
-            initiateTraceData();
-        }
         if (titleText == null) {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
@@ -299,6 +254,9 @@ public class Chart {
         for (AxisWrapper axis : xAxisList) {
             axis.setStartEnd(areaX, areaX + areaWidth);
         }
+        for (Trace trace : traces) {
+            trace.removeData();
+        }
     }
 
     private void setYStartEnd(int areaY, int areaHeight) {
@@ -329,6 +287,13 @@ public class Chart {
         return false;
     }
 
+    private void removeTracesData(int xAxisIndex) {
+        for (Trace trace : traces) {
+            if(trace.getXAxisIndex() == xAxisIndex) {
+                trace.removeData();
+            }
+        }
+    }
 
     public void draw(BCanvas canvas) {
         if(titleText == null) {
@@ -336,8 +301,15 @@ public class Chart {
                 titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
             }
         }
+
         if (isAreasDirty()) {
             calculateMarginsAndAreas(canvas);
+        }
+        for (int i = 0; i < traces.size(); i++) {
+            Trace trace = traces.get(i);
+            if(!trace.isDataSet()) {
+                trace.setData(dataManager.getTraceData(i, xAxisList.get(trace.getXAxisIndex()).getScale()));
+            }
         }
 
         canvas.setColor(chartConfig.getMarginColor());
@@ -554,7 +526,7 @@ public class Chart {
 
 
     /**
-     * add1 trace to the stack with the given number
+     * add trace to the stack with the given number
      *
      * @param stackNumber
      * @param trace
@@ -580,10 +552,10 @@ public class Chart {
             isLeftYAxis = false;
         }
         int xIndex = isBottomXAxis ? 0 : 1;
-        int yAxisIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 + 1;
-        trace.setXAxisIndex(xIndex);
-        trace.setYAxisIndex(yAxisIndex);
-        yAxisList.get(yAxisIndex).setVisible(true);
+        int yIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 + 1;
+        trace.setAxes(xIndex, yIndex);
+
+        yAxisList.get(yIndex).setVisible(true);
         xAxisList.get(xIndex).setVisible(true);
 
         if (trace.getName() == null) {
@@ -595,9 +567,6 @@ public class Chart {
         }
 
         traces.add(trace);
-        if (!dataDirty) {
-            trace.setData(dataManager.getProcessedTraceData(traces.size() - 1, xAxisList.get(xIndex).getScale()));
-        }
 
         // add1 trace legend button
         SwitchButton legendButton = new SwitchButton(trace.getMainColor(), trace.getName());
@@ -662,7 +631,7 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         xAxisList.get(xIndex).setMinMax(min, max);
-        updateTraceData(xIndex);
+        removeTracesData(xIndex);
         if(! xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
             setAreasDirty();
         }
@@ -767,32 +736,32 @@ public class Chart {
     }
 
     public void autoScaleX(int xIndex) {
-        BRange tracesMinMax = null;
+        BRange tracesXMinMax = null;
         for (int i = 0; i < traces.size(); i++) {
-            if (getTraceXIndex(i) == xIndex) {
-                Trace trace = traces.get(i);
-                trace.setData(dataManager.getOriginalTraceData(i));
-                tracesMinMax = BRange.join(tracesMinMax, traces.get(i).getXRange());
+            if (traces.get(i).getXAxisIndex() == xIndex) {
+                tracesXMinMax = BRange.join(tracesXMinMax, dataManager.getTraceFullXMinMax(i));
             }
         }
-        if (tracesMinMax != null) {
-            setXMinMax(xIndex, tracesMinMax.getMin(), tracesMinMax.getMax());
+        if (tracesXMinMax != null) {
+            setXMinMax(xIndex, tracesXMinMax.getMin(), tracesXMinMax.getMax());
         }
-        dataDirty = false;
     }
 
     public void autoScaleY(int yIndex) {
-        if (dataDirty) {
-            initiateTraceData();
-        }
-        BRange tracesMinMax = null;
         for (int i = 0; i < traces.size(); i++) {
-            if (getTraceYIndex(i) == yIndex) {
-                tracesMinMax = BRange.join(tracesMinMax, traces.get(i).getYExtremes());
+            Trace trace = traces.get(i);
+            if(trace.getYAxisIndex() == yIndex && !trace.isDataSet()) {
+                trace.setData(dataManager.getTraceData(i, xAxisList.get(trace.getXAxisIndex()).getScale()));
             }
         }
-        if (tracesMinMax != null) {
-            setYMinMax(yIndex, tracesMinMax.getMin(), tracesMinMax.getMax());
+        BRange tracesYMinMax = null;
+        for (int i = 0; i < traces.size(); i++) {
+            if (getTraceYIndex(i) == yIndex) {
+                tracesYMinMax = BRange.join(tracesYMinMax, traces.get(i).getYExtremes());
+            }
+        }
+        if (tracesYMinMax != null) {
+            setYMinMax(yIndex, tracesYMinMax.getMin(), tracesYMinMax.getMax());
         }
     }
 

@@ -15,29 +15,36 @@ public abstract class Trace {
     private int yAxisIndex;
     private String name;
     private ChartData data;
+    private ChartData sortedData;
 
     public void setData(ChartData data) {
         this.data = data;
+        sortedData = null;
     }
 
-    public ChartData getData() {
-        return data;
+    public boolean isDataSet() {
+        if(data != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public void removeData() {
+        data = null;
+        sortedData = null;
+    }
+
+    public void setAxes(int xAxisIndex, int yAxisIndex) {
+        this.xAxisIndex = xAxisIndex;
+        this.yAxisIndex = yAxisIndex;
     }
 
     public int getXAxisIndex() {
         return xAxisIndex;
     }
 
-    public void setXAxisIndex(int xAxisIndex) {
-        this.xAxisIndex = xAxisIndex;
-    }
-
     public int getYAxisIndex() {
         return yAxisIndex;
-    }
-
-    public void setYAxisIndex(int yAxisIndex) {
-        this.yAxisIndex = yAxisIndex;
     }
 
     public String getName() {
@@ -53,8 +60,15 @@ public abstract class Trace {
     }
 
     public long nearest(int x, int y, Scale xScale, Scale yScale) {
-        return data.bisect(0, xScale.invert(x));
+        if(sortedData == null) {
+            if(data.isColumnIncreasing(0)) {
+                sortedData = data;
+            } else {
+                sortedData = data.sort(0);
+            }
+        }
 
+        return sortedData.bisect(0, xScale.invert(x));
     }
 
     public abstract int getMarkSize();

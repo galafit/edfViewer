@@ -96,7 +96,7 @@ public class XYData implements ChartData {
 
     @Override
     public BRange getColumnMinMax(int columnNumber) {
-        return dataFrame.getColumnMinMax(columnNumber);
+        return new BRange(dataFrame.getColumnMin(columnNumber), dataFrame.getColumnMax(columnNumber));
     }
 
     @Override

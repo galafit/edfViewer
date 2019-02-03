@@ -48,20 +48,29 @@ public class TraceDataManager {
         }
     }
 
-
-    public ChartData getOriginalData() {
-        return traceData;
+    public BRange getFullXMinMax() {
+        if(traceData.columnCount() == 0) {
+            return null;
+        }
+        traceData.update();
+        return traceData.getColumnMinMax(0);
     }
 
-    public ChartData getProcessedData_(Scale xScale) {
-        return traceData;
+    public double getBestExtent(int drawingAreaWidth) {
+        if (traceData.rowCount() > 1) {
+            double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth / pixelsPerDataPoint;
+            return traceExtent;
+        }
+        return 0;
     }
+
 
     public ChartData getProcessedData(Scale xScale) {
         traceData.update();
 
         if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
                 || traceData.rowCount() <= 1
+                || traceData.columnCount() == 0
                 || !traceData.isColumnIncreasing(0) ) // if data not sorted (not increasing)
         {
             // No processing
@@ -124,8 +133,15 @@ public class TraceDataManager {
         if(processingConfig.isCropEnabled()) {
             int cropShoulder = CROP_SHOULDER * pointsInGroup;
 
-            int minIndex = traceData.bisect(0, minMax.getMin()) - cropShoulder;
-            int maxIndex = traceData.bisect(0, minMax.getMax()) + cropShoulder;
+            int minIndex = 0;
+            if(dataMinMax.getMin() < xMin) {
+                minIndex = traceData.bisect(0, minMax.getMin()) - cropShoulder;
+            }
+
+            int maxIndex = traceData.rowCount() - 1;
+            if(dataMinMax.getMax() > xMax) {
+                maxIndex = traceData.bisect(0, minMax.getMax()) + cropShoulder;
+            }
             if(minIndex < 0) {
                 minIndex = 0;
             }

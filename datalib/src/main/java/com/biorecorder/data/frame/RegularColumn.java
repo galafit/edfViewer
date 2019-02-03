@@ -1,6 +1,6 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.basechart.BRange;
+
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
@@ -81,8 +81,13 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public BRange minMax(int length) {
-        return new BRange(value(0), value(length - 1));
+    public double max(int length) {
+        return value(length - 1);
+    }
+
+    @Override
+    public double min(int length) {
+        return value(0);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.basechart.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.list.IntArrayList;
@@ -144,28 +143,25 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public BRange minMax(int length) {
-        if(length <= 0 ){
-            return null;
-        }
+    public double min(int length) {
         recalculateAgg(length);
-        return new BRange(minMaxAgg.getMin(), minMaxAgg.getMax());
+        return minMaxAgg.getMin();
+    }
+
+    @Override
+    public double max(int length) {
+        recalculateAgg(length);
+        return minMaxAgg.getMax();
     }
 
     @Override
     public boolean isIncreasing(int length) {
-        if(length <= 0 ){
-            return true;
-        }
         recalculateAgg(length);
         return minMaxAgg.isIncreasing();
     }
 
     @Override
     public boolean isDecreasing(int length) {
-        if(length <= 0 ){
-            return true;
-        }
         recalculateAgg(length);
         return minMaxAgg.isDecreasing();
     }

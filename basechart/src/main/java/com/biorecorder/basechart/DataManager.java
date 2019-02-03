@@ -20,11 +20,15 @@ public class DataManager {
         traceDataManagers.add(new TraceDataManager(traceData, processingConfig, pixelsInDataPoint));
     }
 
-    public ChartData getOriginalTraceData(int traceNumber) {
-        return traceDataManagers.get(traceNumber).getOriginalData();
+    public double getBestExtent(int traceNumber, int drawingAreaWidth) {
+        return traceDataManagers.get(traceNumber).getBestExtent(drawingAreaWidth);
     }
 
-    public ChartData getProcessedTraceData(int traceNumber, Scale scale) {
+    public BRange getTraceFullXMinMax(int traceNumber) {
+        return traceDataManagers.get(traceNumber).getFullXMinMax();
+    }
+
+    public ChartData getTraceData(int traceNumber, Scale scale) {
        return traceDataManagers.get(traceNumber).getProcessedData(scale);
     }
 }

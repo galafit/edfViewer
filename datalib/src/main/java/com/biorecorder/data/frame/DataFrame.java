@@ -1,7 +1,5 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.basechart.BRange;
-import com.biorecorder.basechart.GroupingType;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
@@ -83,19 +81,6 @@ public class DataFrame {
         });
     }
 
-    public boolean isColumnIncreasing(int columnNumber) {
-        return columns.get(columnNumber).isIncreasing(length);
-    }
-
-    public boolean isColumnDecreasing(int columnNumber) {
-        return columns.get(columnNumber).isDecreasing(length);
-    }
-
-
-    public boolean isColumnRegular(int columnNumber) {
-        return columns.get(columnNumber) instanceof RegularColumn;
-    }
-
     public int rowCount() {
         return length;
     }
@@ -121,16 +106,47 @@ public class DataFrame {
     }
 
     public double getValue(int rowNumber, int columnNumber) {
+        rangeCheck(rowNumber);
         return columns.get(columnNumber).value(rowNumber);
     }
 
     public String getLabel(int rowNumber, int columnNumber) {
+        rangeCheck(rowNumber);
         return columns.get(columnNumber).label(rowNumber);
     }
 
-    public BRange getColumnMinMax(int columnNumber) {
-        return columns.get(columnNumber).minMax(length);
+    public double getColumnMin(int columnNumber) {
+        if(length < 1) {
+            return Double.NaN;
+        }
+        return columns.get(columnNumber).min(length);
     }
+
+    public double getColumnMax(int columnNumber) {
+        if(length < 1) {
+            return Double.NaN;
+        }
+        return columns.get(columnNumber).max(length);
+    }
+
+    public boolean isColumnIncreasing(int columnNumber) {
+        if(length < 1) {
+            return true;
+        }
+        return columns.get(columnNumber).isIncreasing(length);
+    }
+
+    public boolean isColumnDecreasing(int columnNumber) {
+        if(length < 1) {
+            return true;
+        }
+        return columns.get(columnNumber).isDecreasing(length);
+    }
+
+    public boolean isColumnRegular(int columnNumber) {
+        return columns.get(columnNumber) instanceof RegularColumn;
+    }
+
 
     /**
      * Binary search algorithm. The column data must be sorted!
@@ -151,17 +167,17 @@ public class DataFrame {
      * (like JTable sort in java)
      */
     public DataFrame sort(int sortColumn) {
-        return view(getSortedRows(sortColumn));
+        return view(argSort(sortColumn));
     }
 
     /**
-     * This method returns an array of row numbers
+     * This method returns an array of row numbers (indexes)
      * which represent sorted version (view) of the given column.
-     * (Similar to google chart DataTable.getSortedRows -
-     * https://developers.google.com/chart/interactive/docs/reference#DataTable)
-     * @return array of sorted rows for the given column.
+     * (Similar to numpy.argsort or google chart DataTable.getSortedRows -
+     * https://developers.google.com/chart/interactive/docs/reference#DataTable,)
+     * @return array of sorted rows (indexes) for the given column.
      */
-    public int[] getSortedRows(int sortColumn) {
+    public int[] argSort(int sortColumn) {
         boolean isParallel = false;
         return columns.get(sortColumn).sort(0, length, isParallel);
     }
@@ -320,4 +336,14 @@ public class DataFrame {
             length = Math.min(length, columns.get(i).size());
         }
     }
+
+    private void rangeCheck(long rowNumber) {
+        if (rowNumber >= length || rowNumber < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(rowNumber));
+    }
+
+    private String outOfBoundsMsg(long index) {
+        return "Index: "+index+", Size: "+length;
+    }
+
 }
