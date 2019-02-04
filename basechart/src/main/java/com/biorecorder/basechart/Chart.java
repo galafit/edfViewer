@@ -237,7 +237,6 @@ public class Chart {
                 BRectangle legendArea = new BRectangle(legendAreaXStart, legendAreaYStart, legendAreaXEnd - legendAreaXStart, legendAreaYEnd - legendAreaYStart);
                 legends.get(stackIndex).setArea(legendArea);
             }
-
         }
     }
 
@@ -253,9 +252,6 @@ public class Chart {
     private void setXStartEnd(int areaX, int areaWidth) {
         for (AxisWrapper axis : xAxisList) {
             axis.setStartEnd(areaX, areaX + areaWidth);
-        }
-        for (Trace trace : traces) {
-            trace.removeData();
         }
     }
 
@@ -588,6 +584,9 @@ public class Chart {
 
     public void setArea(BRectangle area) {
         fullArea = area;
+        for (Trace trace : traces) {
+            trace.removeData();
+        }
         setXStartEnd(area.x, area.width);
         setYStartEnd(area.y, area.height);
         setAreasDirty();
@@ -630,10 +629,11 @@ public class Chart {
 
 
     public void setXMinMax(int xIndex, double min, double max) {
-        xAxisList.get(xIndex).setMinMax(min, max);
-        removeTracesData(xIndex);
-        if(! xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
-            setAreasDirty();
+        if(xAxisList.get(xIndex).setMinMax(min, max)) {
+            removeTracesData(xIndex);
+            if(! xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
+                setAreasDirty();
+            }
         }
     }
 
@@ -924,14 +924,28 @@ public class Chart {
             return scale;
         }
 
-        public void setMinMax(double min, double max) {
-            rowMinMax = new BRange(min, max);
-            setRoundingDirty();
+        /**
+         * return true if axis min or max actually will be changed
+         */
+        public boolean setMinMax(double min, double max) {
+            if(rowMinMax.getMin() != min || rowMinMax.getMax() != max) {
+                rowMinMax = new BRange(min, max);
+                setRoundingDirty();
+                return true;
+            }
+            return false;
         }
 
-        public void setStartEnd(double start, double end) {
-            setRoundingDirty();
-            axis.setStartEnd(start, end);
+        /**
+         * return true if axis start or end actually changed
+         */
+        public boolean setStartEnd(int start, int end) {
+            if((int)axis.getStart() != start || (int) axis.getEnd() != end) {
+                setRoundingDirty();
+                axis.setStartEnd(start, end);
+                return true;
+            }
+            return false;
         }
 
         public double getMin() {

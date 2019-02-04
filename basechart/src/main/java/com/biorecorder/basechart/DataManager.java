@@ -31,4 +31,5 @@ public class DataManager {
     public ChartData getTraceData(int traceNumber, Scale scale) {
        return traceDataManagers.get(traceNumber).getProcessedData(scale);
     }
+
 }

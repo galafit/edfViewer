@@ -14,12 +14,14 @@ public abstract class Trace {
     private int xAxisIndex;
     private int yAxisIndex;
     private String name;
+
+    boolean isIncreasingChecked = false;
     private ChartData data;
-    private ChartData sortedData;
+    private int[] sorter;
 
     public void setData(ChartData data) {
         this.data = data;
-        sortedData = null;
+        isIncreasingChecked = false;
     }
 
     public boolean isDataSet() {
@@ -31,7 +33,6 @@ public abstract class Trace {
 
     public void removeData() {
         data = null;
-        sortedData = null;
     }
 
     public void setAxes(int xAxisIndex, int yAxisIndex) {
@@ -55,20 +56,37 @@ public abstract class Trace {
         this.name = name;
     }
 
-    public BRange getXRange() {
-        return data.getColumnMinMax(0);
-    }
-
-    public long nearest(int x, int y, Scale xScale, Scale yScale) {
-        if(sortedData == null) {
-            if(data.isColumnIncreasing(0)) {
-                sortedData = data;
-            } else {
-                sortedData = data.sort(0);
+    public int nearest(int x, int y, Scale xScale, Scale yScale) {
+        // "lazy" sorting solo when tooltips are called
+        if (!isIncreasingChecked) {
+            if (!data.isColumnIncreasing(0)) {
+                sorter = data.sortedIndices(0);
+                System.out.println("sort");
             }
+            isIncreasingChecked = true;
+        }
+        double xValue = xScale.invert(x);
+
+        int nearest = data.bisect(0, xValue, sorter);
+
+        if (nearest >= data.rowCount()) {
+            nearest = data.rowCount() - 1;
         }
 
-        return sortedData.bisect(0, xScale.invert(x));
+        int nearest_prev = nearest;
+        if (nearest > 0){
+            nearest_prev = nearest - 1;
+        }
+
+        if(sorter != null) {
+            nearest = sorter[nearest];
+            nearest_prev = sorter[nearest_prev];
+        }
+        if(Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
+            nearest = nearest_prev;
+        }
+
+        return nearest;
     }
 
     public abstract int getMarkSize();

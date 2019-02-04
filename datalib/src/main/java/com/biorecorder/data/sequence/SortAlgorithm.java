@@ -171,7 +171,7 @@ public abstract class SortAlgorithm {
          */
         public void sort( final int from, final int to, final IntComparator comp, final Swapper swapper ) {
             final int len = to - from;
-            // Insertion sort on smallest arrays
+            // Insertion sortedIndices on smallest arrays
             if ( len < QUICKSORT_NO_REC ) {
                 for ( int i = from; i < to; i++ )
                     for ( int j = i; j > from && ( comp.compare( j - 1, j ) > 0 ); j-- ) {
@@ -232,7 +232,7 @@ public abstract class SortAlgorithm {
             s = Math.min( d - c, to - d - 1 );
             swap( swapper, b, to - s, s );
 
-            // Recursively sort non-partition-elements
+            // Recursively sortedIndices non-partition-elements
             if ( ( s = b - a ) > 1 ) sort( from, from + s, comp, swapper );
             if ( ( s = d - c ) > 1 ) sort( to - s, to, comp, swapper );
         }
@@ -334,7 +334,7 @@ public abstract class SortAlgorithm {
             s = Math.min( d - c, to - d - 1 );
             swap( swapper, b, to - s, s );
 
-            // Recursively sort non-partition-elements
+            // Recursively sortedIndices non-partition-elements
             int t;
             s = b - a;
             t = d - c;

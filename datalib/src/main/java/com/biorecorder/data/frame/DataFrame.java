@@ -154,30 +154,42 @@ public class DataFrame {
      * multiple elements equal to the searched <b>value</b>, there is no guarantee which
      * one will be found. If there is no element equal to the searched value function returns
      * the insertion point for <b>value</b> in the column to maintain sorted order
-     * (i.e. index of the first element in the column which is less than the searched value).
+     * (i.e. index of the first element in the column which is bigger than the searched value).
+     * @param sorter - Default null.
+     *               Optional array of integer indices that sortedIndices column data
+     *               into ascending order (if data column itself is not sorted).
+     *               They are typically the result of {@link #sortedIndices(int)}
      */
-    public int bisect(int columnNumber, double value) {
-        return columns.get(columnNumber).bisect(value, 0, length);
+    public int bisect(int columnNumber, double value, int[] sorter) {
+        Column column = columns.get(columnNumber);
+        if(sorter != null) {
+            column = column.view(sorter);
+        }
+        int length1 = length;
+        if(sorter != null) {
+            length1 = Math.min(length, sorter.length);
+        }
+        return column.bisect(value, 0, length1);
     }
 
 
     /**
      * This method returns a sorted view of the data frame
      * without modifying the order of the underlying data.
-     * (like JTable sort in java)
+     * (like JTable sortedIndices in java)
      */
     public DataFrame sort(int sortColumn) {
-        return view(argSort(sortColumn));
+        return view(sortedIndices(sortColumn));
     }
 
     /**
-     * This method returns an array of row numbers (indexes)
+     * This method returns an array of row numbers (indices)
      * which represent sorted version (view) of the given column.
      * (Similar to numpy.argsort or google chart DataTable.getSortedRows -
      * https://developers.google.com/chart/interactive/docs/reference#DataTable,)
-     * @return array of sorted rows (indexes) for the given column.
+     * @return array of sorted rows (indices) for the given column.
      */
-    public int[] argSort(int sortColumn) {
+    public int[] sortedIndices(int sortColumn) {
         boolean isParallel = false;
         return columns.get(sortColumn).sort(0, length, isParallel);
     }

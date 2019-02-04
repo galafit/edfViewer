@@ -10,8 +10,8 @@ It is provided "as is" without expressed or implied warranty.
 */
 /**
  * A comparison function which imposes a <i>total ordering</i> on some
- * collection of elements.  Comparators can be passed to a sort method (such as
- * <tt>cern.colt.Sorting.quickSort</tt>) to allow precise control over the sort order.<p>
+ * collection of elements.  Comparators can be passed to a sortedIndices method (such as
+ * <tt>cern.colt.Sorting.quickSort</tt>) to allow precise control over the sortedIndices order.<p>
  *
  * Note: It is generally a good idea for comparators to implement
  * <tt>java.io.Serializable</tt>, as they may be used as ordering methods in

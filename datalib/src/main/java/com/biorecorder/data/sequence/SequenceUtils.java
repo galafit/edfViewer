@@ -52,9 +52,10 @@ public class SequenceUtils {
      * multiple elements equal to the searched <b>value</b>, there is no guarantee which
      * one will be found. If there is no element equal to the searched value function returns
      * the insertion point for <b>value</b> in the data sequence to maintain sorted order
-     * (i.e. index of the first element which is less than the searched value).
+     * (i.e. index of the first element which is bigger than the searched value).
      */
     public static int bisect(IntSequence data, int value, int fromIndex, int length) {
+
         int low = fromIndex;
         int high = fromIndex + length;
         while (low < high) {

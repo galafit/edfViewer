@@ -24,11 +24,11 @@ public interface ChartData {
 
     BRange getColumnMinMax(int columnNumber);
 
-    int bisect(int columnNumber, double value);
+    int bisect(int columnNumber, double value, int[] sorter);
 
     ChartData view(int fromRowNumber, int length);
 
-    ChartData sort(int sortColumn);
+    int[] sortedIndices(int sortColumn);
 
     ChartData resampleByEqualFrequency(int points);
 

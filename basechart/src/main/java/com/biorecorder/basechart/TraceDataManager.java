@@ -64,19 +64,26 @@ public class TraceDataManager {
         return 0;
     }
 
-
-    public ChartData getProcessedData(Scale xScale) {
-        traceData.update();
-
+    public boolean isDataProcessingEnabled() {
         if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
                 || traceData.rowCount() <= 1
                 || traceData.columnCount() == 0
                 || !traceData.isColumnIncreasing(0) ) // if data not sorted (not increasing)
         {
             // No processing
+            return false;
+        }
+        return true;
+    }
+
+
+    public ChartData getProcessedData(Scale xScale) {
+        traceData.update();
+
+        if(!isDataProcessingEnabled()){
+            // No processing
             return traceData;
         }
-
 
         Double xMin = xScale.getDomain()[0];
         Double xMax = xScale.getDomain()[1];
@@ -135,12 +142,12 @@ public class TraceDataManager {
 
             int minIndex = 0;
             if(dataMinMax.getMin() < xMin) {
-                minIndex = traceData.bisect(0, minMax.getMin()) - cropShoulder;
+                minIndex = traceData.bisect(0, minMax.getMin(), null) - cropShoulder;
             }
 
             int maxIndex = traceData.rowCount() - 1;
             if(dataMinMax.getMax() > xMax) {
-                maxIndex = traceData.bisect(0, minMax.getMax()) + cropShoulder;
+                maxIndex = traceData.bisect(0, minMax.getMax(), null) + cropShoulder;
             }
             if(minIndex < 0) {
                 minIndex = 0;

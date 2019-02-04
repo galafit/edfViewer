@@ -80,8 +80,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public ChartData sort(int sortColumn) {
-        return new XYData(dataFrame.sort(sortColumn));
+    public int[] sortedIndices(int sortColumn) {
+        return dataFrame.sortedIndices(sortColumn);
     }
 
     @Override
@@ -100,8 +100,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public int bisect(int columnNumber, double value) {
-        return dataFrame.bisect(columnNumber, value);
+    public int bisect(int columnNumber, double value, int[] sorter) {
+        return dataFrame.bisect(columnNumber, value, sorter);
     }
 
     @Override
