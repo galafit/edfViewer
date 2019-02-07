@@ -19,11 +19,9 @@ public class SwitchButton {
 
     private BRectangle bounds;
 
-    public SwitchButton(BColor color, String label) {
-        this.color = color;
+    public SwitchButton(String label) {
         this.label = label;
     }
-
 
     public void switchState() {
         if(model.isSelected()) {
@@ -64,6 +62,9 @@ public class SwitchButton {
         bounds.y += dy;
     }
 
+    public String getLabel() {
+        return label;
+    }
 
     public BRectangle getBounds(BCanvas canvas) {
         if(bounds == null) {

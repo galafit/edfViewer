@@ -52,7 +52,6 @@ public class TraceDataManager {
         if(traceData.columnCount() == 0) {
             return null;
         }
-        traceData.update();
         return traceData.getColumnMinMax(0);
     }
 
@@ -78,7 +77,6 @@ public class TraceDataManager {
 
 
     public ChartData getProcessedData(Scale xScale) {
-        traceData.update();
 
         if(!isDataProcessingEnabled()){
             // No processing
@@ -134,7 +132,7 @@ public class TraceDataManager {
             }
          }
 
-        System.out.println("points in group "+pointsInGroup);
+       // System.out.println("points in group "+pointsInGroup);
 
         // if crop enabled
         if(processingConfig.isCropEnabled()) {

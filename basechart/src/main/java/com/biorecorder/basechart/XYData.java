@@ -12,6 +12,11 @@ import java.util.List;
 public class XYData implements ChartData {
     private DataFrame dataFrame;
 
+    @Override
+    public void addDataAppendListener(DataAppendListener listener) {
+
+    }
+
     public XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
     }
@@ -134,8 +139,4 @@ public class XYData implements ChartData {
 
     }
 
-    @Override
-    public void update() {
-        dataFrame.update();
-    }
 }

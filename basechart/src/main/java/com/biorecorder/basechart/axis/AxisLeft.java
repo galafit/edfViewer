@@ -17,11 +17,11 @@ public class AxisLeft extends AxisVertical {
     }
 
     @Override
-    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel) {
+    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
-        int labelHeight = tm.ascent();
+        int labelHeight = charSize;
 
         if(isTickLabelInside) {
             int y = tickPosition - space;
@@ -44,6 +44,11 @@ public class AxisLeft extends AxisVertical {
             return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
 
         }
+    }
+
+    @Override
+    protected int charSize(TextMetric tm) {
+        return tm.ascent();
     }
 
     @Override

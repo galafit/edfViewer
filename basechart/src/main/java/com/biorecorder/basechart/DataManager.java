@@ -20,6 +20,10 @@ public class DataManager {
         traceDataManagers.add(new TraceDataManager(traceData, processingConfig, pixelsInDataPoint));
     }
 
+    public void removeTrace(int traceNumber) {
+        traceDataManagers.remove(traceNumber);
+    }
+
     public double getBestExtent(int traceNumber, int drawingAreaWidth) {
         return traceDataManagers.get(traceNumber).getBestExtent(drawingAreaWidth);
     }

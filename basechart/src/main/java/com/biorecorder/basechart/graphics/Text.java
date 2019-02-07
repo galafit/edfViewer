@@ -90,11 +90,11 @@ public class Text {
      *
      * Test method to see how text positioning works
      */
-  /*  public static void main(String[] args) {
+ /*   public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.rowCount(new Dimension(800, 800));
-        frame.add1(new JComponent() {
+        frame.setSize(new Dimension(800, 800));
+        frame.add(new JComponent() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -111,12 +111,12 @@ public class Text {
                 Text text2 = new Text(str, p.x, p.y, TextAnchor.END, TextAnchor.START, fm);
                 Text text3 = new Text(str, p1.x, p1.y, TextAnchor.MIDDLE, TextAnchor.MIDDLE, fm);
 
-                g.setMainColor(Color.gray);
-                g.fillRect(text1.getxValue(), text1.getyValues() - fm.getAscent(),strWidth , strAscent);
-                g.fillRect(text2.getxValue(), text2.getyValues() - fm.getAscent(),strWidth , strAscent);
-                g.fillRect(text3.getxValue(), text3.getyValues() - fm.getAscent(),strWidth , strAscent);
+                g.setColor(Color.gray);
+                g.fillRect(text1.getX(), text1.getY() - fm.getAscent(),strWidth , strAscent);
+                g.fillRect(text2.getX(), text2.getY() - fm.getAscent(),strWidth , strAscent);
+                g.fillRect(text3.getX(), text3.getY() - fm.getAscent(),strWidth , strAscent);
 
-                g.setMainColor(Color.RED);
+                g.setColor(Color.RED);
                 Graphics2D g2  = (Graphics2D) g;
                 text1.draw(g2);
                 text2.draw(g2);
@@ -126,12 +126,12 @@ public class Text {
                 Text rotatedText2 = new Text(str, p.x, p.y, TextAnchor.START, TextAnchor.END, -90, fm);
                 Text rotatedText3 = new Text(str, p1.x, p1.y, TextAnchor.MIDDLE, TextAnchor.MIDDLE, 90, fm);
 
-                g.setMainColor(Color.BLUE);
+                g.setColor(Color.BLUE);
                 rotatedText1.draw(g2);
                 rotatedText2.draw(g2);
                 rotatedText3.draw(g2);
 
-                g.setMainColor(Color.black);
+                g.setColor(Color.black);
                 g.drawLine(p.x, p.y - 600, p.x, p.y + 600);
                 g.drawLine(p.x - 300, p.y, p.x + 300, p.y);
                 g.drawLine(p1.x - 300, p1.y, p1.x + 300, p1.y);

@@ -17,25 +17,38 @@ public class AxisBottom extends AxisHorizontal {
     }
 
     @Override
-    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel) {
+    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
-        int charHalfWidth = tm.stringWidth("0")/2;
+        int charHalfWidth = charSize/2;
 
         if(isTickLabelInside) {
-            int x = tickPosition + space;
             int y = -axisWidth / 2 - labelPadding;
+            int x = tickPosition + space;
+
+            if(x + charSize * tickLabel.length() > getEnd()) {
+                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
+            }
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
 
         } else {
+            int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
             int x = tickPosition - charHalfWidth;
             if(x < getStart()) {
                 x = (int)getStart() + space;
             }
-            int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
+            if(x + charSize * tickLabel.length() > getEnd()) {
+                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.END, tm);
+            }
+
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
         }
+    }
+
+    @Override
+    protected int charSize(TextMetric tm) {
+        return tm.stringWidth("0");
     }
 
     @Override

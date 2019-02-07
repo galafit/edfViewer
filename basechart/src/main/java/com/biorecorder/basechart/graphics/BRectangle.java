@@ -22,4 +22,9 @@ public class BRectangle {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "x: " + x + "  y: " + y + "  width: " + width + "  height: " + height;
+    }
 }

@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.StateListener;
-import com.biorecorder.basechart.button.SwitchButton;
 import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
@@ -531,8 +530,6 @@ public class Chart {
      * @param isYAxisOpposite
      */
     public void addTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        dataManager.addTrace(traceData, trace.getMarkSize());
-
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
         if (isXAxisOpposite && isBottomAxisPrimary) {
@@ -562,12 +559,11 @@ public class Chart {
             trace.setMainColor(traceColors[traces.size() % traceColors.length]);
         }
 
+        dataManager.addTrace(traceData, trace.getMarkSize());
         traces.add(trace);
 
-        // add1 trace legend button
-        SwitchButton legendButton = new SwitchButton(trace.getMainColor(), trace.getName());
         final int traceIndex = traces.size() - 1;
-        legendButton.addListener(new StateListener() {
+        StateListener traceSelectionListener = new StateListener() {
             @Override
             public void stateChanged(boolean isSelected) {
                 if (isSelected) {
@@ -577,8 +573,8 @@ public class Chart {
                     selectedTraceIndex = -1;
                 }
             }
-        });
-        legends.get(stackNumber).add(traceIndex, legendButton);
+        };
+        legends.get(stackNumber).add(trace, traceSelectionListener);
     }
 
 

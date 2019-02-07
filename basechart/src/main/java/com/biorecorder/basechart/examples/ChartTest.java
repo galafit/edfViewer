@@ -68,7 +68,7 @@ public class ChartTest extends JFrame {
 
         chart.addStack();
 
-        chart.addTrace(0, new LineTrace(), xyData1, false, false);
+        chart.addTrace(0, new LineTrace(), xyData1, true, false);
         chart.addTrace(0, new LineTrace(), xyData1, false, false);
         chart.addTrace(0, new LineTrace(), xyData3, false, false);
 

@@ -69,7 +69,6 @@ public abstract class Axis {
     }
 
 
-
     public void setTitle(String title) {
         this.title = title;
         setDirty();
@@ -512,13 +511,14 @@ public abstract class Axis {
 
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = null;
+        int charSize = charSize(tm);
 
         while (currentTick.getValue() <= max) {
             // tick position
             tickPositions.add((int) scale(currentTick.getValue()));
 
             // tick label
-            tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel()));
+            tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel(), charSize));
             for (int i = 0; i < ticksSkipStep; i++) {
                 nextTick = tickProvider.getNextTick();
             }
@@ -586,7 +586,8 @@ public abstract class Axis {
 
     protected abstract int labelSizeForOverlap(TextMetric tm, int angle, String label);
 
-    protected abstract Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel);
+    protected abstract Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize);
+    protected abstract int charSize(TextMetric tm);
 
     protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
 
