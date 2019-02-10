@@ -493,6 +493,9 @@ public class Chart {
         setAreasDirty();
     }
 
+    public void addStack() {
+        addStack(defaultWeight);
+    }
 
     public void addStack(int weight) {
         AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), chartConfig.getLeftAxisConfig()));
@@ -509,11 +512,6 @@ public class Chart {
         stackWeights.add(weight);
         setAreasDirty();
     }
-
-    public void addStack() {
-        addStack(defaultWeight);
-    }
-
 
     /**
      * add trace to the stack with the given number
@@ -569,6 +567,12 @@ public class Chart {
             }
         };
         legend.add(trace, traceSelectionListener);
+    }
+
+    public void removeTrace(int traceNumber) {
+        legend.remove(traces.get(traceNumber));
+        dataManager.removeTrace(traceNumber);
+        traces.remove(traceNumber);
     }
 
     public void setArea(BRectangle area) {

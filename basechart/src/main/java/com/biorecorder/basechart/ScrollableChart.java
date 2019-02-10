@@ -386,6 +386,11 @@ public class ScrollableChart {
         isScrollDirty = true;
     }
 
+    public void removeChartTrace(int traceNumber) {
+        chart.removeTrace(traceNumber);
+        isScrollDirty = true;
+    }
+
     public int chartTraceCount() {
         return chart.traceCount();
     }
@@ -446,7 +451,6 @@ public class ScrollableChart {
         return false;
     }
 
-
     public void addPreviewStack() {
         preview.addStack();
     }
@@ -457,6 +461,11 @@ public class ScrollableChart {
 
     public void addPreviewTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         preview.addTrace(stackNumber, trace, traceData, isXAxisOpposite, isYAxisOpposite);
+    }
+
+    public void removePreviewTrace(int traceNumber) {
+        preview.removeTrace(traceNumber);
+        isScrollDirty = true;
     }
 
     public int previewTraceCount() {

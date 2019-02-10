@@ -79,6 +79,7 @@ public class Legend {
         SwitchButton traceButton = tracesToButtons.get(trace);
         buttonGroup.remove(traceButton.getModel());
         tracesToButtons.remove(trace);
+        isDirty = true;
     }
 
     private BRectangle getTraceArea(Trace trace) {
