@@ -26,7 +26,10 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if(chart.selectTrace(x, y)) {
             return true;
         } else {
-            return chart.setScrollsPosition(x, y);
+            if(chart.isPreviewContains(new BPoint(x, y)))  {
+                return chart.setScrollsPosition(x, y);
+            }
+            return false;
         }
     }
 
@@ -123,18 +126,22 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             return true;
         }
 
-        double scrollTranslation = 0;
-        int xIndex = chart.getChartXIndex(startPoint);
-        if(xIndex >= 0) {
-            scrollTranslation = chart.getScrollExtent(xIndex) / chart.getXMinMax().length();
-        } else {
-            for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                double translation = chart.getScrollExtent(i) / chart.getXMinMax().length();
-                scrollTranslation = Math.max(scrollTranslation, translation);
+        if(startPoint == null || chart.isChartContains(startPoint)) {
+            double scrollTranslation = 0;
+            int xIndex = chart.getChartXIndex(startPoint);
+            if(xIndex >= 0) {
+                scrollTranslation = chart.getScrollExtent(xIndex) / chart.getXMinMax().length();
+            } else {
+                for (int i = 0; i < chart.chartXAxisCount(); i++) {
+                    double translation = chart.getScrollExtent(i) / chart.getXMinMax().length();
+                    scrollTranslation = Math.max(scrollTranslation, translation);
+                }
             }
+            chart.translateScrolls(dx * scrollTranslation);
+            return true;
         }
-        chart.translateScrolls(dx * scrollTranslation);
-        return true;
+
+        return false;
     }
 
     @Override
