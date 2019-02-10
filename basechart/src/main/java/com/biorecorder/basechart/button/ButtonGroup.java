@@ -16,6 +16,13 @@ public class ButtonGroup {
        item.setGroup(this);
     }
 
+    public void remove(ButtonModel item) {
+        if(selection == item) {
+            selection = null;
+        }
+        items.remove(item);
+    }
+
     public void setSelected(ButtonModel item, boolean isSelected) {
         if (isSelected && item != null && item != selection) {
             ButtonModel oldSelection = selection;

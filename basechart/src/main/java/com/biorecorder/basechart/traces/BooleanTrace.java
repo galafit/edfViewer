@@ -41,7 +41,7 @@ public class BooleanTrace extends Trace {
 
 
     @Override
-    public InfoItem[] getInfo(int dataIndex, Scale xScale, Scale yScale){
+    public InfoItem[] getInfo(int dataIndex){
         if (dataIndex == -1){
             return new InfoItem[0];
         }
@@ -58,7 +58,7 @@ public class BooleanTrace extends Trace {
 
 
     @Override
-    public BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale) {
+    public BPoint getDataPosition(int dataIndex) {
         if(xyData.getY(dataIndex) > 0) {
             return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.getRange()[1]);
         }
@@ -66,7 +66,7 @@ public class BooleanTrace extends Trace {
     }
 
     @Override
-    public void draw(BCanvas canvas, Scale xScale, Scale yScale) {
+    public void draw(BCanvas canvas) {
         double[] yRange = yScale.getRange();
         int yStart = (int)yRange[0];
         int yEnd = (int) yRange[yRange.length - 1];

@@ -26,10 +26,12 @@ public class InteractiveChart implements InteractiveDrawable {
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex >= 0) {
-            chart.autoScaleX(chart.getTraceXIndex(selectedTraceIndex));
-            chart.autoScaleY(chart.getTraceYIndex(selectedTraceIndex));
+        int xIndex = chart.getXIndex(new BPoint(x, y));
+        int yIndex = chart.getYIndex(new BPoint(x, y));
+
+        if(xIndex >= 0 && yIndex >= 0) {
+            chart.autoScaleX(xIndex);
+            chart.autoScaleY(yIndex);
         } else {
             for (int i = 0; i < chart.xAxisCount(); i++) {
                 chart.autoScaleX(i);
@@ -51,11 +53,8 @@ public class InteractiveChart implements InteractiveDrawable {
         if(chart.traceCount() == 0) {
             return false;
         }
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex < 0) {
-            selectedTraceIndex = 0;
-        }
-       return chart.hoverOn(x, y, selectedTraceIndex);
+
+       return chart.hoverOn(x, y);
     }
 
     @Override
@@ -66,13 +65,12 @@ public class InteractiveChart implements InteractiveDrawable {
         if(chart.traceCount() == 0) {
             return false;
         }
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex < 0) {
-            selectedTraceIndex = 0;
+        int xAxis = chart.getXIndex(startPoint);
+        if(xAxis >= 0) {
+            chart.zoomX(xAxis, scaleFactor);
+            return true;
         }
-
-        chart.zoomX(chart.getTraceXIndex(selectedTraceIndex), scaleFactor);
-        return true;
+        return false;
     }
 
     @Override
@@ -84,13 +82,12 @@ public class InteractiveChart implements InteractiveDrawable {
         if(chart.traceCount() == 0) {
             return false;
         }
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex < 0) {
-            selectedTraceIndex = 0;
+        int yAxis = chart.getYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.zoomY(yAxis, scaleFactor);
+            return true;
         }
-
-        chart.zoomY(chart.getTraceYIndex(selectedTraceIndex), scaleFactor);
-        return true;
+        return false;
     }
 
     @Override
@@ -98,17 +95,15 @@ public class InteractiveChart implements InteractiveDrawable {
         if(dx == 0) {
             return false;
         }
-
         if(chart.traceCount() == 0) {
             return false;
         }
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex < 0) {
-            selectedTraceIndex = 0;
+        int xAxis = chart.getXIndex(startPoint);
+        if(xAxis >= 0) {
+            chart.translateX(xAxis, dx);
+            return true;
         }
-
-        chart.translateX(chart.getTraceXIndex(selectedTraceIndex), dx);
-        return true;
+        return false;
     }
 
     @Override
@@ -116,17 +111,15 @@ public class InteractiveChart implements InteractiveDrawable {
         if(dy == 0) {
             return false;
         }
-
         if(chart.traceCount() == 0) {
             return false;
         }
-        int selectedTraceIndex = chart.getSelectedTraceIndex();
-        if(selectedTraceIndex < 0) {
-            selectedTraceIndex = 0;
+        int yAxis = chart.getYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.translateY(yAxis, dy);
+            return true;
         }
-
-        chart.translateY(chart.getTraceYIndex(selectedTraceIndex), dy);
-        return true;
+        return false;
     }
 
 

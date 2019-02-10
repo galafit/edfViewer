@@ -127,7 +127,7 @@ public abstract class Axis {
      * @return copy of inner scale
      */
     public Scale getScale() {
-        return scale.copy();
+        return scale;
     }
 
     /**

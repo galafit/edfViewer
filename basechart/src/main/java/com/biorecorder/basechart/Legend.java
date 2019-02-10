@@ -9,7 +9,9 @@ import com.biorecorder.basechart.graphics.HorizontalAlign;
 import com.biorecorder.basechart.graphics.VerticalAlign;
 import com.biorecorder.basechart.traces.Trace;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -18,7 +20,7 @@ import java.util.Map;
  */
 public class Legend {
     private ButtonGroup buttonGroup;
-    private Map<Trace, SwitchButton> buttons = new HashMap<>();
+    private Map<Trace, SwitchButton> tracesToButtons = new HashMap<>();
     private BRectangle area;
 
     private LegendConfig config;
@@ -26,16 +28,16 @@ public class Legend {
     private VerticalAlign valign;
     private boolean isDirty = true;
 
-    public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign, ButtonGroup buttonGroup) {
+    public Legend(LegendConfig legendConfig, HorizontalAlign halign, VerticalAlign valign) {
         this.config = legendConfig;
-        this.buttonGroup = buttonGroup;
+        this.buttonGroup = new ButtonGroup();
         this.halign = halign;
         this.valign = valign;
     }
 
     public boolean selectItem(int x, int y) {
-        for (Trace key : buttons.keySet()){
-            SwitchButton button = buttons.get(key);
+        for (Trace key : tracesToButtons.keySet()){
+            SwitchButton button = tracesToButtons.get(key);
             if(button.contains(x, y)) {
                 button.switchState();
                 return true;
@@ -52,8 +54,8 @@ public class Legend {
 
     public void setConfig(LegendConfig legendConfig) {
         config = legendConfig;
-        for (Trace key : buttons.keySet()){
-            SwitchButton button = buttons.get(key);
+        for (Trace key : tracesToButtons.keySet()){
+            SwitchButton button = tracesToButtons.get(key);
             button.setBackgroundColor(config.getBackgroundColor());
             button.setTextStyle(config.getTextStyle());
             button.setMargin(config.getItemMargin());
@@ -65,7 +67,7 @@ public class Legend {
         // add trace legend button
         SwitchButton traceButton = new SwitchButton(trace.getName());
         traceButton.addListener(traceSelectionListener);
-        buttons.put(trace, traceButton);
+        tracesToButtons.put(trace, traceButton);
         buttonGroup.add(traceButton.getModel());
         traceButton.setBackgroundColor(config.getBackgroundColor());
         traceButton.setTextStyle(config.getTextStyle());
@@ -73,89 +75,116 @@ public class Legend {
         isDirty = true;
     }
 
-    public SwitchButton getButton(int traceNumber) {
-        return buttons.get(traceNumber);
+    public void remove(Trace trace) {
+        SwitchButton traceButton = tracesToButtons.get(trace);
+        buttonGroup.remove(traceButton.getModel());
+        tracesToButtons.remove(trace);
+    }
+
+    private BRectangle getTraceArea(Trace trace) {
+        double[] yRange = trace.getYScale().getRange();
+        int yStart = (int)yRange[0];
+        int yEnd = (int)yRange[yRange.length - 1];
+        return new BRectangle(area.x, yEnd, area.width, yStart - yEnd);
     }
 
     private void arrangeButtons(BCanvas canvas) {
-        int n = 0;
-        int btnsHeight = 0;
-        if(halign == HorizontalAlign.RIGHT) {
-            int x = area.x + area.width;
-            int y = area.y;
-            for (Trace key : buttons.keySet()) {
-                SwitchButton button = buttons.get(key);
-                BRectangle btnArea = button.getBounds(canvas);
-                if(btnsHeight == 0) {
-                    btnsHeight = btnArea.height;
-                }
-                if(n > 0 && x - btnArea.width <= area.x) {
-                    x = area.x + area.width;
-                    y += btnArea.height;
-                    button.setLocation(x - btnArea.width, y, canvas);
-                    x -= btnArea.width - getInterItemSpace();
-                    btnsHeight += btnArea.height;
-                    n = 1;
+        Map<BRectangle, List<Trace>> areasToTraces = new HashMap<>();
+        for (Trace trace : tracesToButtons.keySet()) {
+            BRectangle traceArea = getTraceArea(trace);
+            List<Trace> traces = areasToTraces.get(traceArea);
+            if(traces == null) {
+                traces = new ArrayList<>();
+                areasToTraces.put(traceArea, traces);
+            }
+            traces.add(trace);
+        }
+
+        for (BRectangle area : areasToTraces.keySet()) {
+            List<Trace> traces = areasToTraces.get(area);
+            int n = 0;
+            int btnsHeight = 0;
+            int x;
+            int y;
+            if(halign == HorizontalAlign.RIGHT) {
+                x = area.x + area.width;
+                y = area.y;
+            } else {
+                x = area.x;
+                y = area.y;
+            }
+            for (Trace trace : traces) {
+
+                if(halign == HorizontalAlign.RIGHT) {
+                    SwitchButton button = tracesToButtons.get(trace);
+                    BRectangle btnArea = button.getBounds(canvas);
+                    if(btnsHeight == 0) {
+                        btnsHeight = btnArea.height;
+                    }
+                    if(n > 0 && x - btnArea.width <= area.x) {
+                        x = area.x + area.width;
+                        y += btnArea.height;
+                        button.setLocation(x - btnArea.width, y, canvas);
+                        x -= btnArea.width - getInterItemSpace();
+                        btnsHeight += btnArea.height;
+                        n = 1;
+                    } else {
+                        button.setLocation(x - btnArea.width, y, canvas);
+                        x -= btnArea.width - getInterItemSpace();
+                        n++;
+                    }
+
                 } else {
-                    button.setLocation(x - btnArea.width, y, canvas);
-                    x -= btnArea.width - getInterItemSpace();
-                    n++;
+                    SwitchButton button = tracesToButtons.get(trace);
+                    BRectangle btnArea = button.getBounds(canvas);
+                    if(btnsHeight == 0) {
+                        btnsHeight = btnArea.height;
+                    }
+                    if(n > 0 && x + btnArea.width >= area.x + area.width) {
+                        x = area.x;
+                        y += btnArea.height;
+                        button.setLocation(x, y, canvas);
+                        x += btnArea.width + getInterItemSpace();
+                        btnsHeight += btnArea.height;
+                        n = 1;
+                    } else {
+                        button.setLocation(x, y, canvas);
+                        x += btnArea.width + getInterItemSpace();
+                        n++;
+                    }
                 }
             }
-        }
-        if(halign == HorizontalAlign.LEFT) {
-            int x = area.x;
-            int y = area.y;
-            for (Trace key : buttons.keySet()) {
-                SwitchButton button = buttons.get(key);
-                BRectangle btnArea = button.getBounds(canvas);
-                if(btnsHeight == 0) {
-                    btnsHeight = btnArea.height;
-                }
-                if(n > 0 && x + btnArea.width >= area.x + area.width) {
-                    x = area.x;
-                    y += btnArea.height;
-                    button.setLocation(x, y, canvas);
-                    x += btnArea.width + getInterItemSpace();
-                    btnsHeight += btnArea.height;
-                    n = 1;
-                 } else {
-                    button.setLocation(x, y, canvas);
-                    x += btnArea.width + getInterItemSpace();
-                    n++;
-                }
+            if(valign == VerticalAlign.BOTTOM) {
+                moveTracesButtons(traces, 0, area.height - btnsHeight);
             }
-        }
-        if(valign == VerticalAlign.BOTTOM) {
-            moveButtons(0, area.height - btnsHeight);
-        }
-        if(valign == VerticalAlign.MIDDLE) {
-            moveButtons(0, (area.height - btnsHeight)/2);
+            if(valign == VerticalAlign.MIDDLE) {
+                moveTracesButtons(traces, 0, (area.height - btnsHeight)/2);
+            }
         }
         isDirty = false;
     }
 
-    private void moveButtons(int dx, int dy) {
+    private void moveTracesButtons(List<Trace> traces, int dx, int dy) {
         if(dx != 0 || dy != 0) {
-            for (Trace key : buttons.keySet()){
-                buttons.get(key).moveLocation(dx, dy);
+            for (Trace trace : traces) {
+                tracesToButtons.get(trace).moveLocation(dx, dy);
             }
         }
     }
 
     public void draw(BCanvas canvas) {
-        if (buttons.size() == 0) {
+        if (tracesToButtons.size() == 0) {
             return;
         }
         if(isDirty) {
             arrangeButtons(canvas);
         }
-        for (Trace trace : buttons.keySet()){
-            buttons.get(trace).setColor(trace.getMainColor());
+        for (Trace trace : tracesToButtons.keySet()){
+            tracesToButtons.get(trace).setColor(trace.getMainColor());
         }
         canvas.setTextStyle(config.getTextStyle());
-        for (Trace key : buttons.keySet()) {
-           buttons.get(key).draw(canvas);
+        for (Trace key : tracesToButtons.keySet()) {
+           tracesToButtons.get(key).draw(canvas);
         }
     }
 

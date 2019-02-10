@@ -23,22 +23,41 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
 
     @Override
     public boolean onTap(int x, int y) {
-        if (chart.chartContains(x, y)) {
-            return chart.selectChartTrace(x, y);
+        if(chart.selectTrace(x, y)) {
+            return true;
         } else {
-            if(chart.selectPreviewTrace(x, y)) {
-                return true;
-            }
-            if(chart.setScrollsPosition(x, y)) {
-               return true;
-            }
-            return false;
+            return chart.setScrollsPosition(x, y);
         }
     }
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        chart.autoScale();
+        // AUTO SCALE both chart and preview
+
+        int xIndex = chart.getChartXIndex(null);
+        int yIndex = chart.getChartYIndex(null);
+        // if some trace is selected we auto scale only axis belonging to that trace
+        if (xIndex >= 0 && yIndex >= 0) {
+            chart.autoScaleScrollExtent(xIndex);
+            chart.autoScaleChartY(yIndex);
+        } else { // if no selected trace in chart we scale all x and y axis
+            for (int i = 0; i < chart.chartXAxisCount(); i++) {
+                chart.autoScaleScrollExtent(i);
+            }
+            for (int i = 0; i < chart.chartYAxisCount(); i++) {
+                chart.autoScaleChartY(i);
+            }
+        }
+
+        // do the same with preview...
+        int previewYIndex = chart.getPreviewYIndex(null);
+        if (previewYIndex >= 0) {
+            chart.autoScalePreviewY(previewYIndex);
+        } else {
+            for (int i = 0; i < chart.previewYAxisCount(); i++) {
+                chart.autoScalePreviewY(i);
+            }
+        }
         return true;
     }
 
@@ -49,25 +68,7 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
 
     @Override
     public boolean onLongPress(int x, int y) {
-        if(chart.chartContains(x, y)) {
-            if(chart.chartTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getChartSelectedTraceIndex();
-            if(selectedTraceIndex < 0) {
-                selectedTraceIndex = 0;
-            }
-            return chart.chartHoverOn(x, y, selectedTraceIndex);
-        } else {
-            if(chart.previewTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getPreviewSelectedTraceIndex();
-            if(selectedTraceIndex < 0) {
-                selectedTraceIndex = 0;
-            }
-            return chart.previewHoverOn(x, y, selectedTraceIndex);
-        }
+        return chart.hoverOn(x, y);
     }
 
     @Override
@@ -76,19 +77,15 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             return false;
         }
 
-        if(startPoint == null || chart.chartContains(startPoint.getX(), startPoint.getY())) {
-            int selectedTraceIndex = chart.getChartSelectedTraceIndex();
-            if (selectedTraceIndex >= 0) {
-                chart.zoomScrollExtent(chart.getChartTraceXIndex(selectedTraceIndex), scaleFactor);
-            } else {
-                for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                    chart.zoomScrollExtent(i, scaleFactor);
-                }
+        int xIndex = chart.getChartXIndex(startPoint);
+        if(xIndex >= 0) {
+            chart.zoomScrollExtent(xIndex, scaleFactor);
+        } else {
+            for (int i = 0; i < chart.chartXAxisCount(); i++) {
+                chart.zoomScrollExtent(i, scaleFactor);
             }
-            return true;
         }
-
-        return false;
+        return true;
     }
 
     @Override
@@ -96,27 +93,18 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if (startPoint == null || scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
-        if (chart.chartContains(startPoint.getX(), startPoint.getY())) {
-            if(chart.chartTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getChartSelectedTraceIndex();
-            if (selectedTraceIndex < 0) {
-                selectedTraceIndex = 0;
-            }
-            chart.zoomChartY(chart.getChartTraceYIndex(selectedTraceIndex), scaleFactor);
-            return true;
-        } else {
-            if(chart.previewTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getPreviewSelectedTraceIndex();
-            if (selectedTraceIndex < 0) {
-                selectedTraceIndex = 0;
-            }
-            chart.zoomPreviewY(chart.getPreviewTraceYIndex(selectedTraceIndex), scaleFactor);
+        int yAxis = chart.getChartYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.zoomChartY(yAxis, scaleFactor);
             return true;
         }
+
+        yAxis = chart.getPreviewYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.zoomPreviewY(yAxis, scaleFactor);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -124,34 +112,29 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if(dx == 0) {
             return false;
         }
-        if(startPoint != null && chart.previewContains(startPoint.getX(), startPoint.getY())) {
-            if(!startPoint.equals(lastStartPoint)){
-                lastStartPoint = startPoint;
-                isScrollMoving = chart.isPointInsideScroll(startPoint.getX(), startPoint.getY());
-            }
 
-            if(isScrollMoving) {
-                chart.translateScrolls(-dx);
-                return true;
-            }
+        if(startPoint != null && !startPoint.equals(lastStartPoint)){
+            lastStartPoint = startPoint;
+            isScrollMoving = chart.isScrollContains(startPoint.getX(), startPoint.getY());
         }
 
-        if(startPoint == null || chart.chartContains(startPoint.getX(), startPoint.getY())) {
-            double scrollTranslation = 0;
-            int selectedTraceIndex = chart.getChartSelectedTraceIndex();
-            if(selectedTraceIndex >= 0) {
-                int xIndex = chart.getChartTraceXIndex(selectedTraceIndex);
-                scrollTranslation = chart.getScrollExtent(xIndex) / chart.getXMinMax().length();
-            } else {
-                for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                    double translation = chart.getScrollExtent(i) / chart.getXMinMax().length();
-                    scrollTranslation = Math.max(scrollTranslation, translation);
-                }
-            }
-            chart.translateScrolls(dx * scrollTranslation);
+        if(isScrollMoving) {
+            chart.translateScrolls(-dx);
             return true;
         }
-        return false;
+
+        double scrollTranslation = 0;
+        int xIndex = chart.getChartXIndex(startPoint);
+        if(xIndex >= 0) {
+            scrollTranslation = chart.getScrollExtent(xIndex) / chart.getXMinMax().length();
+        } else {
+            for (int i = 0; i < chart.chartXAxisCount(); i++) {
+                double translation = chart.getScrollExtent(i) / chart.getXMinMax().length();
+                scrollTranslation = Math.max(scrollTranslation, translation);
+            }
+        }
+        chart.translateScrolls(dx * scrollTranslation);
+        return true;
     }
 
     @Override
@@ -160,29 +143,18 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             return false;
         }
 
-        if (chart.chartContains(startPoint.getX(), startPoint.getY())) {
-            if(chart.chartTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getChartSelectedTraceIndex();
-            if (selectedTraceIndex < 0) {
-                selectedTraceIndex = 0;
-            }
-
-            chart.translateChartY(chart.getChartTraceYIndex(selectedTraceIndex), dy);
-            return true;
-        } else {
-            if(chart.previewTraceCount() == 0) {
-                return false;
-            }
-            int selectedTraceIndex = chart.getPreviewSelectedTraceIndex();
-            if (selectedTraceIndex  < 0) {
-                selectedTraceIndex = 0;
-            }
-
-            chart.translatePreviewY(chart.getPreviewTraceYIndex(selectedTraceIndex), dy);
+        int yAxis = chart.getChartYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.translateChartY(yAxis, dy);
             return true;
         }
+
+        yAxis = chart.getPreviewYIndex(startPoint);
+        if(yAxis >= 0) {
+            chart.translatePreviewY(yAxis, dy);
+            return true;
+        }
+        return false;
     }
 
 

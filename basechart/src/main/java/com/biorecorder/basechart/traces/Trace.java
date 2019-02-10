@@ -11,9 +11,9 @@ import com.biorecorder.basechart.scales.Scale;
  * Created by galafit on 16/9/17.
  */
 public abstract class Trace {
-    private int xAxisIndex;
-    private int yAxisIndex;
-    private String name;
+    protected Scale xScale;
+    protected Scale yScale;
+    protected String name;
 
     boolean isIncreasingChecked = false;
     private ChartData data;
@@ -35,17 +35,17 @@ public abstract class Trace {
         data = null;
     }
 
-    public void setAxes(int xAxisIndex, int yAxisIndex) {
-        this.xAxisIndex = xAxisIndex;
-        this.yAxisIndex = yAxisIndex;
+    public void setScales(Scale xScale, Scale yScale) {
+        this.xScale = xScale;
+        this.yScale = yScale;
     }
 
-    public int getXAxisIndex() {
-        return xAxisIndex;
+    public Scale getXScale() {
+        return xScale;
     }
 
-    public int getYAxisIndex() {
-        return yAxisIndex;
+    public Scale getYScale() {
+        return yScale;
     }
 
     public String getName() {
@@ -56,7 +56,7 @@ public abstract class Trace {
         this.name = name;
     }
 
-    public int nearest(int x, int y, Scale xScale, Scale yScale) {
+    public int nearest(int x, int y) {
         // "lazy" sorting solo when tooltips are called
         if (!isIncreasingChecked) {
             if (!data.isColumnIncreasing(0)) {
@@ -97,9 +97,9 @@ public abstract class Trace {
 
     public abstract BRange getYExtremes();
 
-    public abstract BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale);
+    public abstract BPoint getDataPosition(int dataIndex);
 
-    public abstract InfoItem[] getInfo(int dataIndex, Scale xScale, Scale yScale);
+    public abstract InfoItem[] getInfo(int dataIndex);
 
-    public abstract void draw(BCanvas canvas, Scale xScale, Scale yScale);
+    public abstract void draw(BCanvas canvas);
 }

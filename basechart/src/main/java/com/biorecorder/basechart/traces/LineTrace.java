@@ -58,7 +58,7 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    public InfoItem[] getInfo(int dataIndex, Scale xScale, Scale yScale){
+    public InfoItem[] getInfo(int dataIndex){
         if (dataIndex == -1){
             return new InfoItem[0];
         }
@@ -79,25 +79,25 @@ public class LineTrace extends Trace {
 
 
     @Override
-    public BPoint getDataPosition(int dataIndex, Scale xScale, Scale yScale) {
+    public BPoint getDataPosition(int dataIndex) {
         return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.scale(xyData.getY(dataIndex)));
     }
 
     @Override
-    public void draw(BCanvas canvas, Scale xScale, Scale yScale) {
+    public void draw(BCanvas canvas) {
         if (xyData == null || xyData.size() == 0) {
             return;
         }
 
         BPath path = null;
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
-            path = drawLinearPath(canvas, xScale, yScale);
+            path = drawLinearPath(canvas);
         }
         if(traceConfig.getMode() == LineTraceConfig.STEP) {
-            path = drawStepPath(canvas, xScale, yScale);
+            path = drawStepPath(canvas);
         }
         if(traceConfig.getMode() == LineTraceConfig.VERTICAL_LINES) {
-            path = drawVerticalLinesPath(canvas, xScale, yScale);
+            path = drawVerticalLinesPath(canvas);
         }
 
         if(path != null && traceConfig.isFilled()) {
@@ -111,7 +111,7 @@ public class LineTrace extends Trace {
         }
     }
 
-    private BPath drawLinearPath(BCanvas canvas, Scale xScale, Scale yScale) {
+    private BPath drawLinearPath(BCanvas canvas) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
@@ -131,7 +131,7 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawStepPath(BCanvas canvas, Scale xScale, Scale yScale) {
+    private BPath drawStepPath(BCanvas canvas) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
@@ -152,7 +152,7 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawVerticalLinesPath(BCanvas canvas, Scale xScale, Scale yScale) {
+    private BPath drawVerticalLinesPath(BCanvas canvas) {
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         canvas.setColor(getMarkColor());
