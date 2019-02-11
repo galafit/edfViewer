@@ -51,10 +51,10 @@ public class ScrollableChartTest extends JFrame{
 
         ScrollableChart chart = new ScrollableChart();
         chart.addChartStack();
-        chart.addChartTrace(0, new LineTrace(), xyData1, false, false);
-        chart.addChartTrace(0, new LineTrace(), xyData2, false, false);
+        chart.addChartTrace(0, new LineTrace(), xyData1, true, false);
+        chart.addChartTrace(0, new LineTrace(), xyData2, true, false);
         chart.addChartStack();
-        chart.addChartTrace(1, new LineTrace(), xyData1, false, false);
+        chart.addChartTrace(1, new LineTrace(), xyData1, true, false);
 
 
         chart.addPreviewStack();

@@ -7,6 +7,7 @@ import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.Theme;
 import com.biorecorder.basechart.traces.Trace;
+import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 
@@ -403,11 +404,11 @@ public class ScrollableChart {
         return chart.getYMinMax(yAxisIndex);
     }
 
-    public int getChartYIndex(BPoint point) {
+    public int getChartYIndex(@Nullable BPoint point) {
         return chart.getYIndex(point);
     }
 
-    public int getChartXIndex(BPoint point) {
+    public int getChartXIndex(@Nullable BPoint point) {
         return chart.getXIndex(point);
     }
 
@@ -477,7 +478,7 @@ public class ScrollableChart {
         return preview.yAxisCount();
     }
 
-    public int getPreviewYIndex(BPoint point) {
+    public int getPreviewYIndex(@Nullable BPoint point) {
         return preview.getYIndex(point);
     }
 

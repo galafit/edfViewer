@@ -26,8 +26,8 @@ public class InteractiveChart implements InteractiveDrawable {
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        int xIndex = chart.getXIndex(new BPoint(x, y));
-        int yIndex = chart.getYIndex(new BPoint(x, y));
+        int xIndex = chart.getXIndex(null);
+        int yIndex = chart.getYIndex(null);
 
         if(xIndex >= 0 && yIndex >= 0) {
             chart.autoScaleX(xIndex);

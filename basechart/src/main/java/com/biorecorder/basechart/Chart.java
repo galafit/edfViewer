@@ -7,6 +7,7 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.Trace;
+import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 import java.util.List;
@@ -17,9 +18,6 @@ import java.util.List;
 public class Chart {
     private String title;
     private int defaultWeight = 4;
-
-    private HorizontalAlign legendHAlign = HorizontalAlign.RIGHT;
-    private VerticalAlign legendVAlign = VerticalAlign.TOP;
 
     private boolean isLegendVisible = true;
 
@@ -88,7 +86,7 @@ public class Chart {
         // tooltips
         tooltip = new Tooltip(chartConfig.getTooltipConfig());
         crosshair = new Crosshair(chartConfig.getCrossHairConfig());
-        legend = new Legend(chartConfig.getLegendConfig(), legendHAlign, legendVAlign);
+        legend = new Legend(chartConfig.getLegendConfig());
 
     }
 
@@ -187,9 +185,24 @@ public class Chart {
         int top = spacing.top();
         int bottom = spacing.bottom();
 
+        int titleHeight = titleText.getBounds().height;
 
-        top += titleText.getBounds().height + xAxisList.get(1).getWidth(canvas);
+        top += titleHeight + xAxisList.get(1).getWidth(canvas);
         bottom += xAxisList.get(0).getWidth(canvas);
+
+        int legendHeight = 0;
+
+        if(!legend.isAttachedToStacks()) {
+            BRectangle legendArea = new BRectangle(fullArea.x + spacing.left(), fullArea.y + titleHeight + spacing.top(), fullArea.width - spacing.left() - spacing.right(), fullArea.height - titleHeight - spacing.top() - spacing.bottom());
+            legend.setArea(legendArea);
+            legendHeight = legend.getHeight(canvas);
+            if(legend.isTop()) {
+                top += legendHeight;
+            }
+            if(legend.isBottom()) {
+                bottom += legendHeight;
+            }
+        }
 
         // if margins and graph area were not calculated before or
         // width of some xAxis was changed (never should happen if label rotation angle is 0)
@@ -197,13 +210,15 @@ public class Chart {
             setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
         }
 
-        for (int i = 0; i < yAxisList.size() / 2; i++) {
-            left = Math.max(left, yAxisList.get(i * 2).getWidth(canvas));
+        for (int i = 0; i < yAxisList.size() ; i++) {
+            if(i % 2 == 0) {
+                left = Math.max(left, yAxisList.get(i).getWidth(canvas));
+            } else {
+                right = Math.max(right, yAxisList.get(i).getWidth(canvas));
+            }
         }
+
         left += spacing.left();
-        for (int i = 0; i < yAxisList.size() / 2; i++) {
-            right = Math.max(right, yAxisList.get(i * 2 + 1).getWidth(canvas));
-        }
         right += spacing.right();
 
         // if margins and graph area were not calculated before or
@@ -211,8 +226,16 @@ public class Chart {
         if (margin == null || margin.left() != left || margin.right() != right) {
             // adjust XAxis ranges
             setXStartEnd(fullArea.x + left, fullArea.width - left - right);
-            int topNew = spacing.top() + titleText.getBounds().height + xAxisList.get(1).getWidth(canvas);
+            int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
             int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
+            if(!legend.isAttachedToStacks()) {
+                if(legend.isTop()) {
+                    topNew += legendHeight;
+                }
+                if(legend.isBottom()) {
+                    bottomNew += legendHeight;
+                }
+            }
             if (topNew != top || bottomNew != bottom) {
                 // adjust YAxis ranges
                 setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
@@ -228,7 +251,10 @@ public class Chart {
                     fullArea.width - left - right, fullArea.height - top - bottom);
 
         }
-        legend.setArea(graphArea);
+        if(legend.isAttachedToStacks()) {
+            legend.setArea(graphArea);
+        }
+
     }
 
     public int getStacksSumWeight() {
@@ -392,7 +418,6 @@ public class Chart {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -590,7 +615,6 @@ public class Chart {
         return traces.size();
     }
 
-
     public int xAxisCount() {
         return xAxisList.size();
     }
@@ -598,7 +622,6 @@ public class Chart {
     public int yAxisCount() {
         return yAxisList.size();
     }
-
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
@@ -699,11 +722,11 @@ public class Chart {
      * <p>
      * If point != null but chart does not contain the point then return -1
      */
-    public int getXIndex(BPoint point) {
-        if (point == null || graphArea.contains(point.getX(), point.getY())) {
-            if (selectedTrace != null) {
-                return getTraceXIndex(selectedTrace);
-            }
+    public int getXIndex(@Nullable BPoint point) {
+        if (selectedTrace != null) {
+            return getTraceXIndex(selectedTrace);
+        }
+        if (point != null && graphArea.contains(point.getX(), point.getY())) {
             for (int i = 0; i < xAxisList.size(); i++) {
                 if (xAxisList.get(i).isVisible()) {
                     return i;
@@ -723,12 +746,11 @@ public class Chart {
      * <p>
      * If point != null but chart does not contain the point then return -1
      */
-    public int getYIndex(BPoint point) {
+    public int getYIndex(@Nullable BPoint point) {
+        if (selectedTrace != null) {
+            return getTraceYIndex(selectedTrace);
+        }
         if (point != null && graphArea.contains(point.getX(), point.getY())) {
-            if (selectedTrace != null) {
-                return getTraceYIndex(selectedTrace);
-            }
-
             for (int stackIndex = 0; stackIndex < yAxisList.size() / 2; stackIndex++) {
                 int leftYIndex = 2 * stackIndex;
                 int rightYIndex = 2 * stackIndex + 1;
