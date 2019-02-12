@@ -23,6 +23,10 @@ public class Chart {
 
     private boolean isMarginFixed = false;
     private Insets spacing = new Insets(0, 0, 10, 10);
+    private boolean isLeftAxisPrimary = true;
+    private boolean isBottomAxisPrimary = true;
+    private ChartConfig chartConfig = new ChartConfig();
+
 
     /*
  * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
@@ -33,13 +37,7 @@ public class Chart {
     private List<AxisWrapper> xAxisList = new ArrayList<>(2);
     private List<AxisWrapper> yAxisList = new ArrayList<>();
 
-    private boolean isLeftAxisPrimary = true;
-    private boolean isBottomAxisPrimary = true;
-
     private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
-
-    private ChartConfig chartConfig = new ChartConfig();
-
     private List<Trace> traces = new ArrayList<Trace>();
     private Legend legend;
     private Title titleText;
@@ -55,7 +53,6 @@ public class Chart {
     private Trace selectedTrace;
     private Trace hoverTrace;
     private int hoverPointIndex = -1;
-
 
     public Chart() {
         this((new DarkTheme()).getChartConfig());
@@ -73,8 +70,6 @@ public class Chart {
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(false);
         topAxis.setRoundingEnabled(false);
-        topAxis.setRoundingAccuracyPct(-1);
-        bottomAxis.setRoundingAccuracyPct(-1);
         if (isBottomAxisPrimary) {
             bottomAxis.setGridVisible(true);
         } else {
@@ -145,7 +140,6 @@ public class Chart {
         return false;
     }
 
-
     Insets getMargin(BCanvas canvas) {
         if (margin == null) {
             calculateMarginsAndAreas(canvas);
@@ -166,14 +160,15 @@ public class Chart {
         setXStartEnd(fullArea.x + margin.left(), fullArea.width - margin.left() - margin.right());
         graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(),
                 fullArea.width - margin.left() - margin.right(), fullArea.height - margin.top() - margin.bottom());
-
+        if(legend.isAttachedToStacks()) {
+            legend.setArea(graphArea);
+        }
         titleText = null;
     }
 
     Scale getXAxisScale(int xIndex) {
         return xAxisList.get(xIndex).getScale();
     }
-
 
     void calculateMarginsAndAreas(BCanvas canvas) {
         if (titleText == null) {
@@ -289,7 +284,6 @@ public class Chart {
             weightSumTillYAxis += stackWeights.get(stack);
         }
     }
-
 
     boolean isXAxisUsed(int xIndex) {
         for (Trace trace : traces) {

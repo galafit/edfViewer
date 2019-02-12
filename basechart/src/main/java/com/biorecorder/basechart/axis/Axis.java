@@ -31,18 +31,16 @@ public abstract class Axis {
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
-    // used to calculate ticks count. If <= 0 will not be taken into account
-    private int roundingAccuracyPct = 5; // percents for min
-
-    protected String title;
-    private Scale scale;
+    // used to calculate number of ticks. If <= 0 will not be taken into account
+    private int roundingAccuracyPct = 20; // percents for min
     protected AxisConfig config;
     protected boolean isTickLabelInside = false;
 
+    protected String title;
+    private Scale scale;
+
     private double tickInterval = -1; // in axis domain units
-
     private int minorTickIntervalCount = 0; // number of minor intervals in one major interval
-
     private TickFormatInfo tickFormatInfo = new TickFormatInfo();
 
     private TickProvider tickProvider;

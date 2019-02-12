@@ -17,6 +17,10 @@ public interface Scale {
 
     public double invert(double value);
 
+    /**
+     * Format domain value according to the one "point precision"
+     * cutting unnecessary double digits that exceeds that "point precision"
+     */
     public String formatDomainValue(double value);
 
     public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo formatInfo);
