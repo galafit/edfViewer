@@ -6,7 +6,7 @@ import com.biorecorder.basechart.graphics.BStroke;
 /**
  * Created by galafit on 11/10/17.
  */
-public class LineTraceConfig implements TraceConfig {
+public class LineTraceConfig {
     public static final int LINEAR = 0;
     public static final int STEP = 1;
     public static final int VERTICAL_LINES = 2;
@@ -34,17 +34,14 @@ public class LineTraceConfig implements TraceConfig {
         this.isFilled = isFilled;
     }
 
-    @Override
     public BColor getColor() {
         return color;
     }
 
-    @Override
     public void setColor(BColor color) {
         this.color = color;
     }
 
-    @Override
     public int getMarkSize() {
         return markSize;
     }

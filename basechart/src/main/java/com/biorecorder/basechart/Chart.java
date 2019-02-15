@@ -44,15 +44,16 @@ public class Chart {
     private BRectangle fullArea;
     private BRectangle graphArea;
     private Insets margin;
-    private DataManager dataManager;
     private boolean isYAxisRoundingEnabled = false;
 
     private Crosshair crosshair;
     private Tooltip tooltip;
 
-    private Trace selectedTrace;
-    private Trace hoverTrace;
+    private TraceCurve selectedCurve;
+    private TraceCurve hoverCurve;
     private int hoverPointIndex = -1;
+
+    private DataProcessingConfig dataProcessingConfig;
 
     public Chart() {
         this((new DarkTheme()).getChartConfig());
@@ -65,7 +66,7 @@ public class Chart {
 
     public Chart(ChartConfig chartConfig1, DataProcessingConfig dataProcessingConfig) {
         this.chartConfig = new ChartConfig(chartConfig1);
-        dataManager = new DataManager(dataProcessingConfig);
+        this.dataProcessingConfig = dataProcessingConfig;
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(false);
@@ -87,9 +88,9 @@ public class Chart {
 
     double getBestExtent(int xIndex) {
         double maxExtent = 0;
-        for (int i = 0; i < traces.size(); i++) {
-            if (traces.get(i).getXScale() == xAxisList.get(xIndex).getScale()) {
-                maxExtent = Math.max(maxExtent, dataManager.getBestExtent(i, fullArea.width));
+        for (Trace trace : traces) {
+            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
+                maxExtent = Math.max(maxExtent, trace.getBestExtent(fullArea.width));
             }
         }
         return maxExtent;
@@ -100,7 +101,7 @@ public class Chart {
     BRange getAllTracesFullMinMax() {
         BRange minMax = null;
         for (int i = 0; i < traces.size(); i++) {
-            minMax = BRange.join(minMax, dataManager.getTraceFullXMinMax(i));
+            minMax = BRange.join(minMax, traces.get(i).getFullXMinMax());
         }
         return minMax;
     }
@@ -160,7 +161,7 @@ public class Chart {
         setXStartEnd(fullArea.x + margin.left(), fullArea.width - margin.left() - margin.right());
         graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(),
                 fullArea.width - margin.left() - margin.right(), fullArea.height - margin.top() - margin.bottom());
-        if(legend.isAttachedToStacks()) {
+        if (legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
         }
         titleText = null;
@@ -187,14 +188,14 @@ public class Chart {
 
         int legendHeight = 0;
 
-        if(!legend.isAttachedToStacks()) {
+        if (!legend.isAttachedToStacks()) {
             BRectangle legendArea = new BRectangle(fullArea.x + spacing.left(), fullArea.y + titleHeight + spacing.top(), fullArea.width - spacing.left() - spacing.right(), fullArea.height - titleHeight - spacing.top() - spacing.bottom());
             legend.setArea(legendArea);
             legendHeight = legend.getHeight(canvas);
-            if(legend.isTop()) {
+            if (legend.isTop()) {
                 top += legendHeight;
             }
-            if(legend.isBottom()) {
+            if (legend.isBottom()) {
                 bottom += legendHeight;
             }
         }
@@ -205,8 +206,8 @@ public class Chart {
             setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
         }
 
-        for (int i = 0; i < yAxisList.size() ; i++) {
-            if(i % 2 == 0) {
+        for (int i = 0; i < yAxisList.size(); i++) {
+            if (i % 2 == 0) {
                 left = Math.max(left, yAxisList.get(i).getWidth(canvas));
             } else {
                 right = Math.max(right, yAxisList.get(i).getWidth(canvas));
@@ -223,11 +224,11 @@ public class Chart {
             setXStartEnd(fullArea.x + left, fullArea.width - left - right);
             int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
             int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
-            if(!legend.isAttachedToStacks()) {
-                if(legend.isTop()) {
+            if (!legend.isAttachedToStacks()) {
+                if (legend.isTop()) {
                     topNew += legendHeight;
                 }
-                if(legend.isBottom()) {
+                if (legend.isBottom()) {
                     bottomNew += legendHeight;
                 }
             }
@@ -246,7 +247,7 @@ public class Chart {
                     fullArea.width - left - right, fullArea.height - top - bottom);
 
         }
-        if(legend.isAttachedToStacks()) {
+        if (legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
         }
 
@@ -294,13 +295,6 @@ public class Chart {
         return false;
     }
 
-    private void removeTracesData(int xIndex) {
-        for (Trace trace : traces) {
-            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                trace.removeData();
-            }
-        }
-    }
 
     public void draw(BCanvas canvas) {
         if (titleText == null) {
@@ -311,12 +305,6 @@ public class Chart {
 
         if (isAreasDirty()) {
             calculateMarginsAndAreas(canvas);
-        }
-        for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            if (!trace.isDataSet()) {
-                trace.setData(dataManager.getTraceData(i, trace.getXScale()));
-            }
         }
 
         canvas.setColor(chartConfig.getMarginColor());
@@ -391,13 +379,13 @@ public class Chart {
             legend.draw(canvas);
         }
 
-        if (hoverTrace != null && hoverPointIndex >= 0) {
+        if (hoverCurve != null && hoverPointIndex >= 0) {
             crosshair.draw(canvas, graphArea);
             tooltip.draw(canvas, fullArea);
         }
     }
 
-    private int getTraceXIndex(Trace trace) {
+    private int getCurveXIndex(Trace trace) {
         for (int i = 0; i < xAxisList.size(); i++) {
             if (xAxisList.get(i).getScale() == trace.getXScale()) {
                 return i;
@@ -406,9 +394,9 @@ public class Chart {
         return -1;
     }
 
-    private int getTraceYIndex(Trace trace) {
+    private int getCurveYIndex(Trace trace, int curveNumber) {
         for (int i = 0; i < yAxisList.size(); i++) {
-            if (yAxisList.get(i).getScale() == trace.getYScale()) {
+            if (yAxisList.get(i).getScale() == trace.getYScale(curveNumber)) {
                 return i;
             }
         }
@@ -501,12 +489,6 @@ public class Chart {
         //legend
         legend.setConfig(chartConfig.getLegendConfig());
 
-        int colorsCount = chartConfig.getTraceColors().length;
-        for (int i = 0; i < traces.size(); i++) {
-            BColor traceColor = chartConfig.getTraceColors()[i % colorsCount];
-            traces.get(i).setMainColor(traceColor);
-        }
-
         // title
         titleText = null;
         setAreasDirty();
@@ -537,11 +519,10 @@ public class Chart {
      *
      * @param stackNumber
      * @param trace
-     * @param traceData
      * @param isXAxisOpposite
      * @param isYAxisOpposite
      */
-    public void addTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
         if (isXAxisOpposite && isBottomAxisPrimary) {
@@ -558,47 +539,73 @@ public class Chart {
         }
         int xIndex = isBottomXAxis ? 0 : 1;
         int yIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 + 1;
-        trace.setScales(xAxisList.get(xIndex).getScale(), yAxisList.get(yIndex).getScale());
 
-        yAxisList.get(yIndex).setVisible(true);
+        trace.setXScale(xAxisList.get(xIndex).getScale());
         xAxisList.get(xIndex).setVisible(true);
-
-        if (trace.getName() == null) {
-            trace.setName("Trace " + traces.size());
-        }
-        if (trace.getMainColor() == null) {
-            BColor[] traceColors = chartConfig.getTraceColors();
-            trace.setMainColor(traceColors[traces.size() % traceColors.length]);
-        }
-
-        dataManager.addTrace(traceData, trace.getMarkSize());
-        traces.add(trace);
-
-        StateListener traceSelectionListener = new StateListener() {
-            @Override
-            public void stateChanged(boolean isSelected) {
-                if (isSelected) {
-                    selectedTrace = trace;
-                }
-                if (!isSelected && selectedTrace == trace) {
-                    selectedTrace = null;
+        if (!isSplit) {
+            AxisWrapper yAxis = yAxisList.get(yIndex);
+            yAxis.setVisible(true);
+            trace.setYScales(yAxis.getScale());
+        } else {
+            int stackCount = yAxisList.size() / 2;
+            int availableStacks = stackCount - stackNumber;
+            if (trace.curveCount() > availableStacks) {
+                for (int i = 0; i < trace.curveCount() - availableStacks; i++) {
+                    addStack();
                 }
             }
-        };
-        legend.add(trace, traceSelectionListener);
+            Scale[] yScales = new Scale[trace.curveCount()];
+            for (int i = 0; i < trace.curveCount(); i++) {
+                AxisWrapper yAxis = yAxisList.get(yIndex + i * 2);
+                yScales[i] = yAxis.getScale();
+                yAxis.setVisible(true);
+            }
+            trace.setYScales(yScales);
+        }
+
+
+        if (trace.getName() == null) {
+            trace.setName("Trace" + traces.size());
+        }
+        if (trace.getCurvesColors() == null) {
+            int totalCurves = 0;
+            for (Trace trace1 : traces) {
+              totalCurves += trace1.curveCount();
+            }
+            BColor[] colors = chartConfig.getTraceColors();
+            BColor[] curveColors = new BColor[trace.curveCount()];
+            for (int i = 0; i < trace.curveCount(); i++) {
+              curveColors[i] = colors[(totalCurves + i) % colors.length];
+            }
+            trace.setCurvesColors(curveColors);
+        }
+
+        traces.add(trace);
+
+        for (int i = 0; i < trace.curveCount(); i++) {
+            final int curveNumber = i;
+            StateListener traceSelectionListener = new StateListener() {
+                @Override
+                public void stateChanged(boolean isSelected) {
+                    if (isSelected) {
+                        selectedCurve = new TraceCurve(trace, curveNumber);
+                    }
+                    if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber ) {
+                        selectedCurve = null;
+                    }
+                }
+            };
+            legend.add(trace, i, traceSelectionListener);
+        }
     }
 
     public void removeTrace(int traceNumber) {
         legend.remove(traces.get(traceNumber));
-        dataManager.removeTrace(traceNumber);
         traces.remove(traceNumber);
     }
 
     public void setArea(BRectangle area) {
         fullArea = area;
-        for (Trace trace : traces) {
-            trace.removeData();
-        }
         setXStartEnd(area.x, area.width);
         setYStartEnd(area.y, area.height);
         setAreasDirty();
@@ -619,7 +626,6 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            removeTracesData(xIndex);
             if (!xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
                 setAreasDirty();
             }
@@ -671,36 +677,35 @@ public class Chart {
 
     public void autoScaleX(int xIndex) {
         BRange tracesXMinMax = null;
-        for (int i = 0; i < traces.size(); i++) {
-            if (traces.get(i).getXScale() == xAxisList.get(xIndex).getScale()) {
-                tracesXMinMax = BRange.join(tracesXMinMax, dataManager.getTraceFullXMinMax(i));
+        for (Trace trace : traces) {
+            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
+                tracesXMinMax = BRange.join(tracesXMinMax, trace.getFullXMinMax());
             }
         }
+
         if (tracesXMinMax != null) {
             setXMinMax(xIndex, tracesXMinMax.getMin(), tracesXMinMax.getMax());
         }
     }
 
     public void autoScaleY(int yIndex) {
-        for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            if (traces.get(i).getYScale() == yAxisList.get(yIndex).getScale() && !trace.isDataSet()) {
-                trace.setData(dataManager.getTraceData(i, trace.getXScale()));
-            }
-        }
         BRange tracesYMinMax = null;
-        for (int i = 0; i < traces.size(); i++) {
-            if (traces.get(i).getYScale() == yAxisList.get(yIndex).getScale()) {
-                tracesYMinMax = BRange.join(tracesYMinMax, traces.get(i).getYExtremes());
+        Scale yScale = yAxisList.get(yIndex).getScale();
+        for (Trace trace : traces) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+                if(trace.getYScale(i) == yScale) {
+                    tracesYMinMax = BRange.join(tracesYMinMax, trace.yMinMax(i));
+                }
             }
         }
+
         if (tracesYMinMax != null) {
             setYMinMax(yIndex, tracesYMinMax.getMin(), tracesYMinMax.getMax());
         }
     }
 
 
-    public boolean selectTrace(int x, int y) {
+    public boolean selectCurve(int x, int y) {
         if (legend.selectItem(x, y)) {
             return true;
         }
@@ -710,15 +715,15 @@ public class Chart {
     /**
      * If chart contains the point or point == null then
      * <ul>
-     * <li>if selectedTrace != null then return index of selectedTrace X axis</li>
-     * <li>if selectedTrace == null then return index of first visible X axis</li>
+     * <li>if selectedCurve != null then return index of selectedCurve X axis</li>
+     * <li>if selectedCurve == null then return index of first visible X axis</li>
      * </ul>
      * <p>
      * If point != null but chart does not contain the point then return -1
      */
     public int getXIndex(@Nullable BPoint point) {
-        if (selectedTrace != null) {
-            return getTraceXIndex(selectedTrace);
+        if (selectedCurve != null) {
+            return getCurveXIndex(selectedCurve.getTrace());
         }
         if (point != null && graphArea.contains(point.getX(), point.getY())) {
             for (int i = 0; i < xAxisList.size(); i++) {
@@ -733,16 +738,16 @@ public class Chart {
     /**
      * If chart contains the point or point == null then
      * <ul>
-     * <li>if selectedTrace != null then return index of selectedTrace  Y axis</li>
-     * <li>if selectedTrace == null then return index of visible Y axis belonging to the stack containing the point
+     * <li>if selectedCurve != null then return index of selectedCurve  Y axis</li>
+     * <li>if selectedCurve == null then return index of visible Y axis belonging to the stack containing the point
      * or just index of first visible Y axis (if point == null)</li>
      * </ul>
      * <p>
      * If point != null but chart does not contain the point then return -1
      */
     public int getYIndex(@Nullable BPoint point) {
-        if (selectedTrace != null) {
-            return getTraceYIndex(selectedTrace);
+        if (selectedCurve != null) {
+            return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
         }
         if (point != null && graphArea.contains(point.getX(), point.getY())) {
             for (int stackIndex = 0; stackIndex < yAxisList.size() / 2; stackIndex++) {
@@ -765,8 +770,8 @@ public class Chart {
         }
 
         if (point == null) {
-            if (selectedTrace != null) {
-                return getTraceYIndex(selectedTrace);
+            if (selectedCurve != null) {
+                return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
             }
 
             for (int i = 0; i < yAxisList.size(); i++) {
@@ -779,9 +784,9 @@ public class Chart {
     }
 
     public boolean hoverOff() {
-        if (hoverPointIndex >= 0) {
+        if (hoverCurve != null) {
             hoverPointIndex = -1;
-            hoverTrace = null;
+            hoverCurve = null;
             return true;
         }
         return false;
@@ -789,41 +794,45 @@ public class Chart {
 
     public boolean hoverOn(int x, int y) {
         if (!graphArea.contains(x, y)) {
-            if (hoverOff()) {
-                return true;
-            }
-            return false;
+            return hoverOff();
         }
 
-        if (selectedTrace != null) {
-            hoverTrace = selectedTrace;
+        if (selectedCurve != null) {
+            hoverCurve = selectedCurve;
+        }
+        if (hoverCurve != null) {
+            NearestCurvePoint nearestCurvePoint = hoverCurve.getTrace().nearest(x, y, hoverCurve.getCurveNumber());
+            if(hoverPointIndex == nearestCurvePoint.getPointIndex()) {
+                return false;
+            } else {
+                hoverPointIndex = nearestCurvePoint.getPointIndex();
+            }
         } else {
-            for (Trace trace1 : traces) {
-                hoverTrace = trace1;
-                double[] yRange = trace1.getYScale().getRange();
-                int yStart = (int) yRange[0];
-                int yEnd = (int) yRange[yRange.length - 1];
-                if (yEnd <= y && yStart >= y) {
-                    break;
+            // find nearest trace curve
+            NearestCurvePoint nearestCurvePoint = null;
+            for (Trace trace : traces) {
+                NearestCurvePoint curvePoint = trace.nearest(x, y, -1);
+                if(nearestCurvePoint == null || nearestCurvePoint.getDistance() > curvePoint.getDistance()) {
+                    nearestCurvePoint = curvePoint;
                 }
+            }
+
+            if(nearestCurvePoint != null) {
+                hoverCurve = new TraceCurve(nearestCurvePoint.getTrace(), nearestCurvePoint.getCurveNumber());
+                hoverPointIndex = nearestCurvePoint.getPointIndex();
             }
         }
 
-        if (hoverTrace != null) {
-            int nearestIndex = hoverTrace.nearest(x, y);
-            if (hoverPointIndex != nearestIndex) {
-                hoverPointIndex = nearestIndex;
-                if (hoverPointIndex >= 0) {
-                    TooltipInfo tooltipInfo = new TooltipInfo();
-                    tooltipInfo.addItems(hoverTrace.getInfo(hoverPointIndex));
-                    BPoint dataPosition = hoverTrace.getDataPosition(hoverPointIndex);
-                    tooltip.setTooltipInfo(tooltipInfo);
-                    tooltip.setXY(dataPosition.getX(), 100);
-                    crosshair.setXY(dataPosition.getX(), dataPosition.getY());
-                }
-
-                return true;
+        if (hoverCurve != null) {
+            if (hoverPointIndex >= 0) {
+                TooltipInfo tooltipInfo = new TooltipInfo();
+                tooltipInfo.addItems(hoverCurve.getTrace().info(hoverCurve.getCurveNumber(), hoverPointIndex));
+                BPoint dataPosition = hoverCurve.getTrace().dataPosition(hoverCurve.getCurveNumber(), hoverPointIndex);
+                tooltip.setTooltipInfo(tooltipInfo);
+                tooltip.setXY(dataPosition.getX(), 100);
+                crosshair.setXY(dataPosition.getX(), dataPosition.getY());
             }
+            return true;
         }
         return false;
     }

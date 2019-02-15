@@ -3,28 +3,34 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.scales.Scale;
 
+import java.util.Arrays;
+
 /**
  * Created by galafit on 9/7/18.
  */
 public class TraceDataManager {
     private int CROP_SHOULDER = 2; // number of additional points that we leave on every side during crop
     private final ChartData traceData;
-    private final DataProcessingConfig processingConfig;
-    private final int pixelsPerDataPoint;
-    private final boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
+    private DataProcessingConfig processingConfig;
+    private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
 
     private ChartData groupedData;
 
+    private ChartData processedData;
+    private Scale prevXScale;
+    private int prevPixelsPerDataPoint = -1;
+    private boolean isIncreasingChecked = false;
 
-    public TraceDataManager(ChartData traceData, DataProcessingConfig processingConfig, int pixelsPerDataPoint) {
+    private int[] sorter;
+
+
+    public TraceDataManager(ChartData traceData, DataProcessingConfig dataProcessingConfig) {
         this.traceData = traceData;
-        this.processingConfig = processingConfig;
-        if (pixelsPerDataPoint > 0) {
-            this.pixelsPerDataPoint = pixelsPerDataPoint;
-        } else {
-            this.pixelsPerDataPoint = 1;
-        }
+        setConfig(dataProcessingConfig);
+    }
 
+    public void setConfig(DataProcessingConfig processingConfig) {
+        this.processingConfig = processingConfig;
         switch (processingConfig.getGroupingType()) {
             case EQUAL_POINTS_NUMBER:
                 isEqualFrequencyGrouping = true;
@@ -46,7 +52,13 @@ public class TraceDataManager {
                 isEqualFrequencyGrouping = true;
                 break;
         }
+        groupedData = null;
     }
+
+    public String getColumnName(int columnName) {
+        return traceData.getColumnName(columnName);
+    }
+
 
     public BRange getFullXMinMax() {
         if(traceData.columnCount() == 0) {
@@ -55,12 +67,47 @@ public class TraceDataManager {
         return traceData.getColumnMinMax(0);
     }
 
-    public double getBestExtent(int drawingAreaWidth) {
+    public double getBestExtent(int drawingAreaWidth, int markSize) {
         if (traceData.rowCount() > 1) {
-            double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth / pixelsPerDataPoint;
+            double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth;
+            if(markSize > 0) {
+                traceExtent = traceExtent / markSize;
+            }
             return traceExtent;
         }
         return 0;
+    }
+
+    public int nearest(double xValue) {
+        // "lazy" sorting solo when "nearestCurve" is called
+        if (!isIncreasingChecked) {
+            if (!processedData.isColumnIncreasing(0)) {
+                sorter = processedData.sortedIndices(0);
+                System.out.println("sort");
+            }
+            isIncreasingChecked = true;
+        }
+
+        int nearest = processedData.bisect(0, xValue, sorter);
+
+        if (nearest >= processedData.rowCount()) {
+            nearest = processedData.rowCount() - 1;
+        }
+
+        int nearest_prev = nearest;
+        if (nearest > 0){
+            nearest_prev = nearest - 1;
+        }
+
+        if(sorter != null) {
+            nearest = sorter[nearest];
+            nearest_prev = sorter[nearest_prev];
+        }
+        if(Math.abs(processedData.getValue(nearest_prev, 0) - xValue) < Math.abs(processedData.getValue(nearest, 0) - xValue)) {
+            nearest = nearest_prev;
+        }
+
+        return nearest;
     }
 
     public boolean isDataProcessingEnabled() {
@@ -75,13 +122,62 @@ public class TraceDataManager {
         return true;
     }
 
+    public ChartData getData(Scale xScale, int markSize) {
+        int pixelsPerDataPoint = 1;
+        if (markSize > 0) {
+            pixelsPerDataPoint = markSize;
+        }
+        if(!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
+            processedData = processData(xScale, pixelsPerDataPoint);
+            prevXScale = xScale.copy();
+            prevPixelsPerDataPoint = pixelsPerDataPoint;
+        }
+        return processedData;
+    }
 
-    public ChartData getProcessedData(Scale xScale) {
+    private boolean isProcessedDataOk(Scale xScale, int pixelsPerDataPoint) {
+        if(processedData == null) {
+            return false;
+        }
+        if(prevPixelsPerDataPoint != pixelsPerDataPoint) {
+            return false;
+        }
+        if(prevXScale == null) {
+            return false;
+        }
+        if(!prevXScale.getClass().equals(xScale.getClass())) {
+           return false;
+        }
 
+        if(!Arrays.equals(prevXScale.getDomain(), xScale.getDomain())) {
+           return false;
+        }
+
+        int prevLength = length(prevXScale);
+        int length = length(xScale);
+        if(prevLength == 0 || length == 0) {
+            return false;
+        }
+        if(Math.abs(prevLength - length) / length > 0.2) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private int length(Scale scale) {
+        double[] range = scale.getRange();
+        return (int) Math.abs(range[range.length - 1] - range[0]);
+    }
+
+
+    public ChartData processData(Scale xScale, int pixelsPerDataPoint) {
         if(!isDataProcessingEnabled()){
             // No processing
             return traceData;
         }
+
+        System.out.println("process data");
 
         Double xMin = xScale.getDomain()[0];
         Double xMax = xScale.getDomain()[1];

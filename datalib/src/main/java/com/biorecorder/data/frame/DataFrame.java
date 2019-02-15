@@ -233,7 +233,7 @@ public class DataFrame {
      * <p>
      * Binning is a way to group a number of more or less continuous values
      * into a smaller number of buckets (bins or groups).  Each group/bucket/bin defines
-     * an numerical interval and usually is characterized by a name and two boundaries -
+     * an numerical interval and usually is characterized by a traceName and two boundaries -
      * the start or lower boundary and the stop or upper one.
      * <p>
      * On the chart  every bin is represented by one value (point).

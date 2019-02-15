@@ -358,10 +358,10 @@ public class ScrollableChart {
     }
 
     public boolean selectTrace(int x, int y) {
-        if(chart.selectTrace(x, y)) {
+        if(chart.selectCurve(x, y)) {
             return true;
         } else {
-            return preview.selectTrace(x, y);
+            return preview.selectCurve(x, y);
         }
     }
 
@@ -382,8 +382,8 @@ public class ScrollableChart {
         chart.addStack(weight);
     }
 
-    public void addChartTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        chart.addTrace(stackNumber, trace, traceData, isXAxisOpposite, isYAxisOpposite);
+    public void addChartTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        chart.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
         isScrollDirty = true;
     }
 
@@ -460,8 +460,8 @@ public class ScrollableChart {
         preview.addStack(weight);
     }
 
-    public void addPreviewTrace(int stackNumber, Trace trace, ChartData traceData, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        preview.addTrace(stackNumber, trace, traceData, isXAxisOpposite, isYAxisOpposite);
+    public void addPreviewTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        preview.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
     public void removePreviewTrace(int traceNumber) {

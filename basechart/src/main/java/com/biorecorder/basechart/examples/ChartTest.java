@@ -18,6 +18,9 @@ public class ChartTest extends JFrame {
     IntArrayList xData2 = new IntArrayList();
     IntArrayList yData3 = new IntArrayList();
     IntArrayList xData3 = new IntArrayList();
+
+    IntArrayList yData_col1 = new IntArrayList();
+    IntArrayList yData_col2 = new IntArrayList();
     ChartPanel chartPanel;
 
     public ChartTest()  {
@@ -29,6 +32,8 @@ public class ChartTest extends JFrame {
         for (int i = 0; i < 160; i++) {
             //yData1.add1((float) Math.sin(i));
             yData1.add(i);
+            yData_col1.add(i + 20);
+            yData_col2.add(i + 50);
         }
 
         for (int i = 0; i < 160; i++) {
@@ -59,6 +64,8 @@ public class ChartTest extends JFrame {
         XYData xyData2 = new XYData();
         xyData2.addColumn(xData2);
         xyData2.addColumn(yData2);
+        xyData2.addColumn(yData_col1);
+        xyData2.addColumn(yData_col2);
 
         XYData xyData3 = new XYData();
         xyData3.addColumn(xData3);
@@ -68,10 +75,10 @@ public class ChartTest extends JFrame {
 
         chart.addStack();
 
-        chart.addTrace(0, new LineTrace(), xyData1, false, false);
-        chart.addTrace(0, new LineTrace(), xyData2, false, false);
-        chart.addStack();
-        chart.addTrace(1, new LineTrace(), xyData3, false, false);
+        chart.addTrace(0, new LineTrace(xyData1), true, false, false);
+        chart.addTrace(0, new LineTrace(xyData2), false, false, false);
+      //  chart.addStack();
+      //  chart.addTrace(1, new LineTrace(xyData3), false, false, false);
 
         chartPanel = new ChartPanel(chart);
 

@@ -21,7 +21,7 @@ public class InteractiveChart implements InteractiveDrawable {
 
     @Override
     public boolean onTap(int x, int y) {
-        return chart.selectTrace(x, y);
+        return chart.selectCurve(x, y);
     }
 
     @Override

@@ -12,94 +12,106 @@ import com.biorecorder.basechart.scales.Scale;
  */
 public abstract class Trace {
     protected Scale xScale;
-    protected Scale yScale;
+    protected Scale[] yScales;
     protected String name;
+    protected TraceDataManager dataManager;
+    protected BColor[] curvesColors;
+    private final int curveCount;
 
-    boolean isIncreasingChecked = false;
-    private ChartData data;
-    private int[] sorter;
-
-    public void setData(ChartData data) {
-        this.data = data;
-        isIncreasingChecked = false;
+    public Trace(ChartData data) {
+        dataManager = new TraceDataManager(data, new DataProcessingConfig());
+        curveCount = curveCount(data);
     }
 
-    public boolean isDataSet() {
-        if(data != null) {
-            return true;
-        }
-        return false;
+
+    public final NearestCurvePoint nearest(int x, int y, int curveNumber) {
+        return nearest(x, y, curveNumber, dataManager.getData(xScale, getMarkSize()));
     }
 
-    public void removeData() {
-        data = null;
+    public BRange getFullXMinMax() {
+       return dataManager.getFullXMinMax();
     }
 
-    public void setScales(Scale xScale, Scale yScale) {
-        this.xScale = xScale;
-        this.yScale = yScale;
+    public double getBestExtent(int drawingAreaWidth) {
+        return dataManager.getBestExtent(drawingAreaWidth, getMarkSize());
+    }
+
+    public final int curveCount() {
+        return curveCount;
+    }
+
+    public final void draw(BCanvas canvas) {
+        draw(canvas, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public final BPoint dataPosition(int curveNumber, int dataIndex) {
+        return dataPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public final InfoItem[] info(int curveNumber, int dataIndex) {
+        return info(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public final BRange yMinMax(int curveNumber) {
+       return yMinMax(curveNumber, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
+        dataManager.setConfig(dataProcessingConfig);
+    }
+
+    public void setCurvesColors(BColor... colors) {
+        curvesColors = colors;
+    }
+
+    public BColor[] getCurvesColors() {
+        return curvesColors;
+    }
+
+    public BColor getCurveMainColor(int curveNumber) {
+        return curvesColors[curveNumber % curvesColors.length];
     }
 
     public Scale getXScale() {
         return xScale;
     }
 
-    public Scale getYScale() {
-        return yScale;
+    public int yScaleCount() {
+        return yScales.length;
     }
 
-    public String getName() {
-        return name;
+    public final Scale getYScale(int curveNumber) {
+        if(curveNumber < yScales.length - 1) {
+            return yScales[curveNumber];
+        }
+        return yScales[yScales.length - 1];
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public int nearest(int x, int y) {
-        // "lazy" sorting solo when tooltips are called
-        if (!isIncreasingChecked) {
-            if (!data.isColumnIncreasing(0)) {
-                sorter = data.sortedIndices(0);
-                System.out.println("sort");
-            }
-            isIncreasingChecked = true;
-        }
-        double xValue = xScale.invert(x);
-
-        int nearest = data.bisect(0, xValue, sorter);
-
-        if (nearest >= data.rowCount()) {
-            nearest = data.rowCount() - 1;
-        }
-
-        int nearest_prev = nearest;
-        if (nearest > 0){
-            nearest_prev = nearest - 1;
-        }
-
-        if(sorter != null) {
-            nearest = sorter[nearest];
-            nearest_prev = sorter[nearest_prev];
-        }
-        if(Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
-            nearest = nearest_prev;
-        }
-
-        return nearest;
+    public String getName() {
+        return name;
     }
+
+    public void setXScale(Scale xScale) {
+        this.xScale = xScale;
+    }
+
+    public void setYScales(Scale... yScales) {
+        this.yScales = yScales;
+    }
+    protected abstract int curveCount(ChartData data);
+    protected abstract BRange yMinMax(int curveNumber, ChartData data);
+    protected abstract BPoint dataPosition(int curveNumber, int dataIndex, ChartData data);
+    protected abstract NearestCurvePoint nearest(int x, int y, int curveNumber, ChartData data);
+    protected abstract InfoItem[] info(int curveNumber, int dataIndex, ChartData data);
 
     public abstract int getMarkSize();
 
-    public abstract BColor getMainColor();
+    public abstract String getCurveName(int curveNumber);
 
-    public abstract void setMainColor(BColor color);
+    protected abstract void draw(BCanvas canvas, ChartData data);
 
-    public abstract BRange getYExtremes();
-
-    public abstract BPoint getDataPosition(int dataIndex);
-
-    public abstract InfoItem[] getInfo(int dataIndex);
-
-    public abstract void draw(BCanvas canvas);
 }

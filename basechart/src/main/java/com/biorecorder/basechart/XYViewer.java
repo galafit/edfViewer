@@ -5,9 +5,11 @@ package com.biorecorder.basechart;
  */
 public class XYViewer {
     ChartData data;
+    int yColumnNumber;
 
-    public void setData(ChartData data) {
+    public XYViewer(ChartData data, int curveNumber) {
         this.data = data;
+        yColumnNumber = curveNumber + 1;
     }
 
     public int size() {
@@ -19,10 +21,10 @@ public class XYViewer {
     }
 
     public double getY(int index) {
-        return data.getValue(index, 1);
+        return data.getValue(index, yColumnNumber);
     }
 
-    public BRange getYRange() {
-        return data.getColumnMinMax(1);
+    public BRange getYMinMax() {
+        return data.getColumnMinMax(yColumnNumber);
     }
 }

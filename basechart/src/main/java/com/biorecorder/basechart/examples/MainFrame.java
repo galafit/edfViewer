@@ -80,7 +80,7 @@ public class MainFrame extends JFrame {
 
         chart.addChartStack();
 
-        chart.addChartTrace(0, new LineTrace(), xyData1, false, false);
+        chart.addChartTrace(0, new LineTrace(xyData1), true, false, false);
         //config.addChartStack(5);
        // config.addTrace(new BooleanTraceConfig(), bandData, "Band");
 

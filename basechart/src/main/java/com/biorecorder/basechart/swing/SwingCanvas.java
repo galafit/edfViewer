@@ -109,7 +109,10 @@ public class SwingCanvas implements BCanvas {
 
             @Override
             public int stringWidth(String str) {
-                return fm.stringWidth(str);
+                if(str != null) {
+                    return fm.stringWidth(str);
+                }
+                return 0;
             }
         };
     }

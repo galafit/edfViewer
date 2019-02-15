@@ -20,7 +20,15 @@ public class SwitchButton {
     private BRectangle bounds;
 
     public SwitchButton(String label) {
-        this.label = label;
+        if(label != null) {
+            this.label = label;
+        }
+    }
+
+    public void setLabel(String label) {
+        if(label != null) {
+            this.label = label;
+        }
     }
 
     public void switchState() {

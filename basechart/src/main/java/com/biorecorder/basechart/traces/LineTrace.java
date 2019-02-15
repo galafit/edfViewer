@@ -13,26 +13,11 @@ import com.biorecorder.basechart.scales.Scale;
  */
 public class LineTrace extends Trace {
     LineTraceConfig traceConfig;
-    XYViewer xyData;
 
-    public LineTrace() {
+
+    public LineTrace(ChartData data) {
+        super(data);
         traceConfig = new LineTraceConfig();
-    }
-
-    public LineTrace(LineTraceConfig traceConfig) {
-        this.traceConfig = traceConfig;
-    }
-
-    @Override
-    public void setData(ChartData dataSeries) {
-        super.setData(dataSeries);
-        xyData = new XYViewer();
-        xyData.setData(dataSeries);
-    }
-
-    @Override
-    public BColor getMainColor() {
-        return traceConfig.getColor();
     }
 
     @Override
@@ -40,32 +25,76 @@ public class LineTrace extends Trace {
         return traceConfig.getMarkSize();
     }
 
-    @Override
-    public void setMainColor(BColor color) {
-        traceConfig.setColor(color);
+    BColor getLineColor(int curveNumber) {
+        return curvesColors[curveNumber];
     }
 
-    BColor getLineColor() {
-        return traceConfig.getColor();
+    BColor getMarkColor(int curveNumber) {
+        return curvesColors[curveNumber];
     }
 
-    BColor getMarkColor() {
-        return traceConfig.getColor();
-    }
-
-    public BColor getFillColor() {
-        return new BColor(getLineColor().getRed(), getLineColor().getGreen(), getLineColor().getBlue(), 110);
+    public BColor getFillColor(int curveNumber) {
+        return new BColor(getLineColor(curveNumber).getRed(), getLineColor(curveNumber).getGreen(), getLineColor(curveNumber).getBlue(), 110);
     }
 
     @Override
-    public InfoItem[] getInfo(int dataIndex){
+    protected NearestCurvePoint nearest(int x, int y, int curveNumber1, ChartData data) {
+        double xValue =  xScale.invert(x);
+        int pointIndex = dataManager.nearest(xValue);
+        int pointX = (int) xScale.scale(data.getValue(pointIndex, 0));
+
+        int distanceMin = 0;
+        int curveNumber = 0;
+
+        int startCurve = 0;
+        int curveCount = curveCount();
+        if(curveNumber1 >= 0) {
+           startCurve = curveNumber1;
+           curveCount = 1;
+        }
+        int dx = pointX - x;
+        int dx2 = dx * dx;
+
+        for (int i = startCurve; i < startCurve + curveCount; i++) {
+            int pointY =  (int) getYScale(i).scale(data.getValue(pointIndex, i + 1));
+
+            int dy = pointY - y;
+            int distance = dx2 + dy * dy;
+            if(distanceMin == 0 || distanceMin > distance) {
+                curveNumber = i;
+                distanceMin = distance;
+            }
+        }
+        return new NearestCurvePoint(this, curveNumber, pointIndex, Math.sqrt(distanceMin));
+    }
+
+    @Override
+    protected int curveCount(ChartData data) {
+        return data.columnCount() - 1;
+    }
+
+    @Override
+    protected BPoint dataPosition(int curveNumber, int dataIndex, ChartData data) {
+        XYViewer xyData = new XYViewer(data, curveNumber);
+        Scale yScale = getYScale(curveNumber);
+        return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.scale(xyData.getY(dataIndex)));
+    }
+
+
+    @Override
+    public InfoItem[] info(int curveNumber, int dataIndex, ChartData data) {
         if (dataIndex == -1){
             return new InfoItem[0];
         }
+        String curveName = getCurveName(curveNumber);
+        BColor curveColor = getCurveMainColor(curveNumber);
+        XYViewer xyData = new XYViewer(data, curveNumber);
+        Scale yScale = getYScale(curveNumber);
+
         InfoItem[] infoItems = new InfoItem[3];
-        infoItems[0] = new InfoItem(getName(), "", getMainColor());
-       // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
-       // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
+        infoItems[0] = new InfoItem(curveName, "", curveColor);
+        // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
+        // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
         infoItems[1] = new InfoItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
         infoItems[2] = new InfoItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
 
@@ -73,32 +102,51 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    public BRange getYExtremes() {
-        return xyData.getYRange();
+    protected BRange yMinMax(int curveNumber, ChartData data) {
+        return data.getColumnMinMax(curveNumber + 1);
     }
 
 
     @Override
-    public BPoint getDataPosition(int dataIndex) {
-        return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.scale(xyData.getY(dataIndex)));
+    public String getCurveName(int curveNumber) {
+        String columnName = dataManager.getColumnName(curveNumber + 1);
+        if(columnName != null && columnName.isEmpty()) {
+            return columnName;
+        }
+        if(curveCount() == 1) {
+            return name;
+        }
+        return name + "_curve" + curveNumber;
     }
 
     @Override
-    public void draw(BCanvas canvas) {
-        if (xyData == null || xyData.size() == 0) {
+    protected void draw(BCanvas canvas, ChartData data) {
+        for (int i = 0; i < curveCount(); i++) {
+            drawCurve(canvas, i, data);
+        }
+    }
+
+    private void drawCurve(BCanvas canvas, int curveNumber, ChartData data) {
+        XYViewer xyData = new XYViewer(data, curveNumber);
+        if (xyData.size() == 0) {
             return;
         }
+        Scale yScale = getYScale(curveNumber);
 
         BPath path = null;
+        canvas.setColor(getLineColor(curveNumber));
+        BColor lineColor = getLineColor(curveNumber);
+        BColor markColor = getMarkColor(curveNumber);
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
-            path = drawLinearPath(canvas);
+            path = drawLinearPath(canvas, xyData, yScale, lineColor, markColor);
         }
         if(traceConfig.getMode() == LineTraceConfig.STEP) {
-            path = drawStepPath(canvas);
+            path = drawStepPath(canvas, xyData, yScale, lineColor, markColor);
         }
         if(traceConfig.getMode() == LineTraceConfig.VERTICAL_LINES) {
-            path = drawVerticalLinesPath(canvas);
+            path = drawVerticalLinesPath(canvas, xyData, yScale, lineColor, markColor);
         }
+
 
         if(path != null && traceConfig.isFilled()) {
             int x_0 = (int) xScale.scale(xyData.getX(0));
@@ -106,17 +154,17 @@ public class LineTrace extends Trace {
             path.lineTo(x_last, (int)yScale.getRange()[0]);
             path.lineTo(x_0, (int)yScale.getRange()[0]);
             path.close();
-            canvas.setColor(getFillColor());
+            canvas.setColor(getFillColor(curveNumber));
             canvas.fillPath(path);
         }
     }
 
-    private BPath drawLinearPath(BCanvas canvas) {
+    private BPath drawLinearPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);
-        canvas.setColor(getMarkColor());
+        canvas.setColor(markColor);
         int pointRadius = traceConfig.getMarkSize() / 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
@@ -125,18 +173,18 @@ public class LineTrace extends Trace {
             path.lineTo(x, y);
             canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
-        canvas.setColor(getLineColor());
+        canvas.setColor(lineColor);
         canvas.setStroke(traceConfig.getLineStroke());
         canvas.drawPath(path);
         return path;
     }
 
-    private BPath drawStepPath(BCanvas canvas) {
+    private BPath drawStepPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         path.moveTo(x, y);
-        canvas.setColor(getMarkColor());
+        canvas.setColor(markColor);
         int pointRadius = traceConfig.getMarkSize()/ 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
@@ -146,16 +194,15 @@ public class LineTrace extends Trace {
             path.lineTo(x, y);
             canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
-        canvas.setColor(getLineColor());
+        canvas.setColor(lineColor);
         canvas.setStroke(traceConfig.getLineStroke());
         canvas.drawPath(path);
         return path;
     }
 
-    private BPath drawVerticalLinesPath(BCanvas canvas) {
+    private BPath drawVerticalLinesPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
-        canvas.setColor(getMarkColor());
         int pointRadius = traceConfig.getMarkSize() / 2;
         canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         VerticalLine vLine = new VerticalLine(y);
@@ -163,6 +210,7 @@ public class LineTrace extends Trace {
             int x_prev = x;
             x = (int) xScale.scale(xyData.getX(i));
             // draw horizontal lines to avoid line breaking
+            canvas.setColor(lineColor);
             if(x > x_prev + 1) {
                 vLine.setNewBounds(y);
                 canvas.drawLine(x_prev, y, x, y);
@@ -171,6 +219,7 @@ public class LineTrace extends Trace {
             vLine.setNewBounds(y);
             // draw vertical line
             canvas.drawLine(x, vLine.min, x, vLine.max);
+            canvas.setColor(markColor);
             canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
         return null;
