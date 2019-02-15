@@ -6,7 +6,7 @@ import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.traces.*;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -50,8 +50,7 @@ public class Chart {
     private Tooltip tooltip;
 
     private TraceCurve selectedCurve;
-    private TraceCurve hoverCurve;
-    private int hoverPointIndex = -1;
+    private TraceCurvePoint hoverPoint;
 
     private DataProcessingConfig dataProcessingConfig;
 
@@ -379,7 +378,7 @@ public class Chart {
             legend.draw(canvas);
         }
 
-        if (hoverCurve != null && hoverPointIndex >= 0) {
+        if (hoverPoint != null) {
             crosshair.draw(canvas, graphArea);
             tooltip.draw(canvas, fullArea);
         }
@@ -784,9 +783,8 @@ public class Chart {
     }
 
     public boolean hoverOff() {
-        if (hoverCurve != null) {
-            hoverPointIndex = -1;
-            hoverCurve = null;
+        if (hoverPoint != null) {
+            hoverPoint = null;
             return true;
         }
         return false;
@@ -796,40 +794,39 @@ public class Chart {
         if (!graphArea.contains(x, y)) {
             return hoverOff();
         }
-
-        if (selectedCurve != null) {
-            hoverCurve = selectedCurve;
+        if (hoverPoint == null && selectedCurve != null) {
+            hoverPoint = new TraceCurvePoint(selectedCurve.getTrace(), selectedCurve.getCurveNumber(), -1);
         }
-        if (hoverCurve != null) {
-            NearestCurvePoint nearestCurvePoint = hoverCurve.getTrace().nearest(x, y, hoverCurve.getCurveNumber());
-            if(hoverPointIndex == nearestCurvePoint.getPointIndex()) {
+
+        if (hoverPoint != null) {
+            NearestPoint nearestPoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurveNumber());
+            if(hoverPoint.getPointIndex() == nearestPoint.getPointIndex()) {
                 return false;
             } else {
-                hoverPointIndex = nearestCurvePoint.getPointIndex();
+                hoverPoint = nearestPoint.getCurvePoint();
             }
         } else {
             // find nearest trace curve
-            NearestCurvePoint nearestCurvePoint = null;
+            NearestPoint nearestPoint = null;
             for (Trace trace : traces) {
-                NearestCurvePoint curvePoint = trace.nearest(x, y, -1);
-                if(nearestCurvePoint == null || nearestCurvePoint.getDistance() > curvePoint.getDistance()) {
-                    nearestCurvePoint = curvePoint;
+                NearestPoint np = trace.nearest(x, y, -1);
+                if(nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq()) {
+                    nearestPoint = np;
                 }
             }
 
-            if(nearestCurvePoint != null) {
-                hoverCurve = new TraceCurve(nearestCurvePoint.getTrace(), nearestCurvePoint.getCurveNumber());
-                hoverPointIndex = nearestCurvePoint.getPointIndex();
-            }
+            if(nearestPoint != null) {
+                hoverPoint = nearestPoint.getCurvePoint();
+             }
         }
 
-        if (hoverCurve != null) {
-            if (hoverPointIndex >= 0) {
+        if (hoverPoint != null) {
+            if (hoverPoint.getPointIndex() >= 0) {
                 TooltipInfo tooltipInfo = new TooltipInfo();
-                tooltipInfo.addItems(hoverCurve.getTrace().info(hoverCurve.getCurveNumber(), hoverPointIndex));
-                BPoint dataPosition = hoverCurve.getTrace().dataPosition(hoverCurve.getCurveNumber(), hoverPointIndex);
+                tooltipInfo.addItems(hoverPoint.getTrace().info(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex()));
+                BPoint dataPosition = hoverPoint.getTrace().dataPosition(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex());
                 tooltip.setTooltipInfo(tooltipInfo);
-                tooltip.setXY(dataPosition.getX(), 100);
+                tooltip.setXY(dataPosition.getX(), 0);
                 crosshair.setXY(dataPosition.getX(), dataPosition.getY());
             }
             return true;

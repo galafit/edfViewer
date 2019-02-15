@@ -79,7 +79,7 @@ public class Tooltip {
     }
 
 
-    private void drawItem(BCanvas canvas, int x, int y, InfoItem infoItem) {
+    private void drawItem(BCanvas canvas, int x, int y, TooltipItem infoItem) {
         TextMetric tm = canvas.getTextMetric(tooltipConfig.getTextStyle());
         int string_y = y + tm.ascent();
         if (infoItem.getMarkColor() != null) {
@@ -114,7 +114,7 @@ public class Tooltip {
         return (int) (tooltipConfig.getTextStyle().getSize() * 0.5);
     }
 
-    private int getItemWidth(BCanvas canvas, InfoItem infoItem) {
+    private int getItemWidth(BCanvas canvas, TooltipItem infoItem) {
         String string = "";
         if (infoItem.getValue() != null) {
             string = infoItem.getValue();

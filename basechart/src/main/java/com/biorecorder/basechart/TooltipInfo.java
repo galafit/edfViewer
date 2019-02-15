@@ -6,14 +6,14 @@ import java.util.ArrayList;
  * Created by hdablin on 02.08.17.
  */
 public class TooltipInfo {
-    private InfoItem header;
-    private ArrayList<InfoItem> items = new ArrayList<InfoItem>();
+    private TooltipItem header;
+    private ArrayList<TooltipItem> items = new ArrayList<TooltipItem>();
 
-    public InfoItem getHeader() {
+    public TooltipItem getHeader() {
         return header;
     }
 
-    public void setHeader(InfoItem header) {
+    public void setHeader(TooltipItem header) {
         this.header = header;
     }
 
@@ -21,12 +21,12 @@ public class TooltipInfo {
         return items.size();
     }
 
-    public InfoItem getItem(int index){
+    public TooltipItem getItem(int index){
         return items.get(index);
     }
 
-    public void addItems(InfoItem... items){
-        for (InfoItem item : items) {
+    public void addItems(TooltipItem... items){
+        for (TooltipItem item : items) {
             this.items.add(item);
         }
     }

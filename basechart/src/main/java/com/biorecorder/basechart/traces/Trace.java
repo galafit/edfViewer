@@ -23,8 +23,7 @@ public abstract class Trace {
         curveCount = curveCount(data);
     }
 
-
-    public final NearestCurvePoint nearest(int x, int y, int curveNumber) {
+    public final NearestPoint nearest(int x, int y, int curveNumber) {
         return nearest(x, y, curveNumber, dataManager.getData(xScale, getMarkSize()));
     }
 
@@ -48,7 +47,7 @@ public abstract class Trace {
         return dataPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
     }
 
-    public final InfoItem[] info(int curveNumber, int dataIndex) {
+    public final TooltipItem[] info(int curveNumber, int dataIndex) {
         return info(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
     }
 
@@ -102,16 +101,16 @@ public abstract class Trace {
     public void setYScales(Scale... yScales) {
         this.yScales = yScales;
     }
-    protected abstract int curveCount(ChartData data);
-    protected abstract BRange yMinMax(int curveNumber, ChartData data);
-    protected abstract BPoint dataPosition(int curveNumber, int dataIndex, ChartData data);
-    protected abstract NearestCurvePoint nearest(int x, int y, int curveNumber, ChartData data);
-    protected abstract InfoItem[] info(int curveNumber, int dataIndex, ChartData data);
 
     public abstract int getMarkSize();
 
     public abstract String getCurveName(int curveNumber);
 
+    protected abstract int curveCount(ChartData data);
+    protected abstract BRange yMinMax(int curveNumber, ChartData data);
+    protected abstract BPoint dataPosition(int curveNumber, int dataIndex, ChartData data);
+    protected abstract NearestPoint nearest(int x, int y, int curveNumber, ChartData data);
+    protected abstract TooltipItem[] info(int curveNumber, int dataIndex, ChartData data);
     protected abstract void draw(BCanvas canvas, ChartData data);
 
 }

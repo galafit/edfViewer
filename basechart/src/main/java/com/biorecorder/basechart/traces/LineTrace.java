@@ -38,7 +38,7 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected NearestCurvePoint nearest(int x, int y, int curveNumber1, ChartData data) {
+    protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
         int pointX = (int) xScale.scale(data.getValue(pointIndex, 0));
@@ -65,7 +65,7 @@ public class LineTrace extends Trace {
                 distanceMin = distance;
             }
         }
-        return new NearestCurvePoint(this, curveNumber, pointIndex, Math.sqrt(distanceMin));
+        return new NearestPoint(new TraceCurvePoint(this, curveNumber, pointIndex), distanceMin);
     }
 
     @Override
@@ -82,21 +82,21 @@ public class LineTrace extends Trace {
 
 
     @Override
-    public InfoItem[] info(int curveNumber, int dataIndex, ChartData data) {
+    public TooltipItem[] info(int curveNumber, int dataIndex, ChartData data) {
         if (dataIndex == -1){
-            return new InfoItem[0];
+            return new TooltipItem[0];
         }
         String curveName = getCurveName(curveNumber);
         BColor curveColor = getCurveMainColor(curveNumber);
         XYViewer xyData = new XYViewer(data, curveNumber);
         Scale yScale = getYScale(curveNumber);
 
-        InfoItem[] infoItems = new InfoItem[3];
-        infoItems[0] = new InfoItem(curveName, "", curveColor);
+        TooltipItem[] infoItems = new TooltipItem[3];
+        infoItems[0] = new TooltipItem(curveName, "", curveColor);
         // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
         // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
-        infoItems[1] = new InfoItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
-        infoItems[2] = new InfoItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
+        infoItems[1] = new TooltipItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
+        infoItems[2] = new TooltipItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
 
         return infoItems;
     }

@@ -8,6 +8,7 @@ import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.graphics.HorizontalAlign;
 import com.biorecorder.basechart.graphics.VerticalAlign;
 import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.traces.TraceCurve;
 
 import java.util.*;
 

@@ -80,6 +80,9 @@ public class ChartTest extends JFrame {
       //  chart.addStack();
       //  chart.addTrace(1, new LineTrace(xyData3), false, false, false);
 
+        chart.setXMinMax(0, -100, 200);
+        chart.setYMinMax(0, -100, 300);
+
         chartPanel = new ChartPanel(chart);
 
         chartPanel.setPreferredSize(new Dimension(width, height));

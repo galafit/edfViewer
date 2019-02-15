@@ -6,12 +6,12 @@ import com.biorecorder.basechart.graphics.BColor;
 /**
  * Created by galafit on 6/8/17.
  */
-public class InfoItem {
+public class TooltipItem {
     private String label;
     private String value;
     private BColor markColor;
 
-    public InfoItem(String label, String value, BColor markColor) {
+    public TooltipItem(String label, String value, BColor markColor) {
         this.label = label;
         this.value = value;
         this.markColor = markColor;
