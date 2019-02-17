@@ -14,6 +14,8 @@ public interface ChartData {
 
     String getColumnName(int columnNumber);
 
+    void setColumnName(int columnNumber, String name);
+
     boolean isNumberColumn(int columnNumber);
 
     boolean isColumnRegular(int columnNumber);

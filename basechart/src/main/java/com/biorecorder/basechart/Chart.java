@@ -562,21 +562,19 @@ public class Chart {
             trace.setYScales(yScales);
         }
 
-
-        if (trace.getName() == null) {
-            trace.setName("Trace" + traces.size());
+        BColor[] colors = chartConfig.getTraceColors();
+        int totalCurves = 0;
+        for (Trace trace1 : traces) {
+            totalCurves += trace1.curveCount();
         }
-        if (trace.getCurvesColors() == null) {
-            int totalCurves = 0;
-            for (Trace trace1 : traces) {
-              totalCurves += trace1.curveCount();
+        for (int i = 0; i < trace.curveCount(); i++) {
+            if(trace.getCurveColor(i) == null) {
+                trace.setCurveColor(i, colors[(totalCurves + i) % colors.length]);
             }
-            BColor[] colors = chartConfig.getTraceColors();
-            BColor[] curveColors = new BColor[trace.curveCount()];
-            for (int i = 0; i < trace.curveCount(); i++) {
-              curveColors[i] = colors[(totalCurves + i) % colors.length];
+            if(trace.getCurveName(i) == null || trace.getCurveName(i).isEmpty()) {
+                trace.setCurveName(i, "Trace" + traces.size() + "_curve"+i);
             }
-            trace.setCurvesColors(curveColors);
+
         }
 
         traces.add(trace);
@@ -824,7 +822,7 @@ public class Chart {
             if (hoverPoint.getPointIndex() >= 0) {
                 TooltipInfo tooltipInfo = new TooltipInfo();
                 tooltipInfo.addItems(hoverPoint.getTrace().info(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex()));
-                BPoint dataPosition = hoverPoint.getTrace().dataPosition(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex());
+                BPoint dataPosition = hoverPoint.getTrace().curvePointPosition(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex());
                 tooltip.setTooltipInfo(tooltipInfo);
                 tooltip.setXY(dataPosition.getX(), 0);
                 crosshair.setXY(dataPosition.getX(), dataPosition.getY());

@@ -55,10 +55,13 @@ public class TraceDataManager {
         groupedData = null;
     }
 
-    public String getColumnName(int columnName) {
-        return traceData.getColumnName(columnName);
+    public String getColumnName(int columnNumber) {
+        return traceData.getColumnName(columnNumber);
     }
 
+    public void setColumnName(int columnNumber, String name) {
+        traceData.setColumnName(columnNumber, name);
+    }
 
     public BRange getFullXMinMax() {
         if(traceData.columnCount() == 0) {

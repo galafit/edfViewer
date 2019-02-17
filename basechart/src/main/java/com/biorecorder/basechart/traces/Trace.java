@@ -13,9 +13,7 @@ import com.biorecorder.basechart.scales.Scale;
 public abstract class Trace {
     protected Scale xScale;
     protected Scale[] yScales;
-    protected String name;
     protected TraceDataManager dataManager;
-    protected BColor[] curvesColors;
     private final int curveCount;
 
     public Trace(ChartData data) {
@@ -43,8 +41,8 @@ public abstract class Trace {
         draw(canvas, dataManager.getData(xScale, getMarkSize()));
     }
 
-    public final BPoint dataPosition(int curveNumber, int dataIndex) {
-        return dataPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    public final BPoint curvePointPosition(int curveNumber, int dataIndex) {
+        return curvePointPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
     }
 
     public final TooltipItem[] info(int curveNumber, int dataIndex) {
@@ -57,18 +55,6 @@ public abstract class Trace {
 
     public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
         dataManager.setConfig(dataProcessingConfig);
-    }
-
-    public void setCurvesColors(BColor... colors) {
-        curvesColors = colors;
-    }
-
-    public BColor[] getCurvesColors() {
-        return curvesColors;
-    }
-
-    public BColor getCurveMainColor(int curveNumber) {
-        return curvesColors[curveNumber % curvesColors.length];
     }
 
     public Scale getXScale() {
@@ -86,14 +72,6 @@ public abstract class Trace {
         return yScales[yScales.length - 1];
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     public void setXScale(Scale xScale) {
         this.xScale = xScale;
     }
@@ -106,10 +84,47 @@ public abstract class Trace {
 
     public abstract String getCurveName(int curveNumber);
 
+    public abstract void setCurveName(int curveNumber, String name);
+
+    protected  BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data) {
+        return new BPoint((int)xScale.scale(data.getValue(dataIndex, 0)), (int)getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1)));
+    }
+
+    protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
+        double xValue =  xScale.invert(x);
+        int pointIndex = dataManager.nearest(xValue);
+
+        int distanceMin = 0;
+        int curveNumber = 0;
+
+        int startCurve = 0;
+        int curveCount = curveCount();
+        if(curveNumber1 >= 0) {
+            startCurve = curveNumber1;
+            curveCount = 1;
+        }
+
+        for (int i = startCurve; i < startCurve + curveCount; i++) {
+            BPoint pointPosition = curvePointPosition(i, pointIndex);
+            int dy = pointPosition.getY() - y;
+            int dx = pointPosition.getX() - x;
+            int dx2 = dx * dx;
+            int distance = dx2 + dy * dy;
+            if(distanceMin == 0 || distanceMin > distance) {
+                curveNumber = i;
+                distanceMin = distance;
+            }
+        }
+        return new NearestPoint(new TraceCurvePoint(this, curveNumber, pointIndex), distanceMin);
+    }
+
+    public abstract void setCurveColor(int curveNumber, BColor color);
+
+    public abstract BColor getCurveColor(int curveNumber);
+
+
     protected abstract int curveCount(ChartData data);
     protected abstract BRange yMinMax(int curveNumber, ChartData data);
-    protected abstract BPoint dataPosition(int curveNumber, int dataIndex, ChartData data);
-    protected abstract NearestPoint nearest(int x, int y, int curveNumber, ChartData data);
     protected abstract TooltipItem[] info(int curveNumber, int dataIndex, ChartData data);
     protected abstract void draw(BCanvas canvas, ChartData data);
 

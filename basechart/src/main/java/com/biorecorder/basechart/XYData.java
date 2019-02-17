@@ -46,7 +46,7 @@ public class XYData implements ChartData {
        dataFrame.addColumn(columnData);
     }
 
-   public void setColumnName(int columnNumber, String columnName) {
+    public void setColumnName(int columnNumber, String columnName) {
         dataFrame.setColumnName(columnNumber, columnName);
    }
 

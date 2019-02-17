@@ -5,15 +5,16 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
-import com.biorecorder.basechart.graphics.BPoint;
 import com.biorecorder.basechart.scales.Scale;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by galafit on 11/10/17.
  */
 public class LineTrace extends Trace {
-    LineTraceConfig traceConfig;
-
+     private LineTraceConfig traceConfig;
 
     public LineTrace(ChartData data) {
         super(data);
@@ -25,48 +26,40 @@ public class LineTrace extends Trace {
         return traceConfig.getMarkSize();
     }
 
-    BColor getLineColor(int curveNumber) {
-        return curvesColors[curveNumber];
-    }
-
-    BColor getMarkColor(int curveNumber) {
-        return curvesColors[curveNumber];
-    }
-
-    public BColor getFillColor(int curveNumber) {
-        return new BColor(getLineColor(curveNumber).getRed(), getLineColor(curveNumber).getGreen(), getLineColor(curveNumber).getBlue(), 110);
+    @Override
+    public void setCurveColor(int curveNumber, BColor color) {
+        BColor[] colors = new BColor[curveCount()];
+        for (int i = 0; i < curveCount(); i++) {
+            if(i == curveNumber) {
+                colors[i] = color;
+            } else {
+                colors[i] = getCurveColor(i);
+            }
+        }
+        traceConfig.setCurveColors(colors);
     }
 
     @Override
-    protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
-        double xValue =  xScale.invert(x);
-        int pointIndex = dataManager.nearest(xValue);
-        int pointX = (int) xScale.scale(data.getValue(pointIndex, 0));
-
-        int distanceMin = 0;
-        int curveNumber = 0;
-
-        int startCurve = 0;
-        int curveCount = curveCount();
-        if(curveNumber1 >= 0) {
-           startCurve = curveNumber1;
-           curveCount = 1;
+    public BColor getCurveColor(int curveNumber) {
+        BColor[] colors = traceConfig.getCurveColors();
+        if(colors != null) {
+            return colors[curveNumber % colors.length];
         }
-        int dx = pointX - x;
-        int dx2 = dx * dx;
-
-        for (int i = startCurve; i < startCurve + curveCount; i++) {
-            int pointY =  (int) getYScale(i).scale(data.getValue(pointIndex, i + 1));
-
-            int dy = pointY - y;
-            int distance = dx2 + dy * dy;
-            if(distanceMin == 0 || distanceMin > distance) {
-                curveNumber = i;
-                distanceMin = distance;
-            }
-        }
-        return new NearestPoint(new TraceCurvePoint(this, curveNumber, pointIndex), distanceMin);
+        return null;
     }
+
+    BColor getLineColor(int curveNumber) {
+        return getCurveColor(curveNumber);
+    }
+
+    BColor getMarkColor(int curveNumber) {
+        return getCurveColor(curveNumber);
+    }
+
+    public BColor getFillColor(int curveNumber) {
+        return new BColor(getCurveColor(curveNumber).getRed(), getCurveColor(curveNumber).getGreen(), getCurveColor(curveNumber).getBlue(), 110);
+    }
+
 
     @Override
     protected int curveCount(ChartData data) {
@@ -74,20 +67,12 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected BPoint dataPosition(int curveNumber, int dataIndex, ChartData data) {
-        XYViewer xyData = new XYViewer(data, curveNumber);
-        Scale yScale = getYScale(curveNumber);
-        return new BPoint((int)xScale.scale(xyData.getX(dataIndex)), (int)yScale.scale(xyData.getY(dataIndex)));
-    }
-
-
-    @Override
     public TooltipItem[] info(int curveNumber, int dataIndex, ChartData data) {
         if (dataIndex == -1){
             return new TooltipItem[0];
         }
         String curveName = getCurveName(curveNumber);
-        BColor curveColor = getCurveMainColor(curveNumber);
+        BColor curveColor = getCurveColor(curveNumber);
         XYViewer xyData = new XYViewer(data, curveNumber);
         Scale yScale = getYScale(curveNumber);
 
@@ -110,13 +95,12 @@ public class LineTrace extends Trace {
     @Override
     public String getCurveName(int curveNumber) {
         String columnName = dataManager.getColumnName(curveNumber + 1);
-        if(columnName != null && columnName.isEmpty()) {
-            return columnName;
-        }
-        if(curveCount() == 1) {
-            return name;
-        }
-        return name + "_curve" + curveNumber;
+        return columnName;
+    }
+
+    @Override
+    public void setCurveName(int curveNumber, String name) {
+        dataManager.setColumnName(curveNumber + 1, name);
     }
 
     @Override

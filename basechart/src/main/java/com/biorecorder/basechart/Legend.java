@@ -214,7 +214,7 @@ public class Legend {
             arrangeButtons(canvas);
         }
         for (TraceCurve traceCurve : traceCurvesToButtons.keySet()){
-            traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveMainColor(traceCurve.getCurveNumber()));
+            traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveColor(traceCurve.getCurveNumber()));
         }
         canvas.setTextStyle(config.getTextStyle());
         for (TraceCurve key : traceCurvesToButtons.keySet()) {
