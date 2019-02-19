@@ -2,6 +2,8 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.*;
 
+import java.util.ArrayList;
+
 /**
  * Created by hdablin on 02.08.17.
  */
@@ -10,28 +12,29 @@ public class Tooltip {
     private int x, y;
     private int y_offset = 2;
     private String separator = "  ";
-    private TooltipInfo tooltipInfo;
+    private TooltipItem header;
+    private ArrayList<TooltipItem> items = new ArrayList<TooltipItem>();
 
-    public Tooltip(TooltipConfig tooltipConfig) {
+    public Tooltip(TooltipConfig tooltipConfig, int x, int y) {
         this.tooltipConfig = tooltipConfig;
-    }
-
-    public void setConfig(TooltipConfig tooltipConfig) {
-        this.tooltipConfig = tooltipConfig;
-    }
-
-    public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public void setTooltipInfo(TooltipInfo tooltipInfo) {
-        this.tooltipInfo = tooltipInfo;
+    public void setHeader(TooltipItem header) {
+        this.header = header;
     }
+
+    public void addItems(TooltipItem... items){
+        for (TooltipItem item : items) {
+            this.items.add(item);
+        }
+    }
+
 
     public void draw(BCanvas canvas, BRectangle area) {
         canvas.setTextStyle(tooltipConfig.getTextStyle());
-        BDimension tooltipDimension  = getTextSize(canvas, tooltipInfo);
+        BDimension tooltipDimension  = getTextSize(canvas);
         int tooltipAreaX = x - tooltipDimension.width / 2;
         int tooltipAreaY = y - tooltipDimension.height - y_offset;
         if (tooltipAreaX + tooltipDimension.width > area.x + area.width){
@@ -53,26 +56,26 @@ public class Tooltip {
         canvas.setColor(tooltipConfig.getBorderColor());
         canvas.setStroke(new BStroke(tooltipConfig.getBorderWidth()));
         canvas.drawRect(tooltipArea.x, tooltipArea.y, tooltipArea.width, tooltipArea.height);
-        drawTooltipInfo(canvas, tooltipArea, tooltipInfo);
+        drawTooltipInfo(canvas, tooltipArea);
     }
 
 
     /**
      * https://stackoverflow.com/questions/27706197/how-can-i-center-graphics-drawstring-in-java
      */
-    private void drawTooltipInfo(BCanvas canvas, BRectangle area, TooltipInfo tooltipInfo) {
+    private void drawTooltipInfo(BCanvas canvas, BRectangle area) {
         Insets margin = tooltipConfig.getMargin();
         int stringHeght = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
         int lineSpace = getInterLineSpace();
         int x = area.x + margin.left();
         int y = area.y + margin.top();
-        if (tooltipInfo.getHeader() != null) {
-            drawItem(canvas, x, y, tooltipInfo.getHeader());
+        if (header != null) {
+            drawItem(canvas, x, y, header);
             y += (lineSpace + stringHeght);
         }
 
-        for (int i = 0; i < tooltipInfo.getAmountOfItems(); i++) {
-            drawItem(canvas, x, y, tooltipInfo.getItem(i));
+        for (int i = 0; i < items.size(); i++) {
+            drawItem(canvas, x, y, items.get(i));
             //g2.drawRect(x - margin.left(), y, area.width, stringHeght);
             y += (lineSpace + stringHeght);
         }
@@ -130,21 +133,21 @@ public class Tooltip {
         return itemWidth;
     }
 
-    private BDimension getTextSize(BCanvas canvas, TooltipInfo tooltipInfo) {
+    private BDimension getTextSize(BCanvas canvas) {
         int textWidth = 0;
-        int amountOfItems = tooltipInfo.getAmountOfItems();
-        for (int i = 0; i < amountOfItems; i++) {
-            textWidth = Math.max(textWidth, getItemWidth(canvas, tooltipInfo.getItem(i)));
+
+        for (int i = 0; i < items.size(); i++) {
+            textWidth = Math.max(textWidth, getItemWidth(canvas, items.get(i)));
         }
-        if (tooltipInfo.getHeader() != null) {
-            textWidth = Math.max(textWidth, getItemWidth(canvas, tooltipInfo.getHeader()));
+        if (header != null) {
+            textWidth = Math.max(textWidth, getItemWidth(canvas, header));
         }
         Insets margin = tooltipConfig.getMargin();
         textWidth += margin.left() + margin.right();
         int strHeight = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
-        int textHeight = margin.top() + margin.bottom() + amountOfItems * strHeight;
-        textHeight += getInterLineSpace() * (amountOfItems - 1);
-        if (tooltipInfo.getHeader() != null) {
+        int textHeight = margin.top() + margin.bottom() + items.size() * strHeight;
+        textHeight += getInterLineSpace() * (items.size() - 1);
+        if (header != null) {
             textHeight += strHeight + getInterLineSpace();
         }
         return new BDimension(textWidth, textHeight);

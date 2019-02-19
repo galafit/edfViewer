@@ -5,6 +5,7 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
+import com.biorecorder.basechart.graphics.BPoint;
 import com.biorecorder.basechart.scales.Scale;
 
 import java.util.ArrayList;
@@ -48,18 +49,10 @@ public class LineTrace extends Trace {
         return null;
     }
 
-    BColor getLineColor(int curveNumber) {
-        return getCurveColor(curveNumber);
+    @Override
+    protected BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data) {
+        return new BPoint((int)xScale.scale(data.getValue(dataIndex, 0)), (int)getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1)));
     }
-
-    BColor getMarkColor(int curveNumber) {
-        return getCurveColor(curveNumber);
-    }
-
-    public BColor getFillColor(int curveNumber) {
-        return new BColor(getCurveColor(curveNumber).getRed(), getCurveColor(curveNumber).getGreen(), getCurveColor(curveNumber).getBlue(), 110);
-    }
-
 
     @Override
     protected int curveCount(ChartData data) {
@@ -67,23 +60,14 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    public TooltipItem[] info(int curveNumber, int dataIndex, ChartData data) {
-        if (dataIndex == -1){
-            return new TooltipItem[0];
-        }
-        String curveName = getCurveName(curveNumber);
-        BColor curveColor = getCurveColor(curveNumber);
+    protected PointInfo curvePointInfo(int curveNumber, int dataIndex, ChartData data) {
         XYViewer xyData = new XYViewer(data, curveNumber);
         Scale yScale = getYScale(curveNumber);
-
-        TooltipItem[] infoItems = new TooltipItem[3];
-        infoItems[0] = new TooltipItem(curveName, "", curveColor);
-        // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
-        // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
-        infoItems[1] = new TooltipItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
-        infoItems[2] = new TooltipItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
-
-        return infoItems;
+        double xValue = xyData.getX(dataIndex);
+        double yValue = xyData.getY(dataIndex);
+        PointInfo pointInfo = new PointInfo(xValue, xScale.formatDomainValue(xValue));
+        pointInfo.addValue("", yValue, yScale.formatDomainValue(yValue));
+        return pointInfo;
     }
 
     @Override
@@ -101,6 +85,18 @@ public class LineTrace extends Trace {
     @Override
     public void setCurveName(int curveNumber, String name) {
         dataManager.setColumnName(curveNumber + 1, name);
+    }
+
+    private BColor getLineColor(int curveNumber) {
+        return getCurveColor(curveNumber);
+    }
+
+    private BColor getMarkColor(int curveNumber) {
+        return getCurveColor(curveNumber);
+    }
+
+    private BColor getFillColor(int curveNumber) {
+        return new BColor(getCurveColor(curveNumber).getRed(), getCurveColor(curveNumber).getGreen(), getCurveColor(curveNumber).getBlue(), 110);
     }
 
     @Override

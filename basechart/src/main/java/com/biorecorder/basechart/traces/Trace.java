@@ -41,12 +41,14 @@ public abstract class Trace {
         draw(canvas, dataManager.getData(xScale, getMarkSize()));
     }
 
-    public final BPoint curvePointPosition(int curveNumber, int dataIndex) {
-        return curvePointPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+
+    public final PointInfo curvePointInfo(int curveNumber, int dataIndex) {
+        return curvePointInfo(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
     }
 
-    public final TooltipItem[] info(int curveNumber, int dataIndex) {
-        return info(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+
+    public final BPoint curvePointPosition(int curveNumber, int dataIndex) {
+        return curvePointPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
     }
 
     public final BRange yMinMax(int curveNumber) {
@@ -86,10 +88,6 @@ public abstract class Trace {
 
     public abstract void setCurveName(int curveNumber, String name);
 
-    protected  BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data) {
-        return new BPoint((int)xScale.scale(data.getValue(dataIndex, 0)), (int)getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1)));
-    }
-
     protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
@@ -122,10 +120,10 @@ public abstract class Trace {
 
     public abstract BColor getCurveColor(int curveNumber);
 
-
+    protected abstract BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data);
+    protected abstract PointInfo curvePointInfo(int curveNumber, int dataIndex, ChartData data);
     protected abstract int curveCount(ChartData data);
     protected abstract BRange yMinMax(int curveNumber, ChartData data);
-    protected abstract TooltipItem[] info(int curveNumber, int dataIndex, ChartData data);
     protected abstract void draw(BCanvas canvas, ChartData data);
 
 }

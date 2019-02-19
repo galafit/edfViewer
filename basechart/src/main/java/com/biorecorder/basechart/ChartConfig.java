@@ -12,6 +12,11 @@ public class ChartConfig {
     private BColor backgroundColor;
     private BColor marginColor;
 
+    private Insets spacing = new Insets(0, 0, 10, 10);
+    private boolean isLeftAxisPrimary = true;
+    private boolean isBottomAxisPrimary = true;
+
+
     private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();

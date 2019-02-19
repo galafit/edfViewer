@@ -38,8 +38,7 @@ public class DataFrame {
 
     private void addColumn(Column column) {
         columns.add(column);
-        //columnNames.add("Column " + (columns.size() - 1));
-        columnNames.add("");
+        columnNames.add("Column " + (columns.size() - 1));
         AggregateFunction[] agg = new AggregateFunction[1];
         agg[0] = AggregateFunction.FIRST;
         columnAggFunctions.add(agg);

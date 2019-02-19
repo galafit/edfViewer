@@ -21,6 +21,7 @@ public class Chart {
 
     private boolean isLegendVisible = true;
 
+    private boolean isSingleCurveTooltip = true;
     private boolean isMarginFixed = false;
     private Insets spacing = new Insets(0, 0, 10, 10);
     private boolean isLeftAxisPrimary = true;
@@ -820,6 +821,8 @@ public class Chart {
 
         if (hoverPoint != null) {
             if (hoverPoint.getPointIndex() >= 0) {
+                PointInfo hoverPointInfo = hoverPoint.getTrace()
+
                 TooltipInfo tooltipInfo = new TooltipInfo();
                 tooltipInfo.addItems(hoverPoint.getTrace().info(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex()));
                 BPoint dataPosition = hoverPoint.getTrace().curvePointPosition(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex());
@@ -830,6 +833,26 @@ public class Chart {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public TooltipItem[] info(int curveNumber, int dataIndex, ChartData data) {
+        if (dataIndex == -1){
+            return new TooltipItem[0];
+        }
+        String curveName = getCurveName(curveNumber);
+        BColor curveColor = getCurveColor(curveNumber);
+        XYViewer xyData = new XYViewer(data, curveNumber);
+        Scale yScale = getYScale(curveNumber);
+
+        TooltipItem[] infoItems = new TooltipItem[3];
+        infoItems[0] = new TooltipItem(curveName, "", curveColor);
+        // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
+        // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
+        infoItems[1] = new TooltipItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
+        infoItems[2] = new TooltipItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
+
+        return infoItems;
     }
 
     /**

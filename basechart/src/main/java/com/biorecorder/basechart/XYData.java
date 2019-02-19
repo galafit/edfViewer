@@ -30,20 +30,28 @@ public class XYData implements ChartData {
         dataFrame.addColumn(start, step);
     }
 
+    private void setLastColumnDefaultName() {
+       dataFrame.setColumnName(dataFrame.columnCount() - 1, "");
+    }
+
     public void addColumn(IntSequence columnData) {
         dataFrame.addColumn(columnData);
+        setLastColumnDefaultName();
     }
 
     public void addColumn(double start, double step) {
         dataFrame.addColumn(start, step);
+        setLastColumnDefaultName();
     }
 
     public void addColumn(List<Integer> columnData) {
         dataFrame.addColumn(columnData);
+        setLastColumnDefaultName();
     }
 
     public void addColumn(int[] columnData) {
        dataFrame.addColumn(columnData);
+        setLastColumnDefaultName();
     }
 
     public void setColumnName(int columnNumber, String columnName) {
