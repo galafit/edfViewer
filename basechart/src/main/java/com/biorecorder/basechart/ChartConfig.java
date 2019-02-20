@@ -12,11 +12,6 @@ public class ChartConfig {
     private BColor backgroundColor;
     private BColor marginColor;
 
-    private Insets spacing = new Insets(0, 0, 10, 10);
-    private boolean isLeftAxisPrimary = true;
-    private boolean isBottomAxisPrimary = true;
-
-
     private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();
@@ -26,6 +21,17 @@ public class ChartConfig {
     private AxisConfig rightAxisConfig = new AxisConfig();
     private AxisConfig bottomAxisConfig = new AxisConfig();
     private AxisConfig topAxisConfig = new AxisConfig();
+
+    private Insets spacing = new Insets(0, 0, 10, 10);
+    private boolean isLeftAxisPrimary = true;
+    private boolean isBottomAxisPrimary = true;
+    private boolean isMultiCurveTooltip = true;
+
+    private int defaultStackWeight = 4;
+    private int axisRoundingAccuracyPctIfRoundingEnabled = 5;
+    private int axisRoundingAccuracyPctIfRoundingDisabled = 20;
+    private boolean isYAxisRoundingEnabled = true;
+    private boolean isXAxisRoundingEnabled = false;
 
     public ChartConfig() {
     }
@@ -42,6 +48,88 @@ public class ChartConfig {
         rightAxisConfig = new AxisConfig(chartConfig.rightAxisConfig);
         topAxisConfig = new AxisConfig(chartConfig.topAxisConfig);
         bottomAxisConfig = new AxisConfig(chartConfig.bottomAxisConfig);
+        spacing = new Insets(chartConfig.spacing);
+        isLeftAxisPrimary = chartConfig.isLeftAxisPrimary;
+        isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
+        isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
+        defaultStackWeight = chartConfig.defaultStackWeight;
+        axisRoundingAccuracyPctIfRoundingEnabled = chartConfig.axisRoundingAccuracyPctIfRoundingEnabled;
+        axisRoundingAccuracyPctIfRoundingDisabled = chartConfig.axisRoundingAccuracyPctIfRoundingDisabled;
+
+        isYAxisRoundingEnabled = chartConfig.isYAxisRoundingEnabled;
+        isXAxisRoundingEnabled = chartConfig.isXAxisRoundingEnabled;
+    }
+
+    public Insets getSpacing() {
+        return spacing;
+    }
+
+    public void setSpacing(int top, int right, int bottom, int left) {
+        this.spacing = new Insets(top, right, bottom, left);
+    }
+
+    public boolean isLeftAxisPrimary() {
+        return isLeftAxisPrimary;
+    }
+
+    public void setLeftAxisPrimary(boolean isLeftAxisPrimary) {
+        this.isLeftAxisPrimary = isLeftAxisPrimary;
+    }
+
+    public boolean isBottomAxisPrimary() {
+        return isBottomAxisPrimary;
+    }
+
+    public void setBottomAxisPrimary(boolean isBottomAxisPrimary) {
+        this.isBottomAxisPrimary = isBottomAxisPrimary;
+    }
+
+    public boolean isMultiCurveTooltip() {
+        return isMultiCurveTooltip;
+    }
+
+    public void setMultiCurveTooltip(boolean isSingleCurveTooltip) {
+        this.isMultiCurveTooltip = isSingleCurveTooltip;
+    }
+
+    public int getDefaultStackWeight() {
+        return defaultStackWeight;
+    }
+
+    public void setDefaultStackWeight(int defaultStackWeight) {
+        this.defaultStackWeight = defaultStackWeight;
+    }
+
+    public int getAxisRoundingAccuracyPctIfRoundingEnabled() {
+        return axisRoundingAccuracyPctIfRoundingEnabled;
+    }
+
+    public void setAxisRoundingAccuracyPctIfRoundingEnabled(int axisRoundingAccuracyPctIfRoundingEnabled) {
+        this.axisRoundingAccuracyPctIfRoundingEnabled = axisRoundingAccuracyPctIfRoundingEnabled;
+    }
+
+    public int getAxisRoundingAccuracyPctIfRoundingDisabled() {
+        return axisRoundingAccuracyPctIfRoundingDisabled;
+    }
+
+    public void setAxisRoundingAccuracyPctIfRoundingDisabled(int axisRoundingAccuracyPctIfRoundingDisabled) {
+        this.axisRoundingAccuracyPctIfRoundingDisabled = axisRoundingAccuracyPctIfRoundingDisabled;
+    }
+
+    public boolean isYAxisRoundingEnabled() {
+        return isYAxisRoundingEnabled;
+    }
+
+    public void setYAxisRoundingEnabled(boolean isYAxisRoundingEnabled) {
+        this.isYAxisRoundingEnabled = isYAxisRoundingEnabled;
+    }
+
+    public boolean isXAxisRoundingEnabled() {
+        return isXAxisRoundingEnabled;
+    }
+
+    public void setXAxisRoundingEnabled(boolean isXAxisRoundingEnabled) {
+        this.isXAxisRoundingEnabled = isXAxisRoundingEnabled;
     }
 
     public TitleConfig getTitleConfig() {

@@ -65,6 +65,7 @@ public class WhiteTheme extends Theme {
         previewConfig.setBottomAxisConfig(xAxisConfig);
         previewConfig.getCrossHairConfig().setLineColor(crosshairColor);
         previewConfig.getLegendConfig().setBackgroundColor(chartBgColor);
+        previewConfig.setDefaultStackWeight(2);
 
         scrollConfig.setColor(scrollColor);
     }

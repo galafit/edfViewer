@@ -66,6 +66,7 @@ public class ChartTest extends JFrame {
         xyData2.addColumn(yData2);
         xyData2.addColumn(yData_col1);
         xyData2.addColumn(yData_col2);
+        xyData2.setColumnName(2, "eeg");
 
         XYData xyData3 = new XYData();
         xyData3.addColumn(xData3);

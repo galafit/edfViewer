@@ -72,7 +72,7 @@ public class Tooltip {
             canvas.setColor(tooltipConfig.getHeaderBackgroundColor());
             canvas.fillRect(area.x, area.y, area.width, stringHeight + margin.top());
 
-            int headerWidth = getItemWidth(canvas, header);
+            int headerWidth = itemWidth(canvas, header);
 
             drawItem(canvas, area.x + (area.width - headerWidth) / 2 , y, header);
             y += (lineSpace + stringHeight);
@@ -137,30 +137,14 @@ public class Tooltip {
         return (int) (tooltipConfig.getTextStyle().getSize() * 0.5);
     }
 
-    private int getItemWidth(BCanvas canvas, TooltipItem infoItem) {
-        String string = "";
-        if (infoItem.getValue() != null) {
-            string = infoItem.getValue();
-        }
-        if (infoItem.getLabel() != null) {
-            string = infoItem.getLabel() + separator + string;
-        }
-        int itemWidth = canvas.getTextMetric(tooltipConfig.getTextStyle()).stringWidth(string);
-        if (infoItem.getMarkColor() != null) {
-            itemWidth = itemWidth + getColorMarkerPadding() + getColorMarkerSize();
-        }
-
-        return itemWidth;
-    }
-
     private BDimension getTextSize(BCanvas canvas) {
         int textWidth = 0;
 
         for (int i = 0; i < items.size(); i++) {
-            textWidth = Math.max(textWidth, getItemWidth(canvas, items.get(i)));
+            textWidth = Math.max(textWidth, itemWidth(canvas, items.get(i)));
         }
         if (header != null) {
-            textWidth = Math.max(textWidth, getItemWidth(canvas, header));
+            textWidth = Math.max(textWidth, itemWidth(canvas, header));
         }
         Insets margin = tooltipConfig.getMargin();
         textWidth += margin.left() + margin.right();

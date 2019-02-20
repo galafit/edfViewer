@@ -22,7 +22,7 @@ public class AxisTop extends AxisHorizontal {
         int space = 2;// px
         int charHalfWidth = charSize/2;
 
-        if(isTickLabelInside) {
+        if(config.isTickLabelInside()) {
             int y = axisWidth / 2  + labelPadding;
             int x = tickPosition + space;
             if(x + charSize * tickLabel.length() > getEnd()) {

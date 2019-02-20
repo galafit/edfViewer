@@ -34,7 +34,6 @@ public abstract class Axis {
     // used to calculate number of ticks. If <= 0 will not be taken into account
     private int roundingAccuracyPct = 20; // percents for min
     protected AxisConfig config;
-    protected boolean isTickLabelInside = false;
 
     protected String title;
     private Scale scale;
@@ -85,15 +84,6 @@ public abstract class Axis {
     public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
         this.tickFormatInfo = tickFormatInfo;
         setDirty();
-    }
-
-    public void setTickLabelInside(boolean tickLabelInside) {
-        isTickLabelInside = tickLabelInside;
-        setDirty();
-    }
-
-    public boolean isTickLabelInside() {
-        return isTickLabelInside;
     }
 
     /**
@@ -148,6 +138,10 @@ public abstract class Axis {
         // set a copy to safely change
         this.config = new AxisConfig(config);
         setDirty();
+    }
+
+    public boolean isTickLabelInside() {
+        return config.isTickLabelInside();
     }
 
 
@@ -261,7 +255,7 @@ public abstract class Axis {
 
             width += config.getTickMarkOutsideSize();
 
-            if (!isTickLabelInside) {
+            if (!config.isTickLabelInside()) {
                 if (isDirty) {
                     createAxisElements(canvas);
                 }

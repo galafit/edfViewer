@@ -17,17 +17,11 @@ import java.util.List;
  */
 public class Chart {
     private String title;
-    private int defaultWeight = 4;
 
     private boolean isLegendVisible = true;
-
-    private boolean isSingleCurveTooltip = true;
     private boolean isMarginFixed = false;
-    private Insets spacing = new Insets(0, 0, 10, 10);
-    private boolean isLeftAxisPrimary = true;
-    private boolean isBottomAxisPrimary = true;
-    private ChartConfig chartConfig = new ChartConfig();
 
+    private ChartConfig chartConfig = new ChartConfig();
 
     /*
  * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
@@ -45,7 +39,6 @@ public class Chart {
     private BRectangle fullArea;
     private BRectangle graphArea;
     private Insets margin;
-    private boolean isYAxisRoundingEnabled = false;
 
     private Crosshair crosshair;
     private Tooltip tooltip;
@@ -69,9 +62,16 @@ public class Chart {
         this.dataProcessingConfig = dataProcessingConfig;
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
-        bottomAxis.setRoundingEnabled(false);
-        topAxis.setRoundingEnabled(false);
-        if (isBottomAxisPrimary) {
+        bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
+        topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
+        if(chartConfig.isXAxisRoundingEnabled()) {
+            bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+            topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+        } else {
+            bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+            topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+        }
+        if (chartConfig.isBottomAxisPrimary()) {
             bottomAxis.setGridVisible(true);
         } else {
             topAxis.setGridVisible(true);
@@ -174,6 +174,7 @@ public class Chart {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
 
+        Insets spacing = chartConfig.getSpacing();
         int left = 0;
         int right = 0;
         int top = spacing.top();
@@ -406,16 +407,6 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setDefaultWeight(int defaultWeight) {
-        this.defaultWeight = defaultWeight;
-    }
-
-    public void setSpacing(int top, int right, int bottom, int left) {
-        this.spacing = new Insets(top, right, bottom, left);
-        setAreasDirty();
-        titleText = null;
-    }
-
     public void setFixedMargin(Insets margin) {
         if (margin != null) {
             isMarginFixed = true;
@@ -427,57 +418,37 @@ public class Chart {
         }
     }
 
-    /**
-     * if true all x axis will start and end on tick
-     */
-    public void setXRoundingEnabled(boolean isRoundingEnabled) {
-        for (AxisWrapper axis : xAxisList) {
-            axis.setRoundingEnabled(isRoundingEnabled);
-        }
-        setAreasDirty();
-    }
-
-    /**
-     * if true all y axis will start and end on tick
-     */
-    public void setYRoundingEnabled(boolean isRoundingEnabled) {
-        isYAxisRoundingEnabled = isRoundingEnabled;
-        for (AxisWrapper axis : yAxisList) {
-            axis.setRoundingEnabled(isRoundingEnabled);
-        }
-        setAreasDirty();
-    }
-
-    public void setXLabelsInside(boolean isInside) {
-        for (AxisWrapper axis : xAxisList) {
-            axis.setTickLabelInside(isInside);
-        }
-        setAreasDirty();
-    }
-
-    public void setYLabelsInside(boolean isInside) {
-        for (AxisWrapper axis : yAxisList) {
-            axis.setTickLabelInside(isInside);
-        }
-        setAreasDirty();
-    }
 
     public void setConfig(ChartConfig chartConfig1) {
         this.chartConfig = new ChartConfig(chartConfig1);
         // axis
         for (int i = 0; i < xAxisList.size(); i++) {
+            AxisWrapper axis = xAxisList.get(i);
             if (isXAxisBottom(i)) {
-                xAxisList.get(i).setConfig(chartConfig.getBottomAxisConfig());
+                axis.setConfig(chartConfig.getBottomAxisConfig());
             } else {
-                xAxisList.get(i).setConfig(chartConfig.getTopAxisConfig());
+                axis.setConfig(chartConfig.getTopAxisConfig());
+            }
+            axis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
+            if(chartConfig.isXAxisRoundingEnabled()) {
+                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+            } else {
+                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
             }
         }
 
         for (int i = 0; i < yAxisList.size(); i++) {
+            AxisWrapper axis = yAxisList.get(i);
             if (isYAxisLeft(i)) {
-                yAxisList.get(i).setConfig(chartConfig.getLeftAxisConfig());
+                axis.setConfig(chartConfig.getLeftAxisConfig());
             } else {
-                yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
+                axis.setConfig(chartConfig.getRightAxisConfig());
+            }
+            axis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
+            if(chartConfig.isYAxisRoundingEnabled()) {
+                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+            }else {
+                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
             }
         }
 
@@ -490,15 +461,22 @@ public class Chart {
     }
 
     public void addStack() {
-        addStack(defaultWeight);
+        addStack(chartConfig.getDefaultStackWeight());
     }
 
     public void addStack(int weight) {
         AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), chartConfig.getLeftAxisConfig()));
         AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig()));
-        leftAxis.setRoundingEnabled(isYAxisRoundingEnabled);
-        rightAxis.setRoundingEnabled(isYAxisRoundingEnabled);
-        if (isLeftAxisPrimary) {
+        leftAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
+        rightAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
+        if(chartConfig.isYAxisRoundingEnabled()) {
+            leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+            rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+        } else {
+            leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+            rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+        }
+        if (chartConfig.isLeftAxisPrimary()) {
             leftAxis.setGridVisible(true);
         } else {
             rightAxis.setGridVisible(true);
@@ -520,16 +498,16 @@ public class Chart {
     public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
-        if (isXAxisOpposite && isBottomAxisPrimary) {
+        if (isXAxisOpposite && chartConfig.isBottomAxisPrimary()) {
             isBottomXAxis = false;
         }
-        if (!isXAxisOpposite && !isBottomAxisPrimary) {
+        if (!isXAxisOpposite && !chartConfig.isBottomAxisPrimary()) {
             isBottomXAxis = false;
         }
-        if (isYAxisOpposite && isLeftAxisPrimary) {
+        if (isYAxisOpposite && chartConfig.isLeftAxisPrimary()) {
             isLeftYAxis = false;
         }
-        if (!isYAxisOpposite && !isLeftAxisPrimary) {
+        if (!isYAxisOpposite && !chartConfig.isLeftAxisPrimary()) {
             isLeftYAxis = false;
         }
         int xIndex = isBottomXAxis ? 0 : 1;
@@ -826,15 +804,15 @@ public class Chart {
                 crosshair = new Crosshair(chartConfig.getCrossHairConfig(), xPosition);
                 tooltip = new Tooltip(chartConfig.getTooltipConfig(), xPosition, tooltipYPosition);
                 tooltip.setHeader(null, null, xValue.getValueLabel());
-                if(isSingleCurveTooltip) {
-                    addCurvePointToTooltip(tooltip, hoverTrace, hoverCurveNumber, hoverPointIndex);
-                    crosshair.addY(hoverTrace.curveYPosition(hoverCurveNumber, hoverPointIndex));
-                } else {
+                if(chartConfig.isMultiCurveTooltip()) { // all trace curves
                     for (int i = 0; i < hoverTrace.curveCount(); i++) {
                         addCurvePointToTooltip(tooltip, hoverTrace, i, hoverPointIndex);
                         crosshair.addY(hoverTrace.curveYPosition(i, hoverPointIndex));
 
                     }
+                } else { // only hover curve
+                    addCurvePointToTooltip(tooltip, hoverTrace, hoverCurveNumber, hoverPointIndex);
+                    crosshair.addY(hoverTrace.curveYPosition(hoverCurveNumber, hoverPointIndex));
                 }
             }
             return true;
@@ -896,14 +874,9 @@ public class Chart {
             setRoundingDirty();
         }
 
-        public void setTickLabelInside(boolean tickLabelInside) {
-            axis.setTickLabelInside(tickLabelInside);
-        }
-
         public boolean isTickLabelInside() {
             return axis.isTickLabelInside();
         }
-
 
         public void setTitle(String title) {
             axis.setTitle(title);
@@ -922,7 +895,6 @@ public class Chart {
             axis.setTickFormatInfo(tickFormatInfo);
             setRoundingDirty();
         }
-
 
         public Scale getScale() {
             return axis.getScale();

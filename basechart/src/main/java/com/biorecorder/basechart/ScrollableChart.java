@@ -39,12 +39,10 @@ public class ScrollableChart {
     public ScrollableChart() {
         this.theme = new DarkTheme();
         chart = new Chart(theme.getChartConfig());
-        chart.setYRoundingEnabled(true);
 
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
         preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
-        preview.setDefaultWeight(2);
     }
 
     private void createScrolls() {

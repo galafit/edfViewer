@@ -16,11 +16,18 @@ public class Insets {
         this.left = left;
     }
 
-    public Insets(int margin) {
-        this.top = margin;
-        this.right = margin;
-        this.bottom = margin;
-        this.left = margin;
+    public Insets(int inset) {
+        this.top = inset;
+        this.right = inset;
+        this.bottom = inset;
+        this.left = inset;
+    }
+
+    public Insets(Insets insets) {
+        top = insets.top;
+        right = insets.right;
+        bottom = insets.bottom;
+        left = insets.left;
     }
 
     public int top() {

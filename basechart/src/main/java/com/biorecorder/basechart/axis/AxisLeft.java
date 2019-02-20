@@ -23,7 +23,7 @@ public class AxisLeft extends AxisVertical {
         int space = 2;// px
         int labelHeight = charSize;
 
-        if(isTickLabelInside) {
+        if(config.isTickLabelInside()) {
             int y = tickPosition - space;
             int x = axisWidth / 2  + labelPadding;
             if(y - labelHeight/2 - 1 < getEnd()) {
