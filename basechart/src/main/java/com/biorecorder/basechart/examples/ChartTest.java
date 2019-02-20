@@ -48,12 +48,12 @@ public class ChartTest extends JFrame {
         xData3.add(300);
         xData3.add(200);
         xData3.add(100);
-        xData3.add(500);
+        xData3.add(150);
         xData3.add(20);
 
         yData3.add(100);
         yData3.add(200);
-        yData3.add(500);
+        yData3.add(150);
         yData3.add(10);
         yData3.add(300);
         yData3.add(300);
@@ -76,10 +76,10 @@ public class ChartTest extends JFrame {
 
         chart.addStack();
 
-        chart.addTrace(0, new LineTrace(xyData1), true, false, false);
+        //chart.addTrace(0, new LineTrace(xyData1), true, false, false);
         chart.addTrace(0, new LineTrace(xyData2), false, false, false);
-      //  chart.addStack();
-      //  chart.addTrace(1, new LineTrace(xyData3), false, false, false);
+        chart.addStack();
+        chart.addTrace(1, new LineTrace(xyData3), false, false, false);
 
         chart.setXMinMax(0, -100, 200);
         chart.setYMinMax(0, -100, 300);

@@ -19,9 +19,13 @@ public abstract class Trace {
         dataManager = new TraceDataManager(data, new DataProcessingConfig());
         curveCount = curveCount(data);
     }
+    
+    private final ChartData getData() {
+        return dataManager.getData(xScale, getMarkSize());
+    }
 
     public final NearestPoint nearest(int x, int y, int curveNumber) {
-        return nearest(x, y, curveNumber, dataManager.getData(xScale, getMarkSize()));
+        return nearest(x, y, curveNumber, getData());
     }
 
     public BRange getFullXMinMax() {
@@ -37,29 +41,29 @@ public abstract class Trace {
     }
 
     public final void draw(BCanvas canvas) {
-        draw(canvas, dataManager.getData(xScale, getMarkSize()));
+        draw(canvas, getData());
     }
 
     public NamedValue xValue(int dataIndex) {
-        double xValue = dataManager.getData(xScale, getMarkSize()).getValue(dataIndex, 0);
+        double xValue = getData().getValue(dataIndex, 0);
         return new NamedValue("x: ", xValue, xScale.formatDomainValue(xValue));
     }
 
     public int xPosition(int dataIndex) {
-        double xValue = dataManager.getData(xScale, getMarkSize()).getValue(dataIndex, 0);
+        double xValue = getData().getValue(dataIndex, 0);
         return (int)xScale.scale(xValue);
     }
 
     public final NamedValue[] curveValues(int curveNumber, int dataIndex) {
-        return curveValues(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+        return curveValues(curveNumber, dataIndex, getData());
     }
 
     public final int curveYPosition(int curveNumber, int dataIndex) {
-        return curveYPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+        return curveYPosition(curveNumber, dataIndex, getData());
     }
 
     public final BRange curveYMinMax(int curveNumber) {
-       return curveYMinMax(curveNumber, dataManager.getData(xScale, getMarkSize()));
+       return curveYMinMax(curveNumber, getData());
     }
 
     public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {

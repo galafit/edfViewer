@@ -9,7 +9,9 @@ import java.util.Arrays;
  * Created by galafit on 9/7/18.
  */
 public class TraceDataManager {
-    private int CROP_SHOULDER = 2; // number of additional points that we leave on every side during crop
+    private int cropShoulder = 2; // number of additional points that we leave on every side during crop
+    int maxAxisLengthChangePct = 20; // 20%
+
     private final ChartData traceData;
     private DataProcessingConfig processingConfig;
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
@@ -81,7 +83,7 @@ public class TraceDataManager {
         return 0;
     }
 
-    public int nearest(double xValue) {
+    public int nearest(double xValue, double yValue) {
         // "lazy" sorting solo when "nearestCurve" is called
         if (!isIncreasingChecked) {
             if (!processedData.isColumnIncreasing(0)) {
@@ -106,8 +108,10 @@ public class TraceDataManager {
             nearest = sorter[nearest];
             nearest_prev = sorter[nearest_prev];
         }
-        if(Math.abs(processedData.getValue(nearest_prev, 0) - xValue) < Math.abs(processedData.getValue(nearest, 0) - xValue)) {
-            nearest = nearest_prev;
+        if(nearest != nearest_prev) {
+            if(Math.abs(processedData.getValue(nearest_prev, 0) - xValue) < Math.abs(processedData.getValue(nearest, 0) - xValue)) {
+                nearest = nearest_prev;
+            }
         }
 
         return nearest;
@@ -161,7 +165,8 @@ public class TraceDataManager {
         if(prevLength == 0 || length == 0) {
             return false;
         }
-        if(Math.abs(prevLength - length) / length > 0.2) {
+
+        if(Math.abs(prevLength - length) * 100 / length > maxAxisLengthChangePct) {
             return false;
         }
 
@@ -235,7 +240,7 @@ public class TraceDataManager {
 
         // if crop enabled
         if(processingConfig.isCropEnabled()) {
-            int cropShoulder = CROP_SHOULDER * pointsInGroup;
+            int cropShoulder = this.cropShoulder * pointsInGroup;
 
             int minIndex = 0;
             if(dataMinMax.getMin() < xMin) {
