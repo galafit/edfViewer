@@ -1,6 +1,7 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.*;
+import com.sun.istack.internal.Nullable;
 
 import java.util.ArrayList;
 
@@ -11,7 +12,7 @@ public class Tooltip {
     private TooltipConfig tooltipConfig;
     private int x, y;
     private int y_offset = 2;
-    private String separator = "  ";
+    private String separator = ":  ";
     private TooltipItem header;
     private ArrayList<TooltipItem> items = new ArrayList<TooltipItem>();
 
@@ -21,14 +22,12 @@ public class Tooltip {
         this.y = y;
     }
 
-    public void setHeader(TooltipItem header) {
-        this.header = header;
+    public void setHeader(@Nullable BColor markColor, @Nullable String label, @Nullable String value) {
+        header = new TooltipItem(markColor, label, value);
     }
 
-    public void addItems(TooltipItem... items){
-        for (TooltipItem item : items) {
-            this.items.add(item);
-        }
+    public void addLine(@Nullable BColor markColor, @Nullable String label, @Nullable String value){
+        items.add(new TooltipItem(markColor, label, value));
     }
 
 
@@ -65,20 +64,41 @@ public class Tooltip {
      */
     private void drawTooltipInfo(BCanvas canvas, BRectangle area) {
         Insets margin = tooltipConfig.getMargin();
-        int stringHeght = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
+        int stringHeight = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
         int lineSpace = getInterLineSpace();
         int x = area.x + margin.left();
         int y = area.y + margin.top();
         if (header != null) {
-            drawItem(canvas, x, y, header);
-            y += (lineSpace + stringHeght);
+            canvas.setColor(tooltipConfig.getHeaderBackgroundColor());
+            canvas.fillRect(area.x, area.y, area.width, stringHeight + margin.top());
+
+            int headerWidth = getItemWidth(canvas, header);
+
+            drawItem(canvas, area.x + (area.width - headerWidth) / 2 , y, header);
+            y += (lineSpace + stringHeight);
         }
 
         for (int i = 0; i < items.size(); i++) {
             drawItem(canvas, x, y, items.get(i));
             //g2.drawRect(x - margin.left(), y, area.width, stringHeght);
-            y += (lineSpace + stringHeght);
+            y += (lineSpace + stringHeight);
         }
+    }
+
+    private int itemWidth(BCanvas canvas, TooltipItem infoItem) {
+        TextMetric tm = canvas.getTextMetric(tooltipConfig.getTextStyle());
+        int width = 0;
+        if (infoItem.getMarkColor() != null) {
+            width += getColorMarkerSize() + getColorMarkerPadding();
+        }
+        if (infoItem.getLabel() != null) {
+            String labelString = infoItem.getLabel() + separator;
+            width += tm.stringWidth(labelString);
+        }
+        if (infoItem.getValue() != null) {
+            width += tm.stringWidth(infoItem.getValue());
+        }
+        return width;
     }
 
 
@@ -155,5 +175,41 @@ public class Tooltip {
 
     private int getInterLineSpace() {
         return (int) (tooltipConfig.getTextStyle().getSize() * 0.2);
+    }
+
+    public class TooltipItem {
+        private String label;
+        private String value;
+        private BColor markColor;
+
+        public TooltipItem(BColor markColor, String label, String value) {
+            this.label = label;
+            this.value = value;
+            this.markColor = markColor;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public BColor getMarkColor() {
+            return markColor;
+        }
+
+        public void setMarkColor(BColor markColor) {
+            this.markColor = markColor;
+        }
     }
 }

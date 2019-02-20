@@ -3,7 +3,6 @@ package com.biorecorder.basechart.traces;
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BPoint;
 import com.biorecorder.basechart.scales.Scale;
 
 
@@ -41,18 +40,26 @@ public abstract class Trace {
         draw(canvas, dataManager.getData(xScale, getMarkSize()));
     }
 
-
-    public final PointInfo curvePointInfo(int curveNumber, int dataIndex) {
-        return curvePointInfo(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    public NamedValue xValue(int dataIndex) {
+        double xValue = dataManager.getData(xScale, getMarkSize()).getValue(dataIndex, 0);
+        return new NamedValue("x: ", xValue, xScale.formatDomainValue(xValue));
     }
 
-
-    public final BPoint curvePointPosition(int curveNumber, int dataIndex) {
-        return curvePointPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    public int xPosition(int dataIndex) {
+        double xValue = dataManager.getData(xScale, getMarkSize()).getValue(dataIndex, 0);
+        return (int)xScale.scale(xValue);
     }
 
-    public final BRange yMinMax(int curveNumber) {
-       return yMinMax(curveNumber, dataManager.getData(xScale, getMarkSize()));
+    public final NamedValue[] curveValues(int curveNumber, int dataIndex) {
+        return curveValues(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public final int curveYPosition(int curveNumber, int dataIndex) {
+        return curveYPosition(curveNumber, dataIndex, dataManager.getData(xScale, getMarkSize()));
+    }
+
+    public final BRange curveYMinMax(int curveNumber) {
+       return curveYMinMax(curveNumber, dataManager.getData(xScale, getMarkSize()));
     }
 
     public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
@@ -91,7 +98,8 @@ public abstract class Trace {
     protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
-
+        int dx = xPosition(pointIndex) - x;
+        int dx2 = dx * dx;
         int distanceMin = 0;
         int curveNumber = 0;
 
@@ -103,10 +111,7 @@ public abstract class Trace {
         }
 
         for (int i = startCurve; i < startCurve + curveCount; i++) {
-            BPoint pointPosition = curvePointPosition(i, pointIndex);
-            int dy = pointPosition.getY() - y;
-            int dx = pointPosition.getX() - x;
-            int dx2 = dx * dx;
+            int dy = curveYPosition(i, pointIndex) - y;
             int distance = dx2 + dy * dy;
             if(distanceMin == 0 || distanceMin > distance) {
                 curveNumber = i;
@@ -120,10 +125,10 @@ public abstract class Trace {
 
     public abstract BColor getCurveColor(int curveNumber);
 
-    protected abstract BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data);
-    protected abstract PointInfo curvePointInfo(int curveNumber, int dataIndex, ChartData data);
+    protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
+    protected abstract NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data);
     protected abstract int curveCount(ChartData data);
-    protected abstract BRange yMinMax(int curveNumber, ChartData data);
+    protected abstract BRange curveYMinMax(int curveNumber, ChartData data);
     protected abstract void draw(BCanvas canvas, ChartData data);
 
 }

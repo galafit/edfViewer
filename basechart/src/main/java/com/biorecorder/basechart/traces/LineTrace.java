@@ -50,8 +50,8 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected BPoint curvePointPosition(int curveNumber, int dataIndex, ChartData data) {
-        return new BPoint((int)xScale.scale(data.getValue(dataIndex, 0)), (int)getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1)));
+    protected int curveYPosition(int curveNumber, int dataIndex, ChartData data) {
+        return (int) getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1));
     }
 
     @Override
@@ -60,18 +60,16 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected PointInfo curvePointInfo(int curveNumber, int dataIndex, ChartData data) {
+    protected NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data) {
         XYViewer xyData = new XYViewer(data, curveNumber);
         Scale yScale = getYScale(curveNumber);
-        double xValue = xyData.getX(dataIndex);
         double yValue = xyData.getY(dataIndex);
-        PointInfo pointInfo = new PointInfo(xValue, xScale.formatDomainValue(xValue));
-        pointInfo.addValue("", yValue, yScale.formatDomainValue(yValue));
-        return pointInfo;
+        NamedValue[] curveValues = {new NamedValue("", yValue, yScale.formatDomainValue(yValue))};
+        return curveValues;
     }
 
     @Override
-    protected BRange yMinMax(int curveNumber, ChartData data) {
+    protected BRange curveYMinMax(int curveNumber, ChartData data) {
         return data.getColumnMinMax(curveNumber + 1);
     }
 

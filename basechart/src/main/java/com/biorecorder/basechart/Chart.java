@@ -79,9 +79,7 @@ public class Chart {
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
 
-        // tooltips
-        tooltip = new Tooltip(chartConfig.getTooltipConfig());
-        crosshair = new Crosshair(chartConfig.getCrossHairConfig());
+        //legend
         legend = new Legend(chartConfig.getLegendConfig());
 
     }
@@ -482,9 +480,6 @@ public class Chart {
                 yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
             }
         }
-        // tooltips
-        tooltip = new Tooltip(chartConfig.getTooltipConfig());
-        crosshair = new Crosshair(chartConfig.getCrossHairConfig());
 
         //legend
         legend.setConfig(chartConfig.getLegendConfig());
@@ -692,7 +687,7 @@ public class Chart {
         for (Trace trace : traces) {
             for (int i = 0; i < trace.curveCount(); i++) {
                 if(trace.getYScale(i) == yScale) {
-                    tracesYMinMax = BRange.join(tracesYMinMax, trace.yMinMax(i));
+                    tracesYMinMax = BRange.join(tracesYMinMax, trace.curveYMinMax(i));
                 }
             }
         }
@@ -821,39 +816,44 @@ public class Chart {
 
         if (hoverPoint != null) {
             if (hoverPoint.getPointIndex() >= 0) {
-                PointInfo hoverPointInfo = hoverPoint.getTrace()
+                Trace hoverTrace = hoverPoint.getTrace();
+                int hoverCurveNumber = hoverPoint.getCurveNumber();
+                int hoverPointIndex = hoverPoint.getPointIndex();
+                int xPosition = hoverTrace.xPosition(hoverPointIndex);
+                int tooltipYPosition = 0;
+                NamedValue xValue = hoverTrace.xValue(hoverPointIndex);
 
-                TooltipInfo tooltipInfo = new TooltipInfo();
-                tooltipInfo.addItems(hoverPoint.getTrace().info(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex()));
-                BPoint dataPosition = hoverPoint.getTrace().curvePointPosition(hoverPoint.getCurveNumber(), hoverPoint.getPointIndex());
-                tooltip.setTooltipInfo(tooltipInfo);
-                tooltip.setXY(dataPosition.getX(), 0);
-                crosshair.setXY(dataPosition.getX(), dataPosition.getY());
+                crosshair = new Crosshair(chartConfig.getCrossHairConfig(), xPosition);
+                tooltip = new Tooltip(chartConfig.getTooltipConfig(), xPosition, tooltipYPosition);
+                tooltip.setHeader(null, null, xValue.getValueLabel());
+                if(isSingleCurveTooltip) {
+                    addCurvePointToTooltip(tooltip, hoverTrace, hoverCurveNumber, hoverPointIndex);
+                    crosshair.addY(hoverTrace.curveYPosition(hoverCurveNumber, hoverPointIndex));
+                } else {
+                    for (int i = 0; i < hoverTrace.curveCount(); i++) {
+                        addCurvePointToTooltip(tooltip, hoverTrace, i, hoverPointIndex);
+                        crosshair.addY(hoverTrace.curveYPosition(i, hoverPointIndex));
+
+                    }
+                }
             }
             return true;
         }
         return false;
     }
 
-    @Override
-    public TooltipItem[] info(int curveNumber, int dataIndex, ChartData data) {
-        if (dataIndex == -1){
-            return new TooltipItem[0];
+    private void addCurvePointToTooltip(Tooltip tooltip, Trace trace, int curveNumber, int pointIndex) {
+        NamedValue[] curveValues = trace.curveValues(curveNumber, pointIndex);
+        if(curveValues.length == 1) {
+            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), curveValues[0].getValueLabel());
+        } else {
+            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), "");
+            for (NamedValue curveValue : curveValues) {
+                tooltip.addLine(null, curveValue.getValueName() , curveValue.getValueLabel());
+            }
         }
-        String curveName = getCurveName(curveNumber);
-        BColor curveColor = getCurveColor(curveNumber);
-        XYViewer xyData = new XYViewer(data, curveNumber);
-        Scale yScale = getYScale(curveNumber);
-
-        TooltipItem[] infoItems = new TooltipItem[3];
-        infoItems[0] = new TooltipItem(curveName, "", curveColor);
-        // infoItems[1] = new InfoItem("X: ", String.valueOf(xyData.getX(dataIndex)), null);
-        // infoItems[2] = new InfoItem("Y: ", String.valueOf(xyData.getY(dataIndex)), null);
-        infoItems[1] = new TooltipItem("X: ", xScale.formatDomainValue(xyData.getX(dataIndex)), null);
-        infoItems[2] = new TooltipItem("Y: ", yScale.formatDomainValue(xyData.getY(dataIndex)), null);
-
-        return infoItems;
     }
+
 
     /**
      * Implement axis rounding when method:
