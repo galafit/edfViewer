@@ -16,7 +16,7 @@ public class ChartConfig {
     private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();
-    private CrossHairConfig crossHairConfig = new CrossHairConfig();
+    private CrosshairConfig crossHairConfig = new CrosshairConfig();
 
     private Insets margin;
     private Insets spacing;
@@ -46,8 +46,8 @@ public class ChartConfig {
         marginColor = chartConfig.marginColor;
         titleConfig = new TitleConfig(chartConfig.titleConfig);
         legendConfig = new LegendConfig(chartConfig.legendConfig);
-        tooltipConfig = chartConfig.tooltipConfig;
-        crossHairConfig = chartConfig.crossHairConfig;
+        tooltipConfig = new TooltipConfig(chartConfig.tooltipConfig);
+        crossHairConfig = new CrosshairConfig(chartConfig.crossHairConfig);
         spacing = chartConfig.spacing;
         margin = chartConfig.margin;
         autoSpacing = chartConfig.autoSpacing;
@@ -196,7 +196,7 @@ public class ChartConfig {
         return tooltipConfig;
     }
 
-    public CrossHairConfig getCrossHairConfig() {
+    public CrosshairConfig getCrossHairConfig() {
         return crossHairConfig;
     }
 

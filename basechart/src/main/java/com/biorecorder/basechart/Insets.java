@@ -4,10 +4,10 @@ package com.biorecorder.basechart;
  * Created by galafit on 18/8/17.
  */
 public class Insets {
-    private int top;
-    private int right;
-    private int bottom;
-    private int left;
+    private final int top;
+    private final int right;
+    private final int bottom;
+    private final int left;
 
     public Insets(int top, int right, int bottom, int left) {
         this.top = top;

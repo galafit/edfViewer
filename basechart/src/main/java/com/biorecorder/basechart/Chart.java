@@ -136,7 +136,6 @@ public class Chart {
 
     private void setAreasDirty() {
         if(chartConfig.getMargin() == null) { // if margin is not fixed
-            graphArea = null;
             margin = null;
         }
     }
@@ -216,26 +215,29 @@ public class Chart {
 
     void calculateMarginsAndAreas(BCanvas canvas) {
         if(chartConfig.getMargin() != null) { // fixed margin
-
+            return;
+        }
+        if(fullArea.width == 0 || fullArea.height == 0) {
+            graphArea = fullArea;
+            margin = new Insets(0);
             return;
         }
 
         if (titleText == null) {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
-
         Insets spacing = calculateSpacing();
-
-        int left = 0;
-        int right = 0;
-
         int titleHeight = titleText.getBounds().height;
+
+        if(graphArea == null) {
+            graphArea = fullArea;
+        }
+        setXStartEnd(graphArea.x, graphArea.width);
 
         int top = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
         int bottom = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
 
         int legendHeight = 0;
-
         if (!legend.isAttachedToStacks()) {
             BRectangle legendArea = new BRectangle(fullArea.x + spacing.left(), fullArea.y + titleHeight + spacing.top(), fullArea.width - spacing.left() - spacing.right(), fullArea.height - titleHeight - spacing.top() - spacing.bottom());
             legend.setArea(legendArea);
@@ -248,12 +250,10 @@ public class Chart {
             }
         }
 
-        // if margins and graph area were not calculated before or
-        // width of some xAxis was changed (never should happen if label rotation angle is 0)
-        if (margin == null || margin.top() != top || margin.bottom() != bottom) {
-            setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
-        }
+        setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
 
+        int left = 0;
+        int right = 0;
         for (int i = 0; i < yAxisList.size(); i++) {
             if (i % 2 == 0) {
                 left = Math.max(left, yAxisList.get(i).getWidth(canvas));
@@ -265,40 +265,32 @@ public class Chart {
         left += spacing.left();
         right += spacing.right();
 
-        // if margins and graph area were not calculated before or
-        // width of some yAxis was changed
-        if (margin == null || margin.left() != left || margin.right() != right) {
-            // adjust XAxis ranges
-            setXStartEnd(fullArea.x + left, fullArea.width - left - right);
-            int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
-            int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
-            if (!legend.isAttachedToStacks()) {
-                if (legend.isTop()) {
-                    topNew += legendHeight;
-                }
-                if (legend.isBottom()) {
-                    bottomNew += legendHeight;
-                }
+        // adjust XAxis ranges
+        setXStartEnd(fullArea.x + left, fullArea.width - left - right);
+        int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
+        int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
+        if (!legend.isAttachedToStacks()) {
+            if (legend.isTop()) {
+                topNew += legendHeight;
             }
-            if (topNew != top || bottomNew != bottom) {
-                // adjust YAxis ranges
-                setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
-                top = topNew;
-                bottom = bottomNew;
+            if (legend.isBottom()) {
+                bottomNew += legendHeight;
             }
         }
-
-        Insets resultantMargin = new Insets(top, right, bottom, left);
-        if (margin == null || !margin.equals(resultantMargin)) {
-            margin = resultantMargin;
-            graphArea = new BRectangle(fullArea.x + left, fullArea.y + top,
-                    fullArea.width - left - right, fullArea.height - top - bottom);
-
+        if (topNew != top || bottomNew != bottom) {
+            // adjust YAxis ranges
+            setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
+            top = topNew;
+            bottom = bottomNew;
         }
+
+        margin = new Insets(top, right, bottom, left);
+        graphArea = new BRectangle(fullArea.x + left, fullArea.y + top,
+                fullArea.width - left - right, fullArea.height - top - bottom);
+
         if (legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
         }
-
     }
 
     public int getStacksSumWeight() {
@@ -345,6 +337,10 @@ public class Chart {
 
 
     public void draw(BCanvas canvas) {
+        if(fullArea.width == 0 || fullArea.height == 0) {
+            return;
+        }
+
         if (titleText == null) {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
@@ -454,47 +450,6 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setConfig(ChartConfig chartConfig1) {
-        this.chartConfig = new ChartConfig(chartConfig1);
-        // axis
-        for (int i = 0; i < xAxisList.size(); i++) {
-            AxisWrapper axis = xAxisList.get(i);
-            if (isXAxisBottom(i)) {
-                axis.setConfig(chartConfig.getBottomAxisConfig());
-            } else {
-                axis.setConfig(chartConfig.getTopAxisConfig());
-            }
-            axis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-            if (chartConfig.isXAxisRoundingEnabled()) {
-                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
-            } else {
-                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
-            }
-        }
-
-        for (int i = 0; i < yAxisList.size(); i++) {
-            AxisWrapper axis = yAxisList.get(i);
-            if (isYAxisLeft(i)) {
-                axis.setConfig(chartConfig.getLeftAxisConfig());
-            } else {
-                axis.setConfig(chartConfig.getRightAxisConfig());
-            }
-            axis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
-            if (chartConfig.isYAxisRoundingEnabled()) {
-                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
-            } else {
-                axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
-            }
-        }
-
-        //legend
-        legend.setConfig(chartConfig.getLegendConfig());
-
-        // title
-        titleText = null;
-        setAreasDirty();
-    }
-
     public void addStack() {
         addStack(chartConfig.getDefaultStackWeight());
     }
@@ -519,6 +474,7 @@ public class Chart {
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
+
         // fixed margins
         if(chartConfig.getMargin() != null) {
             setMargin(chartConfig.getMargin());
@@ -553,7 +509,6 @@ public class Chart {
      * add trace to the stack with the given number
      */
     public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-
         int stackCount = yAxisList.size() / 2;
         if(stackCount == 0) {
             addStack(); // add stack if there is no stack
@@ -640,8 +595,9 @@ public class Chart {
 
     public void setArea(BRectangle area) {
         fullArea = area;
-        setXStartEnd(area.x, area.width);
-        setYStartEnd(area.y, area.height);
+        if(chartConfig.getMargin() != null) {
+            setMargin(chartConfig.getMargin());
+        }
         setAreasDirty();
         titleText = null;
     }

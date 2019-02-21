@@ -15,10 +15,10 @@ public class TitleConfig {
     public TitleConfig() {
     }
 
-    public TitleConfig(TitleConfig titleConfig) {
-        textStyle = titleConfig.textStyle;
-        textColor = titleConfig.textColor;
-        margin = titleConfig.margin;
+    public TitleConfig(TitleConfig config) {
+        textStyle = config.textStyle;
+        textColor = config.textColor;
+        margin = config.margin;
     }
 
     public TextStyle getTextStyle() {

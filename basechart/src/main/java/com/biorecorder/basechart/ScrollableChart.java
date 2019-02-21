@@ -209,7 +209,6 @@ public class ScrollableChart {
 
         chart.setArea(chartArea);
         preview.setArea(previewArea);
-
     }
 
 
@@ -232,10 +231,6 @@ public class ScrollableChart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setTheme(Theme theme) {
-        chart.setConfig(theme.getChartConfig());
-        preview.setConfig(theme.getPreviewConfig());
-    }
 
     public void setArea(BRectangle area) {
         fullArea = area;

@@ -17,6 +17,19 @@ public class TooltipConfig {
     private int borderWidth = 1;
     private Insets margin;
 
+    public TooltipConfig() {
+    }
+
+    public TooltipConfig(TooltipConfig config) {
+        textStyle = config.textStyle;
+        color = config.color;
+        backgroundColor = config.backgroundColor;
+        headerBackgroundColor = config.headerBackgroundColor;
+        borderColor = config.borderColor;
+        borderWidth = config.borderWidth;
+        margin = config.margin;
+    }
+
     public BColor getColor() {
         return color;
     }

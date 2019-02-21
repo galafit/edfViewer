@@ -11,11 +11,11 @@ import java.util.List;
  * Created by galafit on 19/8/17.
  */
 public class Crosshair {
-    private CrossHairConfig crossHairConfig;
+    private CrosshairConfig crossHairConfig;
     private int x;
     private List<Integer> yList = new ArrayList<>(1);
 
-    public Crosshair(CrossHairConfig crossHairConfig, int x) {
+    public Crosshair(CrosshairConfig crossHairConfig, int x) {
         this.crossHairConfig = crossHairConfig;
         this.x = x;
     }

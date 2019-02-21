@@ -22,13 +22,38 @@ public class LegendConfig {
     private Insets margin;
     private boolean isAttachedToStacks = true;
 
+    private int interItemSpace = 0;
+    private int interLineSpace = 1;
+
     public LegendConfig() {
     }
 
     public LegendConfig(LegendConfig legendConfig) {
         backgroundColor = legendConfig.backgroundColor;
-        textStyle = legendConfig.textStyle;
         padding = legendConfig.padding;
+        margin = legendConfig.margin;
+        isAttachedToStacks = legendConfig.isAttachedToStacks;
+        textStyle = legendConfig.textStyle;
+        verticalAlign = legendConfig.verticalAlign;
+        horizontalAlign = legendConfig.horizontalAlign;
+        interItemSpace = legendConfig.interItemSpace;
+        interLineSpace = legendConfig.interLineSpace;
+    }
+
+    public int getInterItemSpace() {
+        return interItemSpace;
+    }
+
+    public void setInterItemSpace(int interItemSpace) {
+        this.interItemSpace = interItemSpace;
+    }
+
+    public int getInterLineSpace() {
+        return interLineSpace;
+    }
+
+    public void setInterLineSpace(int interLineSpace) {
+        this.interLineSpace = interLineSpace;
     }
 
     public boolean isAttachedToStacks() {
@@ -84,7 +109,6 @@ public class LegendConfig {
             return margin;
         }
         return new Insets(textStyle.getSize() / 3);
-
     }
 
     public void setMargin(Insets margin) {

@@ -145,8 +145,8 @@ public class Legend {
                     height = btnArea.height;
                     lineButtons.clear();
                 }
-                if(lineButtons.size() > 0 && x + getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
-                    width += (lineButtons.size() - 1) * getInterItemSpace();
+                if(lineButtons.size() > 0 && x + config.getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
+                    width += (lineButtons.size() - 1) * config.getInterItemSpace();
                     if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
                         moveButtons(lineButtons, margin.left(),0);
                     }
@@ -158,22 +158,22 @@ public class Legend {
                     }
 
                     x = area.x;
-                    y += btnArea.height + getInterLineSpace();
+                    y += btnArea.height + config.getInterLineSpace();
                     button.setLocation(x, y, canvas);
 
-                    x += btnArea.width + getInterItemSpace();
-                    height += btnArea.height + getInterLineSpace();
+                    x += btnArea.width + config.getInterItemSpace();
+                    height += btnArea.height + config.getInterLineSpace();
                     width = btnArea.width;
                     lineButtons.clear();
                     lineButtons.add(button);
                 } else {
                     button.setLocation(x, y, canvas);
-                    x += getInterItemSpace() + btnArea.width;
+                    x += config.getInterItemSpace() + btnArea.width;
                     width += btnArea.width;
                     lineButtons.add(button);
                 }
             }
-            width += (lineButtons.size() - 1) * getInterItemSpace();
+            width += (lineButtons.size() - 1) * config.getInterItemSpace();
             if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
                 moveButtons(lineButtons, margin.left(),0);
             }
@@ -229,13 +229,6 @@ public class Legend {
         for (TraceCurve key : traceCurvesToButtons.keySet()) {
            traceCurvesToButtons.get(key).draw(canvas);
         }
-    }
-
-    private int getInterItemSpace() {
-        return 0;
-    }
-    private int getInterLineSpace() {
-        return 1;
     }
 }
 

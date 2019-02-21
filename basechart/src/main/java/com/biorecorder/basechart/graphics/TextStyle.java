@@ -15,9 +15,9 @@ public class TextStyle {
     public static final int ITALIC = 2;
     public static final int BOLD_ITALIC = 3;
 
-    private int size = 12;
-    private int style = 0;
-    private String fontName;
+    private final int size;
+    private final int style;
+    private final String fontName;
 
     public TextStyle(String fontName, int style, int size) {
         this.size = size;
