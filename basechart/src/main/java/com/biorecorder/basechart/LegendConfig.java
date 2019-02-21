@@ -4,6 +4,7 @@ import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.HorizontalAlign;
 import com.biorecorder.basechart.graphics.TextStyle;
 import com.biorecorder.basechart.graphics.VerticalAlign;
+import com.sun.istack.internal.Nullable;
 
 
 /**
@@ -17,10 +18,8 @@ public class LegendConfig {
   //  private int borderWidth = 1;
  //   private BColor borderColor = BColor.LIGHT_GRAY;
     private BColor backgroundColor = BColor.WHITE;
-    private Insets itemMargin = new Insets((int)(textStyle.getSize() * 0.2),
-            (int)(textStyle.getSize() * 0.2),
-            (int)(textStyle.getSize() * 0.2),
-            (int)(textStyle.getSize() * 0.2));
+    private Insets padding;
+    private Insets margin;
     private boolean isAttachedToStacks = true;
 
     public LegendConfig() {
@@ -29,7 +28,7 @@ public class LegendConfig {
     public LegendConfig(LegendConfig legendConfig) {
         backgroundColor = legendConfig.backgroundColor;
         textStyle = legendConfig.textStyle;
-        itemMargin = legendConfig.itemMargin;
+        padding = legendConfig.padding;
     }
 
     public boolean isAttachedToStacks() {
@@ -72,11 +71,27 @@ public class LegendConfig {
         this.backgroundColor = backgroundColor;
     }
 
-    public Insets getItemMargin() {
-        return itemMargin;
+    public Insets getPadding() {
+        if(padding != null) {
+            return padding;
+        }
+
+        return new Insets(textStyle.getSize()/5);
     }
 
-    public void setItemMargin(Insets itemMargin) {
-        this.itemMargin = itemMargin;
+    public Insets getMargin() {
+        if(margin != null) {
+            return margin;
+        }
+        return new Insets(textStyle.getSize() / 3);
+
+    }
+
+    public void setMargin(Insets margin) {
+        this.margin = margin;
+    }
+
+    public void setPadding(@Nullable Insets padding) {
+        this.padding = padding;
     }
 }

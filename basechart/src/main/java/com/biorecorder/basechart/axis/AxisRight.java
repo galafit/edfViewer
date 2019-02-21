@@ -22,16 +22,7 @@ public class AxisRight extends AxisVertical {
         int space = 2;// px
         int labelHeight = charSize;
 
-        if (config.isTickLabelInside()) {
-            int y = tickPosition - space;
-            int x = -axisWidth / 2 - labelPadding;
-            if (y - labelHeight / 2 - 1 < getEnd()) {
-                y += space;
-                return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
-            }
-            return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
-
-        } else {
+        if (config.isTickLabelOutside()) {
             int y = tickPosition;
             int x = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
             if (y + labelHeight / 2 + 1 > getStart()) {
@@ -41,6 +32,15 @@ public class AxisRight extends AxisVertical {
                 return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
             }
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.MIDDLE, tm);
+
+        } else {
+            int y = tickPosition - space;
+            int x = -axisWidth / 2 - labelPadding;
+            if (y - labelHeight / 2 - 1 < getEnd()) {
+                y += space;
+                return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
+            }
+            return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
         }
     }
 

@@ -167,7 +167,6 @@ public class TraceDataManager {
         }
 
         if(Math.abs(prevLength - length) * 100 / length > maxAxisLengthChangePct) {
-            System.out.println("length changed");
             return false;
         }
 

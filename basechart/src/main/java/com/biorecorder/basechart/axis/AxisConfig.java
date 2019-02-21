@@ -34,7 +34,7 @@ public class AxisConfig {
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
 
-    private boolean isTickLabelInside = false;
+    private boolean isTickLabelOutside = true;
 
     public AxisConfig() {
         titlePadding = (int)(0.4 * titleTextStyle.getSize());
@@ -67,7 +67,7 @@ public class AxisConfig {
         titleTextStyle = axisConfig.titleTextStyle;
         titleColor = axisConfig.titleColor;
 
-        isTickLabelInside = axisConfig.isTickLabelInside;
+        isTickLabelOutside = axisConfig.isTickLabelOutside;
     }
 
     public void setColors(BColor baseColor, BColor gridColor, BColor minorGridColor) {
@@ -128,12 +128,12 @@ public class AxisConfig {
     /** ======================= Ticks ========================== **/
 
 
-    public boolean isTickLabelInside() {
-        return isTickLabelInside;
+    public boolean isTickLabelOutside() {
+        return isTickLabelOutside;
     }
 
-    public void setTickLabelInside(boolean isTickLabelInside) {
-        this.isTickLabelInside = isTickLabelInside;
+    public void setTickLabelOutside(boolean isTickLabelInside) {
+        this.isTickLabelOutside = isTickLabelInside;
     }
 
     public void setTickMarkSize(int insideSize, int outsideSize) {

@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 18/8/17.
@@ -17,12 +18,15 @@ public class ChartConfig {
     private TooltipConfig tooltipConfig = new TooltipConfig();
     private CrossHairConfig crossHairConfig = new CrossHairConfig();
 
+    private Insets margin;
+    private Insets spacing;
+    private int autoSpacing = 5; //px taken into account only if spacing is null
+
     private AxisConfig leftAxisConfig = new AxisConfig();
     private AxisConfig rightAxisConfig = new AxisConfig();
     private AxisConfig bottomAxisConfig = new AxisConfig();
     private AxisConfig topAxisConfig = new AxisConfig();
 
-    private Insets spacing = new Insets(0, 0, 10, 10);
     private boolean isLeftAxisPrimary = true;
     private boolean isBottomAxisPrimary = true;
     private boolean isMultiCurveTooltip = true;
@@ -44,11 +48,13 @@ public class ChartConfig {
         legendConfig = new LegendConfig(chartConfig.legendConfig);
         tooltipConfig = chartConfig.tooltipConfig;
         crossHairConfig = chartConfig.crossHairConfig;
+        spacing = chartConfig.spacing;
+        margin = chartConfig.margin;
+        autoSpacing = chartConfig.autoSpacing;
         leftAxisConfig = new AxisConfig(chartConfig.leftAxisConfig);
         rightAxisConfig = new AxisConfig(chartConfig.rightAxisConfig);
         topAxisConfig = new AxisConfig(chartConfig.topAxisConfig);
         bottomAxisConfig = new AxisConfig(chartConfig.bottomAxisConfig);
-        spacing = new Insets(chartConfig.spacing);
         isLeftAxisPrimary = chartConfig.isLeftAxisPrimary;
         isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
         isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
@@ -60,12 +66,34 @@ public class ChartConfig {
         isXAxisRoundingEnabled = chartConfig.isXAxisRoundingEnabled;
     }
 
+    public Insets getMargin() {
+        return margin;
+    }
+
+    /**
+     * if null (default) margins will be calculated automatically
+     */
+    public void setMargin(@Nullable Insets margin) {
+        this.margin = margin;
+    }
+
     public Insets getSpacing() {
         return spacing;
     }
 
-    public void setSpacing(int top, int right, int bottom, int left) {
-        this.spacing = new Insets(top, right, bottom, left);
+    /**
+     * if null (default) spaces will be calculated automatically on the base of autoSpacing
+     */
+    public void setSpacing(@Nullable Insets spacing) {
+        this.spacing = spacing;
+    }
+
+    public int getAutoSpacing() {
+        return autoSpacing;
+    }
+
+    public void setAutoSpacing(int autoSpacing) {
+        this.autoSpacing = autoSpacing;
     }
 
     public boolean isLeftAxisPrimary() {

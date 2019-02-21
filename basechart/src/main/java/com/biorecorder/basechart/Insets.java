@@ -23,13 +23,6 @@ public class Insets {
         this.left = inset;
     }
 
-    public Insets(Insets insets) {
-        top = insets.top;
-        right = insets.right;
-        bottom = insets.bottom;
-        left = insets.left;
-    }
-
     public int top() {
         return top;
     }

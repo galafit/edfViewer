@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.TextStyle;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 31/8/18.
@@ -9,7 +10,7 @@ import com.biorecorder.basechart.graphics.TextStyle;
 public class TitleConfig {
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
     private BColor textColor = BColor.BLACK;
-    private Insets margin = new Insets(textStyle.getSize());
+    private Insets margin;
 
     public TitleConfig() {
     }
@@ -37,10 +38,13 @@ public class TitleConfig {
     }
 
     public Insets getMargin() {
-        return margin;
+        if(margin != null) {
+            return margin;
+        }
+        return new Insets(textStyle.getSize() / 2);
     }
 
-    public void setMargin(Insets margin) {
+    public void setMargin(@Nullable Insets margin) {
         this.margin = margin;
     }
 }

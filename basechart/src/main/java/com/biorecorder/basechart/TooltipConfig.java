@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.TextStyle;
+import com.sun.istack.internal.Nullable;
 
 
 /**
@@ -14,10 +15,7 @@ public class TooltipConfig {
     private BColor headerBackgroundColor = new BColor(220, 215, 215);
     private BColor borderColor = new BColor(200, 200, 200);
     private int borderWidth = 1;
-    private Insets margin = new Insets((int)(getTextStyle().getSize() * 0.4),
-            (int)(getTextStyle().getSize() * 0.8),
-            (int)(getTextStyle().getSize() * 0.4),
-            (int)(getTextStyle().getSize() * 0.8));
+    private Insets margin;
 
     public BColor getColor() {
         return color;
@@ -64,10 +62,16 @@ public class TooltipConfig {
     }
 
     public Insets getMargin() {
-        return margin;
+        if(margin != null) {
+            return margin;
+        }
+        return new Insets((int)(getTextStyle().getSize() * 0.4),
+                (int)(getTextStyle().getSize() * 0.8),
+                (int)(getTextStyle().getSize() * 0.4),
+                (int)(getTextStyle().getSize() * 0.8));
     }
 
-    public void setMargin(Insets margin) {
+    public void setMargin(@Nullable Insets margin) {
         this.margin = margin;
     }
 }

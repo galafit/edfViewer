@@ -23,8 +23,6 @@ public class Legend {
     private BRectangle area;
     private int height;
 
-    private int spacing = 2; //px
-
     private LegendConfig config;
     private boolean isDirty = true;
 
@@ -84,7 +82,7 @@ public class Legend {
             SwitchButton button = traceCurvesToButtons.get(key);
             button.setBackgroundColor(config.getBackgroundColor());
             button.setTextStyle(config.getTextStyle());
-            button.setMargin(config.getItemMargin());
+            button.setMargin(config.getPadding());
         }
         isDirty = true;
     }
@@ -98,7 +96,7 @@ public class Legend {
         buttonGroup.add(traceButton.getModel());
         traceButton.setBackgroundColor(config.getBackgroundColor());
         traceButton.setTextStyle(config.getTextStyle());
-        traceButton.setMargin(config.getItemMargin());
+        traceButton.setMargin(config.getPadding());
         isDirty = true;
     }
 
@@ -133,13 +131,13 @@ public class Legend {
         }
 
         List<SwitchButton> lineButtons = new ArrayList<SwitchButton>();
-
+        Insets margin = config.getMargin();
         for (BRectangle area : areasToTraces.keySet()) {
             List<TraceCurve> traceCurves = areasToTraces.get(area);
             height = 0;
             int width = 0;
-            int x = area.x + spacing;
-            int y = area.y + spacing;
+            int x = area.x;
+            int y = area.y;
             for (TraceCurve traceCurve : traceCurves) {
                 SwitchButton button = traceCurvesToButtons.get(traceCurve);
                 BRectangle btnArea = button.getBounds(canvas);
@@ -147,16 +145,19 @@ public class Legend {
                     height = btnArea.height;
                     lineButtons.clear();
                 }
-                if(lineButtons.size() > 0 && x + getInterItemSpace() + btnArea.width >= area.x + area.width) {
+                if(lineButtons.size() > 0 && x + getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
                     width += (lineButtons.size() - 1) * getInterItemSpace();
+                    if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                        moveButtons(lineButtons, margin.left(),0);
+                    }
                     if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
-                        moveButtons(lineButtons, area.width - width - 2 * spacing,0);
+                        moveButtons(lineButtons, area.width - width - margin.right(),0);
                     }
                     if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
-                        moveButtons(lineButtons, (area.width - width) / 2 - spacing,0);
+                        moveButtons(lineButtons, (area.width - width) / 2,0);
                     }
 
-                    x = area.x + spacing;
+                    x = area.x;
                     y += btnArea.height + getInterLineSpace();
                     button.setLocation(x, y, canvas);
 
@@ -173,19 +174,27 @@ public class Legend {
                 }
             }
             width += (lineButtons.size() - 1) * getInterItemSpace();
+            if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                moveButtons(lineButtons, margin.left(),0);
+            }
             if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
-                moveButtons(lineButtons, area.width - width - 2 * spacing,0);
+                moveButtons(lineButtons, area.width - width - margin.right(),0);
             }
             if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
-                moveButtons(lineButtons, (area.width - width) / 2 - spacing,0);
+                moveButtons(lineButtons, (area.width - width) / 2,0);
+            }
+
+            if(config.getVerticalAlign() == VerticalAlign.TOP) {
+                moveTracesButtons(traceCurves, 0, margin.top());
             }
             if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
-                moveTracesButtons(traceCurves, 0, area.height - height - 2 * spacing);
+                moveTracesButtons(traceCurves, 0, area.height - height - margin.bottom());
             }
             if(config.getVerticalAlign() == VerticalAlign.MIDDLE) {
-                moveTracesButtons(traceCurves, 0, (area.height - height)/2 - spacing);
+                moveTracesButtons(traceCurves, 0, (area.height - height)/2);
             }
         }
+        height += margin.top() + margin.bottom();
         isDirty = false;
     }
 

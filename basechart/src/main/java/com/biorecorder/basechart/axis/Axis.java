@@ -140,8 +140,8 @@ public abstract class Axis {
         setDirty();
     }
 
-    public boolean isTickLabelInside() {
-        return config.isTickLabelInside();
+    public boolean isTickLabelOutside() {
+        return config.isTickLabelOutside();
     }
 
 
@@ -255,7 +255,7 @@ public abstract class Axis {
 
             width += config.getTickMarkOutsideSize();
 
-            if (!config.isTickLabelInside()) {
+            if (config.isTickLabelOutside()) {
                 if (isDirty) {
                     createAxisElements(canvas);
                 }
@@ -264,7 +264,7 @@ public abstract class Axis {
                     String minTickLabel = tickLabels.get(0).getText();
                     String maxTickLabel = tickLabels.get(tickLabels.size() - 1).getText();
 
-                    String longestLabel = minTickLabel.length() > maxTickLabel.length() ? maxTickLabel : maxTickLabel;
+                    String longestLabel = minTickLabel.length() > maxTickLabel.length() ? minTickLabel : maxTickLabel;
                     width += config.getTickPadding() + labelSizeForWidth(tm, 0, longestLabel);
 
                 }

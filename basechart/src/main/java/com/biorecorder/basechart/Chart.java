@@ -169,23 +169,68 @@ public class Chart {
         return xAxisList.get(xIndex).getScale();
     }
 
+    private Insets calculateSpacing() {
+        if(chartConfig.getSpacing() != null) {
+            return chartConfig.getSpacing();
+        }
+        int minSpacing = 1;
+        int spacingTop = minSpacing;
+        int spacingBottom = minSpacing;
+        int spacingLeft = minSpacing;
+        int spacingRight = minSpacing;
+        for (int i = 0; i < yAxisList.size(); i++) {
+           AxisWrapper axis = yAxisList.get(i);
+           if(i % 2 == 0) { // left
+              if(axis.isVisible && axis.isTickLabelOutside()) {
+                 spacingLeft = chartConfig.getAutoSpacing();
+              }
+           } else { // right
+               if(axis.isVisible && axis.isTickLabelOutside()) {
+                   spacingRight = chartConfig.getAutoSpacing();
+               }
+           }
+        }
+
+        for (int i = 0; i < xAxisList.size(); i++) {
+            AxisWrapper axis = xAxisList.get(i);
+            if(i % 2 == 0) { // bottom
+                if(axis.isVisible && axis.isTickLabelOutside()) {
+                    spacingBottom = chartConfig.getAutoSpacing();
+                }
+            } else { // top
+                if(axis.isVisible && axis.isTickLabelOutside()) {
+                    spacingTop = chartConfig.getAutoSpacing();
+                }
+            }
+        }
+
+        if(title != null){
+            spacingTop = 0;
+        }
+        if(!legend.isAttachedToStacks()) {
+            if(legend.isTop()) {
+                spacingTop = 0;
+            } else if (legend.isBottom()) {
+                spacingBottom = 0;
+            }
+        }
+        return new Insets(spacingTop, spacingRight, spacingBottom, spacingLeft);
+    }
+
     void calculateMarginsAndAreas(BCanvas canvas) {
         if (titleText == null) {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
 
-        Insets spacing = chartConfig.getSpacing();
+        Insets spacing = calculateSpacing();
+
         int left = 0;
         int right = 0;
-        int top = 0;
-        int bottom = 0;
 
         int titleHeight = titleText.getBounds().height;
 
-        top += titleHeight + xAxisList.get(1).getWidth(canvas);
-        bottom += xAxisList.get(0).getWidth(canvas);
-        top += spacing.top();
-        bottom += spacing.bottom();
+        int top = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
+        int bottom = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
 
         int legendHeight = 0;
 
@@ -614,7 +659,7 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            if (!xAxisList.get(xIndex).isTickLabelInside() || !isMarginFixed) {
+            if (xAxisList.get(xIndex).isTickLabelOutside() || !isMarginFixed) {
                 setAreasDirty();
             }
         }
@@ -630,7 +675,7 @@ public class Chart {
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
         yAxisList.get(yAxisIndex).setMinMax(min, max);
-        if (!yAxisList.get(yAxisIndex).isTickLabelInside() || !isMarginFixed) {
+        if (yAxisList.get(yAxisIndex).isTickLabelOutside() || !isMarginFixed) {
             setAreasDirty();
         }
     }
@@ -891,8 +936,8 @@ public class Chart {
             setRoundingDirty();
         }
 
-        public boolean isTickLabelInside() {
-            return axis.isTickLabelInside();
+        public boolean isTickLabelOutside() {
+            return axis.isTickLabelOutside();
         }
 
         public void setTitle(String title) {

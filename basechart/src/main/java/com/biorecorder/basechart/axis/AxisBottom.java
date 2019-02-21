@@ -23,16 +23,7 @@ public class AxisBottom extends AxisHorizontal {
         int space = 2;// px
         int charHalfWidth = charSize/2;
 
-        if(config.isTickLabelInside()) {
-            int y = -axisWidth / 2 - labelPadding;
-            int x = tickPosition + space;
-
-            if(x + charSize * tickLabel.length() > getEnd()) {
-                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
-            }
-            return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
-
-        } else {
+        if(config.isTickLabelOutside()) {
             int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
             int x = tickPosition - charHalfWidth;
             if(x < getStart()) {
@@ -43,6 +34,14 @@ public class AxisBottom extends AxisHorizontal {
             }
 
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
+        } else {
+            int y = -axisWidth / 2 - labelPadding;
+            int x = tickPosition + space;
+
+            if(x + charSize * tickLabel.length() > getEnd()) {
+                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
+            }
+            return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
         }
     }
 
