@@ -44,19 +44,12 @@ public class Chart {
     private TraceCurve selectedCurve;
     private TraceCurvePoint hoverPoint;
 
-    private DataProcessingConfig dataProcessingConfig;
-
     public Chart() {
         this((new DarkTheme()).getChartConfig());
     }
 
-    public Chart(ChartConfig chartConfig) {
-        this(chartConfig, new DataProcessingConfig());
-    }
-
-    public Chart(ChartConfig chartConfig1, DataProcessingConfig dataProcessingConfig) {
+    public Chart(ChartConfig chartConfig1) {
         this.chartConfig = new ChartConfig(chartConfig1);
-        this.dataProcessingConfig = dataProcessingConfig;
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
@@ -859,7 +852,6 @@ public class Chart {
     class AxisWrapper {
         private Axis axis;
         private boolean isVisible = false;
-        private boolean isGridVisible = false;
         private boolean isRoundingEnabled = false;
         // need this field to implement smooth zooming and translate when minMaxRounding enabled
         private BRange rowMinMax; // without rounding
@@ -980,21 +972,8 @@ public class Chart {
             return (int) axis.getEnd();
         }
 
-        public double scale(double value) {
-            return axis.scale(value);
-        }
-
-        public double invert(float value) {
-            return axis.invert(value);
-        }
-
-
         public boolean isVisible() {
             return isVisible;
-        }
-
-        public boolean isGridVisible() {
-            return isGridVisible;
         }
 
         /**
@@ -1033,12 +1012,9 @@ public class Chart {
             axis.drawAxis(canvas, axisOriginPoint);
         }
 
-        public void setVisible(boolean visible) {
-            isVisible = visible;
+        public void setVisible(boolean isVisible) {
+            this.isVisible = isVisible;
         }
 
-        public void setGridVisible(boolean gridVisible) {
-            isGridVisible = gridVisible;
-        }
     }
 }

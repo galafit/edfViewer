@@ -17,8 +17,8 @@ import java.util.List;
 public class LineTrace extends Trace {
      private LineTraceConfig traceConfig;
 
-    public LineTrace(ChartData data) {
-        super(data);
+    public LineTrace(ChartData data, DataProcessingConfig processingConfig) {
+        super(data, processingConfig);
         traceConfig = new LineTraceConfig();
     }
 
