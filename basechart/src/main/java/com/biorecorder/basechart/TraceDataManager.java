@@ -83,7 +83,7 @@ public class TraceDataManager {
         return 0;
     }
 
-    public int nearest(double xValue, double yValue) {
+    public int nearest(double xValue) {
         // "lazy" sorting solo when "nearestCurve" is called
         if (!isIncreasingChecked) {
             if (!processedData.isColumnIncreasing(0)) {
@@ -167,6 +167,7 @@ public class TraceDataManager {
         }
 
         if(Math.abs(prevLength - length) * 100 / length > maxAxisLengthChangePct) {
+            System.out.println("length changed");
             return false;
         }
 

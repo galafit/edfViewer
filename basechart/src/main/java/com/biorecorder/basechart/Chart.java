@@ -64,7 +64,7 @@ public class Chart {
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-        if(chartConfig.isXAxisRoundingEnabled()) {
+        if (chartConfig.isXAxisRoundingEnabled()) {
             bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
             topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
         } else {
@@ -81,7 +81,7 @@ public class Chart {
 
         //legend
         legend = new Legend(chartConfig.getLegendConfig());
-
+        addStack();
     }
 
     double getBestExtent(int xIndex) {
@@ -177,13 +177,15 @@ public class Chart {
         Insets spacing = chartConfig.getSpacing();
         int left = 0;
         int right = 0;
-        int top = spacing.top();
-        int bottom = spacing.bottom();
+        int top = 0;
+        int bottom = 0;
 
         int titleHeight = titleText.getBounds().height;
 
         top += titleHeight + xAxisList.get(1).getWidth(canvas);
         bottom += xAxisList.get(0).getWidth(canvas);
+        top += spacing.top();
+        bottom += spacing.bottom();
 
         int legendHeight = 0;
 
@@ -430,7 +432,7 @@ public class Chart {
                 axis.setConfig(chartConfig.getTopAxisConfig());
             }
             axis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-            if(chartConfig.isXAxisRoundingEnabled()) {
+            if (chartConfig.isXAxisRoundingEnabled()) {
                 axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
             } else {
                 axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
@@ -445,9 +447,9 @@ public class Chart {
                 axis.setConfig(chartConfig.getRightAxisConfig());
             }
             axis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
-            if(chartConfig.isYAxisRoundingEnabled()) {
+            if (chartConfig.isYAxisRoundingEnabled()) {
                 axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
-            }else {
+            } else {
                 axis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
             }
         }
@@ -469,7 +471,7 @@ public class Chart {
         AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig()));
         leftAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
         rightAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
-        if(chartConfig.isYAxisRoundingEnabled()) {
+        if (chartConfig.isYAxisRoundingEnabled()) {
             leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
             rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
         } else {
@@ -488,12 +490,27 @@ public class Chart {
     }
 
     /**
+     * add trace to the last stack
+     */
+    public void addTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        int stackCount = yAxisList.size() / 2;
+        addTrace(stackCount - 1, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    }
+
+    /**
+     * add trace to the last stack
+     */
+    public void addTrace(Trace trace, boolean isSplit) {
+        addTrace(trace, isSplit, false, false);
+    }
+
+    public void addTrace(int stackNumber, Trace trace, boolean isSplit) {
+        addTrace(stackNumber, trace, isSplit, false, false);
+    }
+
+
+    /**
      * add trace to the stack with the given number
-     *
-     * @param stackNumber
-     * @param trace
-     * @param isXAxisOpposite
-     * @param isYAxisOpposite
      */
     public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         boolean isBottomXAxis = true;
@@ -542,11 +559,11 @@ public class Chart {
             totalCurves += trace1.curveCount();
         }
         for (int i = 0; i < trace.curveCount(); i++) {
-            if(trace.getCurveColor(i) == null) {
+            if (trace.getCurveColor(i) == null) {
                 trace.setCurveColor(i, colors[(totalCurves + i) % colors.length]);
             }
-            if(trace.getCurveName(i) == null || trace.getCurveName(i).isEmpty()) {
-                trace.setCurveName(i, "Trace" + traces.size() + "_curve"+i);
+            if (trace.getCurveName(i) == null || trace.getCurveName(i).isEmpty()) {
+                trace.setCurveName(i, "Trace" + traces.size() + "_curve" + i);
             }
 
         }
@@ -561,7 +578,7 @@ public class Chart {
                     if (isSelected) {
                         selectedCurve = new TraceCurve(trace, curveNumber);
                     }
-                    if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber ) {
+                    if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
                         selectedCurve = null;
                     }
                 }
@@ -664,7 +681,7 @@ public class Chart {
         Scale yScale = yAxisList.get(yIndex).getScale();
         for (Trace trace : traces) {
             for (int i = 0; i < trace.curveCount(); i++) {
-                if(trace.getYScale(i) == yScale) {
+                if (trace.getYScale(i) == yScale) {
                     tracesYMinMax = BRange.join(tracesYMinMax, trace.curveYMinMax(i));
                 }
             }
@@ -772,7 +789,7 @@ public class Chart {
 
         if (hoverPoint != null) {
             NearestPoint nearestPoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurveNumber());
-            if(hoverPoint.getPointIndex() == nearestPoint.getPointIndex()) {
+            if (hoverPoint.getPointIndex() == nearestPoint.getPointIndex()) {
                 return false;
             } else {
                 hoverPoint = nearestPoint.getCurvePoint();
@@ -782,14 +799,14 @@ public class Chart {
             NearestPoint nearestPoint = null;
             for (Trace trace : traces) {
                 NearestPoint np = trace.nearest(x, y, -1);
-                if(nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq()) {
+                if (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq()) {
                     nearestPoint = np;
                 }
             }
 
-            if(nearestPoint != null) {
+            if (nearestPoint != null) {
                 hoverPoint = nearestPoint.getCurvePoint();
-             }
+            }
         }
 
         if (hoverPoint != null) {
@@ -804,7 +821,7 @@ public class Chart {
                 crosshair = new Crosshair(chartConfig.getCrossHairConfig(), xPosition);
                 tooltip = new Tooltip(chartConfig.getTooltipConfig(), xPosition, tooltipYPosition);
                 tooltip.setHeader(null, null, xValue.getValueLabel());
-                if(chartConfig.isMultiCurveTooltip()) { // all trace curves
+                if (chartConfig.isMultiCurveTooltip()) { // all trace curves
                     for (int i = 0; i < hoverTrace.curveCount(); i++) {
                         addCurvePointToTooltip(tooltip, hoverTrace, i, hoverPointIndex);
                         crosshair.addY(hoverTrace.curveYPosition(i, hoverPointIndex));
@@ -822,12 +839,12 @@ public class Chart {
 
     private void addCurvePointToTooltip(Tooltip tooltip, Trace trace, int curveNumber, int pointIndex) {
         NamedValue[] curveValues = trace.curveValues(curveNumber, pointIndex);
-        if(curveValues.length == 1) {
+        if (curveValues.length == 1) {
             tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), curveValues[0].getValueLabel());
         } else {
             tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), "");
             for (NamedValue curveValue : curveValues) {
-                tooltip.addLine(null, curveValue.getValueName() , curveValue.getValueLabel());
+                tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
             }
         }
     }

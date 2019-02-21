@@ -36,8 +36,6 @@ public class AxisConfig {
 
     private boolean isTickLabelInside = false;
 
-
-
     public AxisConfig() {
         titlePadding = (int)(0.4 * titleTextStyle.getSize());
         tickPadding = (int)(0.3 * tickLabelTextStyle.getSize());

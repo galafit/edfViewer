@@ -29,7 +29,7 @@ public class ScrollableChart {
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
 
-    private int gap; // between Chart and Preview px
+    private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0, 0, 0, 0);
 
     private boolean autoScrollEnable = true;
@@ -74,6 +74,10 @@ public class ScrollableChart {
                         }
                     }
                 });
+            }
+
+            if (scrolls.get(xIndex) != null  && !chart.isXAxisUsed(xIndex)) {
+                scrolls.remove(xIndex);
             }
         }
         if (autoScrollEnable) {
@@ -332,8 +336,8 @@ public class ScrollableChart {
     }
 
 
-    public void zoomScrollExtent(int xAxisIndex, double zoomFactor) {
-        Scroll scroll = scrolls.get(xAxisIndex);
+    public void zoomScrollExtent(int xIndex, double zoomFactor) {
+        Scroll scroll = scrolls.get(xIndex);
         if (scroll != null) {
             scroll.setExtent(scroll.getExtent() * zoomFactor);
         }
@@ -343,9 +347,16 @@ public class ScrollableChart {
     public double getScrollExtent(int xIndex) {
         Scroll scroll = scrolls.get(xIndex);
         if (scroll != null) {
-            return scrolls.get(xIndex).getExtent();
+            return scroll.getExtent();
         }
         return 0;
+    }
+
+    public void setScrollExtent(int xIndex, double extent) {
+        Scroll scroll = scrolls.get(xIndex);
+        if (scroll != null) {
+            scroll.setExtent(extent);
+        }
     }
 
     public void autoScaleScrollExtent(int xIndex) {
@@ -380,10 +391,27 @@ public class ScrollableChart {
         chart.addStack(weight);
     }
 
+    public void addChartTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        chart.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+        isScrollDirty = true;
+    }
+
+    public void addChartTrace(Trace trace, boolean isSplit) {
+        chart.addTrace(trace, isSplit);
+        isScrollDirty = true;
+    }
+
+    public void addChartTrace(int stackNumber, Trace trace, boolean isSplit) {
+        chart.addTrace(stackNumber, trace, isSplit);
+        isScrollDirty = true;
+    }
+
     public void addChartTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         chart.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
         isScrollDirty = true;
     }
+
+
 
     public void removeChartTrace(int traceNumber) {
         chart.removeTrace(traceNumber);
@@ -458,13 +486,24 @@ public class ScrollableChart {
         preview.addStack(weight);
     }
 
+    public void addPreviewTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        preview.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    }
+
+    public void addPreviewTrace(Trace trace, boolean isSplit) {
+        preview.addTrace(trace, isSplit);
+    }
+
+    public void addPreviewTrace(int stackNumber, Trace trace, boolean isSplit) {
+        preview.addTrace(stackNumber, trace, isSplit);
+    }
+
     public void addPreviewTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         preview.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
     public void removePreviewTrace(int traceNumber) {
         preview.removeTrace(traceNumber);
-        isScrollDirty = true;
     }
 
     public int previewTraceCount() {
