@@ -19,8 +19,6 @@ public class Chart {
     private String title;
 
     private boolean isLegendVisible = true;
-    private boolean isMarginFixed = false;
-
     private ChartConfig chartConfig = new ChartConfig();
 
     /*
@@ -56,7 +54,6 @@ public class Chart {
         this(chartConfig, new DataProcessingConfig());
     }
 
-
     public Chart(ChartConfig chartConfig1, DataProcessingConfig dataProcessingConfig) {
         this.chartConfig = new ChartConfig(chartConfig1);
         this.dataProcessingConfig = dataProcessingConfig;
@@ -81,7 +78,17 @@ public class Chart {
 
         //legend
         legend = new Legend(chartConfig.getLegendConfig());
-        addStack();
+    }
+
+    void setMargin(Insets margin) {
+        this.margin = margin;
+        graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(),
+                fullArea.width - margin.left() - margin.right(), fullArea.height - margin.top() - margin.bottom());
+        if (legend.isAttachedToStacks()) {
+            legend.setArea(graphArea);
+        }
+        setYStartEnd(graphArea.y, graphArea.height);
+        setXStartEnd(graphArea.x, graphArea.width);
     }
 
     double getBestExtent(int xIndex) {
@@ -128,8 +135,10 @@ public class Chart {
     }
 
     private void setAreasDirty() {
-        graphArea = null;
-        margin = null;
+        if(chartConfig.getMargin() == null) { // if margin is not fixed
+            graphArea = null;
+            margin = null;
+        }
     }
 
     private boolean isAreasDirty() {
@@ -151,18 +160,6 @@ public class Chart {
             calculateMarginsAndAreas(canvas);
         }
         return graphArea;
-    }
-
-    void setMargin(Insets margin) {
-        this.margin = margin;
-        setYStartEnd(fullArea.y + margin.top(), fullArea.height - margin.top() - margin.bottom());
-        setXStartEnd(fullArea.x + margin.left(), fullArea.width - margin.left() - margin.right());
-        graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(),
-                fullArea.width - margin.left() - margin.right(), fullArea.height - margin.top() - margin.bottom());
-        if (legend.isAttachedToStacks()) {
-            legend.setArea(graphArea);
-        }
-        titleText = null;
     }
 
     Scale getXAxisScale(int xIndex) {
@@ -218,6 +215,11 @@ public class Chart {
     }
 
     void calculateMarginsAndAreas(BCanvas canvas) {
+        if(chartConfig.getMargin() != null) { // fixed margin
+
+            return;
+        }
+
         if (titleText == null) {
             titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
@@ -344,9 +346,7 @@ public class Chart {
 
     public void draw(BCanvas canvas) {
         if (titleText == null) {
-            if (titleText == null) {
-                titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
-            }
+            titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
         }
 
         if (isAreasDirty()) {
@@ -454,18 +454,6 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setFixedMargin(Insets margin) {
-        if (margin != null) {
-            isMarginFixed = true;
-            setMargin(margin);
-        } else {
-            isMarginFixed = false;
-            setAreasDirty();
-            titleText = null;
-        }
-    }
-
-
     public void setConfig(ChartConfig chartConfig1) {
         this.chartConfig = new ChartConfig(chartConfig1);
         // axis
@@ -531,6 +519,10 @@ public class Chart {
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
+        // fixed margins
+        if(chartConfig.getMargin() != null) {
+            setMargin(chartConfig.getMargin());
+        }
         setAreasDirty();
     }
 
@@ -539,6 +531,9 @@ public class Chart {
      */
     public void addTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         int stackCount = yAxisList.size() / 2;
+        if(stackCount == 0) {
+            stackCount = 1;
+        }
         addTrace(stackCount - 1, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
@@ -558,6 +553,13 @@ public class Chart {
      * add trace to the stack with the given number
      */
     public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+
+        int stackCount = yAxisList.size() / 2;
+        if(stackCount == 0) {
+            addStack(); // add stack if there is no stack
+            stackCount = 1;
+        }
+
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
         if (isXAxisOpposite && chartConfig.isBottomAxisPrimary()) {
@@ -582,7 +584,6 @@ public class Chart {
             yAxis.setVisible(true);
             trace.setYScales(yAxis.getScale());
         } else {
-            int stackCount = yAxisList.size() / 2;
             int availableStacks = stackCount - stackNumber;
             if (trace.curveCount() > availableStacks) {
                 for (int i = 0; i < trace.curveCount() - availableStacks; i++) {
@@ -659,7 +660,7 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            if (xAxisList.get(xIndex).isTickLabelOutside() || !isMarginFixed) {
+            if (xAxisList.get(xIndex).isTickLabelOutside()) {
                 setAreasDirty();
             }
         }
@@ -675,7 +676,7 @@ public class Chart {
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
         yAxisList.get(yAxisIndex).setMinMax(min, max);
-        if (yAxisList.get(yAxisIndex).isTickLabelOutside() || !isMarginFixed) {
+        if (yAxisList.get(yAxisIndex).isTickLabelOutside()) {
             setAreasDirty();
         }
     }
