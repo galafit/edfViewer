@@ -43,12 +43,18 @@ public class Chart {
 
     private TraceCurve selectedCurve;
     private TraceCurvePoint hoverPoint;
+    private DataProcessingConfig dataProcessingConfig;
 
     public Chart() {
         this((new DarkTheme()).getChartConfig());
     }
 
-    public Chart(ChartConfig chartConfig1) {
+    public Chart(ChartConfig chartConfig) {
+        this(chartConfig, null);
+    }
+
+    public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
+        this.dataProcessingConfig = dataProcessingConfig;
         this.chartConfig = new ChartConfig(chartConfig1);
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
@@ -166,11 +172,11 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
            AxisWrapper axis = yAxisList.get(i);
            if(i % 2 == 0) { // left
-              if(axis.isVisible && axis.isTickLabelOutside()) {
+              if(axis.isVisible() && axis.isTickLabelOutside()) {
                  spacingLeft = chartConfig.getAutoSpacing();
               }
            } else { // right
-               if(axis.isVisible && axis.isTickLabelOutside()) {
+               if(axis.isVisible() && axis.isTickLabelOutside()) {
                    spacingRight = chartConfig.getAutoSpacing();
                }
            }
@@ -179,11 +185,11 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
             if(i % 2 == 0) { // bottom
-                if(axis.isVisible && axis.isTickLabelOutside()) {
+                if(axis.isVisible() && axis.isTickLabelOutside()) {
                     spacingBottom = chartConfig.getAutoSpacing();
                 }
             } else { // top
-                if(axis.isVisible && axis.isTickLabelOutside()) {
+                if(axis.isVisible() && axis.isTickLabelOutside()) {
                     spacingTop = chartConfig.getAutoSpacing();
                 }
             }
@@ -315,37 +321,26 @@ public class Chart {
         }
     }
 
-    boolean isXAxisUsed(int xIndex) {
-        for (Trace trace : traces) {
-            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                return true;
-            }
+    boolean isXAxisVisible(int xIndex) {
+        if(xAxisList.get(xIndex).isVisible()) {
+            return true;
         }
         return false;
     }
 
-    private AxisWrapper chooseXAxisWithGrid(int stackNumber) {
-        AxisWrapper bottomAxis = xAxisList.get(0);
-        AxisWrapper topAxis = xAxisList.get(1);
-
-        if(!bottomAxis.isVisible && !topAxis.isVisible) {
-            return null;
-        }
-        if(!bottomAxis.isVisible) {
-            return topAxis;
-        }
-        if(!topAxis.isVisible) {
-            return bottomAxis;
-        }
+    private int chooseXAxisWithGrid(int stackNumber) {
+        int bottomAxisIndex = 0;
+        int topAxisIndex = 1;
 
         AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
         AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
-        AxisWrapper primaryAxis;
+        int primaryAxisIndex;
         if(chartConfig.isBottomAxisPrimary()) {
-           primaryAxis = bottomAxis;
+           primaryAxisIndex = bottomAxisIndex;
         } else {
-            primaryAxis = topAxis;
+            primaryAxisIndex = topAxisIndex;
         }
+        AxisWrapper primaryAxis = xAxisList.get(primaryAxisIndex);
         for (Trace trace : traces) {
             if(trace.getXScale() == primaryAxis.getScale()) {
                 int curveCount = trace.curveCount();
@@ -356,37 +351,16 @@ public class Chart {
                 for (int i = 0; i < curveCount; i++) {
                     Scale yScale = trace.getYScale(i);
                     if(yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
-                        return primaryAxis;
+                        return primaryAxisIndex;
                     }
                 }
             }
         }
 
         if(chartConfig.isBottomAxisPrimary()) {
-            return topAxis;
+            return topAxisIndex;
         } else {
-            return bottomAxis;
-        }
-    }
-
-    private AxisWrapper chooseYAxisWithGrid(int stackNumber) {
-        AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
-        AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
-
-        if(!leftAxis.isVisible() && !rightAxis.isVisible()) {
-            return null;
-        }
-        if(!leftAxis.isVisible()) {
-            return rightAxis;
-        }
-        if(!rightAxis.isVisible()) {
-            return leftAxis;
-        }
-
-        if(chartConfig.isLeftAxisPrimary()) {
-            return leftAxis;
-        } else {
-            return rightAxis;
+            return bottomAxisIndex;
         }
     }
 
@@ -418,25 +392,51 @@ public class Chart {
          * because this methods invokes axis rounding
          */
         int stackCount = yAxisList.size() / 2;
-        for (int i = 0; i < stackCount; i++) {
-            AxisWrapper yAxis = yAxisList.get(2 * i);
-            BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
-            AxisWrapper xAxisWithGrid = chooseXAxisWithGrid(i);
-            if(xAxisWithGrid != null) {
-                xAxisWithGrid.drawGrid(canvas, stackArea);
+
+        // draw X axis and grid
+        AxisWrapper bottomAxis = xAxisList.get(0);
+        AxisWrapper topAxis = xAxisList.get(1);
+
+        bottomAxis.drawAxis(canvas, graphArea);
+        topAxis.drawAxis(canvas, graphArea);
+
+        if(bottomAxis.isVisible() && !topAxis.isVisible()) {
+            bottomAxis.drawGrid(canvas, graphArea);
+        } else if(!bottomAxis.isVisible() && topAxis.isVisible()) {
+            topAxis.drawGrid(canvas, graphArea);
+        } else if(bottomAxis.isVisible() && topAxis.isVisible()) {
+            // draw separately for every stack
+            for (int i = 0; i < stackCount; i++) {
+                AxisWrapper yAxis = yAxisList.get(2 * i);
+                BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
+                xAxisList.get(chooseXAxisWithGrid(i)).drawGrid(canvas, stackArea);
             }
-            AxisWrapper yAxisWithGrid = chooseYAxisWithGrid(i);
-            if(yAxisWithGrid != null) {
-                yAxisWithGrid.drawGrid(canvas, stackArea);
+        }
+        // draw Y axis and grid
+        for (int i = 0; i < stackCount; i++) {
+            AxisWrapper leftAxis = yAxisList.get(i * 2);
+            AxisWrapper rightAxis = yAxisList.get(i * 2 + 1);
+
+            leftAxis.drawAxis(canvas, graphArea);
+            rightAxis.drawAxis(canvas, graphArea);
+
+            if(rightAxis.isVisible() && !leftAxis.isVisible()) {
+                rightAxis.drawAxis(canvas, graphArea);
+                rightAxis.drawGrid(canvas, graphArea);
+            } else if(!rightAxis.isVisible() && leftAxis.isVisible()) {
+                leftAxis.drawAxis(canvas, graphArea);
+                leftAxis.drawGrid(canvas, graphArea);
+            } else if(rightAxis.isVisible() && leftAxis.isVisible()) {
+                if(chartConfig.isLeftAxisPrimary()) {
+                    leftAxis.drawGrid(canvas, graphArea);
+                } else {
+                    rightAxis.drawGrid(canvas, graphArea);
+                }
+                leftAxis.drawAxis(canvas, graphArea);
+                rightAxis.drawAxis(canvas, graphArea);
             }
         }
 
-        for (AxisWrapper axis : xAxisList) {
-            axis.drawAxis(canvas, graphArea);
-        }
-        for (AxisWrapper axis : yAxisList) {
-            axis.drawAxis(canvas, graphArea);
-        }
 
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
@@ -513,10 +513,7 @@ public class Chart {
      */
     public void addTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         int stackCount = yAxisList.size() / 2;
-        if(stackCount == 0) {
-            stackCount = 1;
-        }
-        addTrace(stackCount - 1, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+        addTrace(Math.max(0, stackCount - 1), trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
     /**
@@ -535,6 +532,10 @@ public class Chart {
      * add trace to the stack with the given number
      */
     public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        if(dataProcessingConfig != null) {
+            trace.setDataProcessingConfig(dataProcessingConfig);
+        }
+
         int stackCount = yAxisList.size() / 2;
         if(stackCount == 0) {
             addStack(); // add stack if there is no stack
@@ -692,9 +693,14 @@ public class Chart {
     }
 
     public void autoScaleX(int xIndex) {
+        AxisWrapper axis = xAxisList.get(xIndex);
+        if(!axis.isVisible()) {
+            return;
+        }
+
         BRange tracesXMinMax = null;
         for (Trace trace : traces) {
-            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
+            if (trace.getXScale() == axis.getScale()) {
                 tracesXMinMax = BRange.join(tracesXMinMax, trace.getFullXMinMax());
             }
         }
@@ -705,11 +711,19 @@ public class Chart {
     }
 
     public void autoScaleY(int yIndex) {
+        AxisWrapper axis = yAxisList.get(yIndex);
+        if(!axis.isVisible()) {
+            return;
+        }
+
         BRange tracesYMinMax = null;
-        Scale yScale = yAxisList.get(yIndex).getScale();
         for (Trace trace : traces) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-                if (trace.getYScale(i) == yScale) {
+            int curveCount = trace.curveCount();
+            if(trace.isSingleYScale()) {
+                curveCount = 1;
+            }
+            for (int i = 0; i < curveCount; i++) {
+                if (trace.getYScale(i) == axis.getScale()) {
                     tracesYMinMax = BRange.join(tracesYMinMax, trace.curveYMinMax(i));
                 }
             }
@@ -729,44 +743,62 @@ public class Chart {
     }
 
     /**
-     * If chart contains the point or point == null then
-     * <ul>
-     * <li>if selectedCurve != null then return index of selectedCurve X axis</li>
-     * <li>if selectedCurve == null then return index of first visible X axis</li>
-     * </ul>
+     * If point == null then return selectedCurve x index or -1 if no curve is selected
      * <p>
-     * If point != null but chart does not contain the point then return -1
+     * If point != null
+     * <ul>
+     * <li>if selectedCurve != null then return selectedCurve x index</li>
+     * <li>if selectedCurve == null then return the index of X axis that has grid in the stack containing the point
+     * <li>chart does not contain the point then return -1</li>
      */
     public int getXIndex(@Nullable BPoint point) {
         if (selectedCurve != null) {
             return getCurveXIndex(selectedCurve.getTrace());
         }
-        if (point != null && graphArea.contains(point.getX(), point.getY())) {
-            for (int i = 0; i < xAxisList.size(); i++) {
-                if (xAxisList.get(i).isVisible()) {
-                    return i;
+        if (point != null && fullArea.contains(point.getX(), point.getY())) {
+            int bottomAxisIndex = 0;
+            int topAxisIndex = 1;
+            AxisWrapper bottomAxis = xAxisList.get(bottomAxisIndex);
+            AxisWrapper topAxis = xAxisList.get(topAxisIndex);
+
+            if(bottomAxis.isVisible() && !topAxis.isVisible()) {
+                return bottomAxisIndex;
+            } else if(!bottomAxis.isVisible() && topAxis.isVisible()) {
+                return topAxisIndex;
+            } else if(bottomAxis.isVisible() && topAxis.isVisible()) {
+                if (point != null && fullArea.contains(point.getX(), point.getY())) {
+                    // find point stack
+                    int stackCount = yAxisList.size() / 2;
+                    for (int i = 0; i < stackCount; i++) {
+                        AxisWrapper axisLeft = yAxisList.get(2 * i);
+                        if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
+                            return chooseXAxisWithGrid(i);
+                        }
+                    }
                 }
             }
         }
+
         return -1;
     }
 
     /**
-     * If chart contains the point or point == null then
-     * <ul>
-     * <li>if selectedCurve != null then return index of selectedCurve  Y axis</li>
-     * <li>if selectedCurve == null then return index of visible Y axis belonging to the stack containing the point
-     * or just index of first visible Y axis (if point == null)</li>
-     * </ul>
+     * If point == null then return selectedCurve y index or -1 if no curve is selected
      * <p>
-     * If point != null but chart does not contain the point then return -1
+     * If point != null
+     * <ul>
+     * <li>if selectedCurve != null then return selectedCurve y index</li>
+     * <li>if selectedCurve == null then return the index of visible y axis belonging to the stack containing the point
+     * <li>chart does not contain the point then return -1</li>
      */
     public int getYIndex(@Nullable BPoint point) {
         if (selectedCurve != null) {
             return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
         }
         if (point != null && fullArea.contains(point.getX(), point.getY())) {
-            for (int i = 0; i < yAxisList.size() / 2; i++) {
+            // find point stack and point "side" (left or right)
+            int stackCount = yAxisList.size() / 2;
+            for (int i = 0; i < stackCount; i++) {
                 int leftYIndex = 2 * i;
                 int rightYIndex = 2 * i + 1;
                 AxisWrapper axisLeft = yAxisList.get(leftYIndex);
@@ -781,7 +813,7 @@ public class Chart {
                     if(!axisRight.isVisible()) {
                         return leftYIndex;
                     }
-                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible) { // left half
+                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible()) { // left half
                         return leftYIndex;
                     } else {
                         return rightYIndex;
@@ -790,13 +822,6 @@ public class Chart {
             }
         }
 
-        if (point == null) {
-            for (int i = 0; i < yAxisList.size(); i++) {
-                if (yAxisList.get(i).isVisible()) {
-                    return i;
-                }
-            }
-        }
         return -1;
     }
 

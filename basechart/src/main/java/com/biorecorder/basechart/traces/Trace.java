@@ -15,13 +15,8 @@ public abstract class Trace {
     protected TraceDataManager dataManager;
     private final int curveCount;
 
-    public Trace(ChartData data, DataProcessingConfig processingConfig) {
-        dataManager = new TraceDataManager(data, processingConfig);
-        curveCount = curveCount(data);
-    }
-
     public Trace(ChartData data) {
-        dataManager = new TraceDataManager(data, new DataProcessingConfig());
+        dataManager = new TraceDataManager(data);
         curveCount = curveCount(data);
     }
     
@@ -84,10 +79,6 @@ public abstract class Trace {
             return true;
         }
         return false;
-    }
-
-    public int yScaleCount() {
-        return yScales.length;
     }
 
     public final Scale getYScale(int curveNumber) {

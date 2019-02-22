@@ -80,7 +80,7 @@ public class ChartTest extends JFrame {
 
         Chart chart = new Chart();
 
-        chart.addTrace(new LineTrace(xyData1), true, true, true);
+        chart.addTrace(new LineTrace(xyData1), false, true, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData2), false, false, false);
         chart.addStack();

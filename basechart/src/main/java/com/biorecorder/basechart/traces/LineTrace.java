@@ -15,12 +15,7 @@ import java.util.List;
  * Created by galafit on 11/10/17.
  */
 public class LineTrace extends Trace {
-     private LineTraceConfig traceConfig;
-
-    public LineTrace(ChartData data, DataProcessingConfig processingConfig) {
-        super(data, processingConfig);
-        traceConfig = new LineTraceConfig();
-    }
+    private LineTraceConfig traceConfig;
 
     public LineTrace(ChartData data) {
         super(data);
@@ -117,7 +112,7 @@ public class LineTrace extends Trace {
         Scale yScale = getYScale(curveNumber);
 
         BPath path = null;
-        canvas.setColor(getLineColor(curveNumber));
+        canvas.setStroke(traceConfig.getLineStroke());
         BColor lineColor = getLineColor(curveNumber);
         BColor markColor = getMarkColor(curveNumber);
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
@@ -149,15 +144,14 @@ public class LineTrace extends Trace {
         path.moveTo(x, y);
         canvas.setColor(markColor);
         int pointRadius = traceConfig.getMarkSize() / 2;
-        canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
+        canvas.fillOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
             x = (int) xScale.scale(xyData.getX(i));
             y = (int) yScale.scale(xyData.getY(i));
             path.lineTo(x, y);
-            canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
+            canvas.fillOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
         canvas.setColor(lineColor);
-        canvas.setStroke(traceConfig.getLineStroke());
         canvas.drawPath(path);
         return path;
     }
@@ -169,16 +163,15 @@ public class LineTrace extends Trace {
         path.moveTo(x, y);
         canvas.setColor(markColor);
         int pointRadius = traceConfig.getMarkSize()/ 2;
-        canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
+        canvas.fillOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         for (int i = 1; i < xyData.size(); i++) {
             x = (int) xScale.scale(xyData.getX(i));
             path.lineTo(x, y);
             y = (int) yScale.scale(xyData.getY(i));
             path.lineTo(x, y);
-            canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
+            canvas.fillOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
         canvas.setColor(lineColor);
-        canvas.setStroke(traceConfig.getLineStroke());
         canvas.drawPath(path);
         return path;
     }
@@ -187,7 +180,7 @@ public class LineTrace extends Trace {
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         int pointRadius = traceConfig.getMarkSize() / 2;
-        canvas.drawOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
+        canvas.fillOval(x - pointRadius, y - pointRadius, 2 * pointRadius,2 * pointRadius);
         VerticalLine vLine = new VerticalLine(y);
         for (int i = 1; i < xyData.size(); i++) {
             int x_prev = x;
@@ -203,7 +196,7 @@ public class LineTrace extends Trace {
             // draw vertical line
             canvas.drawLine(x, vLine.min, x, vLine.max);
             canvas.setColor(markColor);
-            canvas.drawOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
+            canvas.fillOval(x - pointRadius,y - pointRadius, 2 * pointRadius,2 * pointRadius);
         }
         return null;
     }

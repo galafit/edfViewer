@@ -26,9 +26,9 @@ public class TraceDataManager {
     private int[] sorter;
 
 
-    public TraceDataManager(ChartData traceData, DataProcessingConfig dataProcessingConfig) {
+    public TraceDataManager(ChartData traceData) {
         this.traceData = traceData;
-        setConfig(dataProcessingConfig);
+        setConfig(new DataProcessingConfig());
     }
 
     public void setConfig(DataProcessingConfig processingConfig) {

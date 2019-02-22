@@ -42,7 +42,8 @@ public class ScrollableChart {
 
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
-        preview = new Chart(theme.getPreviewConfig());
+        preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
+       // preview.setDefaultWeight(2);
     }
 
     private void createScrolls() {
@@ -50,7 +51,7 @@ public class ScrollableChart {
         BRange previewXRange = preview.getXMinMax(previewXIndex);
         double xMin = previewXRange.getMin();
         for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
-            if (scrolls.get(xIndex) == null  && chart.isXAxisUsed(xIndex)) {
+            if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
                 double xExtent = chart.getBestExtent(xIndex);
                 Scroll scroll = new Scroll();
                 scroll.setMinMax(previewXRange);
@@ -76,7 +77,7 @@ public class ScrollableChart {
                 });
             }
 
-            if (scrolls.get(xIndex) != null  && !chart.isXAxisUsed(xIndex)) {
+            if (scrolls.get(xIndex) != null  && !chart.isXAxisVisible(xIndex)) {
                 scrolls.remove(xIndex);
             }
         }
