@@ -79,6 +79,13 @@ public abstract class Trace {
         return xScale;
     }
 
+    public boolean isSingleYScale() {
+        if(yScales.length == 1) {
+            return true;
+        }
+        return false;
+    }
+
     public int yScaleCount() {
         return yScales.length;
     }

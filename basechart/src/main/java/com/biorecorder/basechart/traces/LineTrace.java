@@ -22,6 +22,11 @@ public class LineTrace extends Trace {
         traceConfig = new LineTraceConfig();
     }
 
+    public LineTrace(ChartData data) {
+        super(data);
+        traceConfig = new LineTraceConfig();
+    }
+
     @Override
     public int getMarkSize() {
         return traceConfig.getMarkSize();

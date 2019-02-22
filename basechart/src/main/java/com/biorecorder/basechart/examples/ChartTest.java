@@ -19,6 +19,7 @@ public class ChartTest extends JFrame {
     IntArrayList yData3 = new IntArrayList();
     IntArrayList xData3 = new IntArrayList();
 
+    IntArrayList yData_col0 = new IntArrayList();
     IntArrayList yData_col1 = new IntArrayList();
     IntArrayList yData_col2 = new IntArrayList();
     ChartPanel chartPanel;
@@ -29,9 +30,14 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
+        for (int i = 0; i < 1600; i++) {
+            yData1.add(i);
+        }
+
+
         for (int i = 0; i < 160; i++) {
             //yData1.add1((float) Math.sin(i));
-            yData1.add(i);
+            yData_col0.add(i);
             yData_col1.add(i + 20);
             yData_col2.add(i + 50);
         }
@@ -63,7 +69,7 @@ public class ChartTest extends JFrame {
 
         XYData xyData2 = new XYData();
         xyData2.addColumn(xData2);
-        xyData2.addColumn(yData2);
+        xyData2.addColumn(yData_col0);
         xyData2.addColumn(yData_col1);
         xyData2.addColumn(yData_col2);
         xyData2.setColumnName(2, "eeg");
@@ -74,7 +80,8 @@ public class ChartTest extends JFrame {
 
         Chart chart = new Chart();
 
-        //chart.addTrace(new LineTrace(xyData1), true, false, false);
+        chart.addTrace(new LineTrace(xyData1), true, true, true);
+        chart.addStack();
         chart.addTrace(new LineTrace(xyData2), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData3), false, false, false);

@@ -1,10 +1,7 @@
 package com.biorecorder.basechart.axis;
 
 import com.biorecorder.basechart.BRange;
-import com.biorecorder.basechart.graphics.Text;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BStroke;
-import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
@@ -321,36 +318,36 @@ public abstract class Axis {
         scale.setDomain(tickMin.getValue(), tickMax.getValue());
     }
 
-    public void drawGrid(BCanvas canvas, int axisOriginPoint, int length) {
+    public void drawGrid(BCanvas canvas, BRectangle area) {
         canvas.save();
         if (isDirty) {
             createAxisElements(canvas);
         }
 
-        translateCanvas(canvas, axisOriginPoint);
+        translateCanvas(canvas, area);
 
         canvas.setColor(config.getGridColor());
         canvas.setStroke(config.getGridLineStroke());
         for (int i = 0; i < tickPositions.size(); i++) {
-            drawGridLine(canvas, tickPositions.get(i), length);
+            drawGridLine(canvas, tickPositions.get(i), area);
         }
 
         canvas.setColor(config.getMinorGridColor());
         canvas.setStroke(config.getMinorGridLineStroke());
         for (int i = 0; i < minorTickPositions.size(); i++) {
-            drawGridLine(canvas, minorTickPositions.get(i), length);
+            drawGridLine(canvas, minorTickPositions.get(i), area);
         }
 
         canvas.restore();
     }
 
-    public void drawAxis(BCanvas canvas, int axisOriginPoint) {
+    public void drawAxis(BCanvas canvas, BRectangle area) {
         canvas.save();
 
         if (isDirty) {
             createAxisElements(canvas);
         }
-        translateCanvas(canvas, axisOriginPoint);
+        translateCanvas(canvas, area);
 
         if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
             canvas.setColor(config.getTickMarkColor());
@@ -572,7 +569,7 @@ public abstract class Axis {
         isDirty = false;
     }
 
-    protected abstract void translateCanvas(BCanvas canvas, int axisOriginPoint);
+    protected abstract void translateCanvas(BCanvas canvas, BRectangle area);
 
     protected abstract int labelSizeForWidth(TextMetric tm, int angle, String label);
 
@@ -583,7 +580,7 @@ public abstract class Axis {
 
     protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
 
-    protected abstract void drawGridLine(BCanvas canvas, int tickPosition, int length);
+    protected abstract void drawGridLine(BCanvas canvas, int tickPosition, BRectangle area);
 
     protected abstract void drawAxisLine(BCanvas canvas);
 

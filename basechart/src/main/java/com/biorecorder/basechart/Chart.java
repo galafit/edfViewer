@@ -61,11 +61,7 @@ public class Chart {
             bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
             topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
         }
-        if (chartConfig.isBottomAxisPrimary()) {
-            bottomAxis.setGridVisible(true);
-        } else {
-            topAxis.setGridVisible(true);
-        }
+
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
 
@@ -328,6 +324,72 @@ public class Chart {
         return false;
     }
 
+    private AxisWrapper chooseXAxisWithGrid(int stackNumber) {
+        AxisWrapper bottomAxis = xAxisList.get(0);
+        AxisWrapper topAxis = xAxisList.get(1);
+
+        if(!bottomAxis.isVisible && !topAxis.isVisible) {
+            return null;
+        }
+        if(!bottomAxis.isVisible) {
+            return topAxis;
+        }
+        if(!topAxis.isVisible) {
+            return bottomAxis;
+        }
+
+        AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
+        AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
+        AxisWrapper primaryAxis;
+        if(chartConfig.isBottomAxisPrimary()) {
+           primaryAxis = bottomAxis;
+        } else {
+            primaryAxis = topAxis;
+        }
+        for (Trace trace : traces) {
+            if(trace.getXScale() == primaryAxis.getScale()) {
+                int curveCount = trace.curveCount();
+                if(trace.isSingleYScale()) {
+                    curveCount = 1;
+                }
+
+                for (int i = 0; i < curveCount; i++) {
+                    Scale yScale = trace.getYScale(i);
+                    if(yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
+                        return primaryAxis;
+                    }
+                }
+            }
+        }
+
+        if(chartConfig.isBottomAxisPrimary()) {
+            return topAxis;
+        } else {
+            return bottomAxis;
+        }
+    }
+
+    private AxisWrapper chooseYAxisWithGrid(int stackNumber) {
+        AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
+        AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
+
+        if(!leftAxis.isVisible() && !rightAxis.isVisible()) {
+            return null;
+        }
+        if(!leftAxis.isVisible()) {
+            return rightAxis;
+        }
+        if(!rightAxis.isVisible()) {
+            return leftAxis;
+        }
+
+        if(chartConfig.isLeftAxisPrimary()) {
+            return leftAxis;
+        } else {
+            return rightAxis;
+        }
+    }
+
 
     public void draw(BCanvas canvas) {
         if(fullArea.width == 0 || fullArea.height == 0) {
@@ -350,54 +412,30 @@ public class Chart {
 
         canvas.enableAntiAliasAndHinting();
 
-        int topPosition = graphArea.y;
-        int bottomPosition = graphArea.y + graphArea.height;
-        int leftPosition = graphArea.x;
-        int rightPosition = graphArea.x + graphArea.width;
-
         /*
          * Attention!!!
          * Drawing  axis and grids should be done before drawing traces
          * because this methods invokes axis rounding
          */
-        AxisWrapper bottomAxis = xAxisList.get(0);
-        AxisWrapper topAxis = xAxisList.get(1);
-        if (bottomAxis.isVisible && bottomAxis.isGridVisible) {
-            bottomAxis.drawGrid(canvas, bottomPosition, graphArea.height);
-        }
-        if (topAxis.isVisible && topAxis.isGridVisible) {
-            topAxis.drawGrid(canvas, topPosition, graphArea.height);
-        }
-
-        AxisWrapper leftAxis;
-        AxisWrapper rightAxis;
-        for (int i = 0; i < yAxisList.size() / 2; i++) {
-            leftAxis = yAxisList.get(i * 2);
-            rightAxis = yAxisList.get(i * 2 + 1);
-            if (leftAxis.isVisible() && leftAxis.isGridVisible) {
-                leftAxis.drawGrid(canvas, leftPosition, graphArea.width);
+        int stackCount = yAxisList.size() / 2;
+        for (int i = 0; i < stackCount; i++) {
+            AxisWrapper yAxis = yAxisList.get(2 * i);
+            BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
+            AxisWrapper xAxisWithGrid = chooseXAxisWithGrid(i);
+            if(xAxisWithGrid != null) {
+                xAxisWithGrid.drawGrid(canvas, stackArea);
             }
-            if (rightAxis.isVisible() && rightAxis.isGridVisible) {
-                rightAxis.drawGrid(canvas, rightPosition, graphArea.width);
+            AxisWrapper yAxisWithGrid = chooseYAxisWithGrid(i);
+            if(yAxisWithGrid != null) {
+                yAxisWithGrid.drawGrid(canvas, stackArea);
             }
         }
 
-        if (bottomAxis.isVisible) {
-            bottomAxis.drawAxis(canvas, bottomPosition);
+        for (AxisWrapper axis : xAxisList) {
+            axis.drawAxis(canvas, graphArea);
         }
-        if (topAxis.isVisible) {
-            topAxis.drawAxis(canvas, topPosition);
-        }
-
-        for (int i = 0; i < yAxisList.size() / 2; i++) {
-            leftAxis = yAxisList.get(i * 2);
-            rightAxis = yAxisList.get(i * 2 + 1);
-            if (leftAxis.isVisible()) {
-                leftAxis.drawAxis(canvas, leftPosition);
-            }
-            if (rightAxis.isVisible()) {
-                rightAxis.drawAxis(canvas, rightPosition);
-            }
+        for (AxisWrapper axis : yAxisList) {
+            axis.drawAxis(canvas, graphArea);
         }
 
         canvas.save();
@@ -458,11 +496,6 @@ public class Chart {
         } else {
             leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
             rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
-        }
-        if (chartConfig.isLeftAxisPrimary()) {
-            leftAxis.setGridVisible(true);
-        } else {
-            rightAxis.setGridVisible(true);
         }
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
@@ -733,9 +766,9 @@ public class Chart {
             return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
         }
         if (point != null && graphArea.contains(point.getX(), point.getY())) {
-            for (int stackIndex = 0; stackIndex < yAxisList.size() / 2; stackIndex++) {
-                int leftYIndex = 2 * stackIndex;
-                int rightYIndex = 2 * stackIndex + 1;
+            for (int i = 0; i < yAxisList.size() / 2; i++) {
+                int leftYIndex = 2 * i;
+                int rightYIndex = 2 * i + 1;
                 AxisWrapper axisLeft = yAxisList.get(leftYIndex);
                 AxisWrapper axisRight = yAxisList.get(rightYIndex);
                 if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
@@ -880,9 +913,15 @@ public class Chart {
             return false;
         }
 
-        public void setRoundingEnabled(boolean roundingEnabled) {
-            isRoundingEnabled = roundingEnabled;
-            setRoundingDirty();
+        public int length() {
+            return (int) axis.getLength();
+        }
+
+        public void setRoundingEnabled(boolean isRoundingEnabled) {
+            if(this.isRoundingEnabled != isRoundingEnabled) {
+                this.isRoundingEnabled = isRoundingEnabled;
+                setRoundingDirty();
+            }
         }
 
         public boolean isTickLabelOutside() {
@@ -920,14 +959,14 @@ public class Chart {
 
         public Scale zoom(double zoomFactor) {
             // to have smooth zooming we do it on row domain values instead of rounded ones !!!
-            axis.setMinMax(rowMinMax);
+            setRoundingDirty();
             return axis.zoom(zoomFactor);
         }
 
 
         public Scale translate(int translation) {
             // to have smooth translating we do it on row domain values instead of rounded ones !!!
-            axis.setMinMax(rowMinMax);
+            setRoundingDirty();
             Scale scale = axis.translate(translation);
             return scale;
         }
@@ -993,23 +1032,25 @@ public class Chart {
         /**
          * this method DO AXIS ROUNDING
          */
-        public void drawGrid(BCanvas canvas, int axisOriginPoint, int length) {
+        public void drawGrid(BCanvas canvas, BRectangle area) {
             if (isDirty()) {
                 axis.roundMinMax(canvas);
                 roundingDirty = false;
             }
-            axis.drawGrid(canvas, axisOriginPoint, length);
+            axis.drawGrid(canvas, area);
         }
 
         /**
          * this method DO AXIS ROUNDING
          */
-        public void drawAxis(BCanvas canvas, int axisOriginPoint) {
-            if (isDirty()) {
-                axis.roundMinMax(canvas);
-                roundingDirty = false;
+        public void drawAxis(BCanvas canvas, BRectangle area) {
+            if(isVisible) {
+                if (isDirty()) {
+                    axis.roundMinMax(canvas);
+                    roundingDirty = false;
+                }
+                axis.drawAxis(canvas, area);
             }
-            axis.drawAxis(canvas, axisOriginPoint);
         }
 
         public void setVisible(boolean isVisible) {

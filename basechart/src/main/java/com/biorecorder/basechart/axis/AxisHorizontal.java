@@ -13,11 +13,6 @@ abstract class AxisHorizontal extends Axis {
     }
 
     @Override
-    protected void translateCanvas(BCanvas canvas, int axisOriginPoint) {
-        canvas.translate(0, axisOriginPoint);
-    }
-
-    @Override
     protected int labelSizeForWidth(TextMetric tm, int angle, String label) {
         return tm.height();
     }

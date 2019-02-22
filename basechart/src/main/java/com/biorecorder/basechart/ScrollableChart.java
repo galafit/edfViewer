@@ -42,7 +42,7 @@ public class ScrollableChart {
 
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
-        preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
+        preview = new Chart(theme.getPreviewConfig());
     }
 
     private void createScrolls() {
