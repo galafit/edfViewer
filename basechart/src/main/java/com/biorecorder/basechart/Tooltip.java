@@ -130,7 +130,7 @@ public class Tooltip {
 
 
     private int getColorMarkerSize() {
-        return (int) (tooltipConfig.getTextStyle().getSize() * 0.8);
+        return tooltipConfig.getTextStyle().getSize();
     }
 
     private int getColorMarkerPadding() {

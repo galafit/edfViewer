@@ -765,31 +765,32 @@ public class Chart {
         if (selectedCurve != null) {
             return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
         }
-        if (point != null && graphArea.contains(point.getX(), point.getY())) {
+        if (point != null && fullArea.contains(point.getX(), point.getY())) {
             for (int i = 0; i < yAxisList.size() / 2; i++) {
                 int leftYIndex = 2 * i;
                 int rightYIndex = 2 * i + 1;
                 AxisWrapper axisLeft = yAxisList.get(leftYIndex);
                 AxisWrapper axisRight = yAxisList.get(rightYIndex);
                 if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
-                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible) { // left half
+                    if(!axisLeft.isVisible() && !axisRight.isVisible()) {
+                        break;
+                    }
+                    if(!axisLeft.isVisible()) {
+                        return rightYIndex;
+                    }
+                    if(!axisRight.isVisible()) {
                         return leftYIndex;
                     }
-                    if (fullArea.x + fullArea.width / 2 <= point.getX() && point.getX() <= fullArea.x + fullArea.width) { // right half
-                        if (axisRight.isVisible) {
-                            return rightYIndex;
-                        }
+                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible) { // left half
                         return leftYIndex;
+                    } else {
+                        return rightYIndex;
                     }
                 }
             }
         }
 
         if (point == null) {
-            if (selectedCurve != null) {
-                return getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
-            }
-
             for (int i = 0; i < yAxisList.size(); i++) {
                 if (yAxisList.get(i).isVisible()) {
                     return i;
