@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.graphics.BRange;
+
 /**
  * Created by galafit on 2/11/17.
  */

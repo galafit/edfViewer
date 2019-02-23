@@ -1,5 +1,6 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
 import com.biorecorder.data.sequence.IntSequence;

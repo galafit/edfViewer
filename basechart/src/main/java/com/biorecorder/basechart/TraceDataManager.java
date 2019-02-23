@@ -1,6 +1,7 @@
 package com.biorecorder.basechart;
 
 
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
 
 import java.util.Arrays;

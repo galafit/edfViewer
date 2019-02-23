@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.BRange;
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
@@ -213,7 +213,7 @@ public abstract class Axis {
             String errMsg = "End is infinity";
             throw new IllegalArgumentException(errMsg);
         }
-        if ((int) (start) == (int) getStart() && (int) end == (int) getEnd()) {
+        if (start == getStart() && end == getEnd()) {
             return;
         }
         scale.setRange(start, end);
@@ -506,11 +506,12 @@ public abstract class Axis {
         int charSize = charSize(tm);
 
         while (currentTick.getValue() <= max) {
+            int position = (int) Math.round(scale(currentTick.getValue()));
             // tick position
-            tickPositions.add((int) scale(currentTick.getValue()));
+            tickPositions.add(position);
 
             // tick label
-            tickLabels.add(tickToLabel(tm, (int) scale(currentTick.getValue()), currentTick.getLabel(), charSize));
+            tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), charSize));
             for (int i = 0; i < ticksSkipStep; i++) {
                 nextTick = tickProvider.getNextTick();
             }
@@ -522,7 +523,7 @@ public abstract class Axis {
                 for (int i = 1; i < minorTickIntervalCount; i++) {
                     minorTickValue += minorTickInterval;
                     if (minorTickValue <= max) {
-                        minorTickPositions.add((int) scale(minorTickValue));
+                        minorTickPositions.add((int) Math.round(scale(minorTickValue)));
                     } else {
                         break;
                     }
@@ -549,14 +550,14 @@ public abstract class Axis {
             for (int i = 1; i < minorTickIntervalCount; i++) {
                 minorTickValue -= minorTickInterval;
                 if (minorTickValue >= min) {
-                    positions.add((int) scale(minorTickValue));
+                    positions.add((int) Math.round(scale(minorTickValue)));
                 } else {
                     break;
                 }
             }
             if (positions.size() > 0) {
                 // additionalPositions need to be reversed
-                int[] minorTickAdditionalPositions = new int[(int) positions.size()];
+                int[] minorTickAdditionalPositions = new int[positions.size()];
                 for (int i = 0; i < positions.size(); i++) {
                     minorTickAdditionalPositions[i] = positions.get(positions.size() - 1 - i);
                 }

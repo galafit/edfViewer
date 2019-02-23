@@ -3,10 +3,9 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
+import com.biorecorder.basechart.scroll.ScrollConfig;
 import com.biorecorder.basechart.scroll.ScrollListener;
-import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.themes.Theme;
-import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.themes.ScrollableChartConfigWhite;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -34,16 +33,14 @@ public class ScrollableChart {
 
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
-    private Theme theme;
+    private ScrollableChartConfig theme;
 
     public ScrollableChart() {
-        this.theme = new DarkTheme();
+        this.theme = new ScrollableChartConfigWhite();
         chart = new Chart(theme.getChartConfig());
-
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
         preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
-       // preview.setDefaultWeight(2);
     }
 
     private void createScrolls() {
@@ -249,34 +246,25 @@ public class ScrollableChart {
         }
     }
 
-
     public boolean hoverOff() {
-        boolean isChanged = false;
         if (chart.hoverOff()) {
-            isChanged = true;
+            return true;
         }
         if (preview.hoverOff()) {
-            isChanged = true;
+            return true;
         }
-        return isChanged;
+        return false;
     }
 
     public boolean hoverOn(int x, int y) {
-        if(chartArea.contains(x, y) && chart.hoverOn(x, y)) {
+        if(chart.hoverOn(x, y)) {
             return true;
         }
-        if(previewArea.contains(x, y) && preview.hoverOn(x, y)) {
+        if(preview.hoverOn(x, y)) {
             return true;
         }
 
-        boolean isHoverOff = false;
-        if(chart.hoverOff()) {
-            isHoverOff = true;
-        }
-        if(preview.hoverOff()) {
-            isHoverOff = true;
-        }
-        return isHoverOff;
+       return false;
     }
 
 

@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scroll;
 
-import com.biorecorder.basechart.BRange;
+import com.biorecorder.basechart.graphics.BRange;
 
 import java.util.*;
 import java.util.List;

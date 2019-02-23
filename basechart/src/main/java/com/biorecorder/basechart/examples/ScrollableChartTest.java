@@ -4,7 +4,7 @@ import com.biorecorder.basechart.ScrollableChart;
 import com.biorecorder.basechart.XYData;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
-import com.biorecorder.basechart.traces.LineTrace;
+import com.biorecorder.basechart.LineTrace;
 
 import javax.swing.*;
 import java.awt.*;

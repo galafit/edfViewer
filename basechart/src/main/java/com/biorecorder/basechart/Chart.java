@@ -5,8 +5,6 @@ import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
-import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.traces.*;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -46,7 +44,7 @@ public class Chart {
     private DataProcessingConfig dataProcessingConfig;
 
     public Chart() {
-        this((new DarkTheme()).getChartConfig());
+       this(new ChartConfig());
     }
 
     public Chart(ChartConfig chartConfig) {
@@ -56,6 +54,7 @@ public class Chart {
     public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
         this.dataProcessingConfig = dataProcessingConfig;
         this.chartConfig = new ChartConfig(chartConfig1);
+
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
@@ -308,12 +307,18 @@ public class Chart {
 
         int weightSumTillYAxis = 0;
         int stackCount = yAxisList.size() / 2;
+
         for (int stack = 0; stack < stackCount; stack++) {
             int yAxisWeight = stackWeights.get(stack);
-            int axisHeight = areaHeight * yAxisWeight / weightSum;
+            double axisHeight = areaHeight * yAxisWeight / weightSum;
             int end = areaY + areaHeight * weightSumTillYAxis / weightSum;
-            int start = end + axisHeight;
+            int start = end + (int)Math.round(axisHeight);
 
+            if(stack == stackCount - 1) {
+                // for integer calculation sum yAxis length can be != areaHeight
+                // so we fix that
+                start = areaY + areaHeight;
+            }
             yAxisList.get(stack * 2).setStartEnd(start, end);
             yAxisList.get(stack * 2 + 1).setStartEnd(start, end);
 
@@ -343,13 +348,8 @@ public class Chart {
         AxisWrapper primaryAxis = xAxisList.get(primaryAxisIndex);
         for (Trace trace : traces) {
             if(trace.getXScale() == primaryAxis.getScale()) {
-                int curveCount = trace.curveCount();
-                if(trace.isSingleYScale()) {
-                    curveCount = 1;
-                }
-
-                for (int i = 0; i < curveCount; i++) {
-                    Scale yScale = trace.getYScale(i);
+                Scale[] traceYScales = trace.getYScales();
+                for (Scale yScale : traceYScales) {
                     if(yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
                         return primaryAxisIndex;
                     }
@@ -393,15 +393,14 @@ public class Chart {
          * Attention!!!
          * Drawing  axis and grids should be done before drawing traces
          * because this methods invokes axis rounding
+         * First we should draw all grids and only after that axes
+         * (otherwise the grid will draw over the axes)
          */
         int stackCount = yAxisList.size() / 2;
 
-        // draw X axis and grid
+        // draw X axes grids
         AxisWrapper bottomAxis = xAxisList.get(0);
         AxisWrapper topAxis = xAxisList.get(1);
-
-        bottomAxis.drawAxis(canvas, graphArea);
-        topAxis.drawAxis(canvas, graphArea);
 
         if(bottomAxis.isVisible() && !topAxis.isVisible()) {
             bottomAxis.drawGrid(canvas, graphArea);
@@ -415,19 +414,14 @@ public class Chart {
                 xAxisList.get(chooseXAxisWithGrid(i)).drawGrid(canvas, stackArea);
             }
         }
-        // draw Y axis and grid
+        // draw Y axes grids
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper leftAxis = yAxisList.get(i * 2);
             AxisWrapper rightAxis = yAxisList.get(i * 2 + 1);
 
-            leftAxis.drawAxis(canvas, graphArea);
-            rightAxis.drawAxis(canvas, graphArea);
-
             if(rightAxis.isVisible() && !leftAxis.isVisible()) {
-                rightAxis.drawAxis(canvas, graphArea);
                 rightAxis.drawGrid(canvas, graphArea);
             } else if(!rightAxis.isVisible() && leftAxis.isVisible()) {
-                leftAxis.drawAxis(canvas, graphArea);
                 leftAxis.drawGrid(canvas, graphArea);
             } else if(rightAxis.isVisible() && leftAxis.isVisible()) {
                 if(chartConfig.isLeftAxisPrimary()) {
@@ -435,9 +429,16 @@ public class Chart {
                 } else {
                     rightAxis.drawGrid(canvas, graphArea);
                 }
-                leftAxis.drawAxis(canvas, graphArea);
-                rightAxis.drawAxis(canvas, graphArea);
             }
+        }
+
+        // draw X axes
+        bottomAxis.drawAxis(canvas, graphArea);
+        topAxis.drawAxis(canvas, graphArea);
+
+        // draw Y axes
+        for (AxisWrapper axis : yAxisList) {
+            axis.drawAxis(canvas, graphArea);
         }
 
 
@@ -482,7 +483,7 @@ public class Chart {
     private void checkStackNumber(int stack) {
         int stackCount = yAxisList.size() / 2;
         if(stack >= stackCount) {
-            String errMsg = "stack = " + stack + " Number of stacks: " + stackCount;
+            String errMsg = "Stack = " + stack + " Number of stacks: " + stackCount;
             throw new IllegalArgumentException(errMsg);
         }
     }
@@ -493,7 +494,28 @@ public class Chart {
      **/
 
     public void setXAxisScale(int xIndex, Scale scale) {
-        xAxisList.get(xIndex).setScale(scale);
+        AxisWrapper axis = xAxisList.get(xIndex);
+        for (Trace trace : traces) {
+           if(trace.getXScale() == axis.getScale()) {
+               trace.setXScale(scale);
+           }
+        }
+        axis.setScale(scale);
+        setAreasDirty();
+    }
+
+    public void setYAxisScale(int yIndex, Scale scale) {
+        AxisWrapper axis = yAxisList.get(yIndex);
+        for (Trace trace : traces) {
+            Scale[] traceYScales = trace.getYScales();
+            for (int i = 0; i < traceYScales.length; i++) {
+                if(traceYScales[i] == axis.getScale()) {
+                    traceYScales[i] = scale;
+                }
+            }
+        }
+        axis.setScale(scale);
+        setAreasDirty();
     }
 
     public void setStackWeight(int stack, int weight) {
@@ -744,9 +766,6 @@ public class Chart {
         BRange tracesYMinMax = null;
         for (Trace trace : traces) {
             int curveCount = trace.curveCount();
-            if(trace.isSingleYScale()) {
-                curveCount = 1;
-            }
             for (int i = 0; i < curveCount; i++) {
                 if (trace.getYScale(i) == axis.getScale()) {
                     tracesYMinMax = BRange.join(tracesYMinMax, trace.curveYMinMax(i));

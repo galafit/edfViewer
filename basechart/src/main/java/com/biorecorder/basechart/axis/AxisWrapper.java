@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.BRange;
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
@@ -43,7 +43,7 @@ public class AxisWrapper {
     }
 
     public int length() {
-        return (int) axis.length();
+        return (int) Math.round(axis.length());
     }
 
     public void setRoundingEnabled(boolean isRoundingEnabled) {
@@ -132,7 +132,7 @@ public class AxisWrapper {
      * return true if axis start or end actually changed
      */
     public boolean setStartEnd(int start, int end) {
-        if ((int) axis.getStart() != start || (int) axis.getEnd() != end) {
+        if (axis.getStart() != start || axis.getEnd() != end) {
             setRoundingDirty();
             axis.setStartEnd(start, end);
             return true;
@@ -149,11 +149,11 @@ public class AxisWrapper {
     }
 
     public int getStart() {
-        return (int) axis.getStart();
+        return (int) Math.round(axis.getStart());
     }
 
     public int getEnd() {
-        return (int) axis.getEnd();
+        return (int) Math.round(axis.getEnd());
     }
 
     public boolean isVisible() {

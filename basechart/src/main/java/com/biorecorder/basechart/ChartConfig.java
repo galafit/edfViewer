@@ -2,42 +2,84 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.Insets;
 import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
-    private BColor[] traceColors = {BColor.MAGENTA, BColor.BLUE};
+    protected BColor[] traceColors;
 
-    private BColor backgroundColor;
-    private BColor marginColor;
+    protected BColor backgroundColor;
+    protected BColor marginColor;
 
-    private TitleConfig titleConfig = new TitleConfig();
-    private LegendConfig legendConfig = new LegendConfig();
-    private TooltipConfig tooltipConfig = new TooltipConfig();
-    private CrosshairConfig crossHairConfig = new CrosshairConfig();
+    protected TitleConfig titleConfig = new TitleConfig();
+    protected LegendConfig legendConfig = new LegendConfig();
+    protected TooltipConfig tooltipConfig = new TooltipConfig();
+    protected CrosshairConfig crossHairConfig = new CrosshairConfig();
 
-    private Insets margin;
-    private Insets spacing;
-    private int autoSpacing = 5; //px taken into account only if spacing is null
+    protected Insets margin;
+    protected Insets spacing;
+    protected int autoSpacing = 5; //px taken into account only if spacing is null
 
-    private AxisConfig leftAxisConfig = new AxisConfig();
-    private AxisConfig rightAxisConfig = new AxisConfig();
-    private AxisConfig bottomAxisConfig = new AxisConfig();
-    private AxisConfig topAxisConfig = new AxisConfig();
+    protected AxisConfig leftAxisConfig = new AxisConfig();
+    protected AxisConfig rightAxisConfig = new AxisConfig();
+    protected AxisConfig bottomAxisConfig = new AxisConfig();
+    protected AxisConfig topAxisConfig = new AxisConfig();
 
-    private boolean isLeftAxisPrimary = true;
-    private boolean isBottomAxisPrimary = true;
-    private boolean isMultiCurveTooltip = true;
+    protected boolean isLeftAxisPrimary = true;
+    protected boolean isBottomAxisPrimary = true;
+    protected boolean isMultiCurveTooltip = true;
 
-    private int defaultStackWeight = 4;
-    private int axisRoundingAccuracyPctIfRoundingEnabled = 5;
-    private int axisRoundingAccuracyPctIfRoundingDisabled = 20;
-    private boolean isYAxisRoundingEnabled = true;
-    private boolean isXAxisRoundingEnabled = false;
+    protected int defaultStackWeight = 4;
+    protected int axisRoundingAccuracyPctIfRoundingEnabled = 5;
+    protected int axisRoundingAccuracyPctIfRoundingDisabled = 20;
+    protected boolean isYAxisRoundingEnabled = true;
+    protected boolean isXAxisRoundingEnabled = false;
 
     public ChartConfig() {
+        final BColor CYAN = new BColor(0, 200, 220);
+        final BColor BLUE = new BColor(100, 120, 250);
+        final BColor MAGENTA = new BColor(165, 80, 220);
+        final BColor GREEN = new BColor(110, 250, 110);
+        final BColor RED = new BColor(250, 64, 82);
+        final BColor ORANGE = new BColor(200, 80, 0);//new BColor(173, 105, 49);
+        final BColor YELLOW = new BColor(252, 177, 48);
+        final BColor GRAY = new BColor(180, 180, 200);
+        final BColor PINK = new BColor(255, 50, 200);//new BColor(255, 60, 130); //new BColor(250, 0, 200);
+        final BColor GOLD = new BColor(190, 140, 110);
+
+        final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
+
+        BColor bgColor = new BColor(18, 15, 18);//BColor.BLACK;
+        BColor marginBgColor = BColor.BLACK;//chartBgColor;
+        BColor titleColor = new BColor(160, 140, 110);
+
+        BColor axisColor = titleColor;
+        BColor gridColor = new BColor(70, 65, 45);
+
+        BColor crosshairColor = new BColor(245, 226, 208); //new BColor(201, 182, 163); //new BColor(252, 242, 227);
+
+        AxisConfig xAxisConfig = new AxisConfig();
+        xAxisConfig.setColors(axisColor, gridColor, gridColor);
+        xAxisConfig.setTickMarkSize(4, 0);
+
+        AxisConfig yAxisConfig = new AxisConfig();
+        yAxisConfig.setColors(axisColor, gridColor, gridColor);
+        yAxisConfig.setTickMarkSize(4, 0);
+
+        traceColors = colors;
+        backgroundColor = bgColor;
+        marginColor = marginBgColor;
+        titleConfig.setTextColor(titleColor);
+        leftAxisConfig = new AxisConfig(yAxisConfig);
+        rightAxisConfig = new AxisConfig(yAxisConfig);
+        topAxisConfig = new AxisConfig(xAxisConfig);
+        bottomAxisConfig = new AxisConfig(xAxisConfig);
+        crossHairConfig.setLineColor(crosshairColor);
+        legendConfig.setBackgroundColor(bgColor);
+        legendConfig.setMargin(new Insets(1));
     }
 
     public ChartConfig(ChartConfig chartConfig) {

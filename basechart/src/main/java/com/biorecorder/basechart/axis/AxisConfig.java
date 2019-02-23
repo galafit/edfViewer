@@ -132,8 +132,8 @@ public class AxisConfig {
         return isTickLabelOutside;
     }
 
-    public void setTickLabelOutside(boolean isTickLabelInside) {
-        this.isTickLabelOutside = isTickLabelInside;
+    public void setTickLabelOutside(boolean isTickLabelOutside) {
+        this.isTickLabelOutside = isTickLabelOutside;
     }
 
     public void setTickMarkSize(int insideSize, int outsideSize) {

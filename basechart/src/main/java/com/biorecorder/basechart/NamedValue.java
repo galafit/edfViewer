@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.traces;
+package com.biorecorder.basechart;
 
 public class NamedValue {
     private final String valueName;

@@ -1,15 +1,11 @@
-package com.biorecorder.basechart.traces;
+package com.biorecorder.basechart;
 
 
-import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
-import com.biorecorder.basechart.graphics.BPoint;
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by galafit on 11/10/17.

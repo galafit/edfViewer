@@ -1,6 +1,5 @@
 package com.biorecorder.basechart.button;
 
-import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.*;
 
 /**

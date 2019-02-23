@@ -1,8 +1,8 @@
-package com.biorecorder.basechart.traces;
+package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
 
 
@@ -19,8 +19,15 @@ public abstract class Trace {
         dataManager = new TraceDataManager(data);
         curveCount = curveCount(data);
     }
+
+    protected final void checkCurveNumber(int curveNumber) {
+        if(curveNumber >= curveCount) {
+            String errMsg = "Curve = " + curveNumber + " Number of curves: " + curveCount;
+            throw new IllegalArgumentException(errMsg);
+        }
+    }
     
-    private final ChartData getData() {
+    private ChartData getData() {
         return dataManager.getData(xScale, getMarkSize());
     }
 
@@ -70,15 +77,20 @@ public abstract class Trace {
         dataManager.setConfig(dataProcessingConfig);
     }
 
+    public void setXScale(Scale xScale) {
+        this.xScale = xScale;
+    }
+
+    public void setYScales(Scale... yScales) {
+        this.yScales = yScales;
+    }
+
     public Scale getXScale() {
         return xScale;
     }
 
-    public boolean isSingleYScale() {
-        if(yScales.length == 1) {
-            return true;
-        }
-        return false;
+    public Scale[] getYScales() {
+        return yScales;
     }
 
     public final Scale getYScale(int curveNumber) {
@@ -86,14 +98,6 @@ public abstract class Trace {
             return yScales[curveNumber];
         }
         return yScales[yScales.length - 1];
-    }
-
-    public void setXScale(Scale xScale) {
-        this.xScale = xScale;
-    }
-
-    public void setYScales(Scale... yScales) {
-        this.yScales = yScales;
     }
 
     public abstract int getMarkSize();

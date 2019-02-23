@@ -3,12 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.SwitchButton;
 import com.biorecorder.basechart.button.ButtonGroup;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.graphics.HorizontalAlign;
-import com.biorecorder.basechart.graphics.VerticalAlign;
-import com.biorecorder.basechart.traces.Trace;
-import com.biorecorder.basechart.traces.TraceCurve;
+import com.biorecorder.basechart.graphics.*;
 
 import java.util.*;
 

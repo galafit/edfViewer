@@ -1,6 +1,8 @@
 package com.biorecorder.basechart;
 
 
+import com.biorecorder.basechart.graphics.BRange;
+
 /**
  * Simplified analogue of data table which
  * in fact is simply a collection of columns
