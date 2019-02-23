@@ -54,6 +54,7 @@ public class TraceDataManager {
                 isEqualFrequencyGrouping = true;
                 break;
         }
+        processedData = null;
         groupedData = null;
     }
 

@@ -55,7 +55,6 @@ public abstract class Axis {
         this.config = axisConfig;
     }
 
-
     private void setDirty() {
         tickProvider = null;
         isDirty = true;
@@ -151,6 +150,10 @@ public abstract class Axis {
      * @return new scale with transformed domain
      */
     public Scale zoom(double zoomFactor) {
+        if(zoomFactor <= 0) {
+            String errMsg = "Zoom factor = " + zoomFactor + "  Expected > 0";
+            throw new IllegalArgumentException(errMsg);
+        }
         Scale zoomedScale = scale.copy();
 
         double start = getStart();
@@ -241,7 +244,7 @@ public abstract class Axis {
         return scale.invert(value);
     }
 
-    public double getLength() {
+    public double length() {
         return Math.abs(getEnd() - getStart());
     }
 
@@ -296,7 +299,7 @@ public abstract class Axis {
             double tickPixelInterval = Math.abs(scale(tickMinNext.getValue()) - scale(tickMin.getValue()));
             int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getValue()) - scale(tickMin.getValue())) / tickPixelInterval);
             if (tickIntervalCount / ticksSkipStep < 3) {
-                if (getLength() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+                if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
                     if (tickIntervalCount % 2 != 0) {
                         tickIntervalCount++;
                         tickMax = tickProvider.getNextTick();
@@ -413,7 +416,7 @@ public abstract class Axis {
         } else {
             int fontFactor = 4;
             double tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
-            int tickIntervalCount = (int) (getLength() / tickPixelInterval);
+            int tickIntervalCount = (int) (length() / tickPixelInterval);
 
             // ensure that number of tick intervals is sufficient to get the specified rounding uncertainty
             tickIntervalCount = Math.max(tickIntervalCount, tickIntervalCountByRoundingUncertainty);
@@ -473,7 +476,7 @@ public abstract class Axis {
         }
 
         if (tickIntervalCount / ticksSkipStep < 3) {
-            if (getLength() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+            if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
                 ticksSkipStep = tickIntervalCount / 2;
             } else { // 2 ticks
                 ticksSkipStep = tickIntervalCount;

@@ -366,6 +366,9 @@ public class Chart {
 
 
     public void draw(BCanvas canvas) {
+        if(fullArea == null) {
+            setArea(canvas.getBounds());
+        }
         if(fullArea.width == 0 || fullArea.height == 0) {
             return;
         }
@@ -476,10 +479,32 @@ public class Chart {
         return -1;
     }
 
+    private void checkStackNumber(int stack) {
+        int stackCount = yAxisList.size() / 2;
+        if(stack >= stackCount) {
+            String errMsg = "stack = " + stack + " Number of stacks: " + stackCount;
+            throw new IllegalArgumentException(errMsg);
+        }
+    }
+
 
     /**
      * =======================Base methods to interact==========================
      **/
+
+    public void setXAxisScale(int xIndex, Scale scale) {
+        xAxisList.get(xIndex).setScale(scale);
+    }
+
+    public void setStackWeight(int stack, int weight) {
+        checkStackNumber(stack);
+        stackWeights.set(stack, weight);
+        if(chartConfig.getMargin() != null) { // fixed margins
+            setYStartEnd(graphArea.y, graphArea.height);
+        } else {
+            setAreasDirty();
+        }
+    }
 
     public void addStack() {
         addStack(chartConfig.getDefaultStackWeight());
@@ -501,11 +526,11 @@ public class Chart {
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
 
-        // fixed margins
-        if(chartConfig.getMargin() != null) {
-            setMargin(chartConfig.getMargin());
+        if(chartConfig.getMargin() != null) { // fixed margins
+            setYStartEnd(graphArea.y, graphArea.height);
+        } else {
+            setAreasDirty();
         }
-        setAreasDirty();
     }
 
     /**
@@ -523,24 +548,23 @@ public class Chart {
         addTrace(trace, isSplit, false, false);
     }
 
-    public void addTrace(int stackNumber, Trace trace, boolean isSplit) {
-        addTrace(stackNumber, trace, isSplit, false, false);
+    public void addTrace(int stack, Trace trace, boolean isSplit) {
+        addTrace(stack, trace, isSplit, false, false);
     }
 
 
     /**
      * add trace to the stack with the given number
      */
-    public void addTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(int stack, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         if(dataProcessingConfig != null) {
             trace.setDataProcessingConfig(dataProcessingConfig);
         }
 
-        int stackCount = yAxisList.size() / 2;
-        if(stackCount == 0) {
+        if(yAxisList.size() == 0) {
             addStack(); // add stack if there is no stack
-            stackCount = 1;
         }
+        checkStackNumber(stack);
 
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
@@ -557,7 +581,7 @@ public class Chart {
             isLeftYAxis = false;
         }
         int xIndex = isBottomXAxis ? 0 : 1;
-        int yIndex = isLeftYAxis ? stackNumber * 2 : stackNumber * 2 + 1;
+        int yIndex = isLeftYAxis ? stack * 2 : stack * 2 + 1;
 
         trace.setXScale(xAxisList.get(xIndex).getScale());
         xAxisList.get(xIndex).setVisible(true);
@@ -566,7 +590,8 @@ public class Chart {
             yAxis.setVisible(true);
             trace.setYScales(yAxis.getScale());
         } else {
-            int availableStacks = stackCount - stackNumber;
+            int stackCount = yAxisList.size() / 2;
+            int availableStacks = stackCount - stack;
             if (trace.curveCount() > availableStacks) {
                 for (int i = 0; i < trace.curveCount() - availableStacks; i++) {
                     addStack();
@@ -901,187 +926,5 @@ public class Chart {
                 tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
             }
         }
-    }
-
-
-    /**
-     * Implement axis rounding when method:
-     * drawAxis or drawGrid or getWidth is invoked !!!
-     */
-    class AxisWrapper {
-        private Axis axis;
-        private boolean isVisible = false;
-        private boolean isRoundingEnabled = false;
-        // need this field to implement smooth zooming and translate when minMaxRounding enabled
-        private BRange rowMinMax; // without rounding
-        private boolean roundingDirty = true;
-
-
-        public AxisWrapper(Axis axis) {
-            this.axis = axis;
-            rowMinMax = new BRange(axis.getMin(), axis.getMax());
-        }
-
-        private void setRoundingDirty() {
-            roundingDirty = true;
-            axis.setMinMax(rowMinMax);
-        }
-
-        public void setRoundingAccuracyPct(int roundingAccuracyPct) {
-            axis.setRoundingAccuracyPct(roundingAccuracyPct);
-            setRoundingDirty();
-        }
-
-        private boolean isDirty() {
-            if (isRoundingEnabled && roundingDirty) {
-                return true;
-            }
-            return false;
-        }
-
-        public int length() {
-            return (int) axis.getLength();
-        }
-
-        public void setRoundingEnabled(boolean isRoundingEnabled) {
-            if(this.isRoundingEnabled != isRoundingEnabled) {
-                this.isRoundingEnabled = isRoundingEnabled;
-                setRoundingDirty();
-            }
-        }
-
-        public boolean isTickLabelOutside() {
-            return axis.isTickLabelOutside();
-        }
-
-        public void setTitle(String title) {
-            axis.setTitle(title);
-        }
-
-        public void setTickInterval(double tickInterval) {
-            axis.setTickInterval(tickInterval);
-            setRoundingDirty();
-        }
-
-        public void setMinorTickIntervalCount(int minorTickIntervalCount) {
-            axis.setMinorTickIntervalCount(minorTickIntervalCount);
-        }
-
-        public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
-            axis.setTickFormatInfo(tickFormatInfo);
-            setRoundingDirty();
-        }
-
-        public Scale getScale() {
-            return axis.getScale();
-        }
-
-
-        public void setConfig(AxisConfig config) {
-            axis.setConfig(config);
-            setRoundingDirty();
-        }
-
-
-        public Scale zoom(double zoomFactor) {
-            // to have smooth zooming we do it on row domain values instead of rounded ones !!!
-            setRoundingDirty();
-            return axis.zoom(zoomFactor);
-        }
-
-
-        public Scale translate(int translation) {
-            // to have smooth translating we do it on row domain values instead of rounded ones !!!
-            setRoundingDirty();
-            Scale scale = axis.translate(translation);
-            return scale;
-        }
-
-        /**
-         * return true if axis min or max actually will be changed
-         */
-        public boolean setMinMax(double min, double max) {
-            if (rowMinMax.getMin() != min || rowMinMax.getMax() != max) {
-                rowMinMax = new BRange(min, max);
-                setRoundingDirty();
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * return true if axis start or end actually changed
-         */
-        public boolean setStartEnd(int start, int end) {
-            if ((int) axis.getStart() != start || (int) axis.getEnd() != end) {
-                setRoundingDirty();
-                axis.setStartEnd(start, end);
-                return true;
-            }
-            return false;
-        }
-
-        public double getMin() {
-            return axis.getMin();
-        }
-
-        public double getMax() {
-            return axis.getMax();
-        }
-
-        public int getStart() {
-            return (int) axis.getStart();
-        }
-
-        public int getEnd() {
-            return (int) axis.getEnd();
-        }
-
-        public boolean isVisible() {
-            return isVisible;
-        }
-
-        /**
-         * this method DO AXIS ROUNDING
-         */
-        public int getWidth(BCanvas canvas) {
-            if (isVisible) {
-                if (isDirty()) {
-                    axis.roundMinMax(canvas);
-                    roundingDirty = false;
-                }
-                return axis.getWidth(canvas);
-            }
-            return 0;
-        }
-
-        /**
-         * this method DO AXIS ROUNDING
-         */
-        public void drawGrid(BCanvas canvas, BRectangle area) {
-            if (isDirty()) {
-                axis.roundMinMax(canvas);
-                roundingDirty = false;
-            }
-            axis.drawGrid(canvas, area);
-        }
-
-        /**
-         * this method DO AXIS ROUNDING
-         */
-        public void drawAxis(BCanvas canvas, BRectangle area) {
-            if(isVisible) {
-                if (isDirty()) {
-                    axis.roundMinMax(canvas);
-                    roundingDirty = false;
-                }
-                axis.drawAxis(canvas, area);
-            }
-        }
-
-        public void setVisible(boolean isVisible) {
-            this.isVisible = isVisible;
-        }
-
     }
 }

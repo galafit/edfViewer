@@ -10,6 +10,14 @@ public class BRectangle {
     public int height;
 
     public BRectangle(int x, int y, int width, int height) {
+        if(width < 0) {
+            String errMsg = "Width = " + width + " Expected >= 0";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(height < 0) {
+            String errMsg = "Height = " + height + " Expected >= 0";
+            throw new IllegalArgumentException(errMsg);
+        }
         this.x = x;
         this.y = y;
         this.width = width;
