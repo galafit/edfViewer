@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.graphics.BText;
+import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
 
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.ArrayList;
  */
 public class Title {
     private TitleConfig config;
-    private ArrayList<Text> lines = new ArrayList<Text>();
+    private ArrayList<BText> lines = new ArrayList<BText>();
     private BRectangle bounds = new BRectangle(0, 0, 0, 0);
 
 
@@ -41,7 +43,7 @@ public class Title {
                 if (x < area.x + margin.left()) {
                     x = area.x + margin.left();
                 }
-                lines.add(new Text(lineString, x, y + tm.ascent()));
+                lines.add(new BText(lineString, x, y + tm.ascent()));
 
                 y += getInterLineSpace() + tm.height();
                 stringBuilder = new StringBuilder(words[i]);
@@ -57,7 +59,7 @@ public class Title {
             x = area.x + margin.left();
         }
 
-        lines.add(new Text(lineString, x, y + tm.ascent()));
+        lines.add(new BText(lineString, x, y + tm.ascent()));
 
         int height = tm.height() * lines.size()
                 + getInterLineSpace() * (lines.size() - 1)
@@ -72,7 +74,7 @@ public class Title {
         }
         canvas.setTextStyle(config.getTextStyle());
         canvas.setColor(config.getTextColor());
-        for (Text string : lines) {
+        for (BText string : lines) {
             string.draw(canvas);
         }
     }

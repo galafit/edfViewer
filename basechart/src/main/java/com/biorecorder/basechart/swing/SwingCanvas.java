@@ -1,5 +1,7 @@
 package com.biorecorder.basechart.swing;
 
+import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.TextStyle;
 import com.biorecorder.basechart.graphics.*;
 
 import javax.swing.*;

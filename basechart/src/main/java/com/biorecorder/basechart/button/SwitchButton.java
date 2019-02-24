@@ -1,5 +1,8 @@
 package com.biorecorder.basechart.button;
 
+import com.biorecorder.basechart.Insets;
+import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.TextStyle;
 import com.biorecorder.basechart.graphics.*;
 
 /**

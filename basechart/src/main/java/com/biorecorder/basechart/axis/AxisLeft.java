@@ -1,6 +1,9 @@
 package com.biorecorder.basechart.axis;
 
 
+import com.biorecorder.basechart.graphics.BText;
+import com.biorecorder.basechart.graphics.TextAnchor;
+import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 
@@ -14,7 +17,7 @@ public class AxisLeft extends AxisVertical {
     }
 
     @Override
-    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
@@ -24,22 +27,23 @@ public class AxisLeft extends AxisVertical {
             int y = tickPosition;
             int x = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
             if(y + labelHeight/2 + 1 > getStart()) {
-                return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
+                y = tickPosition - space;
+                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
             }
             if(y - labelHeight/2 - 1 < getEnd()) {
-                return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
+                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
             }
-            return new Text(tickLabel, x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
+            return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
 
         } else {
-            int y = tickPosition - space;
+            int y = tickPosition;
             int x = axisWidth / 2  + labelPadding;
 
             if(y - labelHeight - 1 < getEnd()) {
-                y += space;
-                return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END , tm);
+                return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END , tm);
             }
-            return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
+            y = tickPosition - space;
+            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
         }
     }
 
@@ -66,11 +70,11 @@ public class AxisLeft extends AxisVertical {
     }
 
     @Override
-    protected Text createTitle(BCanvas canvas) {
+    protected BText createTitle(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
         int x = -getWidth(canvas);
         int y = (int)(getEnd() + getStart()) / 2;
-        return new Text(title, x, y, TextAnchor.END, TextAnchor.MIDDLE, -90, tm);
+        return new BText(title, x, y, TextAnchor.END, TextAnchor.MIDDLE, -90, tm);
     }
 
     @Override

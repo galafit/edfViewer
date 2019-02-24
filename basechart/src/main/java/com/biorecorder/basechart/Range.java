@@ -1,15 +1,15 @@
-package com.biorecorder.basechart.graphics;
+package com.biorecorder.basechart;
 
 import java.text.MessageFormat;
 
 /**
  * Created by galafit on 11/7/17.
  */
-public class BRange {
+public class Range {
     private double min;
     private double max;
 
-    public BRange(double min, double max) {
+    public Range(double min, double max) {
         if(Double.isInfinite(min)) {
             String errMsg = "Min is infinity";
             throw new IllegalArgumentException(errMsg);
@@ -34,7 +34,7 @@ public class BRange {
         return false;
     }
 
-    public boolean contains(BRange range) {
+    public boolean contains(Range range) {
         if(min <= range.getMin() && max >= range.getMax()) {
             return true;
         }
@@ -58,7 +58,7 @@ public class BRange {
      * min = min(range1.min, range2.min)
      * length = min(range1.length, range2.length) if both lengths > 0
      */
-    public static BRange min(BRange range1, BRange range2) {
+    public static Range min(Range range1, Range range2) {
         if(range1 == null && range2 == null) {
             return null;
         }
@@ -77,10 +77,10 @@ public class BRange {
         } else {
             length = Math.min(range1.length(), range2.length());
         }
-        return new BRange(min, min + length);
+        return new Range(min, min + length);
     }
 
-    public static BRange join(BRange range1, BRange range2) {
+    public static Range join(Range range1, Range range2) {
         if(range1 == null && range2 == null) {
             return null;
         }
@@ -90,10 +90,10 @@ public class BRange {
         if(range2 != null && range1 == null) {
             return range2;
         }
-        return new BRange(Math.min(range1.min, range2.min), Math.max(range1.max, range2.max));
+        return new Range(Math.min(range1.min, range2.min), Math.max(range1.max, range2.max));
     }
 
-    public static BRange intersect(BRange range1, BRange range2) {
+    public static Range intersect(Range range1, Range range2) {
         if(range1 == null && range2 == null) {
             return null;
         }
@@ -106,7 +106,7 @@ public class BRange {
         double min = Math.max(range1.min, range2.min);
         double max =  Math.min(range1.max, range2.max);
         if(min <= max) {
-            return new BRange(min, max);
+            return new Range(min, max);
         }
         return null;
     }

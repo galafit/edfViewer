@@ -1,5 +1,8 @@
 package com.biorecorder.basechart.axis;
 
+import com.biorecorder.basechart.graphics.BText;
+import com.biorecorder.basechart.graphics.TextAnchor;
+import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 
@@ -13,7 +16,7 @@ public class AxisTop extends AxisHorizontal {
     }
 
     @Override
-    protected Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
@@ -28,17 +31,17 @@ public class AxisTop extends AxisHorizontal {
             }
 
             if(x + charSize * tickLabel.length() > getEnd()) {
-                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
+                return new BText(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
             }
-            return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
+            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
 
         } else {
             int y = axisWidth / 2  + labelPadding;
             int x = tickPosition + space;
             if(x + charSize * tickLabel.length() > getEnd()) {
-                return new Text(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.END, tm);
+                return new BText(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.END, tm);
             }
-            return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
+            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
         }
     }
 
@@ -65,11 +68,11 @@ public class AxisTop extends AxisHorizontal {
     }
 
     @Override
-    protected Text createTitle(BCanvas canvas) {
+    protected BText createTitle(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
         int y = - getWidth(canvas) + tm.height();
         int x = (int)(getEnd() + getStart()) / 2;
-        return new Text(title, x, y, TextAnchor.MIDDLE, TextAnchor.START, tm);
+        return new BText(title, x, y, TextAnchor.MIDDLE, TextAnchor.START, tm);
     }
 
     @Override

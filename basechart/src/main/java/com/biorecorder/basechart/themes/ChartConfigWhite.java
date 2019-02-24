@@ -3,7 +3,7 @@ package com.biorecorder.basechart.themes;
 import com.biorecorder.basechart.ChartConfig;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.Insets;
+import com.biorecorder.basechart.Insets;
 
 /**
  * Created by galafit on 23/2/19.

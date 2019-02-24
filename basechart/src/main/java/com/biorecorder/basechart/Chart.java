@@ -97,10 +97,10 @@ public class Chart {
 
 
     // for all x axis
-    BRange getAllTracesFullMinMax() {
-        BRange minMax = null;
+    Range getAllTracesFullMinMax() {
+        Range minMax = null;
         for (int i = 0; i < traces.size(); i++) {
-            minMax = BRange.join(minMax, traces.get(i).getFullXMinMax());
+            minMax = Range.join(minMax, traces.get(i).getFullXMinMax());
         }
         return minMax;
     }
@@ -547,7 +547,6 @@ public class Chart {
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
-        System.out.println("is rounding "+ leftAxis.isRoundingEnabled());
 
         if(chartConfig.getMargin() != null) { // fixed margins
             setYStartEnd(graphArea.y, graphArea.height);
@@ -697,12 +696,12 @@ public class Chart {
         }
     }
 
-    public BRange getXMinMax(int xIndex) {
-        return new BRange(xAxisList.get(xIndex).getMin(), xAxisList.get(xIndex).getMax());
+    public Range getXMinMax(int xIndex) {
+        return new Range(xAxisList.get(xIndex).getMin(), xAxisList.get(xIndex).getMax());
     }
 
-    public BRange getYMinMax(int yAxisIndex) {
-        return new BRange(yAxisList.get(yAxisIndex).getMin(), yAxisList.get(yAxisIndex).getMax());
+    public Range getYMinMax(int yAxisIndex) {
+        return new Range(yAxisList.get(yAxisIndex).getMin(), yAxisList.get(yAxisIndex).getMax());
     }
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
@@ -746,10 +745,10 @@ public class Chart {
             return;
         }
 
-        BRange tracesXMinMax = null;
+        Range tracesXMinMax = null;
         for (Trace trace : traces) {
             if (trace.getXScale() == axis.getScale()) {
-                tracesXMinMax = BRange.join(tracesXMinMax, trace.getFullXMinMax());
+                tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax());
             }
         }
 
@@ -764,12 +763,12 @@ public class Chart {
             return;
         }
 
-        BRange tracesYMinMax = null;
+        Range tracesYMinMax = null;
         for (Trace trace : traces) {
             int curveCount = trace.curveCount();
             for (int i = 0; i < curveCount; i++) {
                 if (trace.getYScale(i) == axis.getScale()) {
-                    tracesYMinMax = BRange.join(tracesYMinMax, trace.curveYMinMax(i));
+                    tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(i));
                 }
             }
         }

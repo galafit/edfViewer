@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
 
 
@@ -35,7 +34,7 @@ public abstract class Trace {
         return nearest(x, y, curveNumber, getData());
     }
 
-    public BRange getFullXMinMax() {
+    public Range getFullXMinMax() {
        return dataManager.getFullXMinMax();
     }
 
@@ -69,7 +68,7 @@ public abstract class Trace {
         return curveYPosition(curveNumber, dataIndex, getData());
     }
 
-    public final BRange curveYMinMax(int curveNumber) {
+    public final Range curveYMinMax(int curveNumber) {
        return curveYMinMax(curveNumber, getData());
     }
 
@@ -139,7 +138,7 @@ public abstract class Trace {
     protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
     protected abstract NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data);
     protected abstract int curveCount(ChartData data);
-    protected abstract BRange curveYMinMax(int curveNumber, ChartData data);
+    protected abstract Range curveYMinMax(int curveNumber, ChartData data);
     protected abstract void draw(BCanvas canvas, ChartData data);
 
 }

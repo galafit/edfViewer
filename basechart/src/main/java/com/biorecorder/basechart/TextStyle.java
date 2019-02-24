@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.graphics;
+package com.biorecorder.basechart;
 
 
 /**

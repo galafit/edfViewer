@@ -1,7 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.graphics.BRange;
-
 /**
  * Created by galafit on 2/11/17.
  */
@@ -26,7 +24,7 @@ public class XYViewer {
         return data.getValue(index, yColumnNumber);
     }
 
-    public BRange getYMinMax() {
+    public Range getYMinMax() {
         return data.getColumnMinMax(yColumnNumber);
     }
 }

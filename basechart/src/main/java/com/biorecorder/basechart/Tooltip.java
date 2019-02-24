@@ -1,5 +1,6 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
 import com.sun.istack.internal.Nullable;
 

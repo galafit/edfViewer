@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
 import com.biorecorder.data.sequence.IntSequence;
@@ -109,8 +108,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public BRange getColumnMinMax(int columnNumber) {
-        return new BRange(dataFrame.getColumnMin(columnNumber), dataFrame.getColumnMax(columnNumber));
+    public Range getColumnMinMax(int columnNumber) {
+        return new Range(dataFrame.getColumnMin(columnNumber), dataFrame.getColumnMax(columnNumber));
     }
 
     @Override

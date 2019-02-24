@@ -4,20 +4,20 @@ package com.biorecorder.basechart.graphics;
 /**
  * Created by galafit on 10/9/17.
  */
-public class Text {
+public class BText {
     private String text;
     private int x;
     private int y;
     private int rotationAngle = 0;
     private int translationX, translationY;
 
-    public Text(String text, int x, int y) {
+    public BText(String text, int x, int y) {
         this.text = text;
         this.x = x;
         this.y = y;
     }
 
-    public Text(String string, int x, int y, TextAnchor hTextAnchor, TextAnchor vTextAnchor, TextMetric tm) {
+    public BText(String string, int x, int y, TextAnchor hTextAnchor, TextAnchor vTextAnchor, TextMetric tm) {
         if(string != null && !string.isEmpty()) {
             text = string;
             this.x = x;
@@ -37,7 +37,7 @@ public class Text {
         }
     }
 
-    public Text(String string, int x, int y, TextAnchor hTextAnchor, TextAnchor vTextAnchor, int rotationAngle, TextMetric tm) {
+    public BText(String string, int x, int y, TextAnchor hTextAnchor, TextAnchor vTextAnchor, int rotationAngle, TextMetric tm) {
         if(string != null && !string.isEmpty()) {
             text = string;
             this.rotationAngle = rotationAngle;

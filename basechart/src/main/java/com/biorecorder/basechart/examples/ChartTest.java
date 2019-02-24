@@ -28,7 +28,7 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 1600; i++) {
+        for (int i = 0; i <= 1600; i++) {
             yData1.add(i);
         }
 
@@ -79,8 +79,8 @@ public class ChartTest extends JFrame {
         Chart chart = new Chart();
 
         chart.addTrace(new LineTrace(xyData1), false, false, false);
-        chart.addStack();
-        chart.addTrace(new LineTrace(xyData2), false, false, false);
+        //chart.addStack();
+        //chart.addTrace(new LineTrace(xyData2), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData3), false, false, false);
 

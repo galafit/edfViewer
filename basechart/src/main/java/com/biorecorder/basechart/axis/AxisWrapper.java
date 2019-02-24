@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.graphics.BRange;
+import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
@@ -16,13 +16,13 @@ public class AxisWrapper {
     private boolean isVisible = false;
     private boolean isRoundingEnabled = false;
     // need this field to implement smooth zooming and translate when minMaxRounding enabled
-    private BRange rowMinMax; // without rounding
+    private Range rowMinMax; // without rounding
     private boolean roundingDirty = true;
 
 
     public AxisWrapper(Axis axis) {
         this.axis = axis;
-        rowMinMax = new BRange(axis.getMin(), axis.getMax());
+        rowMinMax = new Range(axis.getMin(), axis.getMax());
     }
 
     private void setRoundingDirty() {
@@ -125,7 +125,7 @@ public class AxisWrapper {
      */
     public boolean setMinMax(double min, double max) {
         if (rowMinMax.getMin() != min || rowMinMax.getMax() != max) {
-            rowMinMax = new BRange(min, max);
+            rowMinMax = new Range(min, max);
             setRoundingDirty();
             return true;
         }

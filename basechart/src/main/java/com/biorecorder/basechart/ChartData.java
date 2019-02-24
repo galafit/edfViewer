@@ -1,8 +1,6 @@
 package com.biorecorder.basechart;
 
 
-import com.biorecorder.basechart.graphics.BRange;
-
 /**
  * Simplified analogue of data table which
  * in fact is simply a collection of columns
@@ -28,7 +26,7 @@ public interface ChartData {
 
     String getLabel(int rowNumber, int columnNumber);
 
-    BRange getColumnMinMax(int columnNumber);
+    Range getColumnMinMax(int columnNumber);
 
     int bisect(int columnNumber, double value, int[] sorter);
 

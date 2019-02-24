@@ -2,7 +2,7 @@ package com.biorecorder.basechart.axis;
 
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BStroke;
-import com.biorecorder.basechart.graphics.TextStyle;
+import com.biorecorder.basechart.TextStyle;
 
 /**
  * Created by galafit on 5/9/17.
@@ -134,6 +134,7 @@ public class AxisConfig {
 
     public void setTickLabelOutside(boolean isTickLabelOutside) {
         this.isTickLabelOutside = isTickLabelOutside;
+
     }
 
     public void setTickMarkSize(int insideSize, int outsideSize) {

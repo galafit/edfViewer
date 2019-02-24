@@ -1,6 +1,8 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.graphics.BRange;
+import com.biorecorder.basechart.graphics.BText;
+import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
@@ -42,10 +44,10 @@ public abstract class Axis {
     private TickProvider tickProvider;
 
     private int ticksSkipStep = 1;
-    private List<Text> tickLabels = new ArrayList<>();
+    private List<BText> tickLabels = new ArrayList<>();
     private IntArrayList tickPositions = new IntArrayList();
     private IntArrayList minorTickPositions = new IntArrayList();
-    private Text titleText;
+    private BText titleText;
 
     private boolean isDirty = true;
     private int width = -1;
@@ -195,7 +197,7 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public void setMinMax(BRange minMax) {
+    public void setMinMax(Range minMax) {
         if (minMax.getMin() == getMin() && minMax.getMax() == getMax()) {
             return;
         }
@@ -371,7 +373,7 @@ public abstract class Axis {
         canvas.setStroke(new BStroke(1));
         canvas.setColor(config.getTickLabelColor());
         canvas.setTextStyle(config.getTickLabelTextStyle());
-        for (Text tickLabel : tickLabels) {
+        for (BText tickLabel : tickLabels) {
             tickLabel.draw(canvas);
         }
 
@@ -508,7 +510,6 @@ public abstract class Axis {
             int position = (int) Math.round(scale(currentTick.getValue()));
             // tick position
             tickPositions.add(position);
-
             // tick label
             tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), charSize));
             for (int i = 0; i < ticksSkipStep; i++) {
@@ -578,7 +579,7 @@ public abstract class Axis {
 
     protected abstract int labelSizeForOverlap(TextMetric tm, int angle, String label);
 
-    protected abstract Text tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize);
+    protected abstract BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize);
     protected abstract int charSize(TextMetric tm);
 
     protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
@@ -587,6 +588,6 @@ public abstract class Axis {
 
     protected abstract void drawAxisLine(BCanvas canvas);
 
-    protected abstract Text createTitle(BCanvas canvas);
+    protected abstract BText createTitle(BCanvas canvas);
 
 }

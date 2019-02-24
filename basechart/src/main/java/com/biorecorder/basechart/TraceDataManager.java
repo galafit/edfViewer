@@ -1,7 +1,6 @@
 package com.biorecorder.basechart;
 
 
-import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
 
 import java.util.Arrays;
@@ -67,7 +66,7 @@ public class TraceDataManager {
         traceData.setColumnName(columnNumber, name);
     }
 
-    public BRange getFullXMinMax() {
+    public Range getFullXMinMax() {
         if(traceData.columnCount() == 0) {
             return null;
         }
@@ -194,17 +193,17 @@ public class TraceDataManager {
         double xStart =  xScale.getRange()[0];
         double xEnd =  xScale.getRange()[1];
 
-        BRange dataMinMax = traceData.getColumnMinMax(0);
+        Range dataMinMax = traceData.getColumnMinMax(0);
         double dataStart = xScale.scale(dataMinMax.getMin());
         double dataEnd = xScale.scale(dataMinMax.getMax());
 
 
         int drawingAreaWidth = 0;
-        BRange intersection = BRange.intersect(new BRange(xStart, xEnd), new BRange(dataStart, dataEnd));
+        Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
         if(intersection != null) {
             drawingAreaWidth = (int)intersection.length();
         }
-        BRange minMax = BRange.intersect(dataMinMax, new BRange(xMin, xMax));
+        Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
         if(drawingAreaWidth == 0) {
             if(processingConfig.isCropEnabled()) {

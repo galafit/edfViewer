@@ -4,7 +4,6 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
-import com.biorecorder.basechart.graphics.BRange;
 import com.biorecorder.basechart.scales.Scale;
 
 /**
@@ -65,7 +64,7 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected BRange curveYMinMax(int curveNumber, ChartData data) {
+    protected Range curveYMinMax(int curveNumber, ChartData data) {
         return data.getColumnMinMax(curveNumber + 1);
     }
 
