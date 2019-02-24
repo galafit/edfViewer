@@ -291,6 +291,7 @@ public abstract class Axis {
         Tick tickMin = tickProvider.getLowerTick(min);
         Tick tickMinNext = tickProvider.getNextTick();
         Tick tickMax = tickProvider.getUpperTick(max);
+
         // Calculate required space to avoid labels overlapping.
         // Simplified algorithm assumes that the biggest tick rowCount are on the axis edges
         // (it is reasonable for all axis except the category one that at the moment not used)
@@ -319,6 +320,9 @@ public abstract class Axis {
                     }
                 }
             }
+        }
+        if(isRight()) {
+            System.out.println(tickMin.getValue()+ " rounding1 "+tickMax.getValue() + " "+ticksSkipStep);
         }
         scale.setDomain(tickMin.getValue(), tickMax.getValue());
     }
@@ -408,7 +412,6 @@ public abstract class Axis {
     }
 
     private void configTickProvider(TextMetric tm) {
-
         int tickIntervalCountByRoundingUncertainty = 0;
         if (roundingAccuracyPct > 0) {
             tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / roundingAccuracyPct);
@@ -506,10 +509,17 @@ public abstract class Axis {
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = null;
         int charSize = charSize(tm);
+        if(isRight()) {
+            System.out.println();
+            System.out.println(getMin()+ " min max "+getMax());
+        }
         while (currentTick.getValue() <= max) {
             int position = (int) Math.round(scale(currentTick.getValue()));
             // tick position
             tickPositions.add(position);
+            if(isRight()) {
+                System.out.println("tick "+currentTick.getValue());
+            }
             // tick label
             tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), charSize));
             for (int i = 0; i < ticksSkipStep; i++) {
@@ -571,6 +581,10 @@ public abstract class Axis {
         }
 
         isDirty = false;
+    }
+
+    protected boolean isRight() {
+        return false;
     }
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);

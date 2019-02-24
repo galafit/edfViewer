@@ -5,7 +5,6 @@ import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 import com.biorecorder.basechart.scroll.ScrollListener;
-import com.biorecorder.basechart.themes.ScrollableChartConfigWhite;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -14,33 +13,33 @@ import java.util.*;
 /**
  * Created by galafit on 3/10/17.
  */
-public class ScrollableChart {
+public class NavigableChart {
     private Chart chart;
-    private Chart preview;
+    private Chart navigator;
     private int previewXIndex = 0;
     private boolean isScrollDirty = true;
 
     private BRectangle fullArea;
     private BRectangle chartArea;
-    private BRectangle previewArea;
+    private BRectangle navigatorArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
 
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
-    private ScrollableChartConfig config;
+    private NavigableChartConfig config;
 
-    public ScrollableChart() {
-        this.config = new ScrollableChartConfigWhite();
+    public NavigableChart() {
+        this.config = new NavigableChartConfig();
         chart = new Chart(config.getChartConfig());
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
-        preview = new Chart(config.getPreviewConfig(), previewDataProcessingConfig);
+        navigator = new Chart(config.getNavigatorConfig(), previewDataProcessingConfig);
     }
 
     private void createScrolls() {
         updatePreviewMinMax();
-        Range previewXRange = preview.getXMinMax(previewXIndex);
+        Range previewXRange = navigator.getXMinMax(previewXIndex);
         double xMin = previewXRange.getMin();
         for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
@@ -86,14 +85,14 @@ public class ScrollableChart {
     }
 
     private void updatePreviewMinMax() {
-        Range previewMinMax = preview.getXMinMax(0);
+        Range previewMinMax = navigator.getXMinMax(0);
         Range chartMinMax = chart.getAllTracesFullMinMax();
         for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
             chartMinMax = Range.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
         if (!previewMinMax.contains(chartMinMax)) {
             previewMinMax = Range.join(previewMinMax, chartMinMax);
-            preview.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
+            navigator.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
         }
     }
 
@@ -134,16 +133,16 @@ public class ScrollableChart {
         canvas.setColor(config.getBackgroundColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
         Insets chartMargin = chart.getMargin(canvas);
-        Insets previewMargin = preview.getMargin(canvas);
+        Insets previewMargin = navigator.getMargin(canvas);
         if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
             int left = Math.max(chartMargin.left(), previewMargin.left());
             int right = Math.max(chartMargin.right(), previewMargin.right());
             chartMargin = new Insets(chartMargin.top(), right, chartMargin.bottom(), left);
             previewMargin = new Insets(previewMargin.top(), right, previewMargin.bottom(), left);
             chart.setMargin(chartMargin);
-            preview.setMargin(previewMargin);
+            navigator.setMargin(previewMargin);
         }
-        preview.draw(canvas);
+        navigator.draw(canvas);
 
         for (Integer key : scrolls.keySet()) {
             drawScroll(canvas, scrolls.get(key));
@@ -153,7 +152,7 @@ public class ScrollableChart {
     }
 
     private void drawScroll(BCanvas canvas, Scroll scroll) {
-        BRectangle area = preview.getGraphArea(canvas);
+        BRectangle area = navigator.getGraphArea(canvas);
         ScrollConfig scrollConfig = config.getScrollConfig();
         Range scrollRange = getScrollStartEnd(scroll);
 
@@ -178,7 +177,6 @@ public class ScrollableChart {
 
 
     private void calculateAndSetAreas() {
-
         int top = config.getSpacing().top();
         int bottom = config.getSpacing().bottom();
         int left = config.getSpacing().left();
@@ -188,32 +186,32 @@ public class ScrollableChart {
         int width = fullArea.width - left - right;
         int height = fullArea.height - top - bottom - gap;
 
-        int previewHeight;
-        if (preview.traceCount() == 0) {
-            previewHeight = config.getPreviewHeightMin();
+        int navigatorHeight;
+        if (navigator.traceCount() == 0) {
+            navigatorHeight = config.getNavigatorHeightMin();
         } else {
             int chartWeight = chart.getStacksSumWeight();
-            int previewWeight = preview.getStacksSumWeight();
-            previewHeight = height * previewWeight / (chartWeight + previewWeight);
+            int navigatorWeight = navigator.getStacksSumWeight();
+            navigatorHeight = height * navigatorWeight / (chartWeight + navigatorWeight);
 
         }
 
-        int chartHeight = height - previewHeight;
+        int chartHeight = height - navigatorHeight;
 
-        if (chartHeight <= 0 || previewHeight <= 0) {
+        if (chartHeight <= 0 || navigatorHeight <= 0) {
            // TODO think...
         }
 
         chartArea = new BRectangle(fullArea.x + left, fullArea.y + top, width, chartHeight);
-        previewArea = new BRectangle(fullArea.x + left, fullArea.y + fullArea.height - previewHeight, width, previewHeight);
+        navigatorArea = new BRectangle(fullArea.x + left, fullArea.y + fullArea.height - navigatorHeight, width, navigatorHeight);
 
         chart.setArea(chartArea);
-        preview.setArea(previewArea);
+        navigator.setArea(navigatorArea);
     }
 
 
     private Range getScrollStartEnd(Scroll scroll) {
-        Scale scale = preview.getXAxisScale(previewXIndex);
+        Scale scale = navigator.getXAxisScale(previewXIndex);
         double scrollStart = scale.scale(scroll.getValue());
         double scrollEnd = scale.scale(scroll.getValue() + scroll.getExtent());
         return new Range(scrollStart, scrollEnd);
@@ -240,7 +238,7 @@ public class ScrollableChart {
     public void update() {
         updatePreviewMinMax();
         for (Integer xAxis : scrolls.keySet()) {
-            scrolls.get(xAxis).setMinMax(preview.getXMinMax(previewXIndex));
+            scrolls.get(xAxis).setMinMax(navigator.getXMinMax(previewXIndex));
         }
 
         if (autoScrollEnable && scrollsAtTheEnd) {
@@ -252,7 +250,7 @@ public class ScrollableChart {
         if (chart.hoverOff()) {
             return true;
         }
-        if (preview.hoverOff()) {
+        if (navigator.hoverOff()) {
             return true;
         }
         return false;
@@ -262,7 +260,7 @@ public class ScrollableChart {
         if(chart.hoverOn(x, y)) {
             return true;
         }
-        if(preview.hoverOn(x, y)) {
+        if(navigator.hoverOn(x, y)) {
             return true;
         }
 
@@ -271,7 +269,7 @@ public class ScrollableChart {
 
 
     public boolean isScrollContains(int x, int y) {
-        if(!previewArea.contains(x, y)) {
+        if(!navigatorArea.contains(x, y)) {
             return false;
         }
 
@@ -299,12 +297,12 @@ public class ScrollableChart {
      * @return true if scrollValue was changed and false if newValue = current scroll value
      */
     public boolean setScrollsPosition(double x, double y) {
-        if (previewArea == null) {
+        if (navigatorArea == null) {
             return false;
         }
         boolean scrollsMoved = false;
         for (Integer key : scrolls.keySet()) {
-            Scale scale = preview.getXAxisScale(previewXIndex);
+            Scale scale = navigator.getXAxisScale(previewXIndex);
             double value = scale.invert(x);
             scrollsMoved = scrolls.get(key).setValue(value) || scrollsMoved;
         }
@@ -313,12 +311,12 @@ public class ScrollableChart {
 
     public boolean translateScrolls(double dx) {
         Double maxScrollsPosition = null;
-        Scale scale = preview.getXAxisScale(previewXIndex);
+        Scale scale = navigator.getXAxisScale(previewXIndex);
         for (Integer key : scrolls.keySet()) {
             double scrollPosition = scale.scale(scrolls.get(key).getValue());
             maxScrollsPosition = (maxScrollsPosition == null) ? scrollPosition : Math.max(maxScrollsPosition, scrollPosition);
         }
-        return setScrollsPosition(maxScrollsPosition + dx, previewArea.y);
+        return setScrollsPosition(maxScrollsPosition + dx, navigatorArea.y);
     }
 
 
@@ -356,13 +354,13 @@ public class ScrollableChart {
         if(chart.selectCurve(x, y)) {
             return true;
         } else {
-            return preview.selectCurve(x, y);
+            return navigator.selectCurve(x, y);
         }
     }
 
 
     public Range getXMinMax() {
-        return preview.getXMinMax(0);
+        return navigator.getXMinMax(0);
     }
 
     /**
@@ -454,66 +452,66 @@ public class ScrollableChart {
 
 
     /**
-     * =======================Base methods to interact with preview==========================
+     * =======================Base methods to interact with navigator==========================
      **/
 
-    public boolean isPreviewContains(BPoint point) {
-        if(point != null && previewArea.contains(point.getX(), point.getY())) {
+    public boolean isNavigatorContains(BPoint point) {
+        if(point != null && navigatorArea.contains(point.getX(), point.getY())) {
             return true;
         }
         return false;
     }
 
-    public void addPreviewStack() {
-        preview.addStack();
+    public void addNavigatorStack() {
+        navigator.addStack();
     }
 
-    public void addPreviewStack(int weight) {
-        preview.addStack(weight);
+    public void addNavigatorStack(int weight) {
+        navigator.addStack(weight);
     }
 
-    public void addPreviewTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        preview.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    public void addNavigatorTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        navigator.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
-    public void addPreviewTrace(Trace trace, boolean isSplit) {
-        preview.addTrace(trace, isSplit);
+    public void addNavigatorTrace(Trace trace, boolean isSplit) {
+        navigator.addTrace(trace, isSplit);
     }
 
-    public void addPreviewTrace(int stackNumber, Trace trace, boolean isSplit) {
-        preview.addTrace(stackNumber, trace, isSplit);
+    public void addNavigatorTrace(int stackNumber, Trace trace, boolean isSplit) {
+        navigator.addTrace(stackNumber, trace, isSplit);
     }
 
-    public void addPreviewTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        preview.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    public void addNavigatorTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        navigator.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
-    public void removePreviewTrace(int traceNumber) {
-        preview.removeTrace(traceNumber);
+    public void removeNavigatorTrace(int traceNumber) {
+        navigator.removeTrace(traceNumber);
     }
 
-    public int previewTraceCount() {
-        return preview.traceCount();
+    public int navigatorTraceCount() {
+        return navigator.traceCount();
     }
 
 
-    public int previewYAxisCount() {
-        return preview.yAxisCount();
+    public int navigatorYAxisCount() {
+        return navigator.yAxisCount();
     }
 
-    public int getPreviewYIndex(@Nullable BPoint point) {
-        return preview.getYIndex(point);
+    public int getNavigatorYIndex(@Nullable BPoint point) {
+        return navigator.getYIndex(point);
     }
 
-    public void zoomPreviewY(int yAxisIndex, double zoomFactor) {
-        preview.zoomY(yAxisIndex, zoomFactor);
+    public void zoomNavigatorY(int yAxisIndex, double zoomFactor) {
+        navigator.zoomY(yAxisIndex, zoomFactor);
     }
 
-    public void translatePreviewY(int yAxisIndex, int dy) {
-        preview.translateY(yAxisIndex, dy);
+    public void translateNavigatorY(int yAxisIndex, int dy) {
+        navigator.translateY(yAxisIndex, dy);
 
     }
-    public void autoScalePreviewY(int yAxisIndex) {
-        preview.autoScaleY(yAxisIndex);
+    public void autoScaleNavigatorY(int yAxisIndex) {
+        navigator.autoScaleY(yAxisIndex);
     }
 }

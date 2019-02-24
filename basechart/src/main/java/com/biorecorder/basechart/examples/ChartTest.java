@@ -85,7 +85,7 @@ public class ChartTest extends JFrame {
         chart.addTrace(new LineTrace(xyData3), false, false, false);
 
         chart.setXMinMax(0, 0, 200);
-        chart.setYMinMax(0, -100, 300);
+        chart.setYMinMax(1, - 0.256, 0.76);
 
         chartPanel = new ChartPanel(chart);
 

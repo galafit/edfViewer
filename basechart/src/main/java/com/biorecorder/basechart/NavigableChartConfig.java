@@ -1,0 +1,95 @@
+package com.biorecorder.basechart;
+
+import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.scroll.ScrollConfig;
+
+/**
+ * Created by galafit on 31/8/18.
+ */
+public class NavigableChartConfig {
+    private BColor backgroundColor = BColor.WHITE;
+    private int gap = 0; // between Chart and Preview px
+    private Insets spacing = new Insets(0);
+    private int navigatorHeightMin = 30; // px
+
+    private ChartConfig chartConfig;
+    private ChartConfig navigatorConfig;
+    private ScrollConfig scrollConfig;
+
+    public NavigableChartConfig() {
+        BColor navigatorBgColor = new BColor(230, 230, 230);
+        BColor navigatorMarginColor = navigatorBgColor;
+
+        BColor scrollColor = new BColor(30, 30, 30);;
+
+        chartConfig = new ChartConfig();
+        navigatorConfig = new ChartConfig();
+        scrollConfig = new ScrollConfig();
+
+        chartConfig.setMarginColor(chartConfig.getBackgroundColor());
+        chartConfig.getRightAxisConfig().setTickLabelOutside(false);
+        chartConfig.getLeftAxisConfig().setTickLabelOutside(false);
+        chartConfig.setLeftAxisPrimary(false);
+
+        navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.setLeftAxisPrimary(false);
+        navigatorConfig.setBackgroundColor(navigatorBgColor);
+        navigatorConfig.setMarginColor(navigatorMarginColor);
+        navigatorConfig.setDefaultStackWeight(2);
+        navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
+
+        scrollConfig.setColor(scrollColor);
+    }
+
+    public NavigableChartConfig(ChartConfig chartConfig, ChartConfig navigatorConfig, ScrollConfig scrollConfig) {
+        this.chartConfig = chartConfig;
+        this.navigatorConfig = navigatorConfig;
+        this.scrollConfig = scrollConfig;
+    }
+
+
+    public ChartConfig getChartConfig() {
+        return chartConfig;
+    }
+
+    public ChartConfig getNavigatorConfig() {
+        return navigatorConfig;
+    }
+
+    public ScrollConfig getScrollConfig() {
+        return scrollConfig;
+    }
+
+    public BColor getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(BColor backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public int getGap() {
+        return gap;
+    }
+
+    public void setGap(int gap) {
+        this.gap = gap;
+    }
+
+    public Insets getSpacing() {
+        return spacing;
+    }
+
+    public void setSpacing(Insets spacing) {
+        this.spacing = spacing;
+    }
+
+    public int getNavigatorHeightMin() {
+        return navigatorHeightMin;
+    }
+
+    public void setNavigatorHeightMin(int navigatorHeightMin) {
+        this.navigatorHeightMin = navigatorHeightMin;
+    }
+}

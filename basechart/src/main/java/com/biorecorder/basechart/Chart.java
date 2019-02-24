@@ -163,7 +163,7 @@ public class Chart {
         if(chartConfig.getSpacing() != null) {
             return chartConfig.getSpacing();
         }
-        int minSpacing = 1;
+        int minSpacing = 0;
         int spacingTop = minSpacing;
         int spacingBottom = minSpacing;
         int spacingLeft = minSpacing;

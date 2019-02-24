@@ -7,12 +7,12 @@ import com.biorecorder.basechart.graphics.BRectangle;
 /**
  * Created by galafit on 23/9/18.
  */
-public class InteractiveScrollableChart implements InteractiveDrawable {
-    private final ScrollableChart chart;
+public class InteractiveNavigableChart implements InteractiveDrawable {
+    private final NavigableChart chart;
     private BPoint lastStartPoint;
     private boolean isScrollMoving;
 
-    public InteractiveScrollableChart(ScrollableChart chart) {
+    public InteractiveNavigableChart(NavigableChart chart) {
         this.chart = chart;
     }
 
@@ -26,7 +26,7 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         if(chart.selectTrace(x, y)) {
             return true;
         } else {
-            if(chart.isPreviewContains(new BPoint(x, y)))  {
+            if(chart.isNavigatorContains(new BPoint(x, y)))  {
                 return chart.setScrollsPosition(x, y);
             }
             return false;
@@ -53,12 +53,12 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
         }
 
         // do the same with preview...
-        int previewYIndex = chart.getPreviewYIndex(null);
+        int previewYIndex = chart.getNavigatorYIndex(null);
         if (previewYIndex >= 0) {
-            chart.autoScalePreviewY(previewYIndex);
+            chart.autoScaleNavigatorY(previewYIndex);
         } else {
-            for (int i = 0; i < chart.previewYAxisCount(); i++) {
-                chart.autoScalePreviewY(i);
+            for (int i = 0; i < chart.navigatorYAxisCount(); i++) {
+                chart.autoScaleNavigatorY(i);
             }
         }
         return true;
@@ -102,9 +102,9 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             return true;
         }
 
-        yAxis = chart.getPreviewYIndex(startPoint);
+        yAxis = chart.getNavigatorYIndex(startPoint);
         if(yAxis >= 0) {
-            chart.zoomPreviewY(yAxis, scaleFactor);
+            chart.zoomNavigatorY(yAxis, scaleFactor);
             return true;
         }
         return false;
@@ -156,9 +156,9 @@ public class InteractiveScrollableChart implements InteractiveDrawable {
             return true;
         }
 
-        yAxis = chart.getPreviewYIndex(startPoint);
+        yAxis = chart.getNavigatorYIndex(startPoint);
         if(yAxis >= 0) {
-            chart.translatePreviewY(yAxis, dy);
+            chart.translateNavigatorY(yAxis, dy);
             return true;
         }
         return false;

@@ -214,14 +214,15 @@ public class LinearScale implements Scale {
 
         @Override
         public Tick getUpperTick(double value) {
-            lastTickDigits = (int) Math.ceil (value / Math.pow(10, tickPower));
+            lastTickDigits = ((int) Math.ceil (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
             double tickValue = lastTickDigits * Math.pow(10, tickPower);
             return new Tick(tickValue, format(tickValue));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            lastTickDigits = (int) Math.floor (value / Math.pow(10, tickPower));
+            lastTickDigits = ((int) Math.floor (value /(tickDigits *  Math.pow(10, tickPower)))) * tickDigits;
+            System.out.println("tick interval " + tickDigits *  Math.pow(10, tickPower));
             double tickValue = lastTickDigits * Math.pow(10, tickPower);
             return new Tick(tickValue, format(tickValue));
         }

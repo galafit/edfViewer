@@ -8,58 +8,58 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
-    protected BColor[] traceColors;
+    private BColor[] traceColors;
 
-    protected BColor backgroundColor;
-    protected BColor marginColor;
+    private BColor backgroundColor;
+    private BColor marginColor;
 
-    protected TitleConfig titleConfig = new TitleConfig();
-    protected LegendConfig legendConfig = new LegendConfig();
-    protected TooltipConfig tooltipConfig = new TooltipConfig();
-    protected CrosshairConfig crossHairConfig = new CrosshairConfig();
+    private TitleConfig titleConfig = new TitleConfig();
+    private LegendConfig legendConfig = new LegendConfig();
+    private TooltipConfig tooltipConfig = new TooltipConfig();
+    private CrosshairConfig crossHairConfig = new CrosshairConfig();
 
-    protected Insets margin;
-    protected Insets spacing;
-    protected int autoSpacing = 5; //px taken into account only if spacing is null
+    private Insets margin;
+    private Insets spacing;
+    private int autoSpacing = 5; //px taken into account only if spacing is null
 
-    protected AxisConfig leftAxisConfig = new AxisConfig();
-    protected AxisConfig rightAxisConfig = new AxisConfig();
-    protected AxisConfig bottomAxisConfig = new AxisConfig();
-    protected AxisConfig topAxisConfig = new AxisConfig();
+    private AxisConfig leftAxisConfig = new AxisConfig();
+    private AxisConfig rightAxisConfig = new AxisConfig();
+    private AxisConfig bottomAxisConfig = new AxisConfig();
+    private AxisConfig topAxisConfig = new AxisConfig();
 
-    protected boolean isMultiCurveTooltip = true;
+    private boolean isMultiCurveTooltip = true;
 
-    protected boolean isLeftAxisPrimary = false;
-    protected boolean isBottomAxisPrimary = true;
+    private boolean isLeftAxisPrimary = false;
+    private boolean isBottomAxisPrimary = true;
 
-    protected int defaultStackWeight = 4;
-    protected int axisRoundingAccuracyPctIfRoundingEnabled = 5;
-    protected int axisRoundingAccuracyPctIfRoundingDisabled = 20;
-    protected boolean isYAxisRoundingEnabled = true;
-    protected boolean isXAxisRoundingEnabled = false;
+    private int defaultStackWeight = 4;
+    private int axisRoundingAccuracyPctIfRoundingEnabled = 5;
+    private int axisRoundingAccuracyPctIfRoundingDisabled = 20;
+    private boolean isYAxisRoundingEnabled = true;
+    private boolean isXAxisRoundingEnabled = false;
 
     public ChartConfig() {
-        final BColor CYAN = new BColor(0, 200, 220);
-        final BColor BLUE = new BColor(100, 120, 250);
-        final BColor MAGENTA = new BColor(165, 80, 220);
-        final BColor GREEN = new BColor(110, 250, 110);
-        final BColor RED = new BColor(250, 64, 82);
-        final BColor ORANGE = new BColor(200, 80, 0);//new BColor(173, 105, 49);
-        final BColor YELLOW = new BColor(252, 177, 48);
-        final BColor GRAY = new BColor(180, 180, 200);
-        final BColor PINK = new BColor(255, 50, 200);//new BColor(255, 60, 130); //new BColor(250, 0, 200);
-        final BColor GOLD = new BColor(190, 140, 110);
+        final BColor BLUE = new BColor(0, 130, 230);
+        final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
+        final BColor GREEN_DARK = new BColor(0, 130, 0);
+        final BColor MAGENTA = new BColor(120, 50, 185);
+        final BColor RED = new BColor(250, 60, 90); //new BColor(230, 10, 60);
+        final BColor BLUE_DARK = new BColor(30, 30, 180);
+        final BColor PINK = new BColor(230, 0, 230);
+        final BColor RED_DARK = new BColor(180, 0, 0);
+        final BColor CYAN = new BColor(0, 160, 160);
+        final BColor GRAY = new BColor(120, 56, 7); //new BColor(60, 70, 100);
 
-        final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
+        //final BColor[] colors = {BLUE, ORANGE, RED, GREEN_DARK, MAGENTA, BLUE_DARK, PINK, RED_DARK, CYAN, GRAY};
+        final BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
+        BColor bgColor = new BColor(245, 245, 245);
+        BColor marginBgColor = bgColor;
 
-        BColor bgColor = new BColor(18, 15, 18);//BColor.BLACK;
-        BColor marginBgColor = BColor.BLACK;//chartBgColor;
-        BColor titleColor = new BColor(160, 140, 110);
-
+        BColor titleColor = new BColor(70, 70, 70);
         BColor axisColor = titleColor;
-        BColor gridColor = new BColor(70, 65, 45);
+        BColor gridColor = new BColor(214, 214, 214);
 
-        BColor crosshairColor = new BColor(245, 226, 208); //new BColor(201, 182, 163); //new BColor(252, 242, 227);
+        BColor crosshairColor = new BColor(30, 30, 30);
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
@@ -68,7 +68,7 @@ public class ChartConfig {
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(4, 0);
-
+        
         traceColors = colors;
         backgroundColor = bgColor;
         marginColor = marginBgColor;

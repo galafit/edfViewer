@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.examples;
 
-import com.biorecorder.basechart.ScrollableChart;
+import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.data.list.IntArrayList;
@@ -76,7 +76,7 @@ public class MainFrame extends JFrame {
         XYData bandData = new XYData();
         bandData.setYData(bandYData);*/
 
-        ScrollableChart chart = new ScrollableChart();
+        NavigableChart chart = new NavigableChart();
 
         chart.addChartStack();
 
@@ -105,9 +105,9 @@ public class MainFrame extends JFrame {
 
         // config.updatePreviewMinMax(new Range(0, 1000));
         // config.addScroll(0, 100);
-      //  config.addPreviewTrace(new LineTraceConfig(), xyData3, "PREV", "kg");
-       // config.addPreviewTrace(new LineTraceConfig(), xyData2);
-       // config.addPreviewTrace(new LineTraceConfig(), xyData1);
+      //  config.addNavigatorTrace(new LineTraceConfig(), xyData3, "PREV", "kg");
+       // config.addNavigatorTrace(new LineTraceConfig(), xyData2);
+       // config.addNavigatorTrace(new LineTraceConfig(), xyData1);
 
         //config.addPreviewGroupingInterval(1000);
 

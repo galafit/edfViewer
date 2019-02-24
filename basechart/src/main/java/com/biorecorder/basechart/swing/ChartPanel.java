@@ -29,8 +29,8 @@ public class ChartPanel extends JPanel implements KeyListener {
         init();
     }
 
-    public ChartPanel(ScrollableChart chart1) {
-        this.chart = new InteractiveScrollableChart(chart1);
+    public ChartPanel(NavigableChart chart1) {
+        this.chart = new InteractiveNavigableChart(chart1);
         init();
     }
 

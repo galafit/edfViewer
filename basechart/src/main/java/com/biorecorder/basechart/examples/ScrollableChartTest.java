@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.examples;
 
-import com.biorecorder.basechart.ScrollableChart;
+import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
@@ -49,15 +49,15 @@ public class ScrollableChartTest extends JFrame{
         xyData2.addColumn(xData);
         xyData2.addColumn(yData2);
 
-        ScrollableChart chart = new ScrollableChart();
+        NavigableChart chart = new NavigableChart();
         chart.addChartTrace(new LineTrace(xyData1), false , true, false);
        // chart.addChartTrace(0, new LineTrace(xyData2), false , true, false);
        // chart.addChartStack();
         //chart.addChartTrace(new LineTrace(xyData1), false , true, false);
 
 
-        chart.addPreviewTrace( new LineTrace(xyData1), false, false, false);
-       // chart.addPreviewTrace(new LineTrace(xyData2), false, false, false);
+        chart.addNavigatorTrace( new LineTrace(xyData1), false, false, false);
+       // chart.addNavigatorTrace(new LineTrace(xyData2), false, false, false);
 
         chartPanel = new ChartPanel(chart);
 
