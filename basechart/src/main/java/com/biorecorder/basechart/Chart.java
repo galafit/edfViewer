@@ -547,6 +547,7 @@ public class Chart {
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
+        System.out.println("is rounding "+ leftAxis.isRoundingEnabled());
 
         if(chartConfig.getMargin() != null) { // fixed margins
             setYStartEnd(graphArea.y, graphArea.height);

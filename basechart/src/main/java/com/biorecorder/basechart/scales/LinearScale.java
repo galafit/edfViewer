@@ -125,98 +125,29 @@ public class LinearScale implements Scale {
 
 
     class LinearTickProvider implements TickProvider {
-        private double tickInterval = 1;
         int tickDigits;
         int tickPower;
         private TickFormatInfo labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
-        private Tick lastTick;
+        private int lastTickDigits;
 
         public LinearTickProvider(TickFormatInfo labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
         }
 
         public void setTickInterval(double tickInterval) {
-            this.tickInterval = tickInterval;
             NormalizedNumber normalizedInterval = new NormalizedNumber(tickInterval);
             tickPower = normalizedInterval.getPowerOfLastSignificantDigit();
             tickDigits = (int) (normalizedInterval.getMantissa() * Math.pow(10, tickPower));
             labelFormat = getNumberFormat(tickPower, labelFormatInfo);
         }
 
-        public void setTickIntervalCount(int tickIntervalCount) {
-            NormalizedNumber normalizedInterval = getRoundTickInterval(tickIntervalCount);
-            tickInterval = normalizedInterval.getValue();
-            tickDigits = (int) normalizedInterval.getMantissa();
-            tickPower = normalizedInterval.getPower();
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
-        }
-
-        @Override
-        public void increaseTickInterval(int increaseFactor) {
-            tickInterval *= increaseFactor;
-            tickDigits *= increaseFactor;
-            while (tickDigits % 10 == 0) {
-                tickDigits /= 10;
-                tickPower++;
-            }
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
-        }
-
-        @Override
-        public Tick getNextTick() {
-            if (lastTick == null) {
-                double min = domain[0];
-                lastTick = getLowerTick(min);
-            } else {
-                double tickValue = lastTick.getValue() + tickInterval;
-                lastTick = new Tick(tickValue, format(tickValue));
-            }
-            return lastTick;
-        }
-
-        @Override
-        public Tick getPreviousTick() {
-            if (lastTick == null) {
-                double min = domain[0];
-                lastTick = getLowerTick(min);
-            } else {
-                double tickValue = lastTick.getValue() - tickInterval;
-                lastTick = new Tick(tickValue, format(tickValue));
-            }
-            return lastTick;
-        }
-
-        @Override
-        public Tick getUpperTick(double value) {
-            double tickValue = Math.ceil(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, format(tickValue));
-            return lastTick;
-        }
-
-        @Override
-        public Tick getLowerTick(double value) {
-            double tickValue = Math.floor(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, format(tickValue));
-            return lastTick;
-        }
-
-
-
-        public String format(double value) {
-            String formattedValue = labelFormat.format(value);
-            // truncate the negative sign when the result returns zero: -0.0 and so on
-            formattedValue = formattedValue.replaceAll("^-(?=0(.0*)?$)", "");
-            return formattedValue;
-        }
-
-
         /**
          * Calculates round Tick Interval
          * that is  multiples of 2, 5 or 10.
          * FirstDigit is in {1,2,5,10};
          */
-        private NormalizedNumber getRoundTickInterval(int tickIntervalCount) {
+        public void setTickIntervalCount(int tickIntervalCount) {
             if (tickIntervalCount < 1) {
                 String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
                 throw new IllegalArgumentException(errMsg);
@@ -253,7 +184,56 @@ public class LinearScale implements Scale {
                     power++;
                     break;
             }
-            return new NormalizedNumber(firstDigit, power);
+            tickPower = power;
+            tickDigits = firstDigit;
+            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
         }
+
+        @Override
+        public void increaseTickInterval(int increaseFactor) {
+            tickDigits *= increaseFactor;
+            while (tickDigits % 10 == 0) {
+                tickDigits /= 10;
+                tickPower++;
+            }
+            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
+        }
+
+        @Override
+        public Tick getNextTick() {
+            lastTickDigits += tickDigits;
+            double tickValue = lastTickDigits * Math.pow(10, tickPower);
+            return new Tick(tickValue, format(tickValue));
+        }
+
+        @Override
+        public Tick getPreviousTick() {
+            lastTickDigits -= tickDigits;
+            double tickValue = lastTickDigits * Math.pow(10, tickPower);
+            return new Tick(tickValue, format(tickValue));        }
+
+        @Override
+        public Tick getUpperTick(double value) {
+            lastTickDigits = (int) Math.ceil (value / Math.pow(10, tickPower));
+            double tickValue = lastTickDigits * Math.pow(10, tickPower);
+            return new Tick(tickValue, format(tickValue));
+        }
+
+        @Override
+        public Tick getLowerTick(double value) {
+            lastTickDigits = (int) Math.floor (value / Math.pow(10, tickPower));
+            double tickValue = lastTickDigits * Math.pow(10, tickPower);
+            return new Tick(tickValue, format(tickValue));
+        }
+
+
+
+        public String format(double value) {
+            String formattedValue = labelFormat.format(value);
+            // truncate the negative sign when the result returns zero: -0.0 and so on
+            formattedValue = formattedValue.replaceAll("^-(?=0(.0*)?$)", "");
+            return formattedValue;
+        }
+
     }
 }

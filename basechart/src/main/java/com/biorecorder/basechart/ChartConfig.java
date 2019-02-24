@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.HorizontalAlign;
 import com.biorecorder.basechart.graphics.Insets;
 import com.sun.istack.internal.Nullable;
 
@@ -28,9 +29,10 @@ public class ChartConfig {
     protected AxisConfig bottomAxisConfig = new AxisConfig();
     protected AxisConfig topAxisConfig = new AxisConfig();
 
+    protected boolean isMultiCurveTooltip = true;
+
     protected boolean isLeftAxisPrimary = true;
     protected boolean isBottomAxisPrimary = true;
-    protected boolean isMultiCurveTooltip = true;
 
     protected int defaultStackWeight = 4;
     protected int axisRoundingAccuracyPctIfRoundingEnabled = 5;

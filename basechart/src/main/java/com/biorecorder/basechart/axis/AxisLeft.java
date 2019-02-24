@@ -34,9 +34,10 @@ public class AxisLeft extends AxisVertical {
         } else {
             int y = tickPosition - space;
             int x = axisWidth / 2  + labelPadding;
-            if(y - labelHeight/2 - 1 < getEnd()) {
+
+            if(y - labelHeight - 1 < getEnd()) {
                 y += space;
-                return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
+                return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.END , tm);
             }
             return new Text(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
         }

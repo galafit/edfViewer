@@ -78,13 +78,13 @@ public class ChartTest extends JFrame {
 
         Chart chart = new Chart();
 
-        chart.addTrace(new LineTrace(xyData1), false, true, false);
+        chart.addTrace(new LineTrace(xyData1), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData2), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData3), false, false, false);
 
-        chart.setXMinMax(0, -100, 200);
+        chart.setXMinMax(0, 0, 200);
         chart.setYMinMax(0, -100, 300);
 
         chartPanel = new ChartPanel(chart);

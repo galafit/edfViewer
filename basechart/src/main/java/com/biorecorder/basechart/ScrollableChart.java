@@ -17,10 +17,8 @@ import java.util.*;
 public class ScrollableChart {
     private Chart chart;
     private Chart preview;
-    private int defaultPreviewHeight = 30; // px
     private int previewXIndex = 0;
     private boolean isScrollDirty = true;
-
 
     private BRectangle fullArea;
     private BRectangle chartArea;
@@ -28,19 +26,16 @@ public class ScrollableChart {
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
 
-    private int gap = 0; // between Chart and Preview px
-    private Insets spacing = new Insets(0, 0, 0, 0);
-
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
-    private ScrollableChartConfig theme;
+    private ScrollableChartConfig config;
 
     public ScrollableChart() {
-        this.theme = new ScrollableChartConfigWhite();
-        chart = new Chart(theme.getChartConfig());
+        this.config = new ScrollableChartConfigWhite();
+        chart = new Chart(config.getChartConfig());
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
-        preview = new Chart(theme.getPreviewConfig(), previewDataProcessingConfig);
+        preview = new Chart(config.getPreviewConfig(), previewDataProcessingConfig);
     }
 
     private void createScrolls() {
@@ -129,10 +124,15 @@ public class ScrollableChart {
     }
 
     public void draw(BCanvas canvas) {
+        if(fullArea == null) {
+            setArea(canvas.getBounds());
+        }
         if(isScrollDirty) {
             createScrolls();
             isScrollDirty = false;
         }
+        canvas.setColor(config.getBackgroundColor());
+        canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
         Insets chartMargin = chart.getMargin(canvas);
         Insets previewMargin = preview.getMargin(canvas);
         if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
@@ -154,7 +154,7 @@ public class ScrollableChart {
 
     private void drawScroll(BCanvas canvas, Scroll scroll) {
         BRectangle area = preview.getGraphArea(canvas);
-        ScrollConfig scrollConfig = theme.getScrollConfig();
+        ScrollConfig scrollConfig = config.getScrollConfig();
         BRange scrollRange = getScrollStartEnd(scroll);
 
         int borderWidth = scrollConfig.getBorderWidth();
@@ -178,17 +178,19 @@ public class ScrollableChart {
 
 
     private void calculateAndSetAreas() {
-        int top = spacing.top();
-        int bottom = spacing.bottom();
-        int left = spacing.left();
-        int right = spacing.right();
+
+        int top = config.getSpacing().top();
+        int bottom = config.getSpacing().bottom();
+        int left = config.getSpacing().left();
+        int right = config.getSpacing().right();
+        int gap = config.getGap();
 
         int width = fullArea.width - left - right;
         int height = fullArea.height - top - bottom - gap;
 
         int previewHeight;
         if (preview.traceCount() == 0) {
-            previewHeight = defaultPreviewHeight;
+            previewHeight = config.getPreviewHeightMin();
         } else {
             int chartWeight = chart.getStacksSumWeight();
             int previewWeight = preview.getStacksSumWeight();
@@ -219,7 +221,7 @@ public class ScrollableChart {
 
 
     private BRange getScrollVisibleStartEnd(Scroll scroll) {
-        ScrollConfig scrollConfig = theme.getScrollConfig();
+        ScrollConfig scrollConfig = config.getScrollConfig();
         BRange scrollRange = getScrollStartEnd(scroll);
         return new BRange(scrollRange.getMin() - scrollConfig.getExtraSpace(), scrollRange.getMax() + scrollConfig.getExtraSpace());
     }

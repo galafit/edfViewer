@@ -504,7 +504,6 @@ public abstract class Axis {
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = null;
         int charSize = charSize(tm);
-
         while (currentTick.getValue() <= max) {
             int position = (int) Math.round(scale(currentTick.getValue()));
             // tick position
@@ -538,7 +537,7 @@ public abstract class Axis {
         }
 
         if (minorTickIntervalCount > 0) {
-            // add1 minor ticks that are located between minorTick and min
+            // add minor ticks that are located between minorTick and min
             currentTick = tickProvider.getUpperTick(min);
             Tick previousTick = null;
             for (int i = 0; i < ticksSkipStep; i++) {

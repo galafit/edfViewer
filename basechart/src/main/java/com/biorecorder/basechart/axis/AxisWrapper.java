@@ -53,6 +53,10 @@ public class AxisWrapper {
         }
     }
 
+    public boolean isRoundingEnabled() {
+        return isRoundingEnabled;
+    }
+
     public void setScale(Scale scale) {
         axis.setScale(scale);
     }

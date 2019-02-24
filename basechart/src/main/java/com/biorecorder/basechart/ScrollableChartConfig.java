@@ -1,13 +1,18 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.HorizontalAlign;
+import com.biorecorder.basechart.graphics.Insets;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 
 /**
  * Created by galafit on 31/8/18.
  */
 public class ScrollableChartConfig {
+    private BColor backgroundColor = BColor.RED;
+    private int gap = 10; // between Chart and Preview px
+    private Insets spacing = new Insets(0);
+    private int previewHeightMin = 30; // px
+
     protected ChartConfig chartConfig;
     protected ChartConfig previewConfig;
     protected ScrollConfig scrollConfig;
@@ -48,5 +53,37 @@ public class ScrollableChartConfig {
 
     public ScrollConfig getScrollConfig() {
         return scrollConfig;
+    }
+
+    public BColor getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(BColor backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public int getGap() {
+        return gap;
+    }
+
+    public void setGap(int gap) {
+        this.gap = gap;
+    }
+
+    public Insets getSpacing() {
+        return spacing;
+    }
+
+    public void setSpacing(Insets spacing) {
+        this.spacing = spacing;
+    }
+
+    public int getPreviewHeightMin() {
+        return previewHeightMin;
+    }
+
+    public void setPreviewHeightMin(int previewHeightMin) {
+        this.previewHeightMin = previewHeightMin;
     }
 }
