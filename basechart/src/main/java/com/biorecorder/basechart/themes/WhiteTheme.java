@@ -29,7 +29,7 @@ public class WhiteTheme implements Theme {
 
         /**========================== CHART ==========================**/
         BColor chartBgColor = new BColor(245, 245, 245);
-        BColor chartMarginColor = chartBgColor;
+        BColor chartMarginColor = BColor.WHITE;
 
         BColor titleColor = new BColor(70, 70, 70);
         BColor axisColor = titleColor;
