@@ -24,7 +24,7 @@ public class AxisRight extends AxisVertical {
     protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
-        int space = 2;// px
+        int space = 3;// px
         int labelHeight = charSize;
 
         if (config.isTickLabelOutside()) {

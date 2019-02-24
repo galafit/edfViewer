@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -76,7 +77,7 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(xData3);
         xyData3.addColumn(yData3);
 
-        Chart chart = new Chart();
+        Chart chart = new Chart(new DarkTheme().getChartConfig());
 
         chart.addTrace(new LineTrace(xyData1), false, false, false);
         //chart.addStack();
@@ -85,7 +86,7 @@ public class ChartTest extends JFrame {
         chart.addTrace(new LineTrace(xyData3), false, false, false);
 
         chart.setXMinMax(0, 0, 200);
-        chart.setYMinMax(1, - 0.256, 0.76);
+        chart.setYMinMax(1, - 1.987, 0.76);
 
         chartPanel = new ChartPanel(chart);
 

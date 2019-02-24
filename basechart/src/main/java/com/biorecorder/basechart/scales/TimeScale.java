@@ -160,8 +160,8 @@ public class TimeScale implements Scale {
                 long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() + tickInterval;
-                lastTick = new Tick(tickValue, dateFormat.format(tickValue));
+                long tickValue = lastTick.getTickValue().getDigits() + tickInterval;
+                lastTick = new Tick(new TickValue(tickValue, 0), dateFormat.format(tickValue));
             }
             return lastTick;
         }
@@ -169,26 +169,26 @@ public class TimeScale implements Scale {
         @Override
         public Tick getPreviousTick() {
             if (lastTick == null) {
-                double min = domain[0];
+                long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                double tickValue = lastTick.getValue() - tickInterval;
-                lastTick = new Tick(tickValue, dateFormat.format(tickValue));
+                long tickValue = lastTick.getTickValue().getDigits() - tickInterval;
+                lastTick = new Tick(new TickValue(tickValue, 0), dateFormat.format(tickValue));
             }
             return lastTick;
         }
 
         @Override
         public Tick getUpperTick(double value) {
-            double tickValue = Math.ceil(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, dateFormat.format(tickValue));
+            long tickValue = (long) (Math.ceil(value / tickInterval) * tickInterval);
+            lastTick = new Tick(new TickValue(tickValue, 0), dateFormat.format(tickValue));
             return lastTick;
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            double tickValue = Math.floor(value / tickInterval) * tickInterval;
-            lastTick = new Tick(tickValue, dateFormat.format(tickValue));
+            long tickValue = (long) (Math.floor(value / tickInterval) * tickInterval);
+            lastTick = new Tick(new TickValue(tickValue, 0), dateFormat.format(tickValue));
             return lastTick;
         }
 

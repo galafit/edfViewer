@@ -4,15 +4,15 @@ package com.biorecorder.basechart.scales;
  * Created by galafit on 5/9/17.
  */
 public class Tick {
-    private double value;
+    private TickValue value;
     private String label;
 
-    public Tick(double value, String label) {
+    public Tick(TickValue value, String label) {
         this.value = value;
         this.label = label;
     }
 
-    public double getValue() {
+    public TickValue getTickValue() {
         return value;
     }
 

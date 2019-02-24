@@ -202,32 +202,39 @@ public class LinearScale implements Scale {
         @Override
         public Tick getNextTick() {
             lastTickDigits += tickDigits;
-            double tickValue = lastTickDigits * Math.pow(10, tickPower);
-            return new Tick(tickValue, format(tickValue));
+            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            return new Tick(tickValue, format(tickValue.getValue()));
         }
 
         @Override
         public Tick getPreviousTick() {
             lastTickDigits -= tickDigits;
-            double tickValue = lastTickDigits * Math.pow(10, tickPower);
-            return new Tick(tickValue, format(tickValue));        }
+            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            return new Tick(tickValue, format(tickValue.getValue()));
+        }
 
         @Override
         public Tick getUpperTick(double value) {
-            lastTickDigits = ((int) Math.ceil (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
-            double tickValue = lastTickDigits * Math.pow(10, tickPower);
-            return new Tick(tickValue, format(tickValue));
+            if(tickPower >= 0) {
+                lastTickDigits = ((int) Math.ceil (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
+            } else {
+                lastTickDigits = ((int) Math.ceil (value * Math.pow(10, -tickPower) / tickDigits)) * tickDigits;
+
+            }
+            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            return new Tick(tickValue, format(tickValue.getValue()));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            lastTickDigits = ((int) Math.floor (value /(tickDigits *  Math.pow(10, tickPower)))) * tickDigits;
-            System.out.println("tick interval " + tickDigits *  Math.pow(10, tickPower));
-            double tickValue = lastTickDigits * Math.pow(10, tickPower);
-            return new Tick(tickValue, format(tickValue));
+            if(tickPower >= 0) {
+                lastTickDigits = ((int) Math.floor (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
+            } else {
+                lastTickDigits = ((int) Math.floor (value * Math.pow(10, -tickPower) / tickDigits)) * tickDigits;
+
+            }            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            return new Tick(tickValue, format(tickValue.getValue()));
         }
-
-
 
         public String format(double value) {
             String formattedValue = labelFormat.format(value);
