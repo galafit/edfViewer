@@ -30,11 +30,16 @@ public class NavigableChart {
     private NavigableChartConfig config;
 
     public NavigableChart() {
-        this.config = new NavigableChartConfig();
+        this(new NavigableChartConfig());
+    }
+
+    public NavigableChart(NavigableChartConfig config) {
+        this.config = config;
         chart = new Chart(config.getChartConfig());
         DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
         previewDataProcessingConfig.setCropEnabled(false);
         navigator = new Chart(config.getNavigatorConfig(), previewDataProcessingConfig);
+
     }
 
     private void createScrolls() {
@@ -164,13 +169,10 @@ public class NavigableChart {
         int scrollWidth = Math.max(1, (int)scrollRange.length());
 
 
-        BColor scrollColor = scrollConfig.getColor();
-        BColor fillColor = new BColor(scrollColor.getRed(), scrollColor.getGreen(), scrollColor.getBlue(), 70);
-        canvas.setColor(fillColor);
+        canvas.setColor(scrollConfig.getFillColor());
         canvas.fillRect(scrollX, scrollY, scrollWidth, scrollHeight);
 
-        BColor borderColor = new BColor(scrollColor.getRed(), scrollColor.getGreen(), scrollColor.getBlue(), 130);
-        canvas.setColor(borderColor);
+        canvas.setColor(scrollConfig.getColor());
         canvas.setStroke(new BStroke(borderWidth));
         canvas.drawRect(scrollX, scrollY, scrollWidth, scrollHeight);
     }

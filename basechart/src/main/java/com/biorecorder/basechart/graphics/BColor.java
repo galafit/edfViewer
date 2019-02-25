@@ -4,6 +4,14 @@ package com.biorecorder.basechart.graphics;
  * Created by galafit on 29/12/17.
  */
 public class BColor {
+    public static final BColor STEEL_LIGHT = new BColor(240, 241, 245);
+    public static final BColor STEEL_DARK = new BColor(20, 20, 25);
+    public static final BColor BEIGE_INTENSE = new BColor(245, 226, 208);
+    public static final BColor BEIGE = new BColor(160, 140, 110);
+    public static final BColor BEIGE_LIGHT = new BColor(70, 65, 45);
+    public static final BColor BEIGE_WHITE =  new BColor(245, 240, 238);
+    public static final BColor WHITE_DARK = new BColor(250, 250, 250);
+    public static final BColor BLACK_LIGHT = new BColor(8, 8, 10);
     public static final BColor BLACK = new BColor(0, 0, 0);
     public static final BColor WHITE = new BColor(255, 255, 255);
     public static final BColor RED = new BColor(255, 0, 0);
@@ -13,9 +21,8 @@ public class BColor {
     public static final BColor YELLOW = new BColor(255, 255, 0);
     public static final BColor MAGENTA = new BColor(255, 0, 255);
     public static final BColor PINK = new BColor(255, 175, 175);
-    public static final BColor GRAY = new BColor(128, 128, 128);
-    public static final BColor LIGHT_GRAY = new BColor(192, 192, 192);
-    public static final BColor DARK_GRAY = new BColor(64, 64, 64);
+    public static final BColor GRAY = new BColor(100, 100, 100);
+    public static final BColor GRAY_LIGHT = new BColor(210, 210, 210);
 
     private int r;
     private int g;

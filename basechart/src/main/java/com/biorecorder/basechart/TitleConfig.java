@@ -8,7 +8,7 @@ import com.sun.istack.internal.Nullable;
  */
 public class TitleConfig {
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
-    private BColor textColor = BColor.BLACK;
+    private BColor textColor = BColor.BLACK_LIGHT;
     private Insets margin;
 
     public TitleConfig() {

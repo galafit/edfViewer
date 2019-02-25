@@ -43,8 +43,6 @@ public class Chart {
     private TraceCurvePoint hoverPoint;
     private DataProcessingConfig dataProcessingConfig;
 
-    private int stackGap = 5; //px
-
     public Chart() {
        this(new ChartConfig());
     }
@@ -314,7 +312,7 @@ public class Chart {
             int yAxisWeight = stackWeights.get(stack);
             double axisHeight = areaHeight * yAxisWeight / weightSum;
             int end = areaY + areaHeight * weightSumTillYAxis / weightSum;
-            int start = end + (int)Math.round(axisHeight) - stackGap;
+            int start = end + (int)Math.round(axisHeight) - chartConfig.getStackGap();
 
             if(stack == stackCount - 1) {
                 // for integer calculation sum yAxis length can be != areaHeight
@@ -383,19 +381,20 @@ public class Chart {
             calculateMarginsAndAreas(canvas);
         }
 
+        canvas.enableAntiAliasAndHinting();
+
         canvas.setColor(chartConfig.getMarginColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
 
         // fill stacks
         int stackCount = yAxisList.size() / 2;
+
         canvas.setColor(chartConfig.getBackgroundColor());
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(i * 2);
             BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
-
-        canvas.enableAntiAliasAndHinting();
 
         /*
          * Attention!!!

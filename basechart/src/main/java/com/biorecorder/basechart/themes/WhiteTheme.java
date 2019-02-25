@@ -28,14 +28,14 @@ public class WhiteTheme implements Theme {
         final BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
 
         /**========================== CHART ==========================**/
-        BColor chartBgColor = new BColor(245, 245, 245);
-        BColor chartMarginColor = BColor.WHITE;
+        BColor chartBgColor = BColor.WHITE_DARK;
+        BColor chartMarginColor = BColor.BEIGE_WHITE;
 
-        BColor titleColor = new BColor(70, 70, 70);
+        BColor titleColor = BColor.GRAY;
         BColor axisColor = titleColor;
-        BColor gridColor = new BColor(214, 214, 214);
+        BColor gridColor = BColor.GRAY_LIGHT;
 
-        BColor crosshairColor = new BColor(30, 30, 30);
+        BColor crosshairColor = axisColor;
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
@@ -62,10 +62,10 @@ public class WhiteTheme implements Theme {
 
         /**========================== NAVIGATOR ==========================**/
 
-        BColor navigatorBgColor = new BColor(230, 230, 230);
+        BColor navigatorBgColor = BColor.BEIGE_WHITE;
         BColor navigatorMarginColor = navigatorBgColor;
+        BColor bgColor = BColor.WHITE_DARK;
         BColor scrollColor = crosshairColor;
-        BColor bgColor = BColor.WHITE;
 
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
@@ -73,6 +73,8 @@ public class WhiteTheme implements Theme {
         navigatorConfig.getTitleConfig().setTextColor(titleColor);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
+        navigatorConfig.setStackGap(0);
+        navigatorConfig.setYAxisRoundingEnabled(true);
         navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
 

@@ -2,6 +2,8 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
+import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.LineTrace;
@@ -49,15 +51,16 @@ public class ScrollableChartTest extends JFrame{
         xyData2.addColumn(xData);
         xyData2.addColumn(yData2);
 
-        NavigableChart chart = new NavigableChart();
+        NavigableChart chart = new NavigableChart(new DarkTheme().getNavigableChartConfig());
         chart.addChartTrace(new LineTrace(xyData1), false , true, false);
-       // chart.addChartTrace(0, new LineTrace(xyData2), false , true, false);
-       // chart.addChartStack();
-        //chart.addChartTrace(new LineTrace(xyData1), false , true, false);
+      //  chart.addChartTrace(0, new LineTrace(xyData2), false , true, false);
+        chart.addChartStack();
+        chart.addChartTrace(new LineTrace(xyData1), false , true, false);
 
 
         chart.addNavigatorTrace( new LineTrace(xyData1), false, false, false);
-       // chart.addNavigatorTrace(new LineTrace(xyData2), false, false, false);
+        chart.addNavigatorStack();
+        chart.addNavigatorTrace(new LineTrace(xyData2), false, false, false);
 
         chartPanel = new ChartPanel(chart);
 

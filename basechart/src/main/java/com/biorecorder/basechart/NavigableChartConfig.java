@@ -11,22 +11,18 @@ public class NavigableChartConfig {
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 30; // px
-
     private ChartConfig chartConfig;
     private ChartConfig navigatorConfig;
     private ScrollConfig scrollConfig;
 
     public NavigableChartConfig() {
-        BColor navigatorBgColor = new BColor(230, 230, 230);
+        BColor navigatorBgColor = BColor.BEIGE_WHITE;
         BColor navigatorMarginColor = navigatorBgColor;
-
-        BColor scrollColor = new BColor(30, 30, 30);;
 
         chartConfig = new ChartConfig();
         navigatorConfig = new ChartConfig();
         scrollConfig = new ScrollConfig();
 
-        chartConfig.setMarginColor(chartConfig.getBackgroundColor());
         chartConfig.getRightAxisConfig().setTickLabelOutside(false);
         chartConfig.getLeftAxisConfig().setTickLabelOutside(false);
         chartConfig.setLeftAxisPrimary(false);
@@ -36,11 +32,15 @@ public class NavigableChartConfig {
         navigatorConfig.setLeftAxisPrimary(false);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
+        navigatorConfig.setStackGap(0);
+        navigatorConfig.setYAxisRoundingEnabled(true);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
 
+        BColor scrollColor = chartConfig.getCrossHairConfig().getLineColor();
         scrollConfig.setColor(scrollColor);
     }
+
 
     public NavigableChartConfig(ChartConfig chartConfig, ChartConfig navigatorConfig, ScrollConfig scrollConfig) {
         this.chartConfig = chartConfig;

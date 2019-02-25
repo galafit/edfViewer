@@ -22,6 +22,8 @@ public class ChartConfig {
     private Insets spacing;
     private int autoSpacing = 5; //px taken into account only if spacing is null
 
+    private int stackGap = 6; //px
+
     private AxisConfig leftAxisConfig = new AxisConfig();
     private AxisConfig rightAxisConfig = new AxisConfig();
     private AxisConfig bottomAxisConfig = new AxisConfig();
@@ -33,9 +35,9 @@ public class ChartConfig {
     private boolean isBottomAxisPrimary = true;
 
     private int defaultStackWeight = 4;
-    private int axisRoundingAccuracyPctIfRoundingEnabled = 5;
+    private int axisRoundingAccuracyPctIfRoundingEnabled = 10; // 5 for more smooth translation and zooming
     private int axisRoundingAccuracyPctIfRoundingDisabled = 20;
-    private boolean isYAxisRoundingEnabled = true;
+    private boolean isYAxisRoundingEnabled = false;
     private boolean isXAxisRoundingEnabled = false;
 
     public ChartConfig() {
@@ -52,14 +54,15 @@ public class ChartConfig {
 
         //final BColor[] colors = {BLUE, ORANGE, RED, GREEN_DARK, MAGENTA, BLUE_DARK, PINK, RED_DARK, CYAN, GRAY};
         final BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
-        BColor bgColor = new BColor(245, 245, 245);
-        BColor marginBgColor = bgColor;
 
-        BColor titleColor = new BColor(70, 70, 70);
+        BColor bgColor = BColor.WHITE_DARK;
+        BColor marginBgColor = BColor.BEIGE_WHITE;
+
+        BColor titleColor = BColor.GRAY;
         BColor axisColor = titleColor;
-        BColor gridColor = new BColor(214, 214, 214);
+        BColor gridColor = BColor.GRAY_LIGHT;
 
-        BColor crosshairColor = new BColor(30, 30, 30);
+        BColor crosshairColor = axisColor;
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
@@ -93,6 +96,7 @@ public class ChartConfig {
         spacing = chartConfig.spacing;
         margin = chartConfig.margin;
         autoSpacing = chartConfig.autoSpacing;
+        stackGap = chartConfig.stackGap;
         leftAxisConfig = new AxisConfig(chartConfig.leftAxisConfig);
         rightAxisConfig = new AxisConfig(chartConfig.rightAxisConfig);
         topAxisConfig = new AxisConfig(chartConfig.topAxisConfig);
@@ -106,6 +110,14 @@ public class ChartConfig {
 
         isYAxisRoundingEnabled = chartConfig.isYAxisRoundingEnabled;
         isXAxisRoundingEnabled = chartConfig.isXAxisRoundingEnabled;
+    }
+
+    public int getStackGap() {
+        return stackGap;
+    }
+
+    public void setStackGap(int stackGap) {
+        this.stackGap = stackGap;
     }
 
     public Insets getMargin() {

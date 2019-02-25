@@ -16,11 +16,6 @@ public class AxisRight extends AxisVertical {
     }
 
     @Override
-    protected boolean isRight() {
-        return true;
-    }
-
-    @Override
     protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();

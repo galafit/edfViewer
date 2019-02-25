@@ -321,9 +321,6 @@ public abstract class Axis {
                 }
             }
         }
-        if(isRight()) {
-            System.out.println(tickMin.getTickValue().getValue() + " rounding1 "+tickMax.getTickValue().getValue() + " "+ticksSkipStep);
-        }
         scale.setDomain(tickMin.getTickValue().getValue(), tickMax.getTickValue().getValue());
     }
 
@@ -509,17 +506,10 @@ public abstract class Axis {
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = null;
         int charSize = charSize(tm);
-        if(isRight()) {
-            System.out.println();
-            System.out.println(getMin()+ " min max "+getMax());
-        }
         while (currentTick.getTickValue().compare(max) <= 0) {
             int position = (int) Math.round(scale(currentTick.getTickValue().getValue()));
             // tick position
             tickPositions.add(position);
-            if(isRight()) {
-                System.out.println("tick "+currentTick.getTickValue().getValue());
-            }
             // tick label
             tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), charSize));
             for (int i = 0; i < ticksSkipStep; i++) {
@@ -581,10 +571,6 @@ public abstract class Axis {
         }
 
         isDirty = false;
-    }
-
-    protected boolean isRight() {
-        return false;
     }
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);

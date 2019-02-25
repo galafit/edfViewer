@@ -9,10 +9,10 @@ import com.sun.istack.internal.Nullable;
  */
 public class TooltipConfig {
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
-    private BColor color = BColor.BLACK;
-    private BColor backgroundColor = new BColor(240, 235, 230);
+    private BColor color = BColor.BLACK_LIGHT;
+    private BColor backgroundColor = BColor.BEIGE_WHITE;
     private BColor headerBackgroundColor = new BColor(220, 215, 215);
-    private BColor borderColor = new BColor(200, 200, 200);
+    private BColor borderColor = new BColor(150, 150, 150);
     private int borderWidth = 1;
     private Insets margin;
 

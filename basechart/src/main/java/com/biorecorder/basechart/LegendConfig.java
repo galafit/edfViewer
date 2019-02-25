@@ -13,7 +13,7 @@ public class LegendConfig {
     private VerticalAlign verticalAlign = VerticalAlign.TOP;
 
   //  private int borderWidth = 1;
- //   private BColor borderColor = BColor.LIGHT_GRAY;
+ //   private BColor borderColor = BColor.GRAY_LIGHT;
     private BColor backgroundColor = BColor.WHITE;
     private Insets padding;
     private Insets margin;

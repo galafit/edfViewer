@@ -28,13 +28,13 @@ public class DarkTheme implements Theme {
         final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
 
         /**========================== CHART ==========================**/
-        BColor chartBgColor = new BColor(18, 15, 18);//BColor.BLACK;
-        BColor chartMarginColor = BColor.BLACK;//chartBgColor;
-        BColor titleColor = new BColor(160, 140, 110);
+        BColor chartBgColor =  BColor.STEEL_DARK; new BColor(18, 15, 18);
+        BColor chartMarginColor = BColor.BLACK_LIGHT;
+        BColor titleColor = BColor.BEIGE;
         BColor axisColor = titleColor;
-        BColor gridColor = new BColor(70, 65, 45);
+        BColor gridColor = BColor.BEIGE_LIGHT;
 
-        BColor crosshairColor = new BColor(245, 226, 208); //new BColor(201, 182, 163); //new BColor(252, 242, 227);
+        BColor crosshairColor = axisColor;
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
@@ -61,10 +61,10 @@ public class DarkTheme implements Theme {
 
         /**========================== NAVIGATOR ==========================**/
 
-        BColor navigatorBgColor = BColor.BLACK; //new BColor(25, 25, 30); //new BColor(28, 25, 28);
+        BColor navigatorBgColor = BColor.BLACK_LIGHT;
         BColor navigatorMarginColor = navigatorBgColor;
         BColor scrollColor = crosshairColor;
-        BColor bgColor = BColor.BLACK;
+        BColor bgColor = BColor.BLACK_LIGHT;
 
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
@@ -72,6 +72,8 @@ public class DarkTheme implements Theme {
         navigatorConfig.getTitleConfig().setTextColor(titleColor);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
+        navigatorConfig.setStackGap(0);
+        navigatorConfig.setYAxisRoundingEnabled(true);
         navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
 

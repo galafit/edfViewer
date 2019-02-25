@@ -27,10 +27,10 @@ public class AxisConfig {
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
     private BStroke gridLineStroke = new BStroke(1);
-    private BColor gridColor = BColor.LIGHT_GRAY;
+    private BColor gridColor = BColor.GRAY_LIGHT;
 
     private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
-    private BColor minorGridColor = BColor.LIGHT_GRAY;
+    private BColor minorGridColor = BColor.GRAY_LIGHT;
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
 
