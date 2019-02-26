@@ -280,7 +280,7 @@ public class Chart {
 
         margin = new Insets(top, right, bottom, left);
         graphArea = new BRectangle(fullArea.x + left, fullArea.y + top,
-                fullArea.width - left - right, fullArea.height - top - bottom);
+                Math.max(0, fullArea.width - left - right), Math.max(0, fullArea.height - top - bottom));
 
         if (legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
@@ -305,15 +305,20 @@ public class Chart {
     private void setYStartEnd(int areaY, int areaHeight) {
         int weightSum = getStacksSumWeight();
 
-        int weightSumTillYAxis = 0;
         int stackCount = yAxisList.size() / 2;
 
+        int gap = Math.abs(chartConfig.getStackGap());
+        int height = areaHeight - (stackCount  - 1) * gap;
+        if(height <= 0) {
+            height = areaHeight;
+            gap = 0;
+        }
+
+        int end = areaY;
         for (int stack = 0; stack < stackCount; stack++) {
             int yAxisWeight = stackWeights.get(stack);
-            double axisHeight = areaHeight * yAxisWeight / weightSum;
-            int end = areaY + areaHeight * weightSumTillYAxis / weightSum;
-            int start = end + (int)Math.round(axisHeight) - chartConfig.getStackGap();
-
+            double axisHeight = height * yAxisWeight / weightSum;
+            int start = end + (int)Math.round(axisHeight);
             if(stack == stackCount - 1) {
                 // for integer calculation sum yAxis length can be != areaHeight
                 // so we fix that
@@ -322,7 +327,7 @@ public class Chart {
             yAxisList.get(stack * 2).setStartEnd(start, end);
             yAxisList.get(stack * 2 + 1).setStartEnd(start, end);
 
-            weightSumTillYAxis += stackWeights.get(stack);
+            end = start + gap;
         }
     }
 

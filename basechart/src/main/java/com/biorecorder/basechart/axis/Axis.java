@@ -51,6 +51,7 @@ public abstract class Axis {
 
     private boolean isDirty = true;
     private int width = -1;
+    private int minLength = 30; //px
 
     public Axis(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
@@ -251,6 +252,9 @@ public abstract class Axis {
     }
 
     public int getWidth(BCanvas canvas) {
+        if(length() < minLength) {
+            return config.getAxisLineStroke().getWidth() / 2;
+        }
         if (width < 0) { // calculate width
             width = 0;
             width += config.getAxisLineStroke().getWidth() / 2;
@@ -280,6 +284,9 @@ public abstract class Axis {
     }
 
     public void roundMinMax(BCanvas canvas) {
+        if(length() < minLength) {
+            return;
+        }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
         if (tickProvider == null) {
             configTickProvider(tm);
@@ -325,6 +332,9 @@ public abstract class Axis {
     }
 
     public void drawGrid(BCanvas canvas, BRectangle area) {
+        if(length() < minLength) {
+            return;
+        }
         canvas.save();
         if (isDirty) {
             createAxisElements(canvas);
@@ -355,27 +365,35 @@ public abstract class Axis {
         }
         translateCanvas(canvas, area);
 
-        if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
-            canvas.setColor(config.getTickMarkColor());
-            canvas.setStroke(new BStroke(config.getTickMarkWidth()));
-            for (int i = 0; i < tickPositions.size(); i++) {
-                drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
+        if(length() > minLength) {
+            if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
+                canvas.setColor(config.getTickMarkColor());
+                canvas.setStroke(new BStroke(config.getTickMarkWidth()));
+                for (int i = 0; i < tickPositions.size(); i++) {
+                    drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
+                }
             }
-        }
 
-        if (config.getMinorTickMarkInsideSize() > 0 || config.getMinorTickMarkOutsideSize() > 0) {
-            canvas.setColor(config.getMinorTickMarkColor());
-            canvas.setStroke(new BStroke(config.getMinorTickMarkWidth()));
-            for (int i = 0; i < minorTickPositions.size(); i++) {
-                drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
+            if (config.getMinorTickMarkInsideSize() > 0 || config.getMinorTickMarkOutsideSize() > 0) {
+                canvas.setColor(config.getMinorTickMarkColor());
+                canvas.setStroke(new BStroke(config.getMinorTickMarkWidth()));
+                for (int i = 0; i < minorTickPositions.size(); i++) {
+                    drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
+                }
             }
-        }
 
-        canvas.setStroke(new BStroke(1));
-        canvas.setColor(config.getTickLabelColor());
-        canvas.setTextStyle(config.getTickLabelTextStyle());
-        for (BText tickLabel : tickLabels) {
-            tickLabel.draw(canvas);
+            canvas.setStroke(new BStroke(1));
+            canvas.setColor(config.getTickLabelColor());
+            canvas.setTextStyle(config.getTickLabelTextStyle());
+            for (BText tickLabel : tickLabels) {
+                tickLabel.draw(canvas);
+            }
+
+            if (title != null) {
+                canvas.setColor(config.getTitleColor());
+                canvas.setTextStyle(config.getTitleTextStyle());
+                titleText.draw(canvas);
+            }
         }
 
         if (config.getAxisLineStroke().getWidth() > 0) {
@@ -384,11 +402,6 @@ public abstract class Axis {
             drawAxisLine(canvas);
         }
 
-        if (title != null) {
-            canvas.setColor(config.getTitleColor());
-            canvas.setTextStyle(config.getTitleTextStyle());
-            titleText.draw(canvas);
-        }
         canvas.restore();
     }
 
@@ -409,6 +422,9 @@ public abstract class Axis {
     }
 
     private void configTickProvider(TextMetric tm) {
+        if(length() < 1) {
+            return;
+        }
         int tickIntervalCountByRoundingUncertainty = 0;
         if (roundingAccuracyPct > 0) {
             tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / roundingAccuracyPct);
@@ -442,6 +458,7 @@ public abstract class Axis {
         // (it is reasonable for all axis except the category one that at the moment not used)
         String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
+
         double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue()));
 
         // real resultant number of tick intervals
@@ -491,6 +508,9 @@ public abstract class Axis {
     }
 
     private void createAxisElements(BCanvas canvas) {
+        if(length() < minLength) {
+            return;
+        }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
         if (tickProvider == null) {
             configTickProvider(tm);

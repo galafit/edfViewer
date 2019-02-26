@@ -109,7 +109,7 @@ public class Legend {
         double[] yRange = traceCurve.getTrace().getYScale(traceCurve.getCurveNumber()).getRange();
         int yStart = (int)yRange[0];
         int yEnd = (int)yRange[yRange.length - 1];
-        return new BRectangle(area.x, yEnd, area.width, yStart - yEnd);
+        return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));
     }
 
     private void arrangeButtons(BCanvas canvas) {

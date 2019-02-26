@@ -148,12 +148,12 @@ public class NavigableChart {
             navigator.setMargin(previewMargin);
         }
         navigator.draw(canvas);
-
+        chart.draw(canvas);
         for (Integer key : scrolls.keySet()) {
             drawScroll(canvas, scrolls.get(key));
         }
 
-        chart.draw(canvas);
+
     }
 
     private void drawScroll(BCanvas canvas, Scroll scroll) {
