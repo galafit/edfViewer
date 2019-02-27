@@ -78,11 +78,11 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(xData3);
         xyData3.addColumn(yData3);
 
-        Chart chart = new Chart(new DarkTheme().getChartConfig());
+        Chart chart = new Chart();
 
         chart.addTrace(new LineTrace(xyData1), false, false, false);
         chart.addStack();
-        chart.addTrace(new LineTrace(xyData2), true, false, false);
+        chart.addTrace(new LineTrace(xyData2), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData3), false, false, false);
 

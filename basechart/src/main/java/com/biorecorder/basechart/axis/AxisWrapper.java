@@ -42,8 +42,8 @@ public class AxisWrapper {
         return false;
     }
 
-    public int length() {
-        return (int) Math.round(axis.length());
+    public double length() {
+        return axis.length();
     }
 
     public void setRoundingEnabled(boolean isRoundingEnabled) {
@@ -135,7 +135,7 @@ public class AxisWrapper {
     /**
      * return true if axis start or end actually changed
      */
-    public boolean setStartEnd(int start, int end) {
+    public boolean setStartEnd(double start, double end) {
         if (axis.getStart() != start || axis.getEnd() != end) {
             setRoundingDirty();
             axis.setStartEnd(start, end);
@@ -152,12 +152,12 @@ public class AxisWrapper {
         return axis.getMax();
     }
 
-    public int getStart() {
-        return (int) Math.round(axis.getStart());
+    public double getStart() {
+        return axis.getStart();
     }
 
-    public int getEnd() {
-        return (int) Math.round(axis.getEnd());
+    public double getEnd() {
+        return axis.getEnd();
     }
 
     public boolean isVisible() {

@@ -27,7 +27,7 @@ public class AxisTop extends AxisHorizontal {
             int y = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
 
             if(x < getStart()) {
-                x = (int)getStart() + space;
+                x = (int)getStart();
             }
 
             if(x + charSize * tickLabel.length() > getEnd()) {
@@ -39,7 +39,8 @@ public class AxisTop extends AxisHorizontal {
             int y = axisWidth / 2  + labelPadding;
             int x = tickPosition + space;
             if(x + charSize * tickLabel.length() > getEnd()) {
-                return new BText(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.END, tm);
+                x = (int)getEnd();
+                return new BText(tickLabel, (int)getEnd(), x, TextAnchor.END, TextAnchor.END, tm);
             }
             return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
         }

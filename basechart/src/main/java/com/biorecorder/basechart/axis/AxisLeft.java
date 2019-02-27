@@ -27,10 +27,11 @@ public class AxisLeft extends AxisVertical {
             int y = tickPosition;
             int x = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
             if(y + labelHeight/2 + 1 > getStart()) {
-                y = tickPosition - space;
+                y = (int)getStart() - space;
                 return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
             }
             if(y - labelHeight/2 - 1 < getEnd()) {
+                y = (int)getEnd();
                 return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
             }
             return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
@@ -40,6 +41,7 @@ public class AxisLeft extends AxisVertical {
             int x = axisWidth / 2  + labelPadding;
 
             if(y - labelHeight - 1 < getEnd()) {
+                //y = (int)getEnd();
                 return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END , tm);
             }
             y = tickPosition - space;

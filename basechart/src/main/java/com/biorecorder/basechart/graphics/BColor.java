@@ -21,7 +21,7 @@ public class BColor {
     public static final BColor YELLOW = new BColor(255, 255, 0);
     public static final BColor MAGENTA = new BColor(255, 0, 255);
     public static final BColor PINK = new BColor(255, 175, 175);
-    public static final BColor GRAY = new BColor(100, 100, 100);
+    public static final BColor GRAY = new BColor(90, 90, 90);
     public static final BColor GRAY_LIGHT = new BColor(210, 210, 210);
 
     private int r;

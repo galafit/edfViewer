@@ -5,6 +5,8 @@ import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.TimeScale;
+import com.biorecorder.basechart.themes.WhiteTheme;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -44,7 +46,7 @@ public class Chart {
     private DataProcessingConfig dataProcessingConfig;
 
     public Chart() {
-       this(new ChartConfig());
+       this(new WhiteTheme().getChartConfig());
     }
 
     public Chart(ChartConfig chartConfig) {
@@ -55,7 +57,7 @@ public class Chart {
         this.dataProcessingConfig = dataProcessingConfig;
         this.chartConfig = new ChartConfig(chartConfig1);
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new LinearScale(), chartConfig.getBottomAxisConfig()));
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new TimeScale(), chartConfig.getBottomAxisConfig()));
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
@@ -314,19 +316,18 @@ public class Chart {
             gap = 0;
         }
 
-        int end = areaY;
+        double end = areaY;
         for (int stack = 0; stack < stackCount; stack++) {
             int yAxisWeight = stackWeights.get(stack);
-            double axisHeight = height * yAxisWeight / weightSum;
-            int start = end + (int)Math.round(axisHeight);
-            if(stack == stackCount - 1) {
+            double axisHeight = 1.0 * height * yAxisWeight / weightSum;
+            double start = end + axisHeight;
+           /* if(stack == stackCount - 1) {
                 // for integer calculation sum yAxis length can be != areaHeight
                 // so we fix that
                 start = areaY + areaHeight;
-            }
+            }*/
             yAxisList.get(stack * 2).setStartEnd(start, end);
             yAxisList.get(stack * 2 + 1).setStartEnd(start, end);
-
             end = start + gap;
         }
     }
@@ -397,7 +398,7 @@ public class Chart {
         canvas.setColor(chartConfig.getBackgroundColor());
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(i * 2);
-            BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
+            BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
 
@@ -416,7 +417,7 @@ public class Chart {
         // draw separately for every stack
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(2 * i);
-            BRectangle stackArea = new BRectangle(graphArea.x, yAxis.getEnd(), graphArea.width, yAxis.length());
+            BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
             if(bottomAxis.isVisible() && !topAxis.isVisible()) {
                 bottomAxis.drawGrid(canvas, stackArea);
             } else if(!bottomAxis.isVisible() && topAxis.isVisible()) {

@@ -57,6 +57,8 @@ public class WhiteTheme implements Theme {
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
+        chartConfig.getLeftAxisConfig().setTickLabelOutside(false);
+        chartConfig.getRightAxisConfig().setTickLabelOutside(false);
 
         this.chartConfig = chartConfig;
 

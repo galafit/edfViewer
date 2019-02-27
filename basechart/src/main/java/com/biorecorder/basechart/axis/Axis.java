@@ -51,7 +51,7 @@ public abstract class Axis {
 
     private boolean isDirty = true;
     private int width = -1;
-    private int minLength = 30; //px
+    private int lengthMin = 25; //px
 
     public Axis(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
@@ -62,6 +62,13 @@ public abstract class Axis {
         tickProvider = null;
         isDirty = true;
         width = -1;
+    }
+
+    private boolean isTooShort() {
+        if(length() > lengthMin) {
+            return false;
+        }
+        return true;
     }
 
 
@@ -252,7 +259,7 @@ public abstract class Axis {
     }
 
     public int getWidth(BCanvas canvas) {
-        if(length() < minLength) {
+        if(isTooShort()) {
             return config.getAxisLineStroke().getWidth() / 2;
         }
         if (width < 0) { // calculate width
@@ -284,7 +291,7 @@ public abstract class Axis {
     }
 
     public void roundMinMax(BCanvas canvas) {
-        if(length() < minLength) {
+        if(isTooShort()) {
             return;
         }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
@@ -332,7 +339,7 @@ public abstract class Axis {
     }
 
     public void drawGrid(BCanvas canvas, BRectangle area) {
-        if(length() < minLength) {
+        if(isTooShort()) {
             return;
         }
         canvas.save();
@@ -365,7 +372,7 @@ public abstract class Axis {
         }
         translateCanvas(canvas, area);
 
-        if(length() > minLength) {
+        if(! isTooShort()) {
             if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
                 canvas.setColor(config.getTickMarkColor());
                 canvas.setStroke(new BStroke(config.getTickMarkWidth()));
@@ -508,7 +515,7 @@ public abstract class Axis {
     }
 
     private void createAxisElements(BCanvas canvas) {
-        if(length() < minLength) {
+        if(isTooShort()) {
             return;
         }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());

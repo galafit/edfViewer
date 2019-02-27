@@ -22,7 +22,7 @@ public class ChartConfig {
     private Insets spacing;
     private int autoSpacing = 5; //px taken into account only if spacing is null
 
-    private int stackGap = 5; //px
+    private int stackGap = 4; //px
 
     private AxisConfig leftAxisConfig = new AxisConfig();
     private AxisConfig rightAxisConfig = new AxisConfig();
