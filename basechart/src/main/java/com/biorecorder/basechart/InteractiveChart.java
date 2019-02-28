@@ -33,10 +33,10 @@ public class InteractiveChart implements InteractiveDrawable {
             chart.autoScaleX(xIndex);
             chart.autoScaleY(yIndex);
         } else {
-            for (int i = 0; i < chart.xAxisCount(); i++) {
+            for (int i = 0; i < chart.xAxesCount(); i++) {
                 chart.autoScaleX(i);
             }
-            for (int i = 0; i < chart.yAxisCount(); i++) {
+            for (int i = 0; i < chart.yAxesCount(); i++) {
                 chart.autoScaleY(i);
             }
         }

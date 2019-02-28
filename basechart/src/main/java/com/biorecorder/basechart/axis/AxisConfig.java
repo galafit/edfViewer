@@ -3,11 +3,23 @@ package com.biorecorder.basechart.axis;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.TextStyle;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 5/9/17.
  */
 public class AxisConfig {
+    /**
+     * At the moment not used
+     tera 	T 	1,000,000,000,000 	10x12
+     giga 	G 	1,000,000,000 	10x9
+     mega 	M 	1,000,000 	10x6
+     kilo 	k 	1,000 	10x3
+
+     milli 	m 	0.001 	10x¯3
+     micro 	µ 	0.000001 	10x¯6
+     nano 	n 	0.000000001 	10x¯9
+     */
     private BColor axisLineColor =  BColor.GRAY;
     private BStroke axisLineStroke = new BStroke(1); // if width = 0 line will not be drawn
 
@@ -23,10 +35,13 @@ public class AxisConfig {
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
+    private double tickInterval = -1; // in axis domain units
+    private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
+
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
-    private BStroke gridLineStroke = new BStroke(0);
+    private BStroke gridLineStroke = new BStroke(1);
     private BColor gridColor = BColor.GRAY_LIGHT;
 
     private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
@@ -59,6 +74,8 @@ public class AxisConfig {
         tickMarkColor = axisConfig.tickMarkColor;
         tickLabelColor = axisConfig.tickLabelColor;
         tickLabelTextStyle = axisConfig.tickLabelTextStyle;
+        tickInterval = axisConfig.tickInterval;
+        tickLabelPrefixAndSuffix = axisConfig.tickLabelPrefixAndSuffix;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -71,6 +88,22 @@ public class AxisConfig {
         titleColor = axisConfig.titleColor;
 
         isTickLabelOutside = axisConfig.isTickLabelOutside;
+    }
+
+    public void setTickInterval(double tickInterval) {
+        this.tickInterval = tickInterval;
+    }
+
+    public void setLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
+        tickLabelPrefixAndSuffix = new LabelPrefixAndSuffix(prefix, suffix);
+    }
+
+    public double getTickInterval() {
+        return tickInterval;
+    }
+
+    public LabelPrefixAndSuffix getTickLabelPrefixAndSuffix() {
+        return tickLabelPrefixAndSuffix;
     }
 
     public int getMinorTickIntervalCount() {

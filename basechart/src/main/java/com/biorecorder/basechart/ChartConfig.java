@@ -37,8 +37,6 @@ public class ChartConfig {
     private int defaultStackWeight = 4;
     private boolean isYAxisRoundingEnabled = false;
     private boolean isXAxisRoundingEnabled = false;
-    private boolean isXAxisGridVisible = true;
-    private boolean isYAxisGridVisible = true;
 
     public ChartConfig() {
         final BColor BLUE = new BColor(0, 130, 230);

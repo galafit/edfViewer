@@ -31,8 +31,6 @@ public abstract class Axis {
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
-    private double tickInterval = -1; // in axis domain units
-    private TickFormatInfo tickFormatInfo;
     // Used to calculate number of ticks. If <= 0 will not be taken into account
     //Specify maximum distance between axis start and minTick in relation to axis length (percents)
     private int tickAccuracyPct = 20; // (minTick - min) * 100 / length
@@ -77,11 +75,6 @@ public abstract class Axis {
         setDirty();
     }
 
-    public void setTickInterval(double tickInterval) {
-        this.tickInterval = tickInterval;
-        setDirty();
-    }
-
 
     /**
      * Specify maximum distance between axis start and minTick
@@ -93,12 +86,6 @@ public abstract class Axis {
      */
     public void setTickAccuracyPct(int tickAccuracyPct) {
         this.tickAccuracyPct = tickAccuracyPct;
-        setDirty();
-    }
-
-
-    public void setTickFormatInfo(@Nullable TickFormatInfo tickFormatInfo) {
-        this.tickFormatInfo = tickFormatInfo;
         setDirty();
     }
 
@@ -413,7 +400,7 @@ public abstract class Axis {
     }
 
     private boolean isTickIntervalSpecified() {
-        return tickInterval > 0;
+        return config.getTickInterval() > 0;
     }
 
     private int requiredSpaceForTickLabel(TextMetric tm, int rotation, String label) {
@@ -437,7 +424,7 @@ public abstract class Axis {
             tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / tickAccuracyPct);
         }
         if (isTickIntervalSpecified()) {
-            tickProvider = scale.getTickProviderByInterval(tickInterval, tickFormatInfo);
+            tickProvider = scale.getTickProviderByInterval(config.getTickInterval(), config.getTickLabelPrefixAndSuffix());
         } else {
             int fontFactor = 4;
             double tickPixelInterval = fontFactor * config.getTickLabelTextStyle().getSize();
@@ -450,7 +437,7 @@ public abstract class Axis {
                 tickIntervalCount = 1;
             }
 
-            tickProvider = scale.getTickProviderByIntervalCount(tickIntervalCount, tickFormatInfo);
+            tickProvider = scale.getTickProviderByIntervalCount(tickIntervalCount, config.getTickLabelPrefixAndSuffix());
         }
 
         double min = getMin();

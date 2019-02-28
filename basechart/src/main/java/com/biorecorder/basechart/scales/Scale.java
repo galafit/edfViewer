@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.TickFormatInfo;
+import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 import com.sun.istack.internal.Nullable;
 
 public interface Scale {
@@ -24,9 +24,9 @@ public interface Scale {
      */
     public String formatDomainValue(double value);
 
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, @Nullable TickFormatInfo formatInfo);
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, @Nullable LabelPrefixAndSuffix formatInfo);
 
-    public TickProvider getTickProviderByInterval(double tickInterval, @Nullable TickFormatInfo formatInfo);
+    public TickProvider getTickProviderByInterval(double tickInterval, @Nullable LabelPrefixAndSuffix formatInfo);
 
 }
 

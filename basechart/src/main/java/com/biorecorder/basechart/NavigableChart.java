@@ -46,7 +46,7 @@ public class NavigableChart {
         updatePreviewMinMax();
         Range previewXRange = navigator.getXMinMax(previewXIndex);
         double xMin = previewXRange.getMin();
-        for (int xIndex = 0; xIndex < chart.xAxisCount(); xIndex++) {
+        for (int xIndex = 0; xIndex < chart.xAxesCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
                 double xExtent = chart.getBestExtent(xIndex);
                 Scroll scroll = new Scroll();
@@ -55,7 +55,7 @@ public class NavigableChart {
                 scroll.setExtent(xExtent);
                 double xMax = xMin + xExtent;
                 chart.setXMinMax(xIndex, xMin, xMax);
-                for (int i = 0; i < chart.yAxisCount(); i++) {
+                for (int i = 0; i < chart.yAxesCount(); i++) {
                     chart.autoScaleY(i);
                 }
                 scrolls.put(xIndex, scroll);
@@ -92,7 +92,7 @@ public class NavigableChart {
     private void updatePreviewMinMax() {
         Range previewMinMax = navigator.getXMinMax(0);
         Range chartMinMax = chart.getAllTracesFullMinMax();
-        for (int xAxisIndex = 0; xAxisIndex < chart.xAxisCount(); xAxisIndex++) {
+        for (int xAxisIndex = 0; xAxisIndex < chart.xAxesCount(); xAxisIndex++) {
             chartMinMax = Range.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
         if (!previewMinMax.contains(chartMinMax)) {
@@ -425,11 +425,11 @@ public class NavigableChart {
     }
 
     public int chartXAxisCount() {
-        return chart.xAxisCount();
+        return chart.xAxesCount();
     }
 
     public int chartYAxisCount() {
-        return chart.yAxisCount();
+        return chart.yAxesCount();
     }
 
     public void zoomChartY(int yAxisIndex, double zoomFactor) {
@@ -498,7 +498,7 @@ public class NavigableChart {
 
 
     public int navigatorYAxisCount() {
-        return navigator.yAxisCount();
+        return navigator.yAxesCount();
     }
 
     public int getNavigatorYIndex(@Nullable BPoint point) {

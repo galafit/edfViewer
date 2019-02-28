@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.TickFormatInfo;
-import com.sun.istack.internal.Nullable;
+import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -57,14 +56,14 @@ public class LinearScale implements Scale {
     }
 
     @Override
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo formatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
         provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public TickProvider getTickProviderByInterval(double tickInterval, TickFormatInfo formatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
         provider.setTickInterval(tickInterval);
         return provider;
@@ -86,7 +85,7 @@ public class LinearScale implements Scale {
     }
 
     // TODO: use metric shortcuts - k, M, G... from formatInfo
-    private DecimalFormat getNumberFormat(int power, TickFormatInfo labelFormatInfo) {
+    private DecimalFormat getNumberFormat(int power, LabelPrefixAndSuffix labelFormatInfo) {
         DecimalFormat dfNeg4 = new DecimalFormat("0.0000");
         DecimalFormat dfNeg3 = new DecimalFormat("0.000");
         DecimalFormat dfNeg2 = new DecimalFormat("0.00");
@@ -128,11 +127,11 @@ public class LinearScale implements Scale {
     class LinearTickProvider implements TickProvider {
         int tickDigits;
         int tickPower;
-        private TickFormatInfo labelFormatInfo;
+        private LabelPrefixAndSuffix labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
         private int lastTickDigits;
 
-        public LinearTickProvider(TickFormatInfo labelFormatInfo) {
+        public LinearTickProvider(LabelPrefixAndSuffix labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
         }
 

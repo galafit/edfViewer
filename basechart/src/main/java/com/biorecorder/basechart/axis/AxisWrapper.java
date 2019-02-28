@@ -4,6 +4,7 @@ import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
+import com.sun.istack.internal.Nullable;
 
 /**
  * This class do axis rounding and add isVisible property.
@@ -40,6 +41,10 @@ public class AxisWrapper {
     public void setTickAccuracyPct(int roundingAccuracyPct) {
         axis.setTickAccuracyPct(roundingAccuracyPct);
         setRoundingDirty();
+    }
+
+    public AxisConfig getConfig() {
+        return axis.getConfig();
     }
 
 
@@ -80,16 +85,6 @@ public class AxisWrapper {
 
     public void setTitle(String title) {
         axis.setTitle(title);
-    }
-
-    public void setTickInterval(double tickInterval) {
-        axis.setTickInterval(tickInterval);
-        setRoundingDirty();
-    }
-
-    public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
-        axis.setTickFormatInfo(tickFormatInfo);
-        setRoundingDirty();
     }
 
     public Scale getScale() {

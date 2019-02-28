@@ -82,13 +82,22 @@ public class Chart {
 
     void setMargin(Insets margin) {
         this.margin = margin;
-        graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(),
-                fullArea.width - margin.left() - margin.right(), fullArea.height - margin.top() - margin.bottom());
-        if (legend.isAttachedToStacks()) {
-            legend.setArea(graphArea);
+        if(fullArea != null) {
+            int graphAreaWidth = fullArea.width - margin.left() - margin.right();
+            int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
+            if(graphAreaHeight < 0) {
+                graphAreaHeight = 0;
+            }
+            if(graphAreaWidth < 0) {
+                graphAreaWidth = 0;
+            }
+            graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
+            if (legend.isAttachedToStacks()) {
+                legend.setArea(graphArea);
+            }
+            setYStartEnd(graphArea.y, graphArea.height);
+            setXStartEnd(graphArea.x, graphArea.width);
         }
-        setYStartEnd(graphArea.y, graphArea.height);
-        setXStartEnd(graphArea.x, graphArea.width);
     }
 
     double getBestExtent(int xIndex) {
@@ -510,7 +519,39 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setXAxisScale(int xIndex, Scale scale) {
+    public void setXConfig(int xIndex, AxisConfig axisConfig, boolean isRoundingEnabled) {
+        AxisWrapper axis = xAxisList.get(xIndex);
+        axis.setConfig(axisConfig);
+        axis.setRoundingEnabled(isRoundingEnabled);
+        setAreasDirty();
+    }
+
+    public void setYConfig(int yIndex, AxisConfig axisConfig, boolean isRoundingEnabled) {
+        AxisWrapper axis = yAxisList.get(yIndex);
+        axis.setConfig(axisConfig);
+        axis.setRoundingEnabled(isRoundingEnabled);
+        setAreasDirty();
+    }
+
+    public AxisConfig getXConfig(int xIndex) {
+        return xAxisList.get(xIndex).getConfig();
+    }
+
+    public AxisConfig getYConfig(int yIndex) {
+        return yAxisList.get(yIndex).getConfig();
+    }
+
+    public void setXTitle(int xIndex, String title) {
+        xAxisList.get(xIndex).setTitle(title);
+        setAreasDirty();
+    }
+
+    public void setYTitle(int yIndex, String title) {
+        yAxisList.get(yIndex).setTitle(title);
+        setAreasDirty();
+    }
+
+    public void setXScale(int xIndex, Scale scale) {
         AxisWrapper axis = xAxisList.get(xIndex);
         for (Trace trace : traces) {
            if(trace.getXScale() == axis.getScale()) {
@@ -521,7 +562,7 @@ public class Chart {
         setAreasDirty();
     }
 
-    public void setYAxisScale(int yIndex, Scale scale) {
+    public void setYScale(int yIndex, Scale scale) {
         AxisWrapper axis = yAxisList.get(yIndex);
         for (Trace trace : traces) {
             Scale[] traceYScales = trace.getYScales();
@@ -567,7 +608,7 @@ public class Chart {
         stackWeights.add(weight);
 
         if(chartConfig.getMargin() != null) { // fixed margins
-            setYStartEnd(graphArea.y, graphArea.height);
+            setMargin(chartConfig.getMargin());
         } else {
             setAreasDirty();
         }
@@ -698,11 +739,11 @@ public class Chart {
         return traces.size();
     }
 
-    public int xAxisCount() {
+    public int xAxesCount() {
         return xAxisList.size();
     }
 
-    public int yAxisCount() {
+    public int yAxesCount() {
         return yAxisList.size();
     }
 

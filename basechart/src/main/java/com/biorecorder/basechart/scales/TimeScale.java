@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.TickFormatInfo;
+import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -90,14 +90,14 @@ public class TimeScale implements Scale {
     }
 
     @Override
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, TickFormatInfo labelFormatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
         provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public  TickProvider getTickProviderByInterval(double tickInterval, TickFormatInfo labelFormatInfo) {
+    public  TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
         provider.setTickInterval(tickInterval);
         return provider;
