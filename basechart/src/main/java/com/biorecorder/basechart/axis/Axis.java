@@ -51,7 +51,7 @@ public abstract class Axis {
 
     private boolean isDirty = true;
     private int width = -1;
-    private int lengthMin = 25; //px
+    private int lengthMin = 26; //px
 
     public Axis(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
@@ -470,7 +470,6 @@ public abstract class Axis {
 
         // real resultant number of tick intervals
         int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue())) / tickPixelInterval);
-
         // Calculate how many ticks need to be skipped to avoid labels overlapping.
         // When ticksSkipStep = n, only every n'th label on the axis will be shown.
         // For example if ticksSkipStep = 2 every other label will be shown.
@@ -531,14 +530,17 @@ public abstract class Axis {
         double max = getMax();
 
         Tick currentTick = tickProvider.getUpperTick(min);
-        Tick nextTick = null;
-        int charSize = charSize(tm);
+        Tick nextTick = tickProvider.getNextTick();
+        tickProvider.getPreviousTick();
+
+        int tickPixelInterval = ticksSkipStep * ((int)Math.abs(scale(currentTick.getTickValue().getValue()) - scale(nextTick.getTickValue().getValue())));
+
         while (currentTick.getTickValue().compare(max) <= 0) {
             int position = (int) Math.round(scale(currentTick.getTickValue().getValue()));
             // tick position
             tickPositions.add(position);
             // tick label
-            tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), charSize));
+            tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), tickPixelInterval));
             for (int i = 0; i < ticksSkipStep; i++) {
                 nextTick = tickProvider.getNextTick();
             }
@@ -606,8 +608,7 @@ public abstract class Axis {
 
     protected abstract int labelSizeForOverlap(TextMetric tm, int angle, String label);
 
-    protected abstract BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize);
-    protected abstract int charSize(TextMetric tm);
+    protected abstract BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval);
 
     protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
 

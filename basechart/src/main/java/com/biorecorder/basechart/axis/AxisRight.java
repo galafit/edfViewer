@@ -16,11 +16,11 @@ public class AxisRight extends AxisVertical {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 1;// px
-        int labelHeight = charSize;
+        int labelHeight = tm.ascent();
 
         if (config.isTickLabelOutside()) {
             int y = tickPosition;
@@ -45,11 +45,6 @@ public class AxisRight extends AxisVertical {
             y = tickPosition - space;
             return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
         }
-    }
-
-    @Override
-    protected int charSize(TextMetric tm) {
-        return tm.ascent();
     }
 
     @Override

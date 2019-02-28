@@ -12,6 +12,7 @@ abstract class AxisHorizontal extends Axis {
         super(scale, axisConfig);
     }
 
+
     @Override
     protected int labelSizeForWidth(TextMetric tm, int angle, String label) {
         return tm.height();

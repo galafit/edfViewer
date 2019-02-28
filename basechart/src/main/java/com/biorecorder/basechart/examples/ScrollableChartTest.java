@@ -51,16 +51,16 @@ public class ScrollableChartTest extends JFrame{
         xyData2.addColumn(xData);
         xyData2.addColumn(yData2);
 
-        NavigableChart chart = new NavigableChart(new DarkTheme().getNavigableChartConfig());
-        chart.addChartTrace(new LineTrace(xyData1), false , true, false);
+        NavigableChart chart = new NavigableChart(new WhiteTheme().getNavigableChartConfig());
+        chart.addChartTrace(new LineTrace(xyData1), false );
       //  chart.addChartTrace(0, new LineTrace(xyData2), false , true, false);
         chart.addChartStack();
-        chart.addChartTrace(new LineTrace(xyData1), false , true, false);
+        chart.addChartTrace(new LineTrace(xyData1), false );
 
 
-        chart.addNavigatorTrace( new LineTrace(xyData1), false, false, false);
+        chart.addNavigatorTrace( new LineTrace(xyData1), false);
         chart.addNavigatorStack();
-        chart.addNavigatorTrace(new LineTrace(xyData2), false, false, false);
+        chart.addNavigatorTrace(new LineTrace(xyData2), false);
 
         chartPanel = new ChartPanel(chart);
 

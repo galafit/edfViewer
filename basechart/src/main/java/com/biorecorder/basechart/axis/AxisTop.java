@@ -16,12 +16,13 @@ public class AxisTop extends AxisHorizontal {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
+        int charSize = tm.stringWidth("0");
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
         int charHalfWidth = charSize/2;
-
+        int labelSize = charSize * tickLabel.length();
         if(config.isTickLabelOutside()) {
             int x = tickPosition - charHalfWidth;
             int y = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
@@ -31,7 +32,10 @@ public class AxisTop extends AxisHorizontal {
             }
 
             if(x + charSize * tickLabel.length() > getEnd()) {
-                return new BText(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.START, tm);
+                int x1 = x - (tickPixelInterval - 2 * labelSize);
+                int x2 = (int)getEnd();
+                x = Math.max(x1, x2);
+                return new BText(tickLabel, x , y, TextAnchor.END, TextAnchor.START, tm);
             }
             return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
 
@@ -39,17 +43,15 @@ public class AxisTop extends AxisHorizontal {
             int y = axisWidth / 2  + labelPadding;
             int x = tickPosition + space;
             if(x + charSize * tickLabel.length() > getEnd()) {
-                x = (int)getEnd();
-                return new BText(tickLabel, (int)getEnd(), x, TextAnchor.END, TextAnchor.END, tm);
+                int x1 = x - (tickPixelInterval - 2 * labelSize);
+                int x2 = (int)getEnd();
+                x = Math.max(x1, x2);
+                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
             }
             return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
         }
     }
 
-    @Override
-    protected int charSize(TextMetric tm) {
-        return tm.stringWidth("0");
-    }
 
     @Override
     protected void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize) {

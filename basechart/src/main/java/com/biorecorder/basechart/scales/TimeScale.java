@@ -205,6 +205,9 @@ public class TimeScale implements Scale {
             long max =  domain[domain.length - 1];
             long min =  domain[0];
             long interval = (max - min) / tickIntervalCount;
+            if(interval <= 0) {
+                interval = 1;
+            }
             for (int i = 0; i < TIME_INTERVALS.length - 1; i++) {
                 if(interval >= TIME_INTERVALS[i] && interval <= TIME_INTERVALS[i + 1]) {
                     if(interval - TIME_INTERVALS[i] <= TIME_INTERVALS[i + 1] - interval) {

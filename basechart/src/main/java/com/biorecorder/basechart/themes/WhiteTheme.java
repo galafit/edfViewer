@@ -57,8 +57,8 @@ public class WhiteTheme implements Theme {
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
-        chartConfig.getLeftAxisConfig().setTickLabelOutside(false);
-        chartConfig.getRightAxisConfig().setTickLabelOutside(false);
+        chartConfig.setLeftAxisPrimary(false);
+        chartConfig.setBottomAxisPrimary(true);
 
         this.chartConfig = chartConfig;
 
@@ -86,6 +86,8 @@ public class WhiteTheme implements Theme {
         ChartConfig chartConfig1 = new ChartConfig(chartConfig);
         chartConfig1.getLeftAxisConfig().setTickLabelOutside(false);
         chartConfig1.getRightAxisConfig().setTickLabelOutside(false);
+        chartConfig1.setLeftAxisPrimary(false);
+        chartConfig1.setBottomAxisPrimary(false);
 
         navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);
         navigableChartConfig.setBackgroundColor(bgColor);

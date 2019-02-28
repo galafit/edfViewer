@@ -31,7 +31,7 @@ public class ChartConfig {
 
     private boolean isMultiCurveTooltip = true;
 
-    private boolean isLeftAxisPrimary = false;
+    private boolean isLeftAxisPrimary = true;
     private boolean isBottomAxisPrimary = true;
 
     private int defaultStackWeight = 4;

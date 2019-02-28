@@ -17,11 +17,11 @@ public class AxisLeft extends AxisVertical {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
-        int labelHeight = charSize;
+        int labelHeight = tm.ascent();;
 
         if(config.isTickLabelOutside()) {
             int y = tickPosition;
@@ -49,10 +49,6 @@ public class AxisLeft extends AxisVertical {
         }
     }
 
-    @Override
-    protected int charSize(TextMetric tm) {
-        return tm.ascent();
-    }
 
     @Override
     protected void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize) {

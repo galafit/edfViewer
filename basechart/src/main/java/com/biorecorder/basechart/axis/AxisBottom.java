@@ -17,20 +17,25 @@ public class AxisBottom extends AxisHorizontal {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int charSize) {
+    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
+        int charSize = tm.stringWidth("0");
         int axisWidth = config.getAxisLineStroke().getWidth();
         int labelPadding = config.getTickPadding();
         int space = 2;// px
         int charHalfWidth = charSize/2;
-
+        int labelSize = charSize * tickLabel.length();
         if(config.isTickLabelOutside()) {
             int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
             int x = tickPosition - charHalfWidth;
             if(x < getStart()) {
                 x = (int)getStart();
             }
-            if(x + charSize * tickLabel.length() > getEnd()) {
-                return new BText(tickLabel, (int)getEnd(), y, TextAnchor.END, TextAnchor.END, tm);
+
+             if(x + labelSize > getEnd()) {
+                int x1 = x - (tickPixelInterval - 2 * labelSize);
+                int x2 = (int)getEnd();
+                x = Math.max(x1, x2);
+                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
             }
 
             return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
@@ -39,16 +44,13 @@ public class AxisBottom extends AxisHorizontal {
             int x = tickPosition + space;
 
             if(x + charSize * tickLabel.length() > getEnd()) {
-                x = (int)getEnd();
+                int x1 = x - (tickPixelInterval - 2 * labelSize);
+                int x2 = (int)getEnd();
+                x = Math.max(x1, x2);
                 return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
             }
             return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
         }
-    }
-
-    @Override
-    protected int charSize(TextMetric tm) {
-        return tm.stringWidth("0");
     }
 
     @Override

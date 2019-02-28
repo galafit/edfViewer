@@ -58,7 +58,7 @@ public class Chart {
         this.chartConfig = new ChartConfig(chartConfig1);
 
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new TimeScale(), chartConfig.getBottomAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(new LinearScale(), chartConfig.getTopAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(new TimeScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         if (chartConfig.isXAxisRoundingEnabled()) {
