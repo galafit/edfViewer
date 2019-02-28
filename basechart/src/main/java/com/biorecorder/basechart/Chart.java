@@ -19,6 +19,10 @@ public class Chart {
     private String title;
 
     private boolean isLegendVisible = true;
+
+    private int axisTickAccuracyPctIfRoundingEnabled = 10; // 5 for more smooth translation and zooming
+    private int axisTickAccuracyPctIfRoundingDisabled = 20;
+
     private ChartConfig chartConfig = new ChartConfig();
 
     /*
@@ -61,12 +65,12 @@ public class Chart {
         AxisWrapper topAxis = new AxisWrapper(new AxisTop(new TimeScale(), chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-        if (chartConfig.isXAxisRoundingEnabled()) {
-            bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
-            topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+        if (chartConfig.isYAxisRoundingEnabled()) {
+            topAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
+            bottomAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
         } else {
-            bottomAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
-            topAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+            topAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
+            bottomAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
         }
 
         xAxisList.add(bottomAxis);
@@ -551,12 +555,13 @@ public class Chart {
         leftAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
         rightAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
         if (chartConfig.isYAxisRoundingEnabled()) {
-            leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
-            rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingEnabled());
+            leftAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
+            rightAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
         } else {
-            leftAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
-            rightAxis.setRoundingAccuracyPct(chartConfig.getAxisRoundingAccuracyPctIfRoundingDisabled());
+            leftAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
+            rightAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
         }
+
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);

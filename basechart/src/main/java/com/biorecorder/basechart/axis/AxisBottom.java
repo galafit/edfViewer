@@ -17,39 +17,20 @@ public class AxisBottom extends AxisHorizontal {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
-        int charSize = tm.stringWidth("0");
-        int axisWidth = config.getAxisLineStroke().getWidth();
-        int labelPadding = config.getTickPadding();
-        int space = 2;// px
-        int charHalfWidth = charSize/2;
-        int labelSize = charSize * tickLabel.length();
+    protected int getLabelY() {
         if(config.isTickLabelOutside()) {
-            int y = axisWidth / 2 + config.getTickMarkOutsideSize() + labelPadding;
-            int x = tickPosition - charHalfWidth;
-            if(x < getStart()) {
-                x = (int)getStart();
-            }
-
-             if(x + labelSize > getEnd()) {
-                int x1 = x - (tickPixelInterval - 2 * labelSize);
-                int x2 = (int)getEnd();
-                x = Math.max(x1, x2);
-                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
-            }
-
-            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END, tm);
+            return  config.getAxisLineStroke().getWidth() / 2 + config.getTickMarkOutsideSize() + config.getTickPadding();
         } else {
-            int y = -axisWidth / 2 - labelPadding;
-            int x = tickPosition + space;
+            return -config.getAxisLineStroke().getWidth() / 2  - config.getTickPadding();
+        }
+    }
 
-            if(x + charSize * tickLabel.length() > getEnd()) {
-                int x1 = x - (tickPixelInterval - 2 * labelSize);
-                int x2 = (int)getEnd();
-                x = Math.max(x1, x2);
-                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
-            }
-            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
+    @Override
+    protected TextAnchor getLabelVTextAnchor() {
+        if(config.isTickLabelOutside()) {
+            return TextAnchor.END;
+        } else {
+            return TextAnchor.START;
         }
     }
 

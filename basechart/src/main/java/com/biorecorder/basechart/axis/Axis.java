@@ -8,6 +8,7 @@ import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.scales.TickProvider;
+import com.sun.istack.internal.Nullable;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -30,19 +31,18 @@ public abstract class Axis {
 
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
 
-    // used to calculate number of ticks. If <= 0 will not be taken into account
-    private int roundingAccuracyPct = 20; // percents for min
-    protected AxisConfig config;
+    private double tickInterval = -1; // in axis domain units
+    private TickFormatInfo tickFormatInfo;
+    // Used to calculate number of ticks. If <= 0 will not be taken into account
+    //Specify maximum distance between axis start and minTick in relation to axis length (percents)
+    private int tickAccuracyPct = 20; // (minTick - min) * 100 / length
 
     protected String title;
+    protected AxisConfig config;
+
     private Scale scale;
 
-    private double tickInterval = -1; // in axis domain units
-    private int minorTickIntervalCount = 0; // number of minor intervals in one major interval
-    private TickFormatInfo tickFormatInfo = new TickFormatInfo();
-
     private TickProvider tickProvider;
-
     private int ticksSkipStep = 1;
     private List<BText> tickLabels = new ArrayList<>();
     private IntArrayList tickPositions = new IntArrayList();
@@ -51,7 +51,6 @@ public abstract class Axis {
 
     private boolean isDirty = true;
     private int width = -1;
-    private int lengthMin = 26; //px
 
     public Axis(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
@@ -65,6 +64,7 @@ public abstract class Axis {
     }
 
     private boolean isTooShort() {
+        int lengthMin = config.getTickLabelTextStyle().getSize() * 3;
         if(length() > lengthMin) {
             return false;
         }
@@ -82,15 +82,6 @@ public abstract class Axis {
         setDirty();
     }
 
-    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
-        this.minorTickIntervalCount = minorTickIntervalCount;
-        setDirty();
-    }
-
-    public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
-        this.tickFormatInfo = tickFormatInfo;
-        setDirty();
-    }
 
     /**
      * Specify maximum distance between axis start and minTick
@@ -98,11 +89,19 @@ public abstract class Axis {
      * Ticks count is calculated on the base of the given rounding accuracy.
      * If rounding accuracy <= 0 it will not be taken into account!!!
      *
-     * @param roundingAccuracyPct - rounding accuracy percents
+     * @param tickAccuracyPct - rounding accuracy percents
      */
-    public void setRoundingAccuracyPct(int roundingAccuracyPct) {
-        this.roundingAccuracyPct = roundingAccuracyPct;
+    public void setTickAccuracyPct(int tickAccuracyPct) {
+        this.tickAccuracyPct = tickAccuracyPct;
+        setDirty();
     }
+
+
+    public void setTickFormatInfo(@Nullable TickFormatInfo tickFormatInfo) {
+        this.tickFormatInfo = tickFormatInfo;
+        setDirty();
+    }
+
 
     /**
      * set Axis scale. Inner scale is a COPY of the given scale
@@ -338,8 +337,9 @@ public abstract class Axis {
         scale.setDomain(tickMin.getTickValue().getValue(), tickMax.getTickValue().getValue());
     }
 
+
     public void drawGrid(BCanvas canvas, BRectangle area) {
-        if(isTooShort()) {
+        if(isTooShort() || config.getGridLineStroke().getWidth() == 0) {
             return;
         }
         canvas.save();
@@ -433,8 +433,8 @@ public abstract class Axis {
             return;
         }
         int tickIntervalCountByRoundingUncertainty = 0;
-        if (roundingAccuracyPct > 0) {
-            tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / roundingAccuracyPct);
+        if (tickAccuracyPct > 0) {
+            tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / tickAccuracyPct);
         }
         if (isTickIntervalSpecified()) {
             tickProvider = scale.getTickProviderByInterval(tickInterval, tickFormatInfo);
@@ -494,7 +494,7 @@ public abstract class Axis {
         }
 
         if (ticksSkipStep > 1) {
-            if (isTickIntervalSpecified() || roundingAccuracyPct <= 0) {
+            if (isTickIntervalSpecified() || tickAccuracyPct <= 0) {
                 tickProvider.increaseTickInterval(ticksSkipStep);
                 ticksSkipStep = 1;
             }
@@ -528,6 +528,7 @@ public abstract class Axis {
 
         double min = getMin();
         double max = getMax();
+        int minorTickIntervalCount = config.getMinorTickIntervalCount();
 
         Tick currentTick = tickProvider.getUpperTick(min);
         Tick nextTick = tickProvider.getNextTick();

@@ -17,38 +17,22 @@ public class AxisLeft extends AxisVertical {
     }
 
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
-        int axisWidth = config.getAxisLineStroke().getWidth();
-        int labelPadding = config.getTickPadding();
-        int space = 2;// px
-        int labelHeight = tm.ascent();;
-
+    protected int getLabelX() {
         if(config.isTickLabelOutside()) {
-            int y = tickPosition;
-            int x = -axisWidth / 2 - config.getTickMarkOutsideSize() - labelPadding;
-            if(y + labelHeight/2 + 1 > getStart()) {
-                y = (int)getStart() - space;
-                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.START, tm);
-            }
-            if(y - labelHeight/2 - 1 < getEnd()) {
-                y = (int)getEnd();
-                return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.END, tm);
-            }
-            return new BText(tickLabel, x, y, TextAnchor.END, TextAnchor.MIDDLE, tm);
-
+            return -config.getAxisLineStroke().getWidth() / 2 - config.getTickMarkOutsideSize() - config.getTickPadding();
         } else {
-            int y = tickPosition;
-            int x = axisWidth / 2  + labelPadding;
-
-            if(y - labelHeight - 1 < getEnd()) {
-                //y = (int)getEnd();
-                return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.END , tm);
-            }
-            y = tickPosition - space;
-            return new BText(tickLabel, x, y, TextAnchor.START, TextAnchor.START, tm);
+            return config.getAxisLineStroke().getWidth() / 2  + config.getTickPadding();
         }
     }
 
+    @Override
+    protected TextAnchor getLabelHTextAnchor() {
+        if(config.isTickLabelOutside()) {
+            return TextAnchor.END;
+        } else {
+            return TextAnchor.START;
+        }
+    }
 
     @Override
     protected void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize) {

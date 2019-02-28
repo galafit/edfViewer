@@ -26,15 +26,17 @@ public class AxisConfig {
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
-    private BStroke gridLineStroke = new BStroke(1);
+    private BStroke gridLineStroke = new BStroke(0);
     private BColor gridColor = BColor.GRAY_LIGHT;
 
     private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
     private BColor minorGridColor = BColor.GRAY_LIGHT;
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
+    private int minorTickIntervalCount = 0; // number of minor intervals in one major interval
 
     private boolean isTickLabelOutside = true;
+
 
     public AxisConfig() {
         titlePadding = (int)(0.4 * titleTextStyle.getSize());
@@ -62,12 +64,21 @@ public class AxisConfig {
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
         minorTickMarkInsideSize = axisConfig.minorTickMarkInsideSize;
         minorTickMarkColor = axisConfig.minorTickMarkColor;
+        minorTickIntervalCount = axisConfig.minorTickIntervalCount;
 
         titlePadding = axisConfig.titlePadding;
         titleTextStyle = axisConfig.titleTextStyle;
         titleColor = axisConfig.titleColor;
 
         isTickLabelOutside = axisConfig.isTickLabelOutside;
+    }
+
+    public int getMinorTickIntervalCount() {
+        return minorTickIntervalCount;
+    }
+
+    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
+        this.minorTickIntervalCount = minorTickIntervalCount;
     }
 
     public void setColors(BColor baseColor, BColor gridColor, BColor minorGridColor) {

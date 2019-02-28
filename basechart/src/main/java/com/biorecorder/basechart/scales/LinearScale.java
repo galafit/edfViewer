@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.TickFormatInfo;
+import com.sun.istack.internal.Nullable;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;

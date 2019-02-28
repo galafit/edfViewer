@@ -35,10 +35,10 @@ public class ChartConfig {
     private boolean isBottomAxisPrimary = true;
 
     private int defaultStackWeight = 4;
-    private int axisRoundingAccuracyPctIfRoundingEnabled = 10; // 5 for more smooth translation and zooming
-    private int axisRoundingAccuracyPctIfRoundingDisabled = 20;
     private boolean isYAxisRoundingEnabled = false;
     private boolean isXAxisRoundingEnabled = false;
+    private boolean isXAxisGridVisible = true;
+    private boolean isYAxisGridVisible = true;
 
     public ChartConfig() {
         final BColor BLUE = new BColor(0, 130, 230);
@@ -105,8 +105,6 @@ public class ChartConfig {
         isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
         isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
         defaultStackWeight = chartConfig.defaultStackWeight;
-        axisRoundingAccuracyPctIfRoundingEnabled = chartConfig.axisRoundingAccuracyPctIfRoundingEnabled;
-        axisRoundingAccuracyPctIfRoundingDisabled = chartConfig.axisRoundingAccuracyPctIfRoundingDisabled;
 
         isYAxisRoundingEnabled = chartConfig.isYAxisRoundingEnabled;
         isXAxisRoundingEnabled = chartConfig.isXAxisRoundingEnabled;
@@ -180,22 +178,6 @@ public class ChartConfig {
 
     public void setDefaultStackWeight(int defaultStackWeight) {
         this.defaultStackWeight = defaultStackWeight;
-    }
-
-    public int getAxisRoundingAccuracyPctIfRoundingEnabled() {
-        return axisRoundingAccuracyPctIfRoundingEnabled;
-    }
-
-    public void setAxisRoundingAccuracyPctIfRoundingEnabled(int axisRoundingAccuracyPctIfRoundingEnabled) {
-        this.axisRoundingAccuracyPctIfRoundingEnabled = axisRoundingAccuracyPctIfRoundingEnabled;
-    }
-
-    public int getAxisRoundingAccuracyPctIfRoundingDisabled() {
-        return axisRoundingAccuracyPctIfRoundingDisabled;
-    }
-
-    public void setAxisRoundingAccuracyPctIfRoundingDisabled(int axisRoundingAccuracyPctIfRoundingDisabled) {
-        this.axisRoundingAccuracyPctIfRoundingDisabled = axisRoundingAccuracyPctIfRoundingDisabled;
     }
 
     public boolean isYAxisRoundingEnabled() {

@@ -1,5 +1,7 @@
 package com.biorecorder.basechart.axis;
 
+import com.sun.istack.internal.Nullable;
+
 /**
  * Created by galafit on 5/9/17.
  */
@@ -32,7 +34,7 @@ public class TickFormatInfo {
         return prefix;
     }
 
-    public void setPrefix(String prefix) {
+    public void setPrefix(@Nullable String prefix) {
         this.prefix = prefix;
     }
 
@@ -40,7 +42,7 @@ public class TickFormatInfo {
         return suffix;
     }
 
-    public void setSuffix(String suffix) {
+    public void setSuffix(@Nullable String suffix) {
         this.suffix = suffix;
     }
 }

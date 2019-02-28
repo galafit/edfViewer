@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.themes;
 
 import com.biorecorder.basechart.ChartConfig;
+import com.biorecorder.basechart.HorizontalAlign;
 import com.biorecorder.basechart.NavigableChartConfig;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;

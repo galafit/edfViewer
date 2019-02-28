@@ -30,17 +30,18 @@ public class AxisWrapper {
         axis.setMinMax(rowMinMax);
     }
 
-    public void setRoundingAccuracyPct(int roundingAccuracyPct) {
-        axis.setRoundingAccuracyPct(roundingAccuracyPct);
-        setRoundingDirty();
-    }
-
     private boolean isDirty() {
         if (isRoundingEnabled && roundingDirty) {
             return true;
         }
         return false;
     }
+
+    public void setTickAccuracyPct(int roundingAccuracyPct) {
+        axis.setTickAccuracyPct(roundingAccuracyPct);
+        setRoundingDirty();
+    }
+
 
     public double length() {
         return axis.length();
@@ -84,10 +85,6 @@ public class AxisWrapper {
     public void setTickInterval(double tickInterval) {
         axis.setTickInterval(tickInterval);
         setRoundingDirty();
-    }
-
-    public void setMinorTickIntervalCount(int minorTickIntervalCount) {
-        axis.setMinorTickIntervalCount(minorTickIntervalCount);
     }
 
     public void setTickFormatInfo(TickFormatInfo tickFormatInfo) {
