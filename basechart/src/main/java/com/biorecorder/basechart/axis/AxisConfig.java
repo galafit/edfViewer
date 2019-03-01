@@ -57,7 +57,7 @@ public class AxisConfig {
 
 
     public AxisConfig() {
-        titlePadding = (int)(0.4 * titleTextStyle.getSize());
+        titlePadding = (int)(0.5 * titleTextStyle.getSize());
         tickPadding = (int)(0.5 * tickLabelTextStyle.getSize());
     }
 

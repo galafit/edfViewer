@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.list.IntArrayList;
@@ -8,6 +9,8 @@ import com.biorecorder.basechart.swing.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by galafit on 21/9/18.
@@ -78,7 +81,7 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(xData3);
         xyData3.addColumn(yData3);
 
-        Chart chart = new Chart();
+        Chart chart = new Chart(new WhiteTheme().getChartConfig());
 
         chart.addTrace(new LineTrace(xyData1), false, false, false);
         chart.addStack();
@@ -98,6 +101,39 @@ public class ChartTest extends JFrame {
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
+
+
+        final Timer timer = new Timer(3000, new ActionListener() {
+            int counter = 0;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (counter == 0) {
+                   chart.setConfig(new DarkTheme().getChartConfig());
+                   chartPanel.repaint();
+                }
+                if (counter == 1) {
+                    chart.setYTitle(1, "Y title");
+                    chartPanel.repaint();
+                }
+                if (counter == 2) {
+                    chart.setTitle("Chart title");
+                    chartPanel.repaint();
+                }
+                if (counter == 3) {
+                    AxisConfig xConfig = chart.getXConfig(0);
+                    xConfig.setLabelPrefixAndSuffix(null, "kg");
+                    chart.setXConfig(0, xConfig, true);
+                    chartPanel.repaint();
+                }
+
+
+                counter++;
+            }
+        });
+
+        timer.start();
+
 
     }
 

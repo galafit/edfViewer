@@ -51,6 +51,7 @@ public abstract class Axis {
 
     private void setDirty() {
         tickProvider = null;
+        titleText = null;
         isDirty = true;
         width = -1;
     }
@@ -66,7 +67,8 @@ public abstract class Axis {
 
     public void setTitle(String title) {
         this.title = title;
-        setDirty();
+        titleText = null;
+        width = -1;
     }
 
 
@@ -112,8 +114,19 @@ public abstract class Axis {
         setDirty();
     }
 
-    public boolean isTickLabelOutside() {
-        return config.isTickLabelOutside();
+    public boolean hasTextOutside() {
+        if(config.isTickLabelOutside() || !isTitleEmpty()) {
+            return true;
+        }
+        return false;
+
+    }
+
+    private boolean isTitleEmpty() {
+        if(title == null || title.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -236,7 +249,7 @@ public abstract class Axis {
 
             if (config.isTickLabelOutside()) {
                 if (isDirty) {
-                    createAxisElements(canvas);
+                    createTicks(canvas);
                 }
                 if (tickLabels.size() > 0) {
                     TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
@@ -248,7 +261,7 @@ public abstract class Axis {
 
                 }
             }
-            if (title != null) {
+            if (!isTitleEmpty()) {
                 TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
                 width += config.getTitlePadding() + tm.height();
             }
@@ -311,7 +324,7 @@ public abstract class Axis {
         }
         canvas.save();
         if (isDirty) {
-            createAxisElements(canvas);
+            createTicks(canvas);
         }
 
         translateCanvas(canvas, area);
@@ -335,7 +348,7 @@ public abstract class Axis {
         canvas.save();
 
         if (isDirty) {
-            createAxisElements(canvas);
+            createTicks(canvas);
         }
         translateCanvas(canvas, area);
 
@@ -363,7 +376,10 @@ public abstract class Axis {
                 tickLabel.draw(canvas);
             }
 
-            if (title != null) {
+            if (! isTitleEmpty()) {
+                if(titleText == null) {
+                    titleText = createTitle(canvas);
+                }
                 canvas.setColor(config.getTitleColor());
                 canvas.setTextStyle(config.getTitleTextStyle());
                 titleText.draw(canvas);
@@ -480,7 +496,7 @@ public abstract class Axis {
         }
     }
 
-    private void createAxisElements(BCanvas canvas) {
+    private void createTicks(BCanvas canvas) {
         if(isTooShort()) {
             return;
         }
@@ -560,11 +576,6 @@ public abstract class Axis {
                 }
                 minorTickPositions.add(0, minorTickAdditionalPositions);
             }
-        }
-
-        // title
-        if (title != null) {
-            titleText = createTitle(canvas);
         }
 
         isDirty = false;

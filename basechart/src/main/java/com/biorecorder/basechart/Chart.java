@@ -5,7 +5,6 @@ import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
-import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.sun.istack.internal.Nullable;
 
@@ -17,8 +16,6 @@ import java.util.List;
  */
 public class Chart {
     private String title;
-
-    private boolean isLegendVisible = true;
 
     private ChartConfig chartConfig = new ChartConfig();
 
@@ -81,7 +78,33 @@ public class Chart {
         xAxisList.add(topAxis);
 
         //legend
+        if(chartConfig.getLegendConfig().isEnabled()) {
+            createLegend();
+        }
+    }
+
+    private void addTraceCurveToLegend(Trace trace, int curveNumber) {
+        StateListener traceSelectionListener = new StateListener() {
+            @Override
+            public void stateChanged(boolean isSelected) {
+                if (isSelected) {
+                    selectedCurve = new TraceCurve(trace, curveNumber);
+                }
+                if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
+                    selectedCurve = null;
+                }
+            }
+        };
+        legend.add(trace, curveNumber, traceSelectionListener);
+    }
+
+    private void createLegend() {
         legend = new Legend(chartConfig.getLegendConfig());
+        for (Trace trace : traces) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+               addTraceCurveToLegend(trace, i);
+            }
+        }
     }
 
     void setMargin(Insets margin) {
@@ -96,7 +119,7 @@ public class Chart {
                 graphAreaWidth = 0;
             }
             graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
-            if (legend.isAttachedToStacks()) {
+            if (isLegendEnabled() && legend.isAttachedToStacks()) {
                 legend.setArea(graphArea);
             }
             setYStartEnd(graphArea.y, graphArea.height);
@@ -190,11 +213,11 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
            AxisWrapper axis = yAxisList.get(i);
            if(i % 2 == 0) { // left
-              if(axis.isVisible() && axis.isTickLabelOutside()) {
+              if(axis.isVisible() && axis.hasTextOutside()) {
                  spacingLeft = chartConfig.getAutoSpacing();
               }
            } else { // right
-               if(axis.isVisible() && axis.isTickLabelOutside()) {
+               if(axis.isVisible() && axis.hasTextOutside()) {
                    spacingRight = chartConfig.getAutoSpacing();
                }
            }
@@ -203,11 +226,11 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
             if(i % 2 == 0) { // bottom
-                if(axis.isVisible() && axis.isTickLabelOutside()) {
+                if(axis.isVisible() && axis.hasTextOutside()) {
                     spacingBottom = chartConfig.getAutoSpacing();
                 }
             } else { // top
-                if(axis.isVisible() && axis.isTickLabelOutside()) {
+                if(axis.isVisible() && axis.hasTextOutside()) {
                     spacingTop = chartConfig.getAutoSpacing();
                 }
             }
@@ -216,7 +239,7 @@ public class Chart {
         if(title != null){
             spacingTop = 0;
         }
-        if(!legend.isAttachedToStacks()) {
+        if(isLegendEnabled() && !legend.isAttachedToStacks()) {
             if(legend.isTop()) {
                 spacingTop = 0;
             } else if (legend.isBottom()) {
@@ -226,13 +249,22 @@ public class Chart {
         return new Insets(spacingTop, spacingRight, spacingBottom, spacingLeft);
     }
 
-    void calculateMarginsAndAreas(BCanvas canvas) {
-        if(chartConfig.getMargin() != null) { // fixed margin
-            return;
+    public boolean isLegendEnabled() {
+        if(legend != null) {
+            return true;
         }
+        return false;
+    }
+
+    void calculateMarginsAndAreas(BCanvas canvas) {
         if(fullArea.width == 0 || fullArea.height == 0) {
             graphArea = fullArea;
             margin = new Insets(0);
+            return;
+        }
+
+        if(chartConfig.getMargin() != null) { // fixed margin
+            setMargin(chartConfig.getMargin());
             return;
         }
 
@@ -251,7 +283,7 @@ public class Chart {
         int bottom = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
 
         int legendHeight = 0;
-        if (!legend.isAttachedToStacks()) {
+        if (isLegendEnabled() && !legend.isAttachedToStacks()) {
             BRectangle legendArea = new BRectangle(fullArea.x + spacing.left(), fullArea.y + titleHeight + spacing.top(), fullArea.width - spacing.left() - spacing.right(), fullArea.height - titleHeight - spacing.top() - spacing.bottom());
             legend.setArea(legendArea);
             legendHeight = legend.getHeight(canvas);
@@ -282,7 +314,7 @@ public class Chart {
         setXStartEnd(fullArea.x + left, fullArea.width - left - right);
         int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
         int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
-        if (!legend.isAttachedToStacks()) {
+        if (isLegendEnabled() && !legend.isAttachedToStacks()) {
             if (legend.isTop()) {
                 topNew += legendHeight;
             }
@@ -301,7 +333,7 @@ public class Chart {
         graphArea = new BRectangle(fullArea.x + left, fullArea.y + top,
                 Math.max(0, fullArea.width - left - right), Math.max(0, fullArea.height - top - bottom));
 
-        if (legend.isAttachedToStacks()) {
+        if (isLegendEnabled() && legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
         }
     }
@@ -481,7 +513,7 @@ public class Chart {
 
         titleText.draw(canvas);
 
-        if (isLegendVisible) {
+        if (isLegendEnabled()) {
             legend.draw(canvas);
         }
 
@@ -521,6 +553,38 @@ public class Chart {
     /**
      * =======================Base methods to interact==========================
      **/
+    public void setConfig(ChartConfig config) {
+        this.chartConfig = config;
+        titleText = null;
+        for (int i = 0; i < xAxisList.size(); i++) {
+            if(i % 2 == 0)  { // bottom axis
+                xAxisList.get(i).setConfig(chartConfig.getBottomAxisConfig());
+            } else { // top axis
+                xAxisList.get(i).setConfig(chartConfig.getTopAxisConfig());
+            }
+        }
+        for (int i = 0; i < yAxisList.size(); i++) {
+            if(i % 2 == 0)  { // left axis
+                yAxisList.get(i).setConfig(chartConfig.getLeftAxisConfig());
+            } else { // right axis
+                yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
+            }
+        }
+        if(chartConfig.getLegendConfig().isEnabled()) {
+            createLegend();
+        }
+
+        BColor[] colors = chartConfig.getTraceColors();
+        int curve = 0;
+        for (Trace trace : traces) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+                trace.setCurveColor(i, colors[(curve + i) % colors.length]);
+                curve++;
+            }
+        }
+        setAreasDirty();
+    }
+
 
     public void setXConfig(int xIndex, AxisConfig axisConfig, boolean isRoundingEnabled) {
         AxisWrapper axis = xAxisList.get(xIndex);
@@ -579,13 +643,9 @@ public class Chart {
         setAreasDirty();
     }
 
-    public void setLegendVisible(boolean isLegendVisible) {
-        this.isLegendVisible = isLegendVisible;
-        setAreasDirty();
-    }
-
     public void setTitle(String title) {
         this.title = title;
+        titleText = null;
         setAreasDirty();
     }
 
@@ -705,30 +765,21 @@ public class Chart {
             if (trace.getCurveName(i) == null || trace.getCurveName(i).isEmpty()) {
                 trace.setCurveName(i, "Trace" + traces.size() + "_curve" + i);
             }
-
         }
 
         traces.add(trace);
 
-        for (int i = 0; i < trace.curveCount(); i++) {
-            final int curveNumber = i;
-            StateListener traceSelectionListener = new StateListener() {
-                @Override
-                public void stateChanged(boolean isSelected) {
-                    if (isSelected) {
-                        selectedCurve = new TraceCurve(trace, curveNumber);
-                    }
-                    if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
-                        selectedCurve = null;
-                    }
-                }
-            };
-            legend.add(trace, i, traceSelectionListener);
+        if(isLegendEnabled()) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+                addTraceCurveToLegend(trace, i);
+            }
         }
     }
 
     public void removeTrace(int traceNumber) {
-        legend.remove(traces.get(traceNumber));
+        if(isLegendEnabled()) {
+            legend.remove(traces.get(traceNumber));
+        }
         traces.remove(traceNumber);
     }
 
@@ -755,7 +806,7 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            if (xAxisList.get(xIndex).isTickLabelOutside()) {
+            if (xAxisList.get(xIndex).hasTextOutside()) {
                 setAreasDirty();
             }
         }
@@ -771,7 +822,7 @@ public class Chart {
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
         yAxisList.get(yAxisIndex).setMinMax(min, max);
-        if (yAxisList.get(yAxisIndex).isTickLabelOutside()) {
+        if (yAxisList.get(yAxisIndex).hasTextOutside()) {
             setAreasDirty();
         }
     }
@@ -845,7 +896,7 @@ public class Chart {
 
 
     public boolean selectCurve(int x, int y) {
-        if (legend.selectItem(x, y)) {
+        if (isLegendEnabled() && legend.selectItem(x, y)) {
             return true;
         }
         return false;

@@ -51,6 +51,7 @@ public class AxisLeft extends AxisVertical {
         canvas.drawLine(x1, y, x2, y);
     }
 
+
     @Override
     protected BText createTitle(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());

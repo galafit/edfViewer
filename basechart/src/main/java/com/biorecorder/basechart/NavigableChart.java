@@ -231,7 +231,6 @@ public class NavigableChart {
      * =======================Base methods to interact==========================
      **/
 
-
     public void setArea(BRectangle area) {
         fullArea = area;
         calculateAndSetAreas();
@@ -377,6 +376,28 @@ public class NavigableChart {
         chart.addStack(weight);
     }
 
+    public void setChartStackWeigt(int stack, int weight) {
+        chart.setStackWeight(stack, weight);
+    }
+
+    public void setChartXTitle(int xIndex, String title) {
+        chart.setXTitle(xIndex, title);
+    }
+
+    public void setChartYTitle(int yIndex, String title) {
+        chart.setYTitle(yIndex, title);
+    }
+
+    public void setChartXScale(int xIndex, Scale scale) {
+        chart.setXScale(xIndex, scale);
+    }
+
+    public void setChartYScale(int yIndex, Scale scale) {
+        chart.setYScale(yIndex, scale);
+        scrolls.clear();
+        isScrollDirty = true;
+    }
+
     public void addChartTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
         chart.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
         isScrollDirty = true;
@@ -396,8 +417,6 @@ public class NavigableChart {
         chart.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
         isScrollDirty = true;
     }
-
-
 
     public void removeChartTrace(int traceNumber) {
         chart.removeTrace(traceNumber);

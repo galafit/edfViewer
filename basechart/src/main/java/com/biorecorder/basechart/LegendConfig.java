@@ -8,6 +8,7 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 18/8/17.
  */
 public class LegendConfig {
+    private boolean isEnabled = true;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
     private HorizontalAlign horizontalAlign = HorizontalAlign.LEFT;
     private VerticalAlign verticalAlign = VerticalAlign.TOP;
@@ -35,6 +36,15 @@ public class LegendConfig {
         horizontalAlign = legendConfig.horizontalAlign;
         interItemSpace = legendConfig.interItemSpace;
         interLineSpace = legendConfig.interLineSpace;
+        isEnabled = legendConfig.isEnabled;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
     public int getInterItemSpace() {

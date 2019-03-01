@@ -75,8 +75,8 @@ public class AxisWrapper {
         return axis.formatDomainValue(value);
     }
 
-    public boolean isTickLabelOutside() {
-        return axis.isTickLabelOutside();
+    public boolean hasTextOutside() {
+        return axis.hasTextOutside();
     }
 
     public void setTitle(String title) {
