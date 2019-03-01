@@ -8,7 +8,6 @@ import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.scales.TickProvider;
-import com.sun.istack.internal.Nullable;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -28,12 +27,7 @@ public abstract class Axis {
     private int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
     private final double REQUIRED_SPACE_FOR_3_TICKS_RATIO = 2.2;
 
-
     private final String TOO_MANY_TICKS_MSG = "Too many ticks: {0}. Expected < {1}";
-
-    // Used to calculate number of ticks. If <= 0 will not be taken into account
-    //Specify maximum distance between axis start and minTick in relation to axis length (percents)
-    private int tickAccuracyPct = 20; // (minTick - min) * 100 / length
 
     protected String title;
     protected AxisConfig config;
@@ -72,20 +66,6 @@ public abstract class Axis {
 
     public void setTitle(String title) {
         this.title = title;
-        setDirty();
-    }
-
-
-    /**
-     * Specify maximum distance between axis start and minTick
-     * in relation to axis length (percents)
-     * Ticks count is calculated on the base of the given rounding accuracy.
-     * If rounding accuracy <= 0 it will not be taken into account!!!
-     *
-     * @param tickAccuracyPct - rounding accuracy percents
-     */
-    public void setTickAccuracyPct(int tickAccuracyPct) {
-        this.tickAccuracyPct = tickAccuracyPct;
         setDirty();
     }
 
@@ -420,8 +400,8 @@ public abstract class Axis {
             return;
         }
         int tickIntervalCountByRoundingUncertainty = 0;
-        if (tickAccuracyPct > 0) {
-            tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / tickAccuracyPct);
+        if (config.getTickAccuracy() > 0) {
+            tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / config.getTickAccuracy());
         }
         if (isTickIntervalSpecified()) {
             tickProvider = scale.getTickProviderByInterval(config.getTickInterval(), config.getTickLabelPrefixAndSuffix());
@@ -481,7 +461,7 @@ public abstract class Axis {
         }
 
         if (ticksSkipStep > 1) {
-            if (isTickIntervalSpecified() || tickAccuracyPct <= 0) {
+            if (isTickIntervalSpecified() || config.getTickAccuracy() <= 0) {
                 tickProvider.increaseTickInterval(ticksSkipStep);
                 ticksSkipStep = 1;
             }

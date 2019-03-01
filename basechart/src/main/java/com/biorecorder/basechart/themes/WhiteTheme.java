@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.themes;
 
 import com.biorecorder.basechart.ChartConfig;
-import com.biorecorder.basechart.HorizontalAlign;
 import com.biorecorder.basechart.NavigableChartConfig;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
@@ -70,6 +69,7 @@ public class WhiteTheme implements Theme {
         BColor bgColor = BColor.WHITE_DARK;
         BColor scrollColor = crosshairColor;
 
+
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
@@ -77,9 +77,11 @@ public class WhiteTheme implements Theme {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.setYAxisRoundingEnabled(true);
         navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.setYAxisRoundingEnabled(true);
+        navigatorConfig.getLeftAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
+        navigatorConfig.getRightAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);

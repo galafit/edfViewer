@@ -38,10 +38,6 @@ public class AxisWrapper {
         return false;
     }
 
-    public void setTickAccuracyPct(int roundingAccuracyPct) {
-        axis.setTickAccuracyPct(roundingAccuracyPct);
-        setRoundingDirty();
-    }
 
     public AxisConfig getConfig() {
         return axis.getConfig();

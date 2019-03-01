@@ -20,9 +20,6 @@ public class Chart {
 
     private boolean isLegendVisible = true;
 
-    private int axisTickAccuracyPctIfRoundingEnabled = 10; // 5 for more smooth translation and zooming
-    private int axisTickAccuracyPctIfRoundingDisabled = 20;
-
     private ChartConfig chartConfig = new ChartConfig();
 
     /*
@@ -48,6 +45,7 @@ public class Chart {
     private TraceCurve selectedCurve;
     private TraceCurvePoint hoverPoint;
     private DataProcessingConfig dataProcessingConfig;
+    private Scale yScale;
 
     public Chart() {
        this(new WhiteTheme().getChartConfig());
@@ -58,20 +56,26 @@ public class Chart {
     }
 
     public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
+        this(chartConfig1, new LinearScale(), new LinearScale(), dataProcessingConfig);
+    }
+
+    public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale) {
+        this(chartConfig1, xScale, yScale, null);
+    }
+
+    public Chart(Scale xScale, Scale yScale) {
+        this(new WhiteTheme().getChartConfig(), xScale, yScale, null);
+    }
+
+    public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale, @Nullable DataProcessingConfig dataProcessingConfig) {
         this.dataProcessingConfig = dataProcessingConfig;
         this.chartConfig = new ChartConfig(chartConfig1);
+        this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(new TimeScale(), chartConfig.getBottomAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(new TimeScale(), chartConfig.getTopAxisConfig()));
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale, chartConfig.getBottomAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale, chartConfig.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-        if (chartConfig.isYAxisRoundingEnabled()) {
-            topAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
-            bottomAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
-        } else {
-            topAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
-            bottomAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
-        }
 
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
@@ -467,7 +471,6 @@ public class Chart {
             axis.drawAxis(canvas, graphArea);
         }
 
-
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 
@@ -576,6 +579,16 @@ public class Chart {
         setAreasDirty();
     }
 
+    public void setLegendVisible(boolean isLegendVisible) {
+        this.isLegendVisible = isLegendVisible;
+        setAreasDirty();
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        setAreasDirty();
+    }
+
     public void setStackWeight(int stack, int weight) {
         checkStackNumber(stack);
         stackWeights.set(stack, weight);
@@ -595,13 +608,6 @@ public class Chart {
         AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig()));
         leftAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
         rightAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
-        if (chartConfig.isYAxisRoundingEnabled()) {
-            leftAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
-            rightAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingEnabled);
-        } else {
-            leftAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
-            rightAxis.setTickAccuracyPct(axisTickAccuracyPctIfRoundingDisabled);
-        }
 
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);

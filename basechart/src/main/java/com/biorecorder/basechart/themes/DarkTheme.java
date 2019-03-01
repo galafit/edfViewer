@@ -73,9 +73,11 @@ public class DarkTheme implements Theme {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.setYAxisRoundingEnabled(true);
         navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.setYAxisRoundingEnabled(true);
+        navigatorConfig.getLeftAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
+        navigatorConfig.getRightAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);

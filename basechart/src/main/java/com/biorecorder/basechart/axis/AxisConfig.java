@@ -38,6 +38,9 @@ public class AxisConfig {
     private double tickInterval = -1; // in axis domain units
     private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 
+    // Used to calculate number of ticks. If <= 0 will not be taken into account
+    //Specify maximum distance between axis start and minTick in relation to axis length (percents)
+    private int tickAccuracy = 20; // percent (minTick - min) * 100 / length
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
@@ -76,6 +79,7 @@ public class AxisConfig {
         tickLabelTextStyle = axisConfig.tickLabelTextStyle;
         tickInterval = axisConfig.tickInterval;
         tickLabelPrefixAndSuffix = axisConfig.tickLabelPrefixAndSuffix;
+        tickAccuracy = axisConfig.tickAccuracy;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -88,6 +92,25 @@ public class AxisConfig {
         titleColor = axisConfig.titleColor;
 
         isTickLabelOutside = axisConfig.isTickLabelOutside;
+    }
+
+    /**
+     * Specify maximum distance between axis start and minTick
+     * in relation to axis length (percents)
+     * Ticks count is calculated on the base of the given rounding accuracy.
+     * If rounding accuracy <= 0 it will not be taken into account!!!
+     *
+     * Default value is 20%. If axis rounding is enabled for smooth translation
+     * and zooming good values 5 - 10%
+     *
+     * @param tickAccuracy - rounding accuracy percents
+     */
+    public void setTickAccuracy(int tickAccuracy) {
+        this.tickAccuracy = tickAccuracy;
+    }
+
+    public int getTickAccuracy() {
+        return tickAccuracy;
     }
 
     public void setTickInterval(double tickInterval) {
