@@ -26,6 +26,10 @@ public class Legend {
         this.buttonGroup = new ButtonGroup();
     }
 
+    public boolean isEnabled() {
+        return config.isEnabled();
+    }
+
     public int getHeight(BCanvas canvas) {
         if(!config.isAttachedToStacks()) {
             if(isDirty) {

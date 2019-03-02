@@ -113,19 +113,29 @@ public class ChartTest extends JFrame {
                    chartPanel.repaint();
                 }
                 if (counter == 1) {
-                    chart.setYTitle(1, "Y title");
-                    chartPanel.repaint();
-                }
-                if (counter == 2) {
                     chart.setTitle("Chart title");
                     chartPanel.repaint();
                 }
-                if (counter == 3) {
-                    AxisConfig xConfig = chart.getXConfig(0);
-                    xConfig.setLabelPrefixAndSuffix(null, "kg");
-                    chart.setXConfig(0, xConfig, true);
+                if (counter == 2) {
+                    ChartConfig config = chart.getChartConfig();
+                    config.getLegendConfig().setAttachedToStacks(false);
+                    chart.setConfig(config);
                     chartPanel.repaint();
                 }
+                if (counter == 3) {
+                    ChartConfig config = chart.getChartConfig();
+                    config.getLegendConfig().setEnabled(false);
+                    chart.setConfig(config);
+                    chartPanel.repaint();
+                }
+                if (counter == 4) {
+                    chart.setTitle(null);
+                    ChartConfig config = chart.getChartConfig();
+                    config.getLegendConfig().setEnabled(true);
+                    chart.setConfig(config);
+                    chartPanel.repaint();
+                }
+
 
 
                 counter++;

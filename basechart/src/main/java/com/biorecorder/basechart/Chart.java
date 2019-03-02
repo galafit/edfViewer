@@ -17,7 +17,7 @@ import java.util.List;
 public class Chart {
     private String title;
 
-    private ChartConfig chartConfig = new ChartConfig();
+    private ChartConfig config = new ChartConfig();
 
     /*
  * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
@@ -66,45 +66,19 @@ public class Chart {
 
     public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale, @Nullable DataProcessingConfig dataProcessingConfig) {
         this.dataProcessingConfig = dataProcessingConfig;
-        this.chartConfig = new ChartConfig(chartConfig1);
+        this.config = new ChartConfig(chartConfig1);
         this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale, chartConfig.getBottomAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale, chartConfig.getTopAxisConfig()));
-        bottomAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
-        topAxis.setRoundingEnabled(chartConfig.isXAxisRoundingEnabled());
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale, config.getBottomAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale, config.getTopAxisConfig()));
+        bottomAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
+        topAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
 
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
 
         //legend
-        if(chartConfig.getLegendConfig().isEnabled()) {
-            createLegend();
-        }
-    }
-
-    private void addTraceCurveToLegend(Trace trace, int curveNumber) {
-        StateListener traceSelectionListener = new StateListener() {
-            @Override
-            public void stateChanged(boolean isSelected) {
-                if (isSelected) {
-                    selectedCurve = new TraceCurve(trace, curveNumber);
-                }
-                if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
-                    selectedCurve = null;
-                }
-            }
-        };
-        legend.add(trace, curveNumber, traceSelectionListener);
-    }
-
-    private void createLegend() {
-        legend = new Legend(chartConfig.getLegendConfig());
-        for (Trace trace : traces) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-               addTraceCurveToLegend(trace, i);
-            }
-        }
+        legend = new Legend(config.getLegendConfig());
     }
 
     void setMargin(Insets margin) {
@@ -171,7 +145,7 @@ public class Chart {
     }
 
     private void setAreasDirty() {
-        if(chartConfig.getMargin() == null) { // if margin is not fixed
+        if(config.getMargin() == null) { // if margin is not fixed
             margin = null;
         }
     }
@@ -201,9 +175,16 @@ public class Chart {
         return xAxisList.get(xIndex).getScale();
     }
 
+    private boolean isTitleEmpty() {
+        if(title == null || title.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
     private Insets calculateSpacing() {
-        if(chartConfig.getSpacing() != null) {
-            return chartConfig.getSpacing();
+        if(config.getSpacing() != null) {
+            return config.getSpacing();
         }
         int minSpacing = 0;
         int spacingTop = minSpacing;
@@ -214,11 +195,11 @@ public class Chart {
            AxisWrapper axis = yAxisList.get(i);
            if(i % 2 == 0) { // left
               if(axis.isVisible() && axis.hasTextOutside()) {
-                 spacingLeft = chartConfig.getAutoSpacing();
+                 spacingLeft = config.getAutoSpacing();
               }
            } else { // right
                if(axis.isVisible() && axis.hasTextOutside()) {
-                   spacingRight = chartConfig.getAutoSpacing();
+                   spacingRight = config.getAutoSpacing();
                }
            }
         }
@@ -227,33 +208,33 @@ public class Chart {
             AxisWrapper axis = xAxisList.get(i);
             if(i % 2 == 0) { // bottom
                 if(axis.isVisible() && axis.hasTextOutside()) {
-                    spacingBottom = chartConfig.getAutoSpacing();
+                    spacingBottom = config.getAutoSpacing();
                 }
             } else { // top
                 if(axis.isVisible() && axis.hasTextOutside()) {
-                    spacingTop = chartConfig.getAutoSpacing();
+                    spacingTop = config.getAutoSpacing();
                 }
             }
         }
-
-        if(title != null){
-            spacingTop = 0;
-        }
         if(isLegendEnabled() && !legend.isAttachedToStacks()) {
             if(legend.isTop()) {
-                spacingTop = 0;
+                spacingTop = config.getAutoSpacing();
             } else if (legend.isBottom()) {
-                spacingBottom = 0;
+                spacingBottom = config.getAutoSpacing();
             }
         }
+        if(!isTitleEmpty()){
+            spacingTop = 0;
+        }
+
         return new Insets(spacingTop, spacingRight, spacingBottom, spacingLeft);
     }
 
-    public boolean isLegendEnabled() {
-        if(legend != null) {
-            return true;
+    private boolean isLegendEnabled() {
+        if(legend == null || !legend.isEnabled()) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     void calculateMarginsAndAreas(BCanvas canvas) {
@@ -263,13 +244,13 @@ public class Chart {
             return;
         }
 
-        if(chartConfig.getMargin() != null) { // fixed margin
-            setMargin(chartConfig.getMargin());
+        if(config.getMargin() != null) { // fixed margin
+            setMargin(config.getMargin());
             return;
         }
 
         if (titleText == null) {
-            titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
+            titleText = new Title(title, config.getTitleConfig(), fullArea, canvas);
         }
         Insets spacing = calculateSpacing();
         int titleHeight = titleText.getBounds().height;
@@ -358,7 +339,7 @@ public class Chart {
 
         int stackCount = yAxisList.size() / 2;
 
-        int gap = Math.abs(chartConfig.getStackGap());
+        int gap = Math.abs(config.getStackGap());
         int height = areaHeight - (stackCount  - 1) * gap;
         if(height <= 0) {
             height = areaHeight;
@@ -395,7 +376,7 @@ public class Chart {
         AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
         AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
         int primaryAxisIndex;
-        if(chartConfig.isBottomAxisPrimary()) {
+        if(config.isBottomAxisPrimary()) {
            primaryAxisIndex = bottomAxisIndex;
         } else {
             primaryAxisIndex = topAxisIndex;
@@ -412,7 +393,7 @@ public class Chart {
             }
         }
 
-        if(chartConfig.isBottomAxisPrimary()) {
+        if(config.isBottomAxisPrimary()) {
             return topAxisIndex;
         } else {
             return bottomAxisIndex;
@@ -429,7 +410,7 @@ public class Chart {
         }
 
         if (titleText == null) {
-            titleText = new Title(title, chartConfig.getTitleConfig(), fullArea, canvas);
+            titleText = new Title(title, config.getTitleConfig(), fullArea, canvas);
         }
 
         if (isAreasDirty()) {
@@ -438,13 +419,13 @@ public class Chart {
 
         canvas.enableAntiAliasAndHinting();
 
-        canvas.setColor(chartConfig.getMarginColor());
+        canvas.setColor(config.getMarginColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
 
         // fill stacks
         int stackCount = yAxisList.size() / 2;
 
-        canvas.setColor(chartConfig.getBackgroundColor());
+        canvas.setColor(config.getBackgroundColor());
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(i * 2);
             BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
@@ -486,7 +467,7 @@ public class Chart {
             } else if(!rightAxis.isVisible() && leftAxis.isVisible()) {
                 leftAxis.drawGrid(canvas, graphArea);
             } else if(rightAxis.isVisible() && leftAxis.isVisible()) {
-                if(chartConfig.isLeftAxisPrimary()) {
+                if(config.isLeftAxisPrimary()) {
                     leftAxis.drawGrid(canvas, graphArea);
                 } else {
                     rightAxis.drawGrid(canvas, graphArea);
@@ -553,28 +534,30 @@ public class Chart {
     /**
      * =======================Base methods to interact==========================
      **/
-    public void setConfig(ChartConfig config) {
-        this.chartConfig = config;
+    public ChartConfig getChartConfig() {
+        return new ChartConfig(config);
+    }
+
+    public void setConfig(ChartConfig config1) {
+        this.config = new ChartConfig(config1);
         titleText = null;
         for (int i = 0; i < xAxisList.size(); i++) {
             if(i % 2 == 0)  { // bottom axis
-                xAxisList.get(i).setConfig(chartConfig.getBottomAxisConfig());
+                xAxisList.get(i).setConfig(this.config.getBottomAxisConfig());
             } else { // top axis
-                xAxisList.get(i).setConfig(chartConfig.getTopAxisConfig());
+                xAxisList.get(i).setConfig(this.config.getTopAxisConfig());
             }
         }
         for (int i = 0; i < yAxisList.size(); i++) {
             if(i % 2 == 0)  { // left axis
-                yAxisList.get(i).setConfig(chartConfig.getLeftAxisConfig());
+                yAxisList.get(i).setConfig(this.config.getLeftAxisConfig());
             } else { // right axis
-                yAxisList.get(i).setConfig(chartConfig.getRightAxisConfig());
+                yAxisList.get(i).setConfig(this.config.getRightAxisConfig());
             }
         }
-        if(chartConfig.getLegendConfig().isEnabled()) {
-            createLegend();
-        }
+        legend.setConfig(config.getLegendConfig());
 
-        BColor[] colors = chartConfig.getTraceColors();
+        BColor[] colors = this.config.getTraceColors();
         int curve = 0;
         for (Trace trace : traces) {
             for (int i = 0; i < trace.curveCount(); i++) {
@@ -652,7 +635,7 @@ public class Chart {
     public void setStackWeight(int stack, int weight) {
         checkStackNumber(stack);
         stackWeights.set(stack, weight);
-        if(chartConfig.getMargin() != null) { // fixed margins
+        if(config.getMargin() != null) { // fixed margins
             setYStartEnd(graphArea.y, graphArea.height);
         } else {
             setAreasDirty();
@@ -660,21 +643,21 @@ public class Chart {
     }
 
     public void addStack() {
-        addStack(chartConfig.getDefaultStackWeight());
+        addStack(config.getDefaultStackWeight());
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), chartConfig.getLeftAxisConfig()));
-        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), chartConfig.getRightAxisConfig()));
-        leftAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
-        rightAxis.setRoundingEnabled(chartConfig.isYAxisRoundingEnabled());
+        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), config.getLeftAxisConfig()));
+        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), config.getRightAxisConfig()));
+        leftAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
+        rightAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
 
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
 
-        if(chartConfig.getMargin() != null) { // fixed margins
-            setMargin(chartConfig.getMargin());
+        if(config.getMargin() != null) { // fixed margins
+            setMargin(config.getMargin());
         } else {
             setAreasDirty();
         }
@@ -715,16 +698,16 @@ public class Chart {
 
         boolean isBottomXAxis = true;
         boolean isLeftYAxis = true;
-        if (isXAxisOpposite && chartConfig.isBottomAxisPrimary()) {
+        if (isXAxisOpposite && config.isBottomAxisPrimary()) {
             isBottomXAxis = false;
         }
-        if (!isXAxisOpposite && !chartConfig.isBottomAxisPrimary()) {
+        if (!isXAxisOpposite && !config.isBottomAxisPrimary()) {
             isBottomXAxis = false;
         }
-        if (isYAxisOpposite && chartConfig.isLeftAxisPrimary()) {
+        if (isYAxisOpposite && config.isLeftAxisPrimary()) {
             isLeftYAxis = false;
         }
-        if (!isYAxisOpposite && !chartConfig.isLeftAxisPrimary()) {
+        if (!isYAxisOpposite && !config.isLeftAxisPrimary()) {
             isLeftYAxis = false;
         }
         int xIndex = isBottomXAxis ? 0 : 1;
@@ -753,7 +736,7 @@ public class Chart {
             trace.setYScales(yScales);
         }
 
-        BColor[] colors = chartConfig.getTraceColors();
+        BColor[] colors = config.getTraceColors();
         int totalCurves = 0;
         for (Trace trace1 : traces) {
             totalCurves += trace1.curveCount();
@@ -771,7 +754,19 @@ public class Chart {
 
         if(isLegendEnabled()) {
             for (int i = 0; i < trace.curveCount(); i++) {
-                addTraceCurveToLegend(trace, i);
+                final int curveNumber = i;
+                StateListener traceSelectionListener = new StateListener() {
+                    @Override
+                    public void stateChanged(boolean isSelected) {
+                        if (isSelected) {
+                            selectedCurve = new TraceCurve(trace, curveNumber);
+                        }
+                        if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
+                            selectedCurve = null;
+                        }
+                    }
+                };
+                legend.add(trace, curveNumber, traceSelectionListener);
             }
         }
     }
@@ -785,8 +780,8 @@ public class Chart {
 
     public void setArea(BRectangle area) {
         fullArea = area;
-        if(chartConfig.getMargin() != null) {
-            setMargin(chartConfig.getMargin());
+        if(config.getMargin() != null) {
+            setMargin(config.getMargin());
         }
         setAreasDirty();
         titleText = null;
@@ -1032,10 +1027,10 @@ public class Chart {
                 int tooltipYPosition = 0;
                 NamedValue xValue = hoverTrace.xValue(hoverPointIndex);
 
-                crosshair = new Crosshair(chartConfig.getCrossHairConfig(), xPosition);
-                tooltip = new Tooltip(chartConfig.getTooltipConfig(), xPosition, tooltipYPosition);
+                crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
+                tooltip = new Tooltip(config.getTooltipConfig(), xPosition, tooltipYPosition);
                 tooltip.setHeader(null, null, xValue.getValueLabel());
-                if (chartConfig.isMultiCurveTooltip()) { // all trace curves
+                if (config.isMultiCurveTooltip()) { // all trace curves
                     for (int i = 0; i < hoverTrace.curveCount(); i++) {
                         addCurvePointToTooltip(tooltip, hoverTrace, i, hoverPointIndex);
                         crosshair.addY(hoverTrace.curveYPosition(i, hoverPointIndex));
