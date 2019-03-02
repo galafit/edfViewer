@@ -74,6 +74,17 @@ public class Legend {
         isDirty = true;
     }
 
+    public void setCurveName(Trace trace, int curveNumber, String name) {
+        for (TraceCurve key : traceCurvesToButtons.keySet()){
+            if(key.getTrace() == trace && key.getCurveNumber() == curveNumber) {
+                SwitchButton button = traceCurvesToButtons.get(key);
+                button.setLabel(name);
+                isDirty = true;
+                return;
+            }
+        }
+    }
+
 
     public void setConfig(LegendConfig legendConfig) {
         config = legendConfig;

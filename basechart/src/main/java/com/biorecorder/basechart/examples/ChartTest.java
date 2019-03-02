@@ -1,9 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.axis.AxisConfig;
-import com.biorecorder.basechart.scales.TimeScale;
-import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
@@ -104,14 +102,15 @@ public class ChartTest extends JFrame {
         setVisible(true);
 
 
-        final Timer timer = new Timer(3000, new ActionListener() {
+        final Timer timer = new Timer(6000, new ActionListener() {
             int counter = 0;
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (counter == 0) {
-                    chart.setXScale(0, new TimeScale());
-                    chart.setXRoundingEnabled(0, true, 10);
+                    CurveNumber curveNumber = chart.getSelectedCurveNumber();
+                    chart.setCurveColor(curveNumber.getTraceNumber(), curveNumber.getCurveNumber(), BColor.MAGENTA);
+                    chart.setCurveName(curveNumber.getTraceNumber(), curveNumber.getCurveNumber(), "bla bla bla");
                     chartPanel.repaint();
                 }
 
@@ -119,7 +118,7 @@ public class ChartTest extends JFrame {
             }
         });
 
-        //timer.start();
+        timer.start();
 
     }
 

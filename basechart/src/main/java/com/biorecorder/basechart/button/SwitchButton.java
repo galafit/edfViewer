@@ -30,6 +30,7 @@ public class SwitchButton {
     public void setLabel(String label) {
         if(label != null) {
             this.label = label;
+            bounds = null;
         }
     }
 

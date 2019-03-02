@@ -17,7 +17,6 @@ import java.util.List;
  */
 public class Chart {
     private ChartConfig config = new ChartConfig();
-
     /*
  * 2 X-axis: 0(even) - BOTTOM and 1(odd) - TOP
  * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
@@ -355,6 +354,18 @@ public class Chart {
         }
     }
 
+    private void addCurvePointToTooltip(Tooltip tooltip, Trace trace, int curveNumber, int pointIndex) {
+        NamedValue[] curveValues = trace.curveValues(curveNumber, pointIndex);
+        if (curveValues.length == 1) {
+            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), curveValues[0].getValueLabel());
+        } else {
+            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), "");
+            for (NamedValue curveValue : curveValues) {
+                tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
+            }
+        }
+    }
+
     boolean isXAxisVisible(int xIndex) {
         if(xAxisList.get(xIndex).isVisible()) {
             return true;
@@ -523,12 +534,33 @@ public class Chart {
     /**
      * =======================Base methods to interact==========================
      **/
-    public ChartConfig getChartConfig() {
+
+    public CurveNumber getSelectedCurveNumber() {
+        if(selectedCurve != null) {
+            for (int i = 0; i < traces.size(); i++) {
+                if(selectedCurve.getTrace() == traces.get(i)){
+                    return new CurveNumber(i, selectedCurve.getCurveNumber());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * return COPY of chart config. To change chart config use setConfig
+     */
+    public ChartConfig getConfig() {
         return new ChartConfig(config);
     }
 
-    public void setConfig(ChartConfig config1) {
-        this.config = new ChartConfig(config1);
+    /**
+     * if isTraceColorChangeEnabled is true all curves colors will be
+     * changed according with the config traceColors.
+     * Otherwise curve colors will stay as they are.
+     */
+    public void setConfig(ChartConfig chartConfig, boolean isTraceColorChangeEnabled) {
+        this.config = new ChartConfig(chartConfig);
         title.setConfig(config.getTitleConfig());
         for (int i = 0; i < xAxisList.size(); i++) {
             if(i % 2 == 0)  { // bottom axis
@@ -547,11 +579,13 @@ public class Chart {
         legend.setConfig(config.getLegendConfig());
 
         BColor[] colors = this.config.getTraceColors();
-        int curve = 0;
-        for (Trace trace : traces) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-                trace.setCurveColor(i, colors[(curve + i) % colors.length]);
-                curve++;
+        if(isTraceColorChangeEnabled) {
+            int curve = 0;
+            for (Trace trace : traces) {
+                for (int i = 0; i < trace.curveCount(); i++) {
+                    trace.setCurveColor(i, colors[(curve + i) % colors.length]);
+                    curve++;
+                }
             }
         }
         setAreasDirty();
@@ -579,10 +613,17 @@ public class Chart {
         setAreasDirty();
     }
 
+
+    /**
+     * return COPY of X axis config. To change axis config use setXConfig
+     */
     public AxisConfig getXConfig(int xIndex) {
         return xAxisList.get(xIndex).getConfig();
     }
 
+    /**
+     * return COPY of Y axis config. To change axis config use setYConfig
+     */
     public AxisConfig getYConfig(int yIndex) {
         return yAxisList.get(yIndex).getConfig();
     }
@@ -625,6 +666,15 @@ public class Chart {
     public void setTitle(String title) {
         this.title.setTitle(title);
         setAreasDirty();
+    }
+
+    public void setCurveColor(int traceNumber, int curveNumber, BColor color) {
+        traces.get(traceNumber).setCurveColor(curveNumber, color);
+    }
+
+    public void setCurveName(int traceNumber, int curveNumber, String name) {
+        traces.get(traceNumber).setCurveName(curveNumber, name);
+        legend.setCurveName(traces.get(traceNumber), curveNumber, name);
     }
 
     public void setStackWeight(int stack, int weight) {
@@ -1039,17 +1089,5 @@ public class Chart {
             return true;
         }
         return false;
-    }
-
-    private void addCurvePointToTooltip(Tooltip tooltip, Trace trace, int curveNumber, int pointIndex) {
-        NamedValue[] curveValues = trace.curveValues(curveNumber, pointIndex);
-        if (curveValues.length == 1) {
-            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), curveValues[0].getValueLabel());
-        } else {
-            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), "");
-            for (NamedValue curveValue : curveValues) {
-                tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
-            }
-        }
     }
 }
