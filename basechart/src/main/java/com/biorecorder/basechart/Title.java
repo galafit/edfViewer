@@ -3,6 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.utils.StringUtils;
 
 import java.util.ArrayList;
 
@@ -10,24 +11,59 @@ import java.util.ArrayList;
  * Created by hdablin on 17.08.17.
  */
 public class Title {
+    private String title;
     private TitleConfig config;
     private ArrayList<BText> lines = new ArrayList<BText>();
-    private BRectangle bounds = new BRectangle(0, 0, 0, 0);
+    private BRectangle area;
+    private BRectangle bounds;
 
-
-    public Title(String title, TitleConfig config, BRectangle area, BCanvas canvas) {
+    public Title(TitleConfig config) {
         this.config = config;
-        formLines(canvas, title, area);
     }
 
+    private void setDirty() {
+        lines.clear();
+        bounds = null;
+    }
 
-    public BRectangle getBounds() {
+    private boolean isDirty() {
+        return bounds == null;
+    }
+
+    public BRectangle getBounds(BCanvas canvas) {
+        if(isDirty()) {
+            formLines(canvas);
+        }
         return bounds;
     }
 
-    private void formLines(BCanvas canvas, String title, BRectangle area){
-        if(title == null) {
+    public boolean isNullOrBlank() {
+        return StringUtils.isNullOrBlank(title);
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        setDirty();
+    }
+
+    public void setConfig(TitleConfig config) {
+        this.config = config;
+        setDirty();
+    }
+
+
+    public void setArea(BRectangle area) {
+        this.area = area;
+        setDirty();
+    }
+
+    private void formLines(BCanvas canvas){
+        if(title == null || StringUtils.isNullOrBlank(title)) {
+            bounds = new BRectangle(0, 0, 0, 0);
             return;
+        }
+        if(area == null) {
+            area = canvas.getBounds();
         }
         String[] words = title.split(" ");
         StringBuilder stringBuilder = new StringBuilder(words[0]);
@@ -45,7 +81,7 @@ public class Title {
                 }
                 lines.add(new BText(lineString, x, y + tm.ascent()));
 
-                y += getInterLineSpace() + tm.height();
+                y += config.getInterLineSpace() + tm.height();
                 stringBuilder = new StringBuilder(words[i]);
             } else {
                 stringBuilder.append(" ").append(words[i]);
@@ -62,13 +98,16 @@ public class Title {
         lines.add(new BText(lineString, x, y + tm.ascent()));
 
         int height = tm.height() * lines.size()
-                + getInterLineSpace() * (lines.size() - 1)
+                + config.getInterLineSpace() * (lines.size() - 1)
                 + margin.top() + margin.bottom();
 
         bounds = new BRectangle(area.x, area.y, area.width, height);
     }
 
     public void draw(BCanvas canvas){
+        if(isDirty()) {
+            formLines(canvas);
+        }
         if (lines.size() == 0){
             return;
         }
@@ -77,11 +116,6 @@ public class Title {
         for (BText string : lines) {
             string.draw(canvas);
         }
-    }
-
-
-    private  int getInterLineSpace() {
-        return (int)(config.getTextStyle().getSize() * 0.2);
     }
 
 }

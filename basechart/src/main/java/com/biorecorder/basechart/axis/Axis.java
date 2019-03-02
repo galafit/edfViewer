@@ -4,6 +4,7 @@ import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
@@ -41,7 +42,7 @@ public abstract class Axis {
     private IntArrayList minorTickPositions = new IntArrayList();
     private BText titleText;
 
-    private boolean isDirty = true;
+    private boolean isTicksDirty = true;
     private int width = -1;
 
     public Axis(Scale scale, AxisConfig axisConfig) {
@@ -49,11 +50,14 @@ public abstract class Axis {
         this.config = axisConfig;
     }
 
-    private void setDirty() {
+    private void setTicksDirty() {
         tickProvider = null;
-        titleText = null;
-        isDirty = true;
+        isTicksDirty = true;
         width = -1;
+    }
+
+    private boolean isTicksDirty() {
+        return isTicksDirty;
     }
 
     private boolean isTooShort() {
@@ -67,8 +71,8 @@ public abstract class Axis {
 
     public void setTitle(String title) {
         this.title = title;
-        titleText = null;
         width = -1;
+        titleText = null;
     }
 
 
@@ -79,8 +83,8 @@ public abstract class Axis {
      * @param scale
      */
     public void setScale(Scale scale) {
-        this.scale = scale.copy();
-        setDirty();
+        this.scale = scale;
+        setTicksDirty();
     }
 
     /**
@@ -111,22 +115,20 @@ public abstract class Axis {
     public void setConfig(AxisConfig config) {
         // set a copy to safely change
         this.config = new AxisConfig(config);
-        setDirty();
+        titleText = null;
+        setTicksDirty();
     }
 
-    public boolean hasTextOutside() {
-        if(config.isTickLabelOutside() || !isTitleEmpty()) {
-            return true;
-        }
-        return false;
-
+    public boolean isTickLabelOutside() {
+        return config.isTickLabelOutside();
     }
 
-    private boolean isTitleEmpty() {
-        if(title == null || title.isEmpty()) {
-            return true;
-        }
-        return false;
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTickAccuracy(int tickAccuracy) {
+        config.setTickAccuracy(tickAccuracy);
     }
 
 
@@ -184,16 +186,17 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public void setMinMax(Range minMax) {
+    public boolean setMinMax(Range minMax) {
         if (minMax.getMin() == getMin() && minMax.getMax() == getMax()) {
-            return;
+            return false;
         }
 
         scale.setDomain(minMax.getMin(), minMax.getMax());
-        setDirty();
+        setTicksDirty();
+        return true;
     }
 
-    public void setStartEnd(double start, double end) {
+    public boolean setStartEnd(double start, double end) {
         if(Double.isInfinite(start)) {
             String errMsg = "Start is infinity";
             throw new IllegalArgumentException(errMsg);
@@ -203,10 +206,11 @@ public abstract class Axis {
             throw new IllegalArgumentException(errMsg);
         }
         if (start == getStart() && end == getEnd()) {
-            return;
+            return false;
         }
         scale.setRange(start, end);
-        setDirty();
+        setTicksDirty();
+        return true;
     }
 
     public double getMin() {
@@ -248,7 +252,7 @@ public abstract class Axis {
             width += config.getTickMarkOutsideSize();
 
             if (config.isTickLabelOutside()) {
-                if (isDirty) {
+                if (isTicksDirty()) {
                     createTicks(canvas);
                 }
                 if (tickLabels.size() > 0) {
@@ -261,7 +265,7 @@ public abstract class Axis {
 
                 }
             }
-            if (!isTitleEmpty()) {
+            if (! StringUtils.isNullOrBlank(title)) {
                 TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
                 width += config.getTitlePadding() + tm.height();
             }
@@ -323,7 +327,7 @@ public abstract class Axis {
             return;
         }
         canvas.save();
-        if (isDirty) {
+        if (isTicksDirty()) {
             createTicks(canvas);
         }
 
@@ -347,7 +351,7 @@ public abstract class Axis {
     public void drawAxis(BCanvas canvas, BRectangle area) {
         canvas.save();
 
-        if (isDirty) {
+        if (isTicksDirty()) {
             createTicks(canvas);
         }
         translateCanvas(canvas, area);
@@ -376,7 +380,7 @@ public abstract class Axis {
                 tickLabel.draw(canvas);
             }
 
-            if (! isTitleEmpty()) {
+            if (! StringUtils.isNullOrBlank(title)) {
                 if(titleText == null) {
                     titleText = createTitle(canvas);
                 }
@@ -578,7 +582,7 @@ public abstract class Axis {
             }
         }
 
-        isDirty = false;
+        isTicksDirty = false;
     }
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);

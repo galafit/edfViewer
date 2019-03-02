@@ -27,8 +27,10 @@ public class AxisWrapper {
     }
 
     private void setRoundingDirty() {
-        roundingDirty = true;
-        axis.setMinMax(rowMinMax);
+        if(isRoundingEnabled) {
+            roundingDirty = true;
+            axis.setMinMax(rowMinMax);
+        }
     }
 
     private boolean isDirty() {
@@ -38,21 +40,17 @@ public class AxisWrapper {
         return false;
     }
 
-
     public AxisConfig getConfig() {
         return axis.getConfig();
     }
-
 
     public double length() {
         return axis.length();
     }
 
     public void setRoundingEnabled(boolean isRoundingEnabled) {
-        if(this.isRoundingEnabled != isRoundingEnabled) {
-            this.isRoundingEnabled = isRoundingEnabled;
-            setRoundingDirty();
-        }
+        this.isRoundingEnabled = isRoundingEnabled;
+        setRoundingDirty();
     }
 
     public boolean isRoundingEnabled() {
@@ -61,6 +59,8 @@ public class AxisWrapper {
 
     public void setScale(Scale scale) {
         axis.setScale(scale);
+        rowMinMax = new Range(axis.getMin(), axis.getMax());
+        roundingDirty = true;
     }
 
     public double scale(double value) {
@@ -75,8 +75,16 @@ public class AxisWrapper {
         return axis.formatDomainValue(value);
     }
 
-    public boolean hasTextOutside() {
-        return axis.hasTextOutside();
+    public boolean isTickLabelOutside() {
+        return axis.isTickLabelOutside();
+    }
+
+    public String getTitle() {
+        return axis.getTitle();
+    }
+
+    public void setTickAccuracy(int tickAccuracy) {
+        axis.setTickAccuracy(tickAccuracy);
     }
 
     public void setTitle(String title) {
@@ -92,7 +100,6 @@ public class AxisWrapper {
         axis.setConfig(config);
         setRoundingDirty();
     }
-
 
     public Scale zoom(double zoomFactor) {
         // to have smooth zooming we do it on row domain values instead of rounded ones !!!
@@ -114,6 +121,7 @@ public class AxisWrapper {
     public boolean setMinMax(double min, double max) {
         if (rowMinMax.getMin() != min || rowMinMax.getMax() != max) {
             rowMinMax = new Range(min, max);
+            axis.setMinMax(rowMinMax);
             setRoundingDirty();
             return true;
         }

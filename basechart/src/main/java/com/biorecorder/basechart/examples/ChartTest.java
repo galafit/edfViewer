@@ -2,6 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.axis.AxisConfig;
+import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.list.IntArrayList;
@@ -109,41 +110,16 @@ public class ChartTest extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (counter == 0) {
-                   chart.setConfig(new DarkTheme().getChartConfig());
-                   chartPanel.repaint();
-                }
-                if (counter == 1) {
-                    chart.setTitle("Chart title");
+                    chart.setXScale(0, new TimeScale());
+                    chart.setXRoundingEnabled(0, true, 10);
                     chartPanel.repaint();
                 }
-                if (counter == 2) {
-                    ChartConfig config = chart.getChartConfig();
-                    config.getLegendConfig().setAttachedToStacks(false);
-                    chart.setConfig(config);
-                    chartPanel.repaint();
-                }
-                if (counter == 3) {
-                    ChartConfig config = chart.getChartConfig();
-                    config.getLegendConfig().setEnabled(false);
-                    chart.setConfig(config);
-                    chartPanel.repaint();
-                }
-                if (counter == 4) {
-                    chart.setTitle(null);
-                    ChartConfig config = chart.getChartConfig();
-                    config.getLegendConfig().setEnabled(true);
-                    chart.setConfig(config);
-                    chartPanel.repaint();
-                }
-
-
 
                 counter++;
             }
         });
 
-        timer.start();
-
+        //timer.start();
 
     }
 

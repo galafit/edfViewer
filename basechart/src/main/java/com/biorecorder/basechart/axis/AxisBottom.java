@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.axis;
 
 
+import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
@@ -15,6 +16,7 @@ public class AxisBottom extends AxisHorizontal {
     public AxisBottom(Scale scale, AxisConfig axisConfig) {
         super(scale, axisConfig);
     }
+
 
     @Override
     protected int getLabelY() {

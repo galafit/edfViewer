@@ -6,6 +6,7 @@ import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.basechart.utils.StringUtils;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -15,8 +16,6 @@ import java.util.List;
  * Created by hdablin on 24.03.17.
  */
 public class Chart {
-    private String title;
-
     private ChartConfig config = new ChartConfig();
 
     /*
@@ -31,7 +30,7 @@ public class Chart {
     private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
     private List<Trace> traces = new ArrayList<Trace>();
     private Legend legend;
-    private Title titleText;
+    private Title title;
     private BRectangle fullArea;
     private BRectangle graphArea;
     private Insets margin;
@@ -69,8 +68,8 @@ public class Chart {
         this.config = new ChartConfig(chartConfig1);
         this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale, config.getBottomAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale, config.getTopAxisConfig()));
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getBottomAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getTopAxisConfig()));
         bottomAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
 
@@ -79,6 +78,9 @@ public class Chart {
 
         //legend
         legend = new Legend(config.getLegendConfig());
+
+        //title
+        title = new Title(config.getTitleConfig());
     }
 
     void setMargin(Insets margin) {
@@ -175,12 +177,6 @@ public class Chart {
         return xAxisList.get(xIndex).getScale();
     }
 
-    private boolean isTitleEmpty() {
-        if(title == null || title.isEmpty()) {
-            return true;
-        }
-        return false;
-    }
 
     private Insets calculateSpacing() {
         if(config.getSpacing() != null) {
@@ -194,11 +190,11 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
            AxisWrapper axis = yAxisList.get(i);
            if(i % 2 == 0) { // left
-              if(axis.isVisible() && axis.hasTextOutside()) {
+              if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle())) ) {
                  spacingLeft = config.getAutoSpacing();
               }
            } else { // right
-               if(axis.isVisible() && axis.hasTextOutside()) {
+               if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
                    spacingRight = config.getAutoSpacing();
                }
            }
@@ -207,11 +203,11 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
             if(i % 2 == 0) { // bottom
-                if(axis.isVisible() && axis.hasTextOutside()) {
+                if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingBottom = config.getAutoSpacing();
                 }
             } else { // top
-                if(axis.isVisible() && axis.hasTextOutside()) {
+                if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingTop = config.getAutoSpacing();
                 }
             }
@@ -223,7 +219,7 @@ public class Chart {
                 spacingBottom = config.getAutoSpacing();
             }
         }
-        if(!isTitleEmpty()){
+        if(!title.isNullOrBlank()){
             spacingTop = 0;
         }
 
@@ -249,11 +245,8 @@ public class Chart {
             return;
         }
 
-        if (titleText == null) {
-            titleText = new Title(title, config.getTitleConfig(), fullArea, canvas);
-        }
         Insets spacing = calculateSpacing();
-        int titleHeight = titleText.getBounds().height;
+        int titleHeight = title.getBounds(canvas).height;
 
         if(graphArea == null) {
             graphArea = fullArea;
@@ -409,10 +402,6 @@ public class Chart {
             return;
         }
 
-        if (titleText == null) {
-            titleText = new Title(title, config.getTitleConfig(), fullArea, canvas);
-        }
-
         if (isAreasDirty()) {
             calculateMarginsAndAreas(canvas);
         }
@@ -492,7 +481,7 @@ public class Chart {
         }
         canvas.restore();
 
-        titleText.draw(canvas);
+        title.draw(canvas);
 
         if (isLegendEnabled()) {
             legend.draw(canvas);
@@ -540,7 +529,7 @@ public class Chart {
 
     public void setConfig(ChartConfig config1) {
         this.config = new ChartConfig(config1);
-        titleText = null;
+        title.setConfig(config.getTitleConfig());
         for (int i = 0; i < xAxisList.size(); i++) {
             if(i % 2 == 0)  { // bottom axis
                 xAxisList.get(i).setConfig(this.config.getBottomAxisConfig());
@@ -568,18 +557,25 @@ public class Chart {
         setAreasDirty();
     }
 
-
-    public void setXConfig(int xIndex, AxisConfig axisConfig, boolean isRoundingEnabled) {
+    public void setXRoundingEnabled(int xIndex, boolean isRoundingEnabled, int tickAccuracy) {
         AxisWrapper axis = xAxisList.get(xIndex);
-        axis.setConfig(axisConfig);
         axis.setRoundingEnabled(isRoundingEnabled);
+        axis.setTickAccuracy(tickAccuracy);
+    }
+
+    public void setYRoundingEnabled(int yIndex, boolean isRoundingEnabled, int tickAccuracy) {
+        AxisWrapper axis = yAxisList.get(yIndex);
+        axis.setRoundingEnabled(isRoundingEnabled);
+        axis.setTickAccuracy(tickAccuracy);
+    }
+
+    public void setXConfig(int xIndex, AxisConfig axisConfig) {
+        xAxisList.get(xIndex).setConfig(axisConfig);
         setAreasDirty();
     }
 
-    public void setYConfig(int yIndex, AxisConfig axisConfig, boolean isRoundingEnabled) {
-        AxisWrapper axis = yAxisList.get(yIndex);
-        axis.setConfig(axisConfig);
-        axis.setRoundingEnabled(isRoundingEnabled);
+    public void setYConfig(int yIndex, AxisConfig axisConfig) {
+        yAxisList.get(yIndex).setConfig(axisConfig);
         setAreasDirty();
     }
 
@@ -627,8 +623,7 @@ public class Chart {
     }
 
     public void setTitle(String title) {
-        this.title = title;
-        titleText = null;
+        this.title.setTitle(title);
         setAreasDirty();
     }
 
@@ -647,8 +642,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(new LinearScale(), config.getLeftAxisConfig()));
-        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(new LinearScale(), config.getRightAxisConfig()));
+        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getLeftAxisConfig()));
+        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getRightAxisConfig()));
         leftAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
         rightAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
 
@@ -780,11 +775,11 @@ public class Chart {
 
     public void setArea(BRectangle area) {
         fullArea = area;
+        title.setArea(area);
         if(config.getMargin() != null) {
             setMargin(config.getMargin());
         }
         setAreasDirty();
-        titleText = null;
     }
 
     public int traceCount() {
@@ -801,7 +796,7 @@ public class Chart {
 
     public void setXMinMax(int xIndex, double min, double max) {
         if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            if (xAxisList.get(xIndex).hasTextOutside()) {
+            if (xAxisList.get(xIndex).isTickLabelOutside()) {
                 setAreasDirty();
             }
         }
@@ -817,7 +812,7 @@ public class Chart {
 
     public void setYMinMax(int yAxisIndex, double min, double max) {
         yAxisList.get(yAxisIndex).setMinMax(min, max);
-        if (yAxisList.get(yAxisIndex).hasTextOutside()) {
+        if (yAxisList.get(yAxisIndex).isTickLabelOutside()) {
             setAreasDirty();
         }
     }

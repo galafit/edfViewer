@@ -10,6 +10,7 @@ public class TitleConfig {
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 14);
     private BColor textColor = BColor.BLACK_LIGHT;
     private Insets margin;
+    private int interLineSpace = -1;
 
     public TitleConfig() {
     }
@@ -18,6 +19,17 @@ public class TitleConfig {
         textStyle = config.textStyle;
         textColor = config.textColor;
         margin = config.margin;
+    }
+
+    public int getInterLineSpace() {
+        if(interLineSpace < 0) {
+            return (int)(textStyle.getSize() * 0.2);
+        }
+        return interLineSpace;
+    }
+
+    public void setInterLineSpace(int interLineSpace) {
+        this.interLineSpace = interLineSpace;
     }
 
     public TextStyle getTextStyle() {
