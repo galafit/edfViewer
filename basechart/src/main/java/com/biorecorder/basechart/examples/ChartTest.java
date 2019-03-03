@@ -118,6 +118,12 @@ public class ChartTest extends JFrame {
                 }
                 chart.removeTrace(chart.traceCount() - 1);
                 chartPanel.repaint();
+
+                String[] names = chart.getCurveNames();
+                for (String name : names) {
+                    System.out.println(name);
+                }
+
             }
         });
         t.start();

@@ -49,10 +49,8 @@ public class DarkTheme implements Theme {
         chartConfig.setBackgroundColor(chartBgColor);
         chartConfig.setMarginColor(chartMarginColor);
         chartConfig.getTitleConfig().setTextColor(titleColor);
-        chartConfig.setLeftAxisConfig(yAxisConfig);
-        chartConfig.setRightAxisConfig(yAxisConfig);
-        chartConfig.setTopAxisConfig(xAxisConfig);
-        chartConfig.setBottomAxisConfig(xAxisConfig);
+        chartConfig.setyAxisConfig(yAxisConfig);
+        chartConfig.setxAxisConfig(xAxisConfig);
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
@@ -66,6 +64,7 @@ public class DarkTheme implements Theme {
         BColor scrollColor = crosshairColor;
         BColor bgColor = BColor.BLACK_LIGHT;
 
+
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
@@ -73,18 +72,16 @@ public class DarkTheme implements Theme {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.setYAxisRoundingEnabled(true);
-        navigatorConfig.getLeftAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
-        navigatorConfig.getRightAxisConfig().setTickAccuracy(TICK_ACCURACY_IF_ROUNDING_ENABLED);
+        navigatorConfig.getyAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.setYAxisRoundingEnabled(true, ChartConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);
 
         ChartConfig chartConfig1 = new ChartConfig(chartConfig);
-        chartConfig1.getLeftAxisConfig().setTickLabelOutside(false);
-        chartConfig1.getRightAxisConfig().setTickLabelOutside(false);
+        chartConfig1.getyAxisConfig().setTickLabelOutside(false);
+        chartConfig1.setLeftAxisPrimary(false);
+        chartConfig1.setBottomAxisPrimary(false);
 
         navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);
         navigableChartConfig.setBackgroundColor(bgColor);

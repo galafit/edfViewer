@@ -8,6 +8,9 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
+    public static int TICK_ACCURACY_IF_ROUNDING_ENABLED = 10;
+    public static int TICK_ACCURACY_IF_ROUNDING_DISABLED = 20;
+
     private BColor[] traceColors;
 
     private BColor backgroundColor;
@@ -24,10 +27,9 @@ public class ChartConfig {
 
     private int stackGap = 4; //px
 
-    private AxisConfig leftAxisConfig = new AxisConfig();
-    private AxisConfig rightAxisConfig = new AxisConfig();
-    private AxisConfig bottomAxisConfig = new AxisConfig();
-    private AxisConfig topAxisConfig = new AxisConfig();
+
+    private AxisConfig yAxisConfig = new AxisConfig();
+    private AxisConfig xAxisConfig = new AxisConfig();
 
     private boolean isMultiCurveTooltip = true;
 
@@ -74,10 +76,8 @@ public class ChartConfig {
         backgroundColor = bgColor;
         marginColor = marginBgColor;
         titleConfig.setTextColor(titleColor);
-        leftAxisConfig = new AxisConfig(yAxisConfig);
-        rightAxisConfig = new AxisConfig(yAxisConfig);
-        topAxisConfig = new AxisConfig(xAxisConfig);
-        bottomAxisConfig = new AxisConfig(xAxisConfig);
+        yAxisConfig = new AxisConfig(yAxisConfig);
+        xAxisConfig = new AxisConfig(yAxisConfig);
         crossHairConfig.setLineColor(crosshairColor);
         legendConfig.setBackgroundColor(bgColor);
         legendConfig.setMargin(new Insets(1));
@@ -95,10 +95,8 @@ public class ChartConfig {
         margin = chartConfig.margin;
         autoSpacing = chartConfig.autoSpacing;
         stackGap = chartConfig.stackGap;
-        leftAxisConfig = new AxisConfig(chartConfig.leftAxisConfig);
-        rightAxisConfig = new AxisConfig(chartConfig.rightAxisConfig);
-        topAxisConfig = new AxisConfig(chartConfig.topAxisConfig);
-        bottomAxisConfig = new AxisConfig(chartConfig.bottomAxisConfig);
+        yAxisConfig = new AxisConfig(chartConfig.yAxisConfig);
+        xAxisConfig = new AxisConfig(chartConfig.xAxisConfig);
         isLeftAxisPrimary = chartConfig.isLeftAxisPrimary;
         isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
         isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
@@ -182,16 +180,18 @@ public class ChartConfig {
         return isYAxisRoundingEnabled;
     }
 
-    public void setYAxisRoundingEnabled(boolean isYAxisRoundingEnabled) {
-        this.isYAxisRoundingEnabled = isYAxisRoundingEnabled;
-    }
-
     public boolean isXAxisRoundingEnabled() {
         return isXAxisRoundingEnabled;
     }
 
-    public void setXAxisRoundingEnabled(boolean isXAxisRoundingEnabled) {
+    public void setXAxisRoundingEnabled(boolean isXAxisRoundingEnabled, int tickAccuracy) {
         this.isXAxisRoundingEnabled = isXAxisRoundingEnabled;
+        xAxisConfig.setTickAccuracy(tickAccuracy);
+    }
+
+    public void setYAxisRoundingEnabled(boolean isYAxisRoundingEnabled, int tickAccuracy) {
+        this.isYAxisRoundingEnabled = isYAxisRoundingEnabled;
+        yAxisConfig.setTickAccuracy(tickAccuracy);
     }
 
     public TitleConfig getTitleConfig() {
@@ -234,35 +234,19 @@ public class ChartConfig {
         return crossHairConfig;
     }
 
-    public AxisConfig getLeftAxisConfig() {
-        return leftAxisConfig;
+    public AxisConfig getyAxisConfig() {
+        return yAxisConfig;
     }
 
-    public void setLeftAxisConfig(AxisConfig leftAxisConfig) {
-        this.leftAxisConfig = leftAxisConfig;
+    public void setyAxisConfig(AxisConfig yAxisConfig) {
+        this.yAxisConfig = yAxisConfig;
     }
 
-    public AxisConfig getRightAxisConfig() {
-        return rightAxisConfig;
+    public AxisConfig getxAxisConfig() {
+        return xAxisConfig;
     }
 
-    public void setRightAxisConfig(AxisConfig rightAxisConfig) {
-        this.rightAxisConfig = rightAxisConfig;
-    }
-
-    public AxisConfig getBottomAxisConfig() {
-        return bottomAxisConfig;
-    }
-
-    public void setBottomAxisConfig(AxisConfig bottomAxisConfig) {
-        this.bottomAxisConfig = bottomAxisConfig;
-    }
-
-    public AxisConfig getTopAxisConfig() {
-        return topAxisConfig;
-    }
-
-    public void setTopAxisConfig(AxisConfig topAxisConfig) {
-        this.topAxisConfig = topAxisConfig;
+    public void setxAxisConfig(AxisConfig xAxisConfig) {
+        this.xAxisConfig = xAxisConfig;
     }
 }

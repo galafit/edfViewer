@@ -67,8 +67,8 @@ public class Chart {
         this.config = new ChartConfig(chartConfig1);
         this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getBottomAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getTopAxisConfig()));
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getxAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getxAxisConfig()));
         bottomAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
         topAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
 
@@ -535,6 +535,33 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
 
+    public String[] getCurveNames() {
+       List<String> names = new ArrayList<>();
+        for (Trace trace : traces) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+                names.add(trace.getCurveName(i));
+            }
+        }
+        String[] namesArr = new String[names.size()];
+        return names.toArray(namesArr);
+    }
+
+    public int traceCurveCount(int traceNumber) {
+        return traces.get(traceNumber).curveCount();
+    }
+
+    public CurveNumber getCurveNumberByName(String name) {
+        for (int i = 0; i < traces.size(); i++) {
+            Trace trace = traces.get(i);
+            for (int j = 0; j < trace.curveCount(); j++) {
+               if(trace.getCurveName(i).equals(name)) {
+                   return new CurveNumber(i, j);
+               }
+            }
+        }
+        return null;
+    }
+
     public CurveNumber getSelectedCurveNumber() {
         if(selectedCurve != null) {
             for (int i = 0; i < traces.size(); i++) {
@@ -563,18 +590,10 @@ public class Chart {
         this.config = new ChartConfig(chartConfig);
         title.setConfig(config.getTitleConfig());
         for (int i = 0; i < xAxisList.size(); i++) {
-            if(i % 2 == 0)  { // bottom axis
-                xAxisList.get(i).setConfig(this.config.getBottomAxisConfig());
-            } else { // top axis
-                xAxisList.get(i).setConfig(this.config.getTopAxisConfig());
-            }
+            xAxisList.get(i).setConfig(this.config.getxAxisConfig());
         }
         for (int i = 0; i < yAxisList.size(); i++) {
-            if(i % 2 == 0)  { // left axis
-                yAxisList.get(i).setConfig(this.config.getLeftAxisConfig());
-            } else { // right axis
-                yAxisList.get(i).setConfig(this.config.getRightAxisConfig());
-            }
+            yAxisList.get(i).setConfig(this.config.getyAxisConfig());
         }
         legend.setConfig(config.getLegendConfig());
 
@@ -691,8 +710,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getLeftAxisConfig()));
-        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getRightAxisConfig()));
+        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getyAxisConfig()));
+        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getxAxisConfig()));
         leftAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
         rightAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
 

@@ -23,17 +23,15 @@ public class NavigableChartConfig {
         navigatorConfig = new ChartConfig();
         scrollConfig = new ScrollConfig();
 
-        chartConfig.getRightAxisConfig().setTickLabelOutside(false);
-        chartConfig.getLeftAxisConfig().setTickLabelOutside(false);
+        chartConfig.getyAxisConfig().setTickLabelOutside(false);
         chartConfig.setLeftAxisPrimary(false);
 
-        navigatorConfig.getRightAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.getLeftAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.getyAxisConfig().setTickLabelOutside(false);
         navigatorConfig.setLeftAxisPrimary(false);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.setYAxisRoundingEnabled(true);
+        navigatorConfig.setYAxisRoundingEnabled(true, ChartConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
 
