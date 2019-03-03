@@ -127,8 +127,8 @@ public abstract class Axis {
         return title;
     }
 
-    public void setTickAccuracy(int tickAccuracy) {
-        config.setTickAccuracy(tickAccuracy);
+    public boolean isRoundingEnabled() {
+        return config.isRoundingEnabled();
     }
 
 

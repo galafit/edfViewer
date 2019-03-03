@@ -1,5 +1,6 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 
@@ -23,17 +24,18 @@ public class NavigableChartConfig {
         navigatorConfig = new ChartConfig();
         scrollConfig = new ScrollConfig();
 
-        chartConfig.getyAxisConfig().setTickLabelOutside(false);
+        chartConfig.getYAxisConfig().setTickLabelOutside(false);
         chartConfig.setLeftAxisPrimary(false);
 
-        navigatorConfig.getyAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
         navigatorConfig.setLeftAxisPrimary(false);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.setYAxisRoundingEnabled(true, ChartConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
+        navigatorConfig.getYAxisConfig().setRoundingEnabled(true, AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
+
 
         BColor scrollColor = chartConfig.getCrossHairConfig().getLineColor();
         scrollConfig.setColor(scrollColor);

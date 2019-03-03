@@ -390,12 +390,12 @@ public class NavigableChart {
 
     public void setChartXScale(int xIndex, Scale scale) {
         chart.setXScale(xIndex, scale);
+        scrolls.clear();
+        isScrollDirty = true;
     }
 
     public void setChartYScale(int yIndex, Scale scale) {
         chart.setYScale(yIndex, scale);
-        scrolls.clear();
-        isScrollDirty = true;
     }
 
     public void addChartTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {

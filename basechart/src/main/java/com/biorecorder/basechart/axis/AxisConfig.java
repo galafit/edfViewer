@@ -20,6 +20,10 @@ public class AxisConfig {
      micro 	µ 	0.000001 	10x¯6
      nano 	n 	0.000000001 	10x¯9
      */
+    public static int TICK_ACCURACY_IF_ROUNDING_ENABLED = 10;
+    public static int TICK_ACCURACY_IF_ROUNDING_DISABLED = 20;
+
+
     private BColor axisLineColor =  BColor.GRAY;
     private BStroke axisLineStroke = new BStroke(1); // if width = 0 line will not be drawn
 
@@ -52,7 +56,7 @@ public class AxisConfig {
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
     private int minorTickIntervalCount = 0; // number of minor intervals in one major interval
-
+    private boolean isRoundingEnabled = false;
     private boolean isTickLabelOutside = true;
 
 
@@ -86,6 +90,7 @@ public class AxisConfig {
         minorTickMarkInsideSize = axisConfig.minorTickMarkInsideSize;
         minorTickMarkColor = axisConfig.minorTickMarkColor;
         minorTickIntervalCount = axisConfig.minorTickIntervalCount;
+        isRoundingEnabled = axisConfig.isRoundingEnabled;
 
         titlePadding = axisConfig.titlePadding;
         titleTextStyle = axisConfig.titleTextStyle;
@@ -94,23 +99,30 @@ public class AxisConfig {
         isTickLabelOutside = axisConfig.isTickLabelOutside;
     }
 
+
+    public int getTickAccuracy() {
+        return tickAccuracy;
+    }
+
+    public boolean isRoundingEnabled() {
+        return isRoundingEnabled;
+    }
+
     /**
-     * Specify maximum distance between axis start and minTick
+     * Tick accuracy specify maximum distance between axis start and minTick
      * in relation to axis length (percents)
      * Ticks count is calculated on the base of the given rounding accuracy.
      * If rounding accuracy <= 0 it will not be taken into account!!!
      *
-     * Default value is 20%. If axis rounding is enabled for smooth translation
-     * and zooming good values 5 - 10%
+     * If rounding disables default value is 20%.
+     * If axis rounding is enabled for smooth translation
+     * and zooming good values are: 5 - 10%
      *
      * @param tickAccuracy - rounding accuracy percents
      */
-    public void setTickAccuracy(int tickAccuracy) {
+    public void setRoundingEnabled(boolean roundingEnabled, int tickAccuracy) {
+        isRoundingEnabled = roundingEnabled;
         this.tickAccuracy = tickAccuracy;
-    }
-
-    public int getTickAccuracy() {
-        return tickAccuracy;
     }
 
     public void setTickInterval(double tickInterval) {

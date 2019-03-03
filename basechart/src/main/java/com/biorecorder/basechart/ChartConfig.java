@@ -8,8 +8,6 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
-    public static int TICK_ACCURACY_IF_ROUNDING_ENABLED = 10;
-    public static int TICK_ACCURACY_IF_ROUNDING_DISABLED = 20;
 
     private BColor[] traceColors;
 
@@ -37,8 +35,6 @@ public class ChartConfig {
     private boolean isBottomAxisPrimary = true;
 
     private int defaultStackWeight = 4;
-    private boolean isYAxisRoundingEnabled = false;
-    private boolean isXAxisRoundingEnabled = false;
 
     public ChartConfig() {
         final BColor BLUE = new BColor(0, 130, 230);
@@ -64,11 +60,9 @@ public class ChartConfig {
 
         BColor crosshairColor = axisColor;
 
-        AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
 
-        AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(4, 0);
         
@@ -101,9 +95,6 @@ public class ChartConfig {
         isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
         isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
         defaultStackWeight = chartConfig.defaultStackWeight;
-
-        isYAxisRoundingEnabled = chartConfig.isYAxisRoundingEnabled;
-        isXAxisRoundingEnabled = chartConfig.isXAxisRoundingEnabled;
     }
 
     public int getStackGap() {
@@ -176,24 +167,6 @@ public class ChartConfig {
         this.defaultStackWeight = defaultStackWeight;
     }
 
-    public boolean isYAxisRoundingEnabled() {
-        return isYAxisRoundingEnabled;
-    }
-
-    public boolean isXAxisRoundingEnabled() {
-        return isXAxisRoundingEnabled;
-    }
-
-    public void setXAxisRoundingEnabled(boolean isXAxisRoundingEnabled, int tickAccuracy) {
-        this.isXAxisRoundingEnabled = isXAxisRoundingEnabled;
-        xAxisConfig.setTickAccuracy(tickAccuracy);
-    }
-
-    public void setYAxisRoundingEnabled(boolean isYAxisRoundingEnabled, int tickAccuracy) {
-        this.isYAxisRoundingEnabled = isYAxisRoundingEnabled;
-        yAxisConfig.setTickAccuracy(tickAccuracy);
-    }
-
     public TitleConfig getTitleConfig() {
         return titleConfig;
     }
@@ -234,19 +207,19 @@ public class ChartConfig {
         return crossHairConfig;
     }
 
-    public AxisConfig getyAxisConfig() {
+    public AxisConfig getYAxisConfig() {
         return yAxisConfig;
     }
 
-    public void setyAxisConfig(AxisConfig yAxisConfig) {
+    public void setYAxisConfig(AxisConfig yAxisConfig) {
         this.yAxisConfig = yAxisConfig;
     }
 
-    public AxisConfig getxAxisConfig() {
+    public AxisConfig getXAxisConfig() {
         return xAxisConfig;
     }
 
-    public void setxAxisConfig(AxisConfig xAxisConfig) {
+    public void setXAxisConfig(AxisConfig xAxisConfig) {
         this.xAxisConfig = xAxisConfig;
     }
 }

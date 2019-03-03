@@ -15,7 +15,6 @@ import com.sun.istack.internal.Nullable;
 public class AxisWrapper {
     private Axis axis;
     private boolean isVisible = false;
-    private boolean isRoundingEnabled = false;
     // need this field to implement smooth zooming and translate when minMaxRounding enabled
     private Range rowMinMax; // without rounding
     private boolean roundingDirty = true;
@@ -27,14 +26,19 @@ public class AxisWrapper {
     }
 
     private void setRoundingDirty() {
-        if(isRoundingEnabled) {
+        if(axis.isRoundingEnabled()) {
             roundingDirty = true;
             axis.setMinMax(rowMinMax);
         }
     }
 
+    public boolean isRoundingEnabled() {
+        return axis.isRoundingEnabled();
+    }
+
+
     private boolean isDirty() {
-        if (isRoundingEnabled && roundingDirty) {
+        if (axis.isRoundingEnabled() && roundingDirty) {
             return true;
         }
         return false;
@@ -48,14 +52,6 @@ public class AxisWrapper {
         return axis.length();
     }
 
-    public void setRoundingEnabled(boolean isRoundingEnabled) {
-        this.isRoundingEnabled = isRoundingEnabled;
-        setRoundingDirty();
-    }
-
-    public boolean isRoundingEnabled() {
-        return isRoundingEnabled;
-    }
 
     public void setScale(Scale scale) {
         axis.setScale(scale);
@@ -81,10 +77,6 @@ public class AxisWrapper {
 
     public String getTitle() {
         return axis.getTitle();
-    }
-
-    public void setTickAccuracy(int tickAccuracy) {
-        axis.setTickAccuracy(tickAccuracy);
     }
 
     public void setTitle(String title) {

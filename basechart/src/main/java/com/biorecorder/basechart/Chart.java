@@ -67,10 +67,8 @@ public class Chart {
         this.config = new ChartConfig(chartConfig1);
         this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getxAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getxAxisConfig()));
-        bottomAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
-        topAxis.setRoundingEnabled(config.isXAxisRoundingEnabled());
+        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getXAxisConfig()));
+        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getXAxisConfig()));
 
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
@@ -590,10 +588,10 @@ public class Chart {
         this.config = new ChartConfig(chartConfig);
         title.setConfig(config.getTitleConfig());
         for (int i = 0; i < xAxisList.size(); i++) {
-            xAxisList.get(i).setConfig(this.config.getxAxisConfig());
+            xAxisList.get(i).setConfig(this.config.getXAxisConfig());
         }
         for (int i = 0; i < yAxisList.size(); i++) {
-            yAxisList.get(i).setConfig(this.config.getyAxisConfig());
+            yAxisList.get(i).setConfig(this.config.getYAxisConfig());
         }
         legend.setConfig(config.getLegendConfig());
 
@@ -608,18 +606,6 @@ public class Chart {
             }
         }
         setAreasDirty();
-    }
-
-    public void setXRoundingEnabled(int xIndex, boolean isRoundingEnabled, int tickAccuracy) {
-        AxisWrapper axis = xAxisList.get(xIndex);
-        axis.setRoundingEnabled(isRoundingEnabled);
-        axis.setTickAccuracy(tickAccuracy);
-    }
-
-    public void setYRoundingEnabled(int yIndex, boolean isRoundingEnabled, int tickAccuracy) {
-        AxisWrapper axis = yAxisList.get(yIndex);
-        axis.setRoundingEnabled(isRoundingEnabled);
-        axis.setTickAccuracy(tickAccuracy);
     }
 
     public void setXConfig(int xIndex, AxisConfig axisConfig) {
@@ -710,11 +696,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getyAxisConfig()));
-        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getxAxisConfig()));
-        leftAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
-        rightAxis.setRoundingEnabled(config.isYAxisRoundingEnabled());
-
+        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getYAxisConfig()));
+        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getYAxisConfig()));
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
@@ -774,7 +757,6 @@ public class Chart {
     public void addTrace(int stack, Trace trace, boolean isSplit) {
         addTrace(stack, trace, isSplit, false, false);
     }
-
 
     /**
      * add trace to the stack with the given number

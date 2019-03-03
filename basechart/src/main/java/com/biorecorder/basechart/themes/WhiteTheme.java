@@ -50,8 +50,8 @@ public class WhiteTheme implements Theme {
         chartConfig.setBackgroundColor(chartBgColor);
         chartConfig.setMarginColor(chartMarginColor);
         chartConfig.getTitleConfig().setTextColor(titleColor);
-        chartConfig.setyAxisConfig(yAxisConfig);
-        chartConfig.setxAxisConfig(xAxisConfig);
+        chartConfig.setYAxisConfig(yAxisConfig);
+        chartConfig.setXAxisConfig(xAxisConfig);
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
@@ -75,14 +75,14 @@ public class WhiteTheme implements Theme {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);
-        navigatorConfig.getyAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.setYAxisRoundingEnabled(true, ChartConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
+        navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
+        navigatorConfig.getYAxisConfig().setRoundingEnabled(true, AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);
 
         ChartConfig chartConfig1 = new ChartConfig(chartConfig);
-        chartConfig1.getyAxisConfig().setTickLabelOutside(false);
+        chartConfig1.getYAxisConfig().setTickLabelOutside(false);
         chartConfig1.setLeftAxisPrimary(false);
         chartConfig1.setBottomAxisPrimary(false);
 
