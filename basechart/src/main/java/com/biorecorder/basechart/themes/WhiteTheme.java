@@ -17,7 +17,7 @@ public class WhiteTheme implements Theme {
         final BColor BLUE = new BColor(0, 130, 230);
         final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
         final BColor GREEN_DARK = new BColor(0, 130, 0);
-        final BColor MAGENTA = new BColor(120, 50, 185);
+        final BColor MAGENTA = new BColor(150, 50, 185);
         final BColor RED = new BColor(250, 60, 90); //new BColor(230, 10, 60);
         final BColor BLUE_DARK = new BColor(30, 30, 180);
         final BColor PINK = new BColor(230, 0, 230);

@@ -85,11 +85,9 @@ public class ChartTest extends JFrame {
         chart.addTrace(new LineTrace(xyData1), false, false, false);
         chart.addStack();
         chart.addTrace(new LineTrace(xyData2), false, false, false);
-        chart.addStack();
-        chart.addTrace(new LineTrace(xyData3), false, false, false);
 
         chart.setXMinMax(0, 0, 200);
-        chart.setYMinMax(1, - 0.333, 0.76);
+        chart.setYMinMax(3, 0, 300);
 
         chartPanel = new ChartPanel(chart);
 
@@ -101,24 +99,28 @@ public class ChartTest extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
-
-        final Timer timer = new Timer(6000, new ActionListener() {
-            int counter = 0;
-
+        Thread t = new Thread(new Runnable() {
+            int interval = 3000;
             @Override
-            public void actionPerformed(ActionEvent e) {
-                if (counter == 0) {
-                    CurveNumber curveNumber = chart.getSelectedCurveNumber();
-                    chart.setCurveColor(curveNumber.getTraceNumber(), curveNumber.getCurveNumber(), BColor.MAGENTA);
-                    chart.setCurveName(curveNumber.getTraceNumber(), curveNumber.getCurveNumber(), "bla bla bla");
-                    chartPanel.repaint();
+            public void run() {
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                counter++;
+                //chart.addStack();
+                chart.addTrace(new LineTrace(xyData2), true, false, false);
+                chartPanel.repaint();
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                chart.removeTrace(chart.traceCount() - 1);
+                chartPanel.repaint();
             }
         });
-
-        timer.start();
+        t.start();
 
     }
 

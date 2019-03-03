@@ -111,9 +111,13 @@ public class Legend {
     }
 
     public void remove(Trace trace) {
-        SwitchButton traceButton = traceCurvesToButtons.get(trace);
-        buttonGroup.remove(traceButton.getModel());
-        traceCurvesToButtons.remove(trace);
+        for (int i = 0; i < trace.curveCount(); i++) {
+            TraceCurve traceCurve = new TraceCurve(trace, i);
+            SwitchButton traceButton = traceCurvesToButtons.get(traceCurve);
+            buttonGroup.remove(traceButton.getModel());
+            traceCurvesToButtons.remove(traceCurve);
+        }
+
         isDirty = true;
     }
 

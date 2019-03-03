@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Implemented similar to swing ButtonModel (and  ButtonGroup).
  * Permit to select only one or none
- * button in the button groupByEqualIntervals.
+ * button in the button group.
  */
 public class ButtonModel {
     private List<StateListener> selectionListeners = new ArrayList<StateListener>();

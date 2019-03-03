@@ -613,7 +613,6 @@ public class Chart {
         setAreasDirty();
     }
 
-
     /**
      * return COPY of X axis config. To change axis config use setXConfig
      */
@@ -706,6 +705,36 @@ public class Chart {
         } else {
             setAreasDirty();
         }
+    }
+
+    /**
+     *
+     * @throws IllegalStateException if stack axis are used by some trace curves and
+     * therefor can not be deleted
+     */
+    public void removeStack(int stackNumber) throws IllegalStateException{
+        // check that no trace use that stack
+        Scale leftScale = yAxisList.get(stackNumber * 2).getScale();
+        Scale rightScale = yAxisList.get(stackNumber * 2 + 1).getScale();
+
+
+        for (int i = 0; i < traces.size(); i++) {
+            for (Scale scale : traces.get(i).getYScales()) {
+                if(scale == leftScale || scale == rightScale) {
+                     String errMsg = "Stack: " + stackNumber + "can not be removed. It is used by trace number: " + i;
+                    throw new IllegalStateException(errMsg);
+                }
+            }
+        }
+        stackWeights.remove(stackNumber);
+        yAxisList.remove(stackNumber * 2 + 1);
+        yAxisList.remove(stackNumber * 2);
+        if(config.getMargin() != null) { // fixed margins
+            setMargin(config.getMargin());
+        } else {
+            setAreasDirty();
+        }
+
     }
 
     /**
@@ -817,10 +846,27 @@ public class Chart {
     }
 
     public void removeTrace(int traceNumber) {
+        Trace trace = traces.get(traceNumber);
         if(isLegendEnabled()) {
-            legend.remove(traces.get(traceNumber));
+            legend.remove(trace);
         }
         traces.remove(traceNumber);
+        // remove the stacks used by the trace curves if that stacks
+        // are not used anymore
+        int traceStack = 0;
+        for (int i = 0; i < yAxisList.size(); i++) {
+            if(trace.getYScale(0) == yAxisList.get(i).getScale()) {
+                traceStack = i / 2;
+            }
+        }
+        int stacks = trace.getYScales().length;
+        for (int i = traceStack + stacks - 1; i >= traceStack; i--) {
+            try {
+                removeStack(i);
+            } catch (IllegalStateException ex) {
+                // do nothing;
+            }
+        }
     }
 
     public void setArea(BRectangle area) {
