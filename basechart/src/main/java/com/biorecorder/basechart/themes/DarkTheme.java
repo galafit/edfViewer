@@ -54,6 +54,8 @@ public class DarkTheme implements Theme {
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
+        chartConfig.setLeftAxisPrimary(false);
+        chartConfig.setBottomAxisPrimary(true);
 
         this.chartConfig = chartConfig;
 
@@ -80,7 +82,6 @@ public class DarkTheme implements Theme {
 
         ChartConfig chartConfig1 = new ChartConfig(chartConfig);
         chartConfig1.getYAxisConfig().setTickLabelOutside(false);
-        chartConfig1.setLeftAxisPrimary(false);
         chartConfig1.setBottomAxisPrimary(false);
 
         navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);

@@ -16,19 +16,21 @@ public class AxisWrapper {
     private Axis axis;
     private boolean isVisible = false;
     // need this field to implement smooth zooming and translate when minMaxRounding enabled
-    private Range rowMinMax; // without rounding
+    private double rowMin; // without rounding
+    private double rowMax; // without rounding
     private boolean roundingDirty = true;
 
 
     public AxisWrapper(Axis axis) {
         this.axis = axis;
-        rowMinMax = new Range(axis.getMin(), axis.getMax());
+        rowMin = axis.getMin();
+        rowMax = axis.getMax();
     }
 
     private void setRoundingDirty() {
         if(axis.isRoundingEnabled()) {
             roundingDirty = true;
-            axis.setMinMax(rowMinMax);
+            axis.setMinMax(rowMin, rowMax);
         }
     }
 
@@ -55,7 +57,8 @@ public class AxisWrapper {
 
     public void setScale(Scale scale) {
         axis.setScale(scale);
-        rowMinMax = new Range(axis.getMin(), axis.getMax());
+        rowMin = axis.getMin();
+        rowMax = axis.getMax();
         roundingDirty = true;
     }
 
@@ -111,9 +114,22 @@ public class AxisWrapper {
      * return true if axis min or max actually will be changed
      */
     public boolean setMinMax(double min, double max) {
-        if (rowMinMax.getMin() != min || rowMinMax.getMax() != max) {
-            rowMinMax = new Range(min, max);
-            axis.setMinMax(rowMinMax);
+        double minNew = min;
+        double maxNew = max;
+        if(minNew == maxNew) {
+            if(minNew < rowMin) {
+                maxNew = rowMin;
+            } else if( maxNew > rowMax) {
+                minNew = rowMax;
+            } else {
+                return false;
+            }
+        }
+
+        if (rowMin != minNew || rowMax != maxNew) {
+            rowMin = minNew;
+            rowMax = maxNew;
+            axis.setMinMax(minNew, maxNew);
             setRoundingDirty();
             return true;
         }
@@ -124,7 +140,7 @@ public class AxisWrapper {
      * return true if axis start or end actually changed
      */
     public boolean setStartEnd(double start, double end) {
-        if (axis.getStart() != start || axis.getEnd() != end) {
+        if (start != end && (axis.getStart() != start || axis.getEnd() != end)) {
             setRoundingDirty();
             axis.setStartEnd(start, end);
             return true;

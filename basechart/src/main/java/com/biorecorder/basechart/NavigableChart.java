@@ -16,7 +16,6 @@ import java.util.*;
 public class NavigableChart {
     private Chart chart;
     private Chart navigator;
-    private int previewXIndex = 0;
     private boolean isScrollDirty = true;
 
     private BRectangle fullArea;
@@ -24,7 +23,6 @@ public class NavigableChart {
     private BRectangle navigatorArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean scrollsAtTheEnd = true;
-
     private boolean autoScrollEnable = true;
     private boolean autoScaleEnableDuringScroll = true; // chart Y auto scale during scrolling
     private NavigableChartConfig config;
@@ -42,9 +40,21 @@ public class NavigableChart {
 
     }
 
+    private void setAreasDirty() {
+        chartArea = null;
+        navigatorArea = null;
+    }
+
+    private boolean isAreasDirty() {
+        if (chartArea == null || navigatorArea == null) {
+            return true;
+        }
+        return false;
+    }
+
     private void createScrolls() {
         updatePreviewMinMax();
-        Range previewXRange = navigator.getXMinMax(previewXIndex);
+        Range previewXRange = navigator.getXMinMax(0);
         double xMin = previewXRange.getMin();
         for (int xIndex = 0; xIndex < chart.xAxesCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
@@ -89,15 +99,17 @@ public class NavigableChart {
         }
     }
 
+    // navigator have all X axes synchronized (the same min and max)
     private void updatePreviewMinMax() {
-        Range previewMinMax = navigator.getXMinMax(0);
         Range chartMinMax = chart.getAllTracesFullMinMax();
         for (int xAxisIndex = 0; xAxisIndex < chart.xAxesCount(); xAxisIndex++) {
             chartMinMax = Range.join(chartMinMax, chart.getXMinMax(xAxisIndex));
         }
-        if (!previewMinMax.contains(chartMinMax)) {
-            previewMinMax = Range.join(previewMinMax, chartMinMax);
-            navigator.setXMinMax(0, previewMinMax.getMin(), previewMinMax.getMax());
+        navigator.setXMinMax(0, chartMinMax.getMin(), chartMinMax.getMax());
+        navigator.setXMinMax(1, chartMinMax.getMin(), chartMinMax.getMax());
+
+        for (Integer xAxis : scrolls.keySet()) {
+            scrolls.get(xAxis).setMinMax(chartMinMax);
         }
     }
 
@@ -131,6 +143,9 @@ public class NavigableChart {
         if(fullArea == null) {
             setArea(canvas.getBounds());
         }
+        if(isAreasDirty()) {
+            calculateAndSetAreas();;
+        }
         if(isScrollDirty) {
             createScrolls();
             isScrollDirty = false;
@@ -152,29 +167,68 @@ public class NavigableChart {
         for (Integer key : scrolls.keySet()) {
             drawScroll(canvas, scrolls.get(key));
         }
-
-
     }
+
 
     private void drawScroll(BCanvas canvas, Scroll scroll) {
         BRectangle area = navigator.getGraphArea(canvas);
         ScrollConfig scrollConfig = config.getScrollConfig();
-        Range scrollRange = getScrollStartEnd(scroll);
 
         int borderWidth = scrollConfig.getBorderWidth();
 
-        int scrollX = (int)scrollRange.getMin();
+        int scrollStart = (int)navigatorScale(scroll.getValue());
+        int scrollEnd = (int)navigatorScale(scroll.getValue() + scroll.getExtent());
         int scrollY = area.y + borderWidth/2;
-        int scrollHeight = area.height - borderWidth;
-        int scrollWidth = Math.max(1, (int)scrollRange.length());
+        int scrollHeight = area.height - (borderWidth / 2 ) * 2;
+        int scrollWidth = Math.max(1, scrollEnd - scrollStart);
 
+        Range touchRange = getScrollTouchRange(scroll);
+        int touchStart = (int) touchRange.getMin();
+        int touchWidth = (int) touchRange.length();
+        if(touchStart != scrollStart || touchWidth != scrollWidth) {
+            canvas.setColor(scrollConfig.getFillColor());
+            canvas.fillRect(touchStart, scrollY, touchWidth, scrollHeight);
+        } else {
+            canvas.setColor(scrollConfig.getFillColor());
+            canvas.fillRect(scrollStart, scrollY, scrollWidth, scrollHeight);
+        }
 
-        canvas.setColor(scrollConfig.getFillColor());
-        canvas.fillRect(scrollX, scrollY, scrollWidth, scrollHeight);
 
         canvas.setColor(scrollConfig.getColor());
         canvas.setStroke(new BStroke(borderWidth));
-        canvas.drawRect(scrollX, scrollY, scrollWidth, scrollHeight);
+        canvas.drawRect(scrollStart, scrollY, scrollWidth, scrollHeight);
+
+    }
+
+    private Range getScrollTouchRange(Scroll scroll) {
+        int scrollStart = (int)navigatorScale(scroll.getValue());
+        int scrollEnd = (int)navigatorScale(scroll.getValue() + scroll.getExtent());
+        int scrollWidth = scrollEnd - scrollStart;
+
+        int touchRadius = config.getScrollConfig().getTouchRadius();
+        if(scrollWidth  < 2 * touchRadius) {
+            int delta = touchRadius - scrollWidth / 2;
+            int touchStart = scrollStart - delta;
+            int touchEnd = scrollEnd  + delta;
+            int touchWidth = touchEnd - touchStart;
+
+            int scrollAreaStart = (int)navigatorScale(scroll.getMin());
+            int scrollAreaEnd = (int)navigatorScale(scroll.getMax());
+            touchWidth = Math.min(touchWidth, scrollAreaEnd - scrollAreaStart);
+
+            if(touchEnd > scrollAreaEnd) {
+                touchEnd = scrollAreaEnd;
+                touchStart = touchEnd - touchWidth;
+            }
+            if(touchStart < scrollAreaStart) {
+                touchStart = scrollAreaStart;
+                touchEnd = touchStart + touchWidth;
+            }
+
+            return new Range(touchStart, touchEnd);
+        }
+
+        return new Range(scrollStart, scrollEnd);
     }
 
 
@@ -212,18 +266,12 @@ public class NavigableChart {
     }
 
 
-    private Range getScrollStartEnd(Scroll scroll) {
-        Scale scale = navigator.getXAxisScale(previewXIndex);
-        double scrollStart = scale.scale(scroll.getValue());
-        double scrollEnd = scale.scale(scroll.getValue() + scroll.getExtent());
-        return new Range(scrollStart, scrollEnd);
+    double navigatorScale(double value) {
+        return navigator.scale(0, value);
     }
 
-
-    private Range getScrollVisibleStartEnd(Scroll scroll) {
-        ScrollConfig scrollConfig = config.getScrollConfig();
-        Range scrollRange = getScrollStartEnd(scroll);
-        return new Range(scrollRange.getMin() - scrollConfig.getExtraSpace(), scrollRange.getMax() + scrollConfig.getExtraSpace());
+    double navigatorInvert(double value) {
+        return navigator.invert(0, value);
     }
 
 
@@ -238,10 +286,6 @@ public class NavigableChart {
 
     public void update() {
         updatePreviewMinMax();
-        for (Integer xAxis : scrolls.keySet()) {
-            scrolls.get(xAxis).setMinMax(navigator.getXMinMax(previewXIndex));
-        }
-
         if (autoScrollEnable && scrollsAtTheEnd) {
             scrollToEnd();
         }
@@ -275,7 +319,7 @@ public class NavigableChart {
         }
 
         for (Integer key : scrolls.keySet()) {
-            if (getScrollVisibleStartEnd(scrolls.get(key)).contains(x)) {
+            if (getScrollTouchRange(scrolls.get(key)).contains(x)) {
                 return true;
             }
         }
@@ -303,8 +347,7 @@ public class NavigableChart {
         }
         boolean scrollsMoved = false;
         for (Integer key : scrolls.keySet()) {
-            Scale scale = navigator.getXAxisScale(previewXIndex);
-            double value = scale.invert(x);
+            double value = navigatorInvert(x);
             scrollsMoved = scrolls.get(key).setValue(value) || scrollsMoved;
         }
         return scrollsMoved;
@@ -312,9 +355,8 @@ public class NavigableChart {
 
     public boolean translateScrolls(double dx) {
         Double maxScrollsPosition = null;
-        Scale scale = navigator.getXAxisScale(previewXIndex);
         for (Integer key : scrolls.keySet()) {
-            double scrollPosition = scale.scale(scrolls.get(key).getValue());
+            double scrollPosition = navigatorScale(scrolls.get(key).getValue());
             maxScrollsPosition = (maxScrollsPosition == null) ? scrollPosition : Math.max(maxScrollsPosition, scrollPosition);
         }
         return setScrollsPosition(maxScrollsPosition + dx, navigatorArea.y);
@@ -491,9 +533,6 @@ public class NavigableChart {
         navigator.addStack(weight);
     }
 
-    public void addNavigatorTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        navigator.addTrace(trace, isSplit, isXAxisOpposite, isYAxisOpposite);
-    }
 
     public void addNavigatorTrace(Trace trace, boolean isSplit) {
         navigator.addTrace(trace, isSplit);
@@ -501,10 +540,6 @@ public class NavigableChart {
 
     public void addNavigatorTrace(int stackNumber, Trace trace, boolean isSplit) {
         navigator.addTrace(stackNumber, trace, isSplit);
-    }
-
-    public void addNavigatorTrace(int stackNumber, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        navigator.addTrace(stackNumber, trace, isSplit, isXAxisOpposite, isYAxisOpposite);
     }
 
     public void removeNavigatorTrace(int traceNumber) {

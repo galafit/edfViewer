@@ -86,7 +86,7 @@ public class ChartTest extends JFrame {
         chart.addStack();
         chart.addTrace(new LineTrace(xyData2), false, false, false);
 
-        chart.setXMinMax(0, 0, 200);
+        chart.setXMinMax(0, 0, 0.01);
         chart.setYMinMax(3, 0, 300);
 
         chartPanel = new ChartPanel(chart);
@@ -126,7 +126,7 @@ public class ChartTest extends JFrame {
 
             }
         });
-        t.start();
+       // t.start();
 
     }
 

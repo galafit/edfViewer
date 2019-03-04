@@ -8,7 +8,7 @@ import com.biorecorder.basechart.scroll.ScrollConfig;
  * Created by galafit on 31/8/18.
  */
 public class NavigableChartConfig {
-    private BColor backgroundColor = BColor.WHITE;
+    private BColor backgroundColor = BColor.BEIGE_WHITE;
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 30; // px

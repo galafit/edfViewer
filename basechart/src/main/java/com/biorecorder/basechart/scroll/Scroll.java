@@ -26,7 +26,19 @@ public class Scroll {
         }
     }
 
-    public void setExtent(double newExtent) {
+    public double getMax() {
+        return max;
+    }
+
+    public double getMin() {
+        return min;
+    }
+
+    public void setExtent(double newExtent) throws IllegalArgumentException {
+        if(newExtent <= 0) {
+            String msg = "Scroll extent = " + newExtent + " Expected >= 0";
+            throw new IllegalArgumentException(msg);
+        }
         double oldExtent = extent;
         extent = newExtent;
         if (extent > max - min || extent <= 0) {

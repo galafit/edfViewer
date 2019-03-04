@@ -109,6 +109,11 @@ public class XYData implements ChartData {
 
     @Override
     public Range getColumnMinMax(int columnNumber) {
+        double min = dataFrame.getColumnMin(columnNumber);
+        double max = dataFrame.getColumnMax(columnNumber);
+        if(Double.isNaN(min) || Double.isNaN(max)) {
+            return null;
+        }
         return new Range(dataFrame.getColumnMin(columnNumber), dataFrame.getColumnMax(columnNumber));
     }
 

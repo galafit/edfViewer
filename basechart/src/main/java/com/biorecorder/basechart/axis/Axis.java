@@ -186,23 +186,55 @@ public abstract class Axis {
         return scale.formatDomainValue(value);
     }
 
-    public boolean setMinMax(Range minMax) {
-        if (minMax.getMin() == getMin() && minMax.getMax() == getMax()) {
-            return false;
+    public boolean setMinMax(double min, double max) {
+        if(Double.isNaN(min)) {
+            String errMsg = "Min is NaN";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(Double.isNaN(max)) {
+            String errMsg = "Max is NaN";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(Double.isInfinite(min)) {
+            String errMsg = "Min is infinity";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(Double.isInfinite(max)) {
+            String errMsg = "Max is infinity";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(min == max) {
+            String errMsg = "min == max";
+            throw new IllegalArgumentException(errMsg);
         }
 
-        scale.setDomain(minMax.getMin(), minMax.getMax());
+        if (min == getMin() && max == getMax()) {
+            return false;
+        }
+        scale.setDomain(min, max);
         setTicksDirty();
         return true;
     }
 
     public boolean setStartEnd(double start, double end) {
+        if(Double.isNaN(start)) {
+            String errMsg = "Start is NaN";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(Double.isNaN(end)) {
+            String errMsg = "End is NaN";
+            throw new IllegalArgumentException(errMsg);
+        }
         if(Double.isInfinite(start)) {
             String errMsg = "Start is infinity";
             throw new IllegalArgumentException(errMsg);
         }
         if(Double.isInfinite(end)) {
             String errMsg = "End is infinity";
+            throw new IllegalArgumentException(errMsg);
+        }
+        if(start == end) {
+            String errMsg = "start == end";
             throw new IllegalArgumentException(errMsg);
         }
         if (start == getStart() && end == getEnd()) {

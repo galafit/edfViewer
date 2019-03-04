@@ -9,7 +9,7 @@ import com.biorecorder.basechart.graphics.BColor;
 public class ScrollConfig {
     private BColor color = BColor.GRAY;
     private BColor fillColor;
-    private int extraSpace = 5; //px
+    private int touchRadius = 10; //px
     private int borderWidth = 1; // px
 
     public ScrollConfig() {
@@ -17,14 +17,14 @@ public class ScrollConfig {
 
     public ScrollConfig(ScrollConfig scrollConfig) {
         color = scrollConfig.color;
-        extraSpace = scrollConfig.extraSpace;
+        touchRadius = scrollConfig.touchRadius;
     }
 
     public BColor getFillColor() {
         if(fillColor != null) {
             return fillColor;
         }
-        return new BColor(color.getRed(), color.getGreen(), color.getBlue(), 30);
+        return new BColor(color.getRed(), color.getGreen(), color.getBlue(), 50);
     }
 
     public void setFillColor(BColor fillColor) {
@@ -43,16 +43,16 @@ public class ScrollConfig {
         this.color = color;
     }
 
-    public void setExtraSpace(int activeExtraSpace) {
-        this.extraSpace = activeExtraSpace;
+    public void setTouchRadius(int activeExtraSpace) {
+        this.touchRadius = activeExtraSpace;
     }
 
     public BColor getColor() {
         return color;
     }
 
-    public int getExtraSpace() {
-        return extraSpace;
+    public int getTouchRadius() {
+        return touchRadius;
     }
 
 }

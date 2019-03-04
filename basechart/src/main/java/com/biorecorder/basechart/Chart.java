@@ -170,10 +170,13 @@ public class Chart {
         return graphArea;
     }
 
-    Scale getXAxisScale(int xIndex) {
-        return xAxisList.get(xIndex).getScale();
+    double scale(int xIndex, double value) {
+        return xAxisList.get(xIndex).getScale().scale(value);
     }
 
+    double invert(int xIndex, double value) {
+        return xAxisList.get(xIndex).getScale().invert(value);
+    }
 
     private Insets calculateSpacing() {
         if(config.getSpacing() != null) {
@@ -187,11 +190,11 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
            AxisWrapper axis = yAxisList.get(i);
            if(i % 2 == 0) { // left
-              if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle())) ) {
+              if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle())) ) {
                  spacingLeft = config.getAutoSpacing();
               }
            } else { // right
-               if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
+               if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                    spacingRight = config.getAutoSpacing();
                }
            }
@@ -200,11 +203,11 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
             if(i % 2 == 0) { // bottom
-                if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingBottom = config.getAutoSpacing();
                 }
             } else { // top
-                if(axis.isVisible() && (axis.isTickLabelOutside() || StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingTop = config.getAutoSpacing();
                 }
             }
@@ -975,6 +978,7 @@ public class Chart {
                 }
             }
         }
+
 
         if (tracesYMinMax != null) {
             setYMinMax(yIndex, tracesYMinMax.getMin(), tracesYMinMax.getMax());

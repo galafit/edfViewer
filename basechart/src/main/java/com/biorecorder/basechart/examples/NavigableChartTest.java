@@ -16,13 +16,13 @@ import java.awt.event.ActionListener;
 /**
  * Created by galafit on 27/9/18.
  */
-public class ScrollableChartTest extends JFrame{
+public class NavigableChartTest extends JFrame{
     IntArrayList yData1;
     IntArrayList yData2;
     IntArrayList xData;
     ChartPanel chartPanel;
 
-    public ScrollableChartTest() {
+    public NavigableChartTest() {
         int width = 500;
         int height = 500;
 
@@ -94,7 +94,7 @@ public class ScrollableChartTest extends JFrame{
 
 
     public static void main(String[] args) {
-        ScrollableChartTest chartTest = new ScrollableChartTest();
+        NavigableChartTest chartTest = new NavigableChartTest();
 
         final Timer timer = new Timer(10, new ActionListener() {
             int counter = 0;

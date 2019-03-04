@@ -14,7 +14,7 @@ import java.awt.event.*;
 public class ChartPanel extends JPanel implements KeyListener {
     InteractiveDrawable chart;
 
-    int scrollPointsPerRotation = 10;
+    final int scrollPointsPerRotation = 10;
     // во сколько раз растягивается или сжимается ось при автозуме
     private float defaultZoom = 2;
     private BPoint pressPoint;
