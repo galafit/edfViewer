@@ -66,6 +66,7 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
 
     @Override
     public boolean onTapUp(int x, int y) {
+        isScrollMoving = false;
         return chart.hoverOff();
     }
 

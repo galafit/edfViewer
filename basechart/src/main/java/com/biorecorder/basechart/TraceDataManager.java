@@ -186,8 +186,6 @@ public class TraceDataManager {
             return traceData;
         }
 
-        System.out.println("process data");
-
         Double xMin = xScale.getDomain()[0];
         Double xMax = xScale.getDomain()[1];
         double xStart =  xScale.getRange()[0];
@@ -205,7 +203,10 @@ public class TraceDataManager {
         }
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
-        if(drawingAreaWidth == 0) {
+        System.out.println("\nprocessing "+xMin + " " + xMax + "  " + Math.abs(xStart - xEnd));
+
+
+        if(drawingAreaWidth <= 1) {
             if(processingConfig.isCropEnabled()) {
                 return traceData.view(0, 0);
             } else {
@@ -237,7 +238,7 @@ public class TraceDataManager {
             }
          }
 
-       // System.out.println("points in group "+pointsInGroup);
+
 
         // if crop enabled
         if(processingConfig.isCropEnabled()) {
@@ -260,7 +261,6 @@ public class TraceDataManager {
             }
 
             ChartData resultantData = traceData.view(minIndex, maxIndex - minIndex);
-
             if(pointsInGroup > 1) { // group only visible data
                 if(isEqualFrequencyGrouping) {
                     resultantData = resultantData.resampleByEqualFrequency(pointsInGroup);
@@ -268,6 +268,7 @@ public class TraceDataManager {
                     resultantData = resultantData.resampleByEqualInterval(0, groupInterval);
                 }
             }
+            System.out.println(resultantData.getColumnMinMax(0) +" crop points in group "+pointsInGroup);
             return resultantData;
         }
 

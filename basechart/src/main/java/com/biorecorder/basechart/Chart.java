@@ -974,15 +974,16 @@ public class Chart {
             int curveCount = trace.curveCount();
             for (int i = 0; i < curveCount; i++) {
                 if (trace.getYScale(i) == axis.getScale()) {
+                    System.out.println(i+" curve autoscale y ");
                     tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(i));
                 }
             }
         }
 
-
         if (tracesYMinMax != null) {
             setYMinMax(yIndex, tracesYMinMax.getMin(), tracesYMinMax.getMax());
         }
+
     }
 
 

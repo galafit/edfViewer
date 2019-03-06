@@ -8,13 +8,16 @@ import com.biorecorder.basechart.scroll.ScrollConfig;
  * Created by galafit on 31/8/18.
  */
 public class NavigableChartConfig {
+    private ChartConfig chartConfig;
+    private ChartConfig navigatorConfig;
+    private ScrollConfig scrollConfig;
+
     private BColor backgroundColor = BColor.BEIGE_WHITE;
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 30; // px
-    private ChartConfig chartConfig;
-    private ChartConfig navigatorConfig;
-    private ScrollConfig scrollConfig;
+    private boolean autoScrollEnable = true;
+    private boolean autoScaleEnable = true; // chart Y auto scale during scrolling
 
     public NavigableChartConfig() {
         BColor navigatorBgColor = BColor.BEIGE_WHITE;
@@ -59,6 +62,22 @@ public class NavigableChartConfig {
 
     public ScrollConfig getScrollConfig() {
         return scrollConfig;
+    }
+
+    public boolean isAutoScrollEnable() {
+        return autoScrollEnable;
+    }
+
+    public void setAutoScrollEnable(boolean autoScrollEnable) {
+        this.autoScrollEnable = autoScrollEnable;
+    }
+
+    public boolean isAutoScaleEnable() {
+        return autoScaleEnable;
+    }
+
+    public void setAutoScaleEnable(boolean autoScaleEnable) {
+        this.autoScaleEnable = autoScaleEnable;
     }
 
     public BColor getBackgroundColor() {
