@@ -25,6 +25,8 @@ public class Chart {
  **/
     private List<AxisWrapper> xAxisList = new ArrayList<>(2);
     private List<AxisWrapper> yAxisList = new ArrayList<>();
+    private Map<Integer, Range> xAxisToMinMax = new HashMap<>(1);
+    private Map<Integer, Range> yAxisToMinMax = new HashMap<>(1);
 
     private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
     private List<Trace> traces = new ArrayList<Trace>();
@@ -80,26 +82,6 @@ public class Chart {
         title = new Title(config.getTitleConfig());
     }
 
-    void setMargin(Insets margin) {
-        this.margin = margin;
-        if(fullArea != null) {
-            int graphAreaWidth = fullArea.width - margin.left() - margin.right();
-            int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
-            if(graphAreaHeight < 0) {
-                graphAreaHeight = 0;
-            }
-            if(graphAreaWidth < 0) {
-                graphAreaWidth = 0;
-            }
-            graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
-            if (isLegendEnabled() && legend.isAttachedToStacks()) {
-                legend.setArea(graphArea);
-            }
-            setYStartEnd(graphArea.y, graphArea.height);
-            setXStartEnd(graphArea.x, graphArea.width);
-        }
-    }
-
     double getBestExtent(int xIndex) {
         double maxExtent = 0;
         for (Trace trace : traces) {
@@ -143,29 +125,31 @@ public class Chart {
         return false;
     }
 
-    private void setAreasDirty() {
+    private void setDirty() {
         if(config.getMargin() == null) { // if margin is not fixed
             margin = null;
+            graphArea = null;
         }
     }
 
-    private boolean isAreasDirty() {
+    private boolean isDirty() {
         if (margin == null || graphArea == null) {
             return true;
         }
         return false;
     }
 
+
     Insets getMargin(BCanvas canvas) {
-        if (margin == null) {
-            calculateMarginsAndAreas(canvas);
+        if (isDirty()) {
+            doCalculations(canvas);
         }
         return margin;
     }
 
     BRectangle getGraphArea(BCanvas canvas) {
         if (graphArea == null) {
-            calculateMarginsAndAreas(canvas);
+            doCalculations(canvas);
         }
         return graphArea;
     }
@@ -233,15 +217,89 @@ public class Chart {
         return true;
     }
 
-    void calculateMarginsAndAreas(BCanvas canvas) {
+    private void setXMinMax(BCanvas canvas) {
+        for (int i = 0; i < xAxisList.size(); i++) {
+            Range minMax = xAxisToMinMax.get(i);
+            AxisWrapper axis = xAxisList.get(i);
+            if(minMax != null) {
+                // NO ROUNDING !!! course the X min and max depends data processing
+                axis.setMinMax(minMax.getMin(), minMax.getMax());
+            } else { // auto scale X
+                Range tracesXMinMax = null;
+                for (Trace trace : traces) {
+                    if (trace.getXScale() == axis.getScale()) {
+                        tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax());
+                    }
+                }
+
+                if (tracesXMinMax != null) {
+                    axis.setMinMax(tracesXMinMax.getMin(), tracesXMinMax.getMax());
+                }
+                // rounding only in the case of auto scale when no data processing
+                axis.roundMinMax(canvas);
+            }
+        }
+    }
+
+    private void setYMinMax(BCanvas canvas) {
+        for (int i = 0; i < yAxisList.size(); i++) {
+            Range minMax = yAxisToMinMax.get(i);
+            AxisWrapper axis = yAxisList.get(i);
+            if(minMax != null) {
+                axis.setMinMax(minMax.getMin(), minMax.getMax());
+            } else { // auto scale Y
+                Range tracesYMinMax = null;
+                for (Trace trace : traces) {
+                    int curveCount = trace.curveCount();
+                    for (int curve = 0; curve < curveCount; curve++) {
+                        if (trace.getYScale(curve) == axis.getScale()) {
+                            tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(curve));
+                        }
+                    }
+                }
+
+                if (tracesYMinMax != null) {
+                    axis.setMinMax(tracesYMinMax.getMin(), tracesYMinMax.getMax());
+                }
+            }
+            axis.roundMinMax(canvas);
+        }
+    }
+
+    void setMargin(Insets margin, BCanvas canvas) {
+        this.margin = margin;
+        if(fullArea != null) {
+            int graphAreaWidth = fullArea.width - margin.left() - margin.right();
+            int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
+            if(graphAreaHeight < 0) {
+                graphAreaHeight = 0;
+            }
+            if(graphAreaWidth < 0) {
+                graphAreaWidth = 0;
+            }
+            graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
+            if (isLegendEnabled() && legend.isAttachedToStacks()) {
+                legend.setArea(graphArea);
+            }
+            setXStartEnd(graphArea.x, graphArea.width);
+            setYStartEnd(graphArea.y, graphArea.height);
+            setXMinMax(canvas);
+            setYMinMax(canvas);
+        }
+    }
+
+
+    void doCalculations(BCanvas canvas) {
         if(fullArea.width == 0 || fullArea.height == 0) {
             graphArea = fullArea;
             margin = new Insets(0);
             return;
         }
 
+        // all calculation with x axes must be done always first course data processing depends on it!!!
+
         if(config.getMargin() != null) { // fixed margin
-            setMargin(config.getMargin());
+            setMargin(config.getMargin(), canvas);
             return;
         }
 
@@ -252,6 +310,7 @@ public class Chart {
             graphArea = fullArea;
         }
         setXStartEnd(graphArea.x, graphArea.width);
+        setXMinMax(canvas);
 
         int top = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
         int bottom = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
@@ -270,7 +329,7 @@ public class Chart {
         }
 
         setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
-
+        setYMinMax(canvas);
         int left = 0;
         int right = 0;
         for (int i = 0; i < yAxisList.size(); i++) {
@@ -286,6 +345,7 @@ public class Chart {
 
         // adjust XAxis ranges
         setXStartEnd(fullArea.x + left, fullArea.width - left - right);
+        setXMinMax(canvas);
         int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
         int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
         if (isLegendEnabled() && !legend.isAttachedToStacks()) {
@@ -299,6 +359,7 @@ public class Chart {
         if (topNew != top || bottomNew != bottom) {
             // adjust YAxis ranges
             setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
+            setYMinMax(canvas);
             top = topNew;
             bottom = bottomNew;
         }
@@ -410,12 +471,13 @@ public class Chart {
         if(fullArea == null) {
             setArea(canvas.getBounds());
         }
+
         if(fullArea.width == 0 || fullArea.height == 0) {
             return;
         }
 
-        if (isAreasDirty()) {
-            calculateMarginsAndAreas(canvas);
+        if (isDirty()) {
+            doCalculations(canvas);
         }
 
         canvas.enableAntiAliasAndHinting();
@@ -432,14 +494,6 @@ public class Chart {
             BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
-
-        /*
-         * Attention!!!
-         * Drawing  axis and grids should be done before drawing traces
-         * because this methods invokes axis rounding
-         * First we should draw all grids and only after that axes
-         * (otherwise the grid will draw over the axes)
-         */
 
         // draw X axes grids
         AxisWrapper bottomAxis = xAxisList.get(0);
@@ -531,7 +585,6 @@ public class Chart {
         }
     }
 
-
     /**
      * =======================Base methods to interact==========================
      **/
@@ -608,71 +661,12 @@ public class Chart {
                 }
             }
         }
-        setAreasDirty();
-    }
-
-    public void setXConfig(int xIndex, AxisConfig axisConfig) {
-        xAxisList.get(xIndex).setConfig(axisConfig);
-        setAreasDirty();
-    }
-
-    public void setYConfig(int yIndex, AxisConfig axisConfig) {
-        yAxisList.get(yIndex).setConfig(axisConfig);
-        setAreasDirty();
-    }
-
-    /**
-     * return COPY of X axis config. To change axis config use setXConfig
-     */
-    public AxisConfig getXConfig(int xIndex) {
-        return xAxisList.get(xIndex).getConfig();
-    }
-
-    /**
-     * return COPY of Y axis config. To change axis config use setYConfig
-     */
-    public AxisConfig getYConfig(int yIndex) {
-        return yAxisList.get(yIndex).getConfig();
-    }
-
-    public void setXTitle(int xIndex, String title) {
-        xAxisList.get(xIndex).setTitle(title);
-        setAreasDirty();
-    }
-
-    public void setYTitle(int yIndex, String title) {
-        yAxisList.get(yIndex).setTitle(title);
-        setAreasDirty();
-    }
-
-    public void setXScale(int xIndex, Scale scale) {
-        AxisWrapper axis = xAxisList.get(xIndex);
-        for (Trace trace : traces) {
-           if(trace.getXScale() == axis.getScale()) {
-               trace.setXScale(scale);
-           }
-        }
-        axis.setScale(scale);
-        setAreasDirty();
-    }
-
-    public void setYScale(int yIndex, Scale scale) {
-        AxisWrapper axis = yAxisList.get(yIndex);
-        for (Trace trace : traces) {
-            Scale[] traceYScales = trace.getYScales();
-            for (int i = 0; i < traceYScales.length; i++) {
-                if(traceYScales[i] == axis.getScale()) {
-                    traceYScales[i] = scale;
-                }
-            }
-        }
-        axis.setScale(scale);
-        setAreasDirty();
+        setDirty();
     }
 
     public void setTitle(String title) {
         this.title.setTitle(title);
-        setAreasDirty();
+        setDirty();
     }
 
     public void setCurveColor(int traceNumber, int curveNumber, BColor color) {
@@ -690,7 +684,7 @@ public class Chart {
         if(config.getMargin() != null) { // fixed margins
             setYStartEnd(graphArea.y, graphArea.height);
         } else {
-            setAreasDirty();
+            setDirty();
         }
     }
 
@@ -705,11 +699,7 @@ public class Chart {
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
 
-        if(config.getMargin() != null) { // fixed margins
-            setMargin(config.getMargin());
-        } else {
-            setAreasDirty();
-        }
+        setDirty();
     }
 
     /**
@@ -734,12 +724,7 @@ public class Chart {
         stackWeights.remove(stackNumber);
         yAxisList.remove(stackNumber * 2 + 1);
         yAxisList.remove(stackNumber * 2);
-        if(config.getMargin() != null) { // fixed margins
-            setMargin(config.getMargin());
-        } else {
-            setAreasDirty();
-        }
-
+        setDirty();
     }
 
     /**
@@ -823,9 +808,10 @@ public class Chart {
             if (trace.getCurveColor(i) == null) {
                 trace.setCurveColor(i, colors[(totalCurves + i) % colors.length]);
             }
-            if (trace.getCurveName(i) == null || trace.getCurveName(i).isEmpty()) {
+            if (trace.getCurveName(i) == null || StringUtils.isNullOrBlank(trace.getCurveName(i))) {
                 trace.setCurveName(i, "Trace" + traces.size() + "_curve" + i);
             }
+
         }
 
         traces.add(trace);
@@ -847,6 +833,7 @@ public class Chart {
                 legend.add(trace, curveNumber, traceSelectionListener);
             }
         }
+        setDirty();
     }
 
     public void removeTrace(int traceNumber) {
@@ -871,15 +858,13 @@ public class Chart {
                 // do nothing;
             }
         }
+        setDirty();
     }
 
     public void setArea(BRectangle area) {
         fullArea = area;
         title.setArea(area);
-        if(config.getMargin() != null) {
-            setMargin(config.getMargin());
-        }
-        setAreasDirty();
+        setDirty();
     }
 
     public int traceCount() {
@@ -894,28 +879,86 @@ public class Chart {
         return yAxisList.size();
     }
 
+    public void setXConfig(int xIndex, AxisConfig axisConfig) {
+        xAxisList.get(xIndex).setConfig(axisConfig);
+        setDirty();
+    }
+
+    public void setYConfig(int yIndex, AxisConfig axisConfig) {
+        yAxisList.get(yIndex).setConfig(axisConfig);
+        setDirty();
+    }
+
+    /**
+     * return COPY of X axis config. To change axis config use setXConfig
+     */
+    public AxisConfig getXConfig(int xIndex) {
+        return xAxisList.get(xIndex).getConfig();
+    }
+
+    /**
+     * return COPY of Y axis config. To change axis config use setYConfig
+     */
+    public AxisConfig getYConfig(int yIndex) {
+        return yAxisList.get(yIndex).getConfig();
+    }
+
+    public void setXTitle(int xIndex, @Nullable String title) {
+        xAxisList.get(xIndex).setTitle(title);
+        setDirty();
+    }
+
+    public void setYTitle(int yIndex, @Nullable String title) {
+        yAxisList.get(yIndex).setTitle(title);
+        setDirty();
+    }
+
+
     public void setXMinMax(int xIndex, double min, double max) {
-        if (xAxisList.get(xIndex).setMinMax(min, max)) {
-            if (xAxisList.get(xIndex).isTickLabelOutside()) {
-                setAreasDirty();
+        xAxisToMinMax.put(xIndex, new Range(min, max));
+        setDirty();
+    }
+
+    public void setYMinMax(int yIndex, double min, double max) {
+        yAxisToMinMax.put(yIndex, new Range(min, max));
+        setDirty();
+    }
+
+    public void autoScaleX(int xIndex) {
+        xAxisToMinMax.remove(xIndex);
+        setDirty();
+    }
+
+    public void autoScaleY(int yIndex) {
+        yAxisToMinMax.remove(yIndex);
+        setDirty();
+    }
+
+    public void setXScale(int xIndex, Scale scale) {
+        AxisWrapper axis = xAxisList.get(xIndex);
+        for (Trace trace : traces) {
+            if(trace.getXScale() == axis.getScale()) {
+                trace.setXScale(scale);
             }
         }
+        axis.setScale(scale);
+        setDirty();
     }
 
-    public Range getXMinMax(int xIndex) {
-        return new Range(xAxisList.get(xIndex).getMin(), xAxisList.get(xIndex).getMax());
-    }
-
-    public Range getYMinMax(int yAxisIndex) {
-        return new Range(yAxisList.get(yAxisIndex).getMin(), yAxisList.get(yAxisIndex).getMax());
-    }
-
-    public void setYMinMax(int yAxisIndex, double min, double max) {
-        yAxisList.get(yAxisIndex).setMinMax(min, max);
-        if (yAxisList.get(yAxisIndex).isTickLabelOutside()) {
-            setAreasDirty();
+    public void setYScale(int yIndex, Scale scale) {
+        AxisWrapper axis = yAxisList.get(yIndex);
+        for (Trace trace : traces) {
+            Scale[] traceYScales = trace.getYScales();
+            for (int i = 0; i < traceYScales.length; i++) {
+                if(traceYScales[i] == axis.getScale()) {
+                    traceYScales[i] = scale;
+                }
+            }
         }
+        axis.setScale(scale);
+        setDirty();
     }
+
 
     public void zoomY(int yAxisIndex, double zoomFactor) {
         Scale zoomedScale = yAxisList.get(yAxisIndex).zoom(zoomFactor);
@@ -943,47 +986,6 @@ public class Chart {
         double translatedMin = translatedScale.getDomain()[0];
         double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
         setXMinMax(xIndex, translatedMin, translatedMax);
-    }
-
-    public void autoScaleX(int xIndex) {
-        AxisWrapper axis = xAxisList.get(xIndex);
-        if(!axis.isVisible()) {
-            return;
-        }
-
-        Range tracesXMinMax = null;
-        for (Trace trace : traces) {
-            if (trace.getXScale() == axis.getScale()) {
-                tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax());
-            }
-        }
-
-        if (tracesXMinMax != null) {
-            setXMinMax(xIndex, tracesXMinMax.getMin(), tracesXMinMax.getMax());
-        }
-    }
-
-    public void autoScaleY(int yIndex) {
-        AxisWrapper axis = yAxisList.get(yIndex);
-        if(!axis.isVisible()) {
-            return;
-        }
-
-        Range tracesYMinMax = null;
-        for (Trace trace : traces) {
-            int curveCount = trace.curveCount();
-            for (int i = 0; i < curveCount; i++) {
-                if (trace.getYScale(i) == axis.getScale()) {
-                    System.out.println(i+" curve autoscale y ");
-                    tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(i));
-                }
-            }
-        }
-
-        if (tracesYMinMax != null) {
-            setYMinMax(yIndex, tracesYMinMax.getMin(), tracesYMinMax.getMax());
-        }
-
     }
 
 

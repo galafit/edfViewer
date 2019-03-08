@@ -173,23 +173,22 @@ public class AxisWrapper {
      */
     public int getWidth(BCanvas canvas) {
         if (isVisible) {
-            if (isDirty()) {
-                axis.roundMinMax(canvas);
-                roundingDirty = false;
-            }
             return axis.getWidth(canvas);
         }
         return 0;
+    }
+
+    public void roundMinMax(BCanvas canvas) {
+        if (isDirty()) {
+            axis.roundMinMax(canvas);
+            roundingDirty = false;
+        }
     }
 
     /**
      * this method DO AXIS ROUNDING
      */
     public void drawGrid(BCanvas canvas, BRectangle area) {
-        if (isDirty()) {
-            axis.roundMinMax(canvas);
-            roundingDirty = false;
-        }
         axis.drawGrid(canvas, area);
     }
 
@@ -198,10 +197,6 @@ public class AxisWrapper {
      */
     public void drawAxis(BCanvas canvas, BRectangle area) {
         if(isVisible) {
-            if (isDirty()) {
-                axis.roundMinMax(canvas);
-                roundingDirty = false;
-            }
             axis.drawAxis(canvas, area);
         }
     }

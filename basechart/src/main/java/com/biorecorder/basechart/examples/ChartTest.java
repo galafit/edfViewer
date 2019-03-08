@@ -82,12 +82,9 @@ public class ChartTest extends JFrame {
 
         Chart chart = new Chart(new WhiteTheme().getChartConfig());
 
-        chart.addTrace(new LineTrace(xyData1), false, false, false);
+        chart.addTrace(new LineTrace(xyData1), false);
         chart.addStack();
-        chart.addTrace(new LineTrace(xyData2), false, false, false);
-
-        chart.setXMinMax(0, 0, 0.01);
-        chart.setYMinMax(3, 0, 300);
+        chart.addTrace(new LineTrace(xyData2), true);
 
         chartPanel = new ChartPanel(chart);
 

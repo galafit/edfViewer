@@ -53,14 +53,14 @@ public class NavigableChartTest extends JFrame{
 
         NavigableChart chart = new NavigableChart(new WhiteTheme().getNavigableChartConfig());
         chart.addChartTrace(new LineTrace(xyData1), false );
-       // chart.addChartTrace(new LineTrace(xyData2), false , false, false);
-       // chart.addChartStack();
-       // chart.addChartTrace(new LineTrace(xyData1), false );
+        chart.addChartTrace(new LineTrace(xyData2), false , false, false);
+        chart.addChartStack();
+        chart.addChartTrace(new LineTrace(xyData1), false );
 
 
         chart.addNavigatorTrace( new LineTrace(xyData1), false);
-        //chart.addNavigatorStack();
-       // chart.addNavigatorTrace(new LineTrace(xyData2), false);
+        chart.addNavigatorStack();
+        chart.addNavigatorTrace(new LineTrace(xyData2), false);
 
         chartPanel = new ChartPanel(chart);
 

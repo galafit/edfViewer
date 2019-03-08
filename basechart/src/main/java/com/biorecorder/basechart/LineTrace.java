@@ -18,6 +18,13 @@ public class LineTrace extends Trace {
     }
 
     @Override
+    protected void initiateCurveNames(ChartData data) {
+        for (int i = 0; i < curveCount; i++) {
+            curveNames[i] = data.getColumnName(i + 1);
+        }
+    }
+
+    @Override
     public int getMarkSize() {
         return traceConfig.getMarkSize();
     }
@@ -66,18 +73,6 @@ public class LineTrace extends Trace {
     @Override
     protected Range curveYMinMax(int curveNumber, ChartData data) {
         return data.getColumnMinMax(curveNumber + 1);
-    }
-
-
-    @Override
-    public String getCurveName(int curveNumber) {
-        String columnName = dataManager.getColumnName(curveNumber + 1);
-        return columnName;
-    }
-
-    @Override
-    public void setCurveName(int curveNumber, String name) {
-        dataManager.setColumnName(curveNumber + 1, name);
     }
 
     private BColor getLineColor(int curveNumber) {

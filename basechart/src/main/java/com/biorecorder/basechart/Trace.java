@@ -12,11 +12,22 @@ public abstract class Trace {
     protected Scale xScale;
     protected Scale[] yScales;
     protected TraceDataManager dataManager;
-    private final int curveCount;
+    protected final int curveCount;
+    protected final String[] curveNames;
 
     public Trace(ChartData data) {
         dataManager = new TraceDataManager(data);
         curveCount = curveCount(data);
+        curveNames = new String[curveCount];
+        initiateCurveNames(data);
+    }
+
+    public final String getCurveName(int curveNumber) {
+        return curveNames[curveNumber];
+    }
+
+    public final void setCurveName(int curveNumber, String name) {
+        curveNames[curveNumber] = name;
     }
 
     protected final void checkCurveNumber(int curveNumber) {
@@ -101,10 +112,6 @@ public abstract class Trace {
 
     public abstract int getMarkSize();
 
-    public abstract String getCurveName(int curveNumber);
-
-    public abstract void setCurveName(int curveNumber, String name);
-
     protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
@@ -135,6 +142,7 @@ public abstract class Trace {
 
     public abstract BColor getCurveColor(int curveNumber);
 
+    protected abstract void initiateCurveNames(ChartData data);
     protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
     protected abstract NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data);
     protected abstract int curveCount(ChartData data);
