@@ -81,23 +81,28 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public double max(int length) {
-        return value(length - 1);
-    }
+    public StatsInfo stats(int length, int nLastChangeable) {
+        return new StatsInfo() {
+            @Override
+            public double min() {
+                return value(0);
+            }
 
-    @Override
-    public double min(int length) {
-        return value(0);
-    }
+            @Override
+            public double max() {
+                return value(length - 1);
+            }
 
-    @Override
-    public boolean isIncreasing(int length) {
-        return true;
-    }
+            @Override
+            public boolean isIncreasing() {
+                return true;
+            }
 
-    @Override
-    public boolean isDecreasing(int length) {
-        return false;
+            @Override
+            public boolean isDecreasing() {
+                return false;
+            }
+        };
     }
 
     @Override

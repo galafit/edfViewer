@@ -15,14 +15,6 @@ public interface Column {
 
     DataType dataType();
 
-   double max(int length);
-
-    double min(int length);
-
-    boolean isIncreasing(int length);
-
-    boolean isDecreasing(int length);
-
     /**
      * Returns a sorted version of the column without modifying the order
      * of the underlying data.
@@ -35,10 +27,12 @@ public interface Column {
     Column view(int from, int length);
     Column view(int[] order);
 
-    void cache(int nLastExcluded);
-    void disableCaching();
-
     int bisect(double value, int from, int length);
+
+    StatsInfo stats(int length, int nLastChangeable);
+
+    void cache(int nLastChangeable);
+    void disableCaching();
 
     /**
      * Equal Width Binning. This method divides the entire range of column data (max - min)

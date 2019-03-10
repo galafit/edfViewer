@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DataFrame {
     private int length;
-    private int lastChangeableRows;
+    private int nLastChangeableRows;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
@@ -27,9 +27,9 @@ public class DataFrame {
             columns.add(dataFrame.columns.get(columnOrder[i]));
             columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
             columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
-            lastChangeableRows = dataFrame.lastChangeableRows;
+            nLastChangeableRows = dataFrame.nLastChangeableRows;
+            length = dataFrame.length;
         }
-        update();
     }
 
     public void removeColumn(int columnNumber) {
@@ -118,32 +118,11 @@ public class DataFrame {
         return columns.get(columnNumber).label(rowNumber);
     }
 
-    public double getColumnMin(int columnNumber) {
+    public StatsInfo getStats(int columnNumber) {
         if(length < 1) {
-            return Double.NaN;
+            return null;
         }
-        return columns.get(columnNumber).min(length);
-    }
-
-    public double getColumnMax(int columnNumber) {
-        if(length < 1) {
-            return Double.NaN;
-        }
-        return columns.get(columnNumber).max(length);
-    }
-
-    public boolean isColumnIncreasing(int columnNumber) {
-        if(length < 1) {
-            return true;
-        }
-        return columns.get(columnNumber).isIncreasing(length);
-    }
-
-    public boolean isColumnDecreasing(int columnNumber) {
-        if(length < 1) {
-            return true;
-        }
-        return columns.get(columnNumber).isDecreasing(length);
+        return columns.get(columnNumber).stats(length, nLastChangeableRows);
     }
 
     public boolean isColumnRegular(int columnNumber) {
@@ -333,7 +312,7 @@ public class DataFrame {
     }
 
     public void cacheColumn(int columnNumber) {
-        columns.get(columnNumber).cache(lastChangeableRows);
+        columns.get(columnNumber).cache(nLastChangeableRows);
     }
 
     public void disableCaching() {

@@ -7,6 +7,8 @@ import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,7 +18,7 @@ public class IntColumn implements Column {
     protected final static int NAN = Integer.MAX_VALUE;
     protected final static DataType dataType = DataType.INT;
     protected IntSequence dataSequence;
-    protected MinMaxAgg minMaxAgg = new MinMaxAgg();
+    protected Stats stats = new Stats();
 
     public IntColumn(IntSequence data) {
         this.dataSequence = data;
@@ -124,9 +126,9 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public void cache(int nLastExcluded) {
+    public void cache(int nLastChangeable) {
         if(! (dataSequence instanceof IntCachingSequence)) {
-            dataSequence = new IntCachingSequence(dataSequence, nLastExcluded);
+            dataSequence = new IntCachingSequence(dataSequence, nLastChangeable);
         }
     }
 
@@ -142,54 +144,14 @@ public class IntColumn implements Column {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.doubleToInt(value), from,  length);
     }
 
-    @Override
-    public double min(int length) {
-        recalculateAgg(length);
-        return minMaxAgg.getMin();
-    }
 
     @Override
-    public double max(int length) {
-        recalculateAgg(length);
-        return minMaxAgg.getMax();
-    }
-
-    @Override
-    public boolean isIncreasing(int length) {
-        recalculateAgg(length);
-        return minMaxAgg.isIncreasing();
-    }
-
-    @Override
-    public boolean isDecreasing(int length) {
-        recalculateAgg(length);
-        return minMaxAgg.isDecreasing();
-    }
-
-    private void recalculateAgg(int length) {
-        int n = minMaxAgg.getN();
-        if(n < length) {
-            minMaxAgg.add(dataSequence, n, length - n);
-        }
+    public StatsInfo stats(int length, int nLastChangeable) {
+        return stats.getStats(length, nLastChangeable);
     }
 
     @Override
     public int[] sort(int from, int length, boolean isParallel) {
-        int[] orderedIndexes = new int[length];
-        if(isDecreasing(length)) {
-            for (int i = 0; i < length; i++) {
-                orderedIndexes[i]  = length + from - 1 - i;
-            }
-            return orderedIndexes;
-        }
-
-        if(isIncreasing(length)) {
-            for (int i = 0; i < length; i++) {
-                orderedIndexes[i]  = i + from;
-            }
-            return orderedIndexes;
-        }
-
         return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
 
@@ -278,69 +240,133 @@ public class IntColumn implements Column {
         return new IntColumn(resultantSequence);
     }
 
-    class MinMaxAgg {
+    class Stats {
         protected int count;
         private int min;
         private int max;
         private boolean isIncreasing = true;
         private boolean isDecreasing = true;
 
-        public int add(IntSequence sequence, int from, int length) {
-            if(count == 0) {
-                min = sequence.get(from);
-                max = min;
-            }
-            int till = from + length;
-            for (int i = from + 1; i < till; i++) {
-              min = Math.min(min, sequence.get(i));
-              max = Math.max(max, sequence.get(i));
-              if(isIncreasing || isDecreasing) {
-                  int diff = sequence.get(i) - sequence.get(i - 1);
-                  if(isDecreasing && diff > 0) {
-                      isDecreasing = false;
+        public StatsInfoInt calculate(int from, int length) {
+           int min1 = dataSequence.get(from);
+           int max1 = min1;
+           boolean isIncreasing1 = true;
+           boolean isDecreasing1 = true;
+
+            for (int i = 1; i < length; i++) {
+              min1 = Math.min(min1, dataSequence.get(i + from));
+              max1 = Math.max(max1, dataSequence.get(i + from));
+              if(isIncreasing1 || isDecreasing1) {
+                  int diff = dataSequence.get(i + from) - dataSequence.get(i + from - 1);
+                  if(isDecreasing1 && diff > 0) {
+                      isDecreasing1 = false;
                   }
-                  if(isIncreasing && diff < 0) {
-                      isIncreasing = false;
+                  if(isIncreasing1 && diff < 0) {
+                      isIncreasing1 = false;
                   }
               }
             }
-            count +=length;
-            return count;
+
+           return new StatsInfoInt(min1, max1, isIncreasing1, isDecreasing1);
+        }
+
+        public StatsInfoInt getStats(int length, int nLastChangeable) {
+            if(length <= 0) {
+                String errMsg = "Statistic can not be calculated if length <= 0: "+length;
+                throw new IllegalStateException(errMsg);
+            }
+
+            int length1 = length - nLastChangeable;
+            if(length1 <= 0) {
+                return calculate(0, nLastChangeable);
+            }
+            if(length1 < count) {
+                count = 0;
+            }
+            if(length1 > count) {
+                StatsInfoInt stats = calculate(count, length1 - count);
+                if(count == 0) {
+                    min = stats.getMin();
+                    max = stats.getMax();
+                    isIncreasing = stats.isIncreasing();
+                    isDecreasing = stats.isDecreasing();
+                    count = length1;
+                } else {
+                    min = Math.min(min, stats.getMin());
+                    max = Math.max(max, stats.getMax());
+                    isIncreasing = isIncreasing && stats.isIncreasing();
+                    isDecreasing = isDecreasing && stats.isDecreasing();
+                    count = length1;
+                }
+            }
+
+            if(nLastChangeable > 0) {
+                StatsInfoInt stats = calculate(length1, nLastChangeable);
+                return new StatsInfoInt(Math.min(min, stats.getMin()), Math.max(max, stats.getMax()), isIncreasing && stats.isIncreasing(), isDecreasing && stats.isDecreasing());
+            } else {
+                return new StatsInfoInt(min, max, isIncreasing, isDecreasing);
+            }
+
+        }
+    }
+
+    class StatsInfoInt implements StatsInfo {
+        private final int min;
+        private final int max;
+        private final boolean isIncreasing;
+        private final boolean isDecreasing;
+
+        public StatsInfoInt(int min, int max, boolean isIncreasing, boolean isDecreasing) {
+            this.min = min;
+            this.max = max;
+            this.isIncreasing = isIncreasing;
+            this.isDecreasing = isDecreasing;
         }
 
         public int getMin() {
-            checkIfEmpty();
             return min;
         }
 
         public int getMax() {
-            checkIfEmpty();
             return max;
         }
 
+        @Override
+        public double min() {
+            return min;
+        }
+
+        @Override
+        public double max() {
+            return max;
+        }
+
+        @Override
         public boolean isIncreasing() {
-            checkIfEmpty();
             return isIncreasing;
         }
 
+        @Override
         public boolean isDecreasing() {
-            checkIfEmpty();
             return isDecreasing;
         }
+    }
 
-        public int getN() {
-            return count;
-        }
+    public static void main(String [ ] args) {
+        Integer[] data = {5, 6, 2, 1, 20, 15, 34, -10};
+        List<Integer> dataList = new ArrayList<Integer>(Arrays.asList(data));
+        IntColumn column = new IntColumn(dataList);
 
-        public void reset() {
-            count = 0;
-        }
+        StatsInfo stats = column.stats(8, 1);
+        System.out.println( stats.min() + " min max "+stats.max());
 
-        private void checkIfEmpty() {
-            if(count == 0) {
-                String errMsg = "No elements was added to group. Grouping function can not be calculated.";
-                throw new IllegalStateException(errMsg);
-            }
-        }
+        dataList.set(7, 40);
+
+        stats = column.stats(8, 1);
+        System.out.println( stats.min() + " min max "+stats.max());
+
+        stats = column.stats(3, 1);
+        System.out.println( stats.min() + " min max "+stats.max());
+
     }
 }
