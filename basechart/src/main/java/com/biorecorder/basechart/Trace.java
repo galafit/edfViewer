@@ -41,10 +41,6 @@ public abstract class Trace {
         return dataManager.getData(xScale, getMarkSize());
     }
 
-    public final NearestPoint nearest(int x, int y, int curveNumber) {
-        return nearest(x, y, curveNumber, getData());
-    }
-
     public Range getFullXMinMax() {
        return dataManager.getFullXMinMax();
     }
@@ -112,7 +108,7 @@ public abstract class Trace {
 
     public abstract int getMarkSize();
 
-    protected NearestPoint nearest(int x, int y, int curveNumber1, ChartData data) {
+    public NearestPoint nearest(int x, int y, int curveNumber1) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
         int dx = xPosition(pointIndex) - x;

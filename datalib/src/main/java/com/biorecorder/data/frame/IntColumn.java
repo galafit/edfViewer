@@ -218,17 +218,16 @@ public class IntColumn implements Column {
                     return;
                 }
 
+                int from;
                 if(groupListSize == 0) {
                     groupIndexesList.add(0);
+                    from = 0;
                 } else {
                     // delete last "closing" group
                     groupIndexesList.remove(groupListSize - 1);
+                    from = groupIndexesList.get(groupListSize - 2);
                 }
 
-                int from = 0;
-                if(groupListSize > 0) {
-                   from = groupIndexesList.get(groupListSize - 1);
-                }
                 int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
                 groupValue += intervalValue;
                 for (int i = from + 1;  i < dataSize; i++) {

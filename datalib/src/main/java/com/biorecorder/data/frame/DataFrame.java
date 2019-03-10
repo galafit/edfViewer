@@ -4,6 +4,7 @@ import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -13,6 +14,7 @@ import java.util.List;
  */
 public class DataFrame {
     private int length;
+    private int lastChangeableRows;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
@@ -25,6 +27,7 @@ public class DataFrame {
             columns.add(dataFrame.columns.get(columnOrder[i]));
             columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
             columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
+            lastChangeableRows = dataFrame.lastChangeableRows;
         }
         update();
     }
@@ -329,8 +332,8 @@ public class DataFrame {
         return resultantFrame;
     }
 
-    public void cacheColumn(int columnNumber, int nLastExcluded) {
-        columns.get(columnNumber).cache(nLastExcluded);
+    public void cacheColumn(int columnNumber) {
+        columns.get(columnNumber).cache(lastChangeableRows);
     }
 
     public void disableCaching() {
@@ -356,6 +359,93 @@ public class DataFrame {
 
     private String outOfBoundsMsg(long index) {
         return "Index: "+index+", Size: "+length;
+    }
+
+    public static void main(String [ ] args) {
+        DataFrame df = new DataFrame();
+        Integer[] xData = {2, 4, 5, 9, 12, 33, 34, 35, 40};
+        Integer[] yData = {1, 2, 3, 4, 5,  6,  7,  8,  9};
+        List<Integer> xList = new ArrayList<Integer>(Arrays.asList(xData));
+        List<Integer> yList = new ArrayList<Integer>(Arrays.asList(yData));
+
+        df.addColumn(xList);
+        df.addColumn(yList);
+        df.setColumnAggFunctions(1, AggregateFunction.AVERAGE);
+
+        DataFrame df1 = df.resampleByEqualFrequency(4);
+        DataFrame df2 = df.resampleByEqualInterval(0, 4);
+
+
+        int[] expectedX1 = {2, 12, 40};
+        int[] expectedY1 = {2, 6, 9};
+
+        int[] expectedX2 = {2, 4, 9, 12, 33, 40};
+        int[] expectedY2 = {1, 2, 4, 5,  7,  9};
+
+        for (int i = 0; i < df1.rowCount(); i++) {
+            if(df1.getValue(i, 0) != expectedX1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: "+ i + " expected x =  "+ expectedX1[i] + "  resultant x = " + df1.getValue(i, 0);
+                throw new RuntimeException(errMsg);
+            }
+            if(df1.getValue(i, 1) != expectedY1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: "+ i + " expected y =  "+ expectedY1[i] + "  resultant y = " + df1.getValue(i, 1);
+                throw new RuntimeException(errMsg);
+            }
+        }
+        System.out.println("ResampleByEqualFrequency is OK");
+
+        for (int i = 0; i < df2.rowCount(); i++) {
+            if(df2.getValue(i, 0) != expectedX2[i]) {
+                String errMsg = "ResampleByEqualInterval error: "+ i + " expected x =  "+ expectedX2[i] + "  resultant x = " + df2.getValue(i, 0);
+                throw new RuntimeException(errMsg);
+            }
+            if(df2.getValue(i, 1) != expectedY2[i]) {
+                String errMsg = "ResampleByEqualInterval error: "+ i + " expected y =  "+ expectedY2[i] + "  resultant y = " + df2.getValue(i, 1);
+                throw new RuntimeException(errMsg);
+            }
+        }
+        System.out.println("ResampleByEqualInterval is OK");
+
+        // Test update
+
+        xList.add(42);
+        xList.add(50);
+
+        yList.add(11);
+        yList.add(10);
+        df.update();
+        df1.update();
+        df2.update();
+
+        int[] expectedX1_ = {2, 12, 40};
+        int[] expectedY1_ = {2, 6, 10};
+
+        int[] expectedX2_ = {2, 4, 9, 12, 33, 40, 50};
+        int[] expectedY2_ = {1, 2, 4, 5,  7,  10,  10};
+
+        for (int i = 0; i < df1.rowCount(); i++) {
+            if(df1.getValue(i, 0) != expectedX1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: "+ i + " expected x =  "+ expectedX1_[i] + "  resultant x = " + df1.getValue(i, 0);
+                throw new RuntimeException(errMsg);
+            }
+            if(df1.getValue(i, 1) != expectedY1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: "+ i + " expected y =  "+ expectedY1_[i] + "  resultant y = " + df1.getValue(i, 1);
+                throw new RuntimeException(errMsg);
+            }
+        }
+        System.out.println("ResampleByEqualFrequency UPDATE is OK");
+
+        for (int i = 0; i < df2.rowCount(); i++) {
+            if(df2.getValue(i, 0) != expectedX2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: "+ i + " expected x =  "+ expectedX2_[i] + "  resultant x = " + df2.getValue(i, 0);
+                throw new RuntimeException(errMsg);
+            }
+            if(df2.getValue(i, 1) != expectedY2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: "+ i + " expected y =  "+ expectedY2_[i] + "  resultant y = " + df2.getValue(i, 1);
+                throw new RuntimeException(errMsg);
+            }
+        }
+        System.out.println("ResampleByEqualInterval UPDATE is OK");
     }
 
 }

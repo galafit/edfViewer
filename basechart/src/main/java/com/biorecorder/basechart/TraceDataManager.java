@@ -9,19 +9,13 @@ import java.util.Arrays;
  * Created by galafit on 9/7/18.
  */
 public class TraceDataManager {
-    private int cropShoulder = 2; // number of additional points that we leave on every side during crop
-    int maxAxisLengthChangePct = 20; // 20%
-
     private final ChartData traceData;
     private DataProcessingConfig processingConfig;
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
 
-    private ChartData groupedData;
-
     private ChartData processedData;
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
-    private boolean isIncreasingChecked = false;
 
     private int[] sorter;
 
@@ -54,8 +48,8 @@ public class TraceDataManager {
                 isEqualFrequencyGrouping = true;
                 break;
         }
-        processedData = null;
-        groupedData = null;
+        processedData = traceData;
+        prevXScale = null;
     }
 
     public Range getFullXMinMax() {
@@ -77,13 +71,12 @@ public class TraceDataManager {
     }
 
     public int nearest(double xValue) {
-        // "lazy" sorting solo when "nearestCurve" is called
-        if (!isIncreasingChecked) {
+        // "lazy" sorting solo when "nearest" is called
+        if (sorter == null) {
             if (!processedData.isColumnIncreasing(0)) {
                 sorter = processedData.sortedIndices(0);
                 System.out.println("sort");
             }
-            isIncreasingChecked = true;
         }
 
         int nearest = processedData.bisect(0, xValue, sorter);
@@ -110,7 +103,7 @@ public class TraceDataManager {
         return nearest;
     }
 
-    public boolean isDataProcessingEnabled() {
+    private boolean isDataProcessingEnabled() {
         if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
                 || traceData.rowCount() <= 1
                 || traceData.columnCount() == 0
@@ -136,9 +129,6 @@ public class TraceDataManager {
     }
 
     private boolean isProcessedDataOk(Scale xScale, int pixelsPerDataPoint) {
-        if(processedData == null) {
-            return false;
-        }
         if(prevPixelsPerDataPoint != pixelsPerDataPoint) {
             return false;
         }
@@ -159,7 +149,7 @@ public class TraceDataManager {
             return false;
         }
 
-        if(Math.abs(prevLength - length) * 100 / length > maxAxisLengthChangePct) {
+        if(Math.abs(prevLength - length) * 100 / length > processingConfig.getLengthChangeMax()) {
             return false;
         }
 
@@ -195,22 +185,18 @@ public class TraceDataManager {
         }
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
-        System.out.println("\nprocessing "+xMin + " " + xMax + "  " + Math.abs(xStart - xEnd));
 
-
-        if(drawingAreaWidth <= 1) {
-            if(processingConfig.isCropEnabled()) {
-                return traceData.view(0, 0);
-            } else {
-                return traceData;
-            }
+        if(drawingAreaWidth < 1) {
+            return traceData.view(0, 0);
         }
-
 
         // calculate best grouping interval
         double bestInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;
+        int pointsInGroup = groupIntervalToPointsNumber(traceData, bestInterval);
+        // adjust interval to int number of pointsInGroup
+        bestInterval = pointsNumberToGroupInterval(traceData, pointsInGroup);
+
         double groupInterval = bestInterval;
-        int pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
 
         if(processingConfig.isGroupEnabled()  && pointsInGroup > 1) {
 
@@ -231,10 +217,9 @@ public class TraceDataManager {
          }
 
 
-
         // if crop enabled
         if(processingConfig.isCropEnabled()) {
-            int cropShoulder = this.cropShoulder * pointsInGroup;
+            int cropShoulder = processingConfig.getCropShoulder() * pointsInGroup;
 
             int minIndex = 0;
             if(dataMinMax.getMin() < xMin) {
@@ -260,7 +245,7 @@ public class TraceDataManager {
                     resultantData = resultantData.resampleByEqualInterval(0, groupInterval);
                 }
             }
-            System.out.println(resultantData.getColumnMinMax(0) +" crop points in group "+pointsInGroup);
+            System.out.println(isEqualFrequencyGrouping+" processing with crop  points in group " + pointsInGroup + "  "+ groupInterval + "  " +resultantData.getColumnMinMax(0));
             return resultantData;
         }
 
@@ -269,24 +254,24 @@ public class TraceDataManager {
         // (so when it is possible we use already grouped data for further grouping)
         if(pointsInGroup > 1) {
             if(isEqualFrequencyGrouping) { // group by equal points number
-                if(groupedData != null) {
-                    int pointsInGroup1 = groupIntervalToPointsNumber(groupedData, groupInterval);
+                if(processedData != null) {
+                    int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
                     if(pointsInGroup1 > 1) {
-                        ChartData regroupedData = groupedData.resampleByEqualFrequency(pointsInGroup1);
+                        ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
                         // force "lazy" grouping
                         int rowCount = regroupedData.rowCount();
                         for (int i = 0; i < regroupedData.columnCount(); i++) {
                             regroupedData.getValue(rowCount - 1, i);
                         }
-                        groupedData.disableCaching();
-                        groupedData = regroupedData;
+                        processedData.disableCaching();
+                        processedData = regroupedData;
                     }
                 } else {
-                    groupedData = traceData.resampleByEqualFrequency(pointsInGroup);
+                    processedData = traceData.resampleByEqualFrequency(pointsInGroup);
                 }
-                return groupedData;
+                return processedData;
             } else {
-                return traceData.resampleByEqualInterval(0, groupInterval);
+                 return traceData.resampleByEqualInterval(0, groupInterval);
             }
         }
 
@@ -304,6 +289,6 @@ public class TraceDataManager {
 
     double getDataAvgStep(ChartData data) {
         int dataSize = data.rowCount();
-        return (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
+        return  (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
     }
 }

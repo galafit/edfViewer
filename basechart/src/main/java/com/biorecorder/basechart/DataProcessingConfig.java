@@ -6,6 +6,9 @@ package com.biorecorder.basechart;
  * Created by galafit on 9/7/18.
  */
 public class DataProcessingConfig {
+    private int cropShoulder = 2; // number of additional points that we leave on every side during crop
+    int lengthChangeMax = 30; // 30%
+
 
     private boolean isCropEnabled = true;
     private boolean isGroupEnabled = true;
@@ -15,11 +18,25 @@ public class DataProcessingConfig {
     private GroupingType groupingType = GroupingType.AUTO;
 
 
-    private int groupStep = 2;
-
     // if defined (not null) group intervals will be taken only from that array,
     // otherwise every time "the best interval" will be calculated automatically
     private double[] groupIntervals = null;
+
+    public int getCropShoulder() {
+        return cropShoulder;
+    }
+
+    public void setCropShoulder(int cropShoulder) {
+        this.cropShoulder = cropShoulder;
+    }
+
+    public int getLengthChangeMax() {
+        return lengthChangeMax;
+    }
+
+    public void setLengthChangeMax(int lengthChangeMax) {
+        this.lengthChangeMax = lengthChangeMax;
+    }
 
     public double[] getGroupIntervals() {
         return groupIntervals;
@@ -54,11 +71,4 @@ public class DataProcessingConfig {
         isGroupEnabled = groupEnabled;
     }
 
-    public int getGroupStep() {
-        return groupStep;
-    }
-
-    public void setGroupStep(int groupStep) {
-        this.groupStep = groupStep;
-    }
 }

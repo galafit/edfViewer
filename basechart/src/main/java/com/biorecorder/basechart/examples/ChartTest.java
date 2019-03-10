@@ -37,7 +37,7 @@ public class ChartTest extends JFrame {
         }
 
 
-        for (int i = 0; i < 160; i++) {
+        for (int i = 1; i <= 160; i++) {
             //yData1.add1((float) Math.sin(i));
             yData_col0.add(i);
             yData_col1.add(i + 20);
@@ -47,7 +47,7 @@ public class ChartTest extends JFrame {
         for (int i = 0; i < 160; i++) {
             yData2.add(i);
         }
-        for (int i = 0; i < 160; i++) {
+        for (int i = 1; i <= 160; i++) {
             xData2.add(i);
         }
 
