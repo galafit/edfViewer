@@ -60,7 +60,7 @@ public class IntColumn implements Column {
     @Override
     public double value(int index) {
         int value = dataSequence.get(index);
-        if(value == NAN) {
+        if (value == NAN) {
             return Double.NaN;
         }
         return value;
@@ -69,7 +69,7 @@ public class IntColumn implements Column {
     @Override
     public String label(int index) {
         int value = dataSequence.get(index);
-        if(value == NAN) {
+        if (value == NAN) {
             return null;
         }
         return Integer.toString(value);
@@ -85,7 +85,7 @@ public class IntColumn implements Column {
         IntSequence subSequence = new IntSequence() {
             @Override
             public int size() {
-                if(length < 0) {
+                if (length < 0) {
                     return dataSequence.size() - from;
                 }
                 return length;
@@ -127,21 +127,21 @@ public class IntColumn implements Column {
 
     @Override
     public void cache(int nLastChangeable) {
-        if(! (dataSequence instanceof IntCachingSequence)) {
+        if (!(dataSequence instanceof IntCachingSequence)) {
             dataSequence = new IntCachingSequence(dataSequence, nLastChangeable);
         }
     }
 
     @Override
     public void disableCaching() {
-        if(dataSequence instanceof IntCachingSequence) {
+        if (dataSequence instanceof IntCachingSequence) {
             dataSequence = ((IntCachingSequence) dataSequence).getInnerData();
         }
     }
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.doubleToInt(value), from,  length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.doubleToInt(value), from, length);
     }
 
 
@@ -162,6 +162,7 @@ public class IntColumn implements Column {
         IntSequence groupIndexes = new IntSequence() {
             int intervalValue = (int) interval;
             IntArrayList groupIndexesList = new IntArrayList(sequenceSize);
+
             @Override
             public int size() {
                 update();
@@ -174,14 +175,14 @@ public class IntColumn implements Column {
             }
 
             private void update() {
-                int dataSize =  dataSequence.size();
-                int groupListSize =  groupIndexesList.size();
-                if(dataSize == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == dataSize)) {
+                int dataSize = dataSequence.size();
+                int groupListSize = groupIndexesList.size();
+                if (dataSize == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == dataSize)) {
                     return;
                 }
 
                 int from;
-                if(groupListSize == 0) {
+                if (groupListSize == 0) {
                     groupIndexesList.add(0);
                     from = 0;
                 } else {
@@ -192,13 +193,13 @@ public class IntColumn implements Column {
 
                 int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
                 groupValue += intervalValue;
-                for (int i = from + 1;  i < dataSize; i++) {
+                for (int i = from + 1; i < dataSize; i++) {
                     int data = dataSequence.get(i);
                     if (dataSequence.get(i) >= groupValue) {
                         groupIndexesList.add(i);
                         groupValue += intervalValue; // often situation
 
-                        if(data > groupValue) { // rare situation
+                        if (data > groupValue) { // rare situation
                             groupValue = ((dataSequence.get(i) / intervalValue)) * intervalValue;
                             groupValue += intervalValue;
                         }
@@ -214,7 +215,8 @@ public class IntColumn implements Column {
     @Override
     public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
         IntSequence resultantSequence = new IntSequence() {
-            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);;
+            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);
+            ;
             private int lastIndex = -1;
 
             @Override
@@ -224,14 +226,14 @@ public class IntColumn implements Column {
 
             @Override
             public int get(int index) {
-                if(index != lastIndex) {
+                if (index != lastIndex) {
                     aggFunction.reset();
                     lastIndex = index;
                 }
                 int n = aggFunction.getN();
                 int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
                 int from = groupIndexes.get(index) + n;
-                if(length > 0) {
+                if (length > 0) {
                     aggFunction.add(dataSequence, from, length);
                 }
                 return aggFunction.getValue();
@@ -248,44 +250,45 @@ public class IntColumn implements Column {
         private boolean isDecreasing = true;
 
         public StatsInfoInt calculate(int from, int length) {
-           int min1 = dataSequence.get(from);
-           int max1 = min1;
-           boolean isIncreasing1 = true;
-           boolean isDecreasing1 = true;
+            int min1 = dataSequence.get(from);
+            int max1 = min1;
+            boolean isIncreasing1 = true;
+            boolean isDecreasing1 = true;
 
             for (int i = 1; i < length; i++) {
-              min1 = Math.min(min1, dataSequence.get(i + from));
-              max1 = Math.max(max1, dataSequence.get(i + from));
-              if(isIncreasing1 || isDecreasing1) {
-                  int diff = dataSequence.get(i + from) - dataSequence.get(i + from - 1);
-                  if(isDecreasing1 && diff > 0) {
-                      isDecreasing1 = false;
-                  }
-                  if(isIncreasing1 && diff < 0) {
-                      isIncreasing1 = false;
-                  }
-              }
+                int data_i = dataSequence.get(i + from);
+                min1 = Math.min(min1, data_i);
+                max1 = Math.max(max1, data_i);
+                if (isIncreasing1 || isDecreasing1) {
+                    int diff = data_i - dataSequence.get(i + from - 1);
+                    if (isDecreasing1 && diff > 0) {
+                        isDecreasing1 = false;
+                    }
+                    if (isIncreasing1 && diff < 0) {
+                        isIncreasing1 = false;
+                    }
+                }
             }
 
-           return new StatsInfoInt(min1, max1, isIncreasing1, isDecreasing1);
+            return new StatsInfoInt(min1, max1, isIncreasing1, isDecreasing1);
         }
 
         public StatsInfoInt getStats(int length, int nLastChangeable) {
-            if(length <= 0) {
-                String errMsg = "Statistic can not be calculated if length <= 0: "+length;
+            if (length <= 0) {
+                String errMsg = "Statistic can not be calculated if length <= 0: " + length;
                 throw new IllegalStateException(errMsg);
             }
 
             int length1 = length - nLastChangeable;
-            if(length1 <= 0) {
+            if (length1 <= 0) {
                 return calculate(0, nLastChangeable);
             }
-            if(length1 < count) {
+            if (length1 < count) {
                 count = 0;
             }
-            if(length1 > count) {
+            if (length1 > count) {
                 StatsInfoInt stats = calculate(count, length1 - count);
-                if(count == 0) {
+                if (count == 0) {
                     min = stats.getMin();
                     max = stats.getMax();
                     isIncreasing = stats.isIncreasing();
@@ -300,7 +303,7 @@ public class IntColumn implements Column {
                 }
             }
 
-            if(nLastChangeable > 0) {
+            if (nLastChangeable > 0) {
                 StatsInfoInt stats = calculate(length1, nLastChangeable);
                 return new StatsInfoInt(Math.min(min, stats.getMin()), Math.max(max, stats.getMax()), isIncreasing && stats.isIncreasing(), isDecreasing && stats.isDecreasing());
             } else {
@@ -352,21 +355,21 @@ public class IntColumn implements Column {
         }
     }
 
-    public static void main(String [ ] args) {
-        Integer[] data = {5, 6, 2, 1, 20, 15, 34, -10};
+    public static void main(String[] args) {
+        Integer[] data = {2, 5, 6, 1, 20, 15, 34, -10};
         List<Integer> dataList = new ArrayList<Integer>(Arrays.asList(data));
         IntColumn column = new IntColumn(dataList);
 
         StatsInfo stats = column.stats(8, 1);
-        System.out.println( stats.min() + " min max "+stats.max());
+        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
         dataList.set(7, 40);
 
         stats = column.stats(8, 1);
-        System.out.println( stats.min() + " min max "+stats.max());
+        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
         stats = column.stats(3, 1);
-        System.out.println( stats.min() + " min max "+stats.max());
+        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
     }
 }

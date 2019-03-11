@@ -392,7 +392,7 @@ public class DataFrame {
 
         yList.add(11);
         yList.add(10);
-        df.update();
+       // df.update();
         df1.update();
         df2.update();
 
