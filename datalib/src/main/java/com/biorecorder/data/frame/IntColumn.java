@@ -126,9 +126,13 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public void cache(int nLastChangeable) {
+    public void cache(boolean isLastChangeable) {
+        int nLastExcluded = 0;
+        if(isLastChangeable) {
+            nLastExcluded = 1;
+        }
         if (!(dataSequence instanceof IntCachingSequence)) {
-            dataSequence = new IntCachingSequence(dataSequence, nLastChangeable);
+            dataSequence = new IntCachingSequence(dataSequence, nLastExcluded);
         }
     }
 
@@ -146,8 +150,8 @@ public class IntColumn implements Column {
 
 
     @Override
-    public Stats stats(int length, int nLastChangeable) {
-        return stats.getStats(length, nLastChangeable);
+    public Stats stats(int length, boolean isLastChangeable) {
+        return stats.getStats(length, isLastChangeable);
     }
 
     @Override
@@ -245,7 +249,7 @@ public class IntColumn implements Column {
         private boolean isIncreasing = true;
         private boolean isDecreasing = true;
 
-        public StatsInfoInt calculate(int from, int length) {
+        public StatsInt calculate(int from, int length) {
             int min1 = dataSequence.get(from);
             int max1 = min1;
             boolean isIncreasing1 = true;
@@ -266,56 +270,58 @@ public class IntColumn implements Column {
                 }
             }
 
-            return new StatsInfoInt(min1, max1, isIncreasing1, isDecreasing1);
+            return new StatsInt(min1, max1, isIncreasing1, isDecreasing1);
         }
 
-        public StatsInfoInt getStats(int length, int nLastChangeable) {
+        public StatsInt getStats(int length, boolean isLastChangeable) {
             if (length <= 0) {
                 String errMsg = "Statistic can not be calculated if length <= 0: " + length;
                 throw new IllegalStateException(errMsg);
             }
-
-            int length1 = length - nLastChangeable;
-            if (length1 <= 0) {
-                return calculate(0, nLastChangeable);
+            int dataSize = dataSequence.size();
+            int length1 = length;
+            if(isLastChangeable && length == dataSize) {
+                length1--;
             }
+
             if (length1 < count) {
                 count = 0;
             }
             if (length1 > count) {
-                StatsInfoInt stats = calculate(count, length1 - count);
+                StatsInt stats = calculate(count, length1 - count);
                 if (count == 0) {
                     min = stats.getMin();
                     max = stats.getMax();
                     isIncreasing = stats.isIncreasing();
                     isDecreasing = stats.isDecreasing();
-                    count = length1;
                 } else {
                     min = Math.min(min, stats.getMin());
                     max = Math.max(max, stats.getMax());
-                    isIncreasing = isIncreasing && stats.isIncreasing();
-                    isDecreasing = isDecreasing && stats.isDecreasing();
-                    count = length1;
+                    int diff = dataSequence.get(count) - dataSequence.get(count - 1);
+                    isIncreasing = isIncreasing && stats.isIncreasing() && diff >= 0;
+                    isDecreasing = isDecreasing && stats.isDecreasing() && diff <= 0;
                 }
+                count = length1;
             }
 
-            if (nLastChangeable > 0) {
-                StatsInfoInt stats = calculate(length1, nLastChangeable);
-                return new StatsInfoInt(Math.min(min, stats.getMin()), Math.max(max, stats.getMax()), isIncreasing && stats.isIncreasing(), isDecreasing && stats.isDecreasing());
+            if (length1 < length) {
+                int lastData = dataSequence.get(length1);
+                int diff = dataSequence.get(length1) - dataSequence.get(length1 - 1);
+                return new StatsInt(Math.min(min, lastData), Math.max(max, lastData), isIncreasing && diff >= 0, isDecreasing && diff <= 0);
             } else {
-                return new StatsInfoInt(min, max, isIncreasing, isDecreasing);
+                return new StatsInt(min, max, isIncreasing, isDecreasing);
             }
 
         }
     }
 
-    class StatsInfoInt implements Stats {
+    class StatsInt implements Stats {
         private final int min;
         private final int max;
         private final boolean isIncreasing;
         private final boolean isDecreasing;
 
-        public StatsInfoInt(int min, int max, boolean isIncreasing, boolean isDecreasing) {
+        public StatsInt(int min, int max, boolean isIncreasing, boolean isDecreasing) {
             this.min = min;
             this.max = max;
             this.isIncreasing = isIncreasing;
@@ -352,19 +358,20 @@ public class IntColumn implements Column {
     }
 
     public static void main(String[] args) {
-        Integer[] data = {2, 5, 6, 1, 20, 15, 34, -10};
+        Integer[] data = {2, 5, 6, 8, 15, 15, 34, 40};
         List<Integer> dataList = new ArrayList<Integer>(Arrays.asList(data));
         IntColumn column = new IntColumn(dataList);
 
-        Stats stats = column.stats(8, 1);
+        Stats stats = column.stats(8, true);
         System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
-        dataList.set(7, 40);
+        dataList.set(7, -10);
+        dataList.add(50);
 
-        stats = column.stats(8, 1);
+        stats = column.stats(9, true);
         System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
-        stats = column.stats(3, 1);
+        stats = column.stats(3, true);
         System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
     }

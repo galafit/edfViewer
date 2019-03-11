@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DataFrame {
     private IntWrapper length = new IntWrapper(0);
-    private int nLastChangeable;
+    private boolean isLastRowChangeable = false;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
@@ -22,12 +22,16 @@ public class DataFrame {
     public DataFrame() {
     }
 
+    public DataFrame(boolean isLastRowChangeable) {
+        this.isLastRowChangeable = isLastRowChangeable;
+    }
+
     public DataFrame(DataFrame dataFrame, int[] columnOrder) {
         for (int i = 0; i < columnOrder.length; i++) {
             columns.add(dataFrame.columns.get(columnOrder[i]));
             columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
             columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
-            nLastChangeable = dataFrame.nLastChangeable;
+            isLastRowChangeable = dataFrame.isLastRowChangeable;
             length = dataFrame.length;
         }
     }
@@ -122,7 +126,7 @@ public class DataFrame {
         if (length.getValue() < 1) {
             return null;
         }
-        return columns.get(columnNumber).stats(length.getValue(), nLastChangeable);
+        return columns.get(columnNumber).stats(length.getValue(), isLastRowChangeable);
     }
 
     public boolean isColumnRegular(int columnNumber) {
@@ -249,7 +253,7 @@ public class DataFrame {
      * Implementation of the method implies that the data is sorted!!!
      */
     public DataFrame resampleByEqualFrequency(int points) {
-        DataFrame resultantFrame = new DataFrame();
+        DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = new IntSequence() {
 
             @Override
@@ -298,7 +302,7 @@ public class DataFrame {
      * Implementation of the method implies that the data is sorted!!!
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        DataFrame resultantFrame = new DataFrame();
+        DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
@@ -315,7 +319,7 @@ public class DataFrame {
     }
 
     public void cacheColumn(int columnNumber) {
-        columns.get(columnNumber).cache(nLastChangeable);
+        columns.get(columnNumber).cache(isLastRowChangeable);
     }
 
     public void disableCaching() {
@@ -363,7 +367,7 @@ public class DataFrame {
         int[] expectedY1 = {2, 6, 9};
 
         int[] expectedX2 = {2, 4, 9, 12, 33, 40};
-        int[] expectedY2 = {1, 2, 4, 5, 7, 9};
+        int[] expectedY2 = {1, 2, 4, 5,  7,   9};
 
         for (int i = 0; i < df1.rowCount(); i++) {
             if (df1.getValue(i, 0) != expectedX1[i]) {
@@ -375,7 +379,8 @@ public class DataFrame {
                 throw new RuntimeException(errMsg);
             }
         }
-        System.out.println("ResampleByEqualFrequency is OK");
+
+        System.out.println("ResampleByEqualFrequency is OK " );
 
         for (int i = 0; i < df2.rowCount(); i++) {
             if (df2.getValue(i, 0) != expectedX2[i]) {
@@ -394,17 +399,17 @@ public class DataFrame {
         xList.add(42);
         xList.add(50);
 
-        yList.add(11);
-        yList.add(10);
+        yList.add(1);
+        yList.add(2);
         df.update();
         df1.update();
         df2.update();
 
         int[] expectedX1_ = {2, 12, 40};
-        int[] expectedY1_ = {2, 6, 10};
+        int[] expectedY1_ = {2, 6, 4};
 
         int[] expectedX2_ = {2, 4, 9, 12, 33, 40, 50};
-        int[] expectedY2_ = {1, 2, 4, 5, 7, 10, 10};
+        int[] expectedY2_ = {1, 2, 4, 5,  7,  5, 2};
 
         for (int i = 0; i < df1.rowCount(); i++) {
             if (df1.getValue(i, 0) != expectedX1_[i]) {
@@ -429,6 +434,7 @@ public class DataFrame {
             }
         }
         System.out.println("ResampleByEqualInterval UPDATE is OK");
+
     }
 
 }

@@ -81,7 +81,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Stats stats(int length, int nLastChangeable) {
+    public Stats stats(int length, boolean isLastChangeable) {
         return new Stats() {
             @Override
             public double min() {

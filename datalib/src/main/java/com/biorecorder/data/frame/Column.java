@@ -29,9 +29,9 @@ public interface Column {
 
     int bisect(double value, int from, int length);
 
-    Stats stats(int length, int nLastChangeable);
+    Stats stats(int length, boolean isLastChangeable);
 
-    void cache(int nLastChangeable);
+    void cache(boolean isLastChangeable);
     void disableCaching();
 
     /**
