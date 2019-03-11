@@ -749,7 +749,11 @@ public class Chart {
     /**
      * add trace to the stack with the given number
      */
-    public void addTrace(int stack, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+    public void addTrace(int stack, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) throws IllegalArgumentException {
+        if(trace.curveCount() < 1) {
+            String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
+            throw new IllegalArgumentException(errMsg);
+        }
         if(dataProcessingConfig != null) {
             trace.setDataProcessingConfig(dataProcessingConfig);
         }

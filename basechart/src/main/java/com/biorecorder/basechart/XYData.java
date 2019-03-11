@@ -28,38 +28,48 @@ public class XYData implements ChartData {
 
     public XYData(double start, double step) {
         dataFrame = new DataFrame();
-        dataFrame.addColumn(start, step);
+        addColumn(start, step);
     }
 
-    private void setLastColumnDefaultName() {
-       dataFrame.setColumnName(dataFrame.columnCount() - 1, "");
+    private void onColumnAdded() {
+        int lastColumn = dataFrame.columnCount() - 1;
+        AggregateFunction agg = AggregateFunction.AVERAGE;
+        if(lastColumn == 0) {
+            agg = AggregateFunction.FIRST;
+        }
+        dataFrame.setColumnName(lastColumn, "");
+        dataFrame.setColumnAggFunctions(lastColumn, agg);
     }
 
     public void addColumn(IntSequence columnData) {
         dataFrame.addColumn(columnData);
-        setLastColumnDefaultName();
+        onColumnAdded();
     }
 
     public void addColumn(double start, double step) {
         dataFrame.addColumn(start, step);
-        setLastColumnDefaultName();
+        onColumnAdded();
     }
 
     public void addColumn(List<Integer> columnData) {
         dataFrame.addColumn(columnData);
-        setLastColumnDefaultName();
+        onColumnAdded();
     }
 
     public void addColumn(int[] columnData) {
-       dataFrame.addColumn(columnData);
-        setLastColumnDefaultName();
+        dataFrame.addColumn(columnData);
+        onColumnAdded();
     }
 
     public void setColumnName(int columnNumber, String columnName) {
         dataFrame.setColumnName(columnNumber, columnName);
    }
 
-    public void setColumnAggFunctions(int columnNumber, AggregateFunction... aggFunctions) {
+    public void setColumnAggFunctions(int columnNumber, AggregateFunction... aggFunctions) throws IllegalArgumentException {
+        if(aggFunctions.length == 0) {
+            String errMsg = "No aggregate function is specified for column " + columnNumber;
+            throw new IllegalArgumentException(errMsg);
+        }
         dataFrame.setColumnAggFunctions(columnNumber, aggFunctions);
     }
 

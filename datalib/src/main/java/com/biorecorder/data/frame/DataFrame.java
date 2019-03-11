@@ -46,8 +46,7 @@ public class DataFrame {
     private void addColumn(Column column) {
         columns.add(column);
         columnNames.add("Column " + (columns.size() - 1));
-        AggregateFunction[] agg = new AggregateFunction[1];
-        agg[0] = AggregateFunction.FIRST;
+        AggregateFunction[] agg = new AggregateFunction[0];
         columnAggFunctions.add(agg);
         update();
     }
@@ -251,6 +250,10 @@ public class DataFrame {
      * <p>
      * <p>
      * Implementation of the method implies that the data is sorted!!!
+     * <p>
+     * Resampling will be done only with columns for which at least
+     * one aggregating function is specified!!!
+     * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualFrequency(int points) {
         DataFrame resultantFrame = new DataFrame(true);
@@ -300,6 +303,10 @@ public class DataFrame {
 
     /**
      * Implementation of the method implies that the data is sorted!!!
+     * <p>
+     * Resampling will be done only with columns for which at least
+     * one aggregating function is specified!!!
+     * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
         DataFrame resultantFrame = new DataFrame(true);
@@ -357,6 +364,7 @@ public class DataFrame {
 
         df.addColumn(xList);
         df.addColumn(yList);
+        df.setColumnAggFunctions(0, AggregateFunction.FIRST);
         df.setColumnAggFunctions(1, AggregateFunction.AVERAGE);
 
         DataFrame df1 = df.resampleByEqualFrequency(4);
