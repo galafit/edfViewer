@@ -2,7 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
-import com.biorecorder.data.frame.StatsInfo;
+import com.biorecorder.data.frame.Stats;
 import com.biorecorder.data.sequence.IntSequence;
 
 import java.util.List;
@@ -80,7 +80,7 @@ public class XYData implements ChartData {
 
     @Override
     public boolean isNumberColumn(int columnNumber) {
-        return dataFrame.getColumnType(columnNumber).isNumber();
+        return dataFrame.columnType(columnNumber).isNumber();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class XYData implements ChartData {
 
     @Override
     public boolean isColumnIncreasing(int columnNumber) {
-        return dataFrame.getStats(columnNumber).isIncreasing();
+        return dataFrame.stats(columnNumber).isIncreasing();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class XYData implements ChartData {
 
     @Override
     public Range getColumnMinMax(int columnNumber) {
-        StatsInfo stats = dataFrame.getStats(columnNumber);
+        Stats stats = dataFrame.stats(columnNumber);
         if(stats == null) {
             return null;
         }

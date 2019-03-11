@@ -29,7 +29,7 @@ public interface Column {
 
     int bisect(double value, int from, int length);
 
-    StatsInfo stats(int length, int nLastChangeable);
+    Stats stats(int length, int nLastChangeable);
 
     void cache(int nLastChangeable);
     void disableCaching();
@@ -40,7 +40,7 @@ public interface Column {
      * interval-bin-group and returns a sequence of that start indexes.
      * The column data must be sorted!!!
      */
-    IntSequence group(double interval);
+    IntSequence group(double interval, IntWrapper length);
 
     Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes);
 }

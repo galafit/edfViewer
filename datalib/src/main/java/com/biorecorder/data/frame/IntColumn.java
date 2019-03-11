@@ -18,7 +18,7 @@ public class IntColumn implements Column {
     protected final static int NAN = Integer.MAX_VALUE;
     protected final static DataType dataType = DataType.INT;
     protected IntSequence dataSequence;
-    protected Stats stats = new Stats();
+    protected StatsCalculator stats = new StatsCalculator();
 
     public IntColumn(IntSequence data) {
         this.dataSequence = data;
@@ -146,7 +146,7 @@ public class IntColumn implements Column {
 
 
     @Override
-    public StatsInfo stats(int length, int nLastChangeable) {
+    public Stats stats(int length, int nLastChangeable) {
         return stats.getStats(length, nLastChangeable);
     }
 
@@ -156,12 +156,10 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public IntSequence group(double interval) {
-        int sequenceSize = dataSequence.size();
-
+    public IntSequence group(double interval, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             int intervalValue = (int) interval;
-            IntArrayList groupIndexesList = new IntArrayList(sequenceSize);
+            IntArrayList groupIndexesList = new IntArrayList(length.getValue());
 
             @Override
             public int size() {
@@ -175,9 +173,8 @@ public class IntColumn implements Column {
             }
 
             private void update() {
-                int dataSize = dataSequence.size();
                 int groupListSize = groupIndexesList.size();
-                if (dataSize == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == dataSize)) {
+                if (length.getValue() == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
                     return;
                 }
 
@@ -193,7 +190,7 @@ public class IntColumn implements Column {
 
                 int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
                 groupValue += intervalValue;
-                for (int i = from + 1; i < dataSize; i++) {
+                for (int i = from + 1; i < length.getValue(); i++) {
                     int data = dataSequence.get(i);
                     if (dataSequence.get(i) >= groupValue) {
                         groupIndexesList.add(i);
@@ -206,7 +203,7 @@ public class IntColumn implements Column {
                     }
                 }
                 // add last "closing" groupByEqualIntervals
-                groupIndexesList.add(dataSize);
+                groupIndexesList.add(length.getValue());
             }
         };
         return groupIndexes;
@@ -216,7 +213,6 @@ public class IntColumn implements Column {
     public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);
-            ;
             private int lastIndex = -1;
 
             @Override
@@ -242,7 +238,7 @@ public class IntColumn implements Column {
         return new IntColumn(resultantSequence);
     }
 
-    class Stats {
+    class StatsCalculator {
         protected int count;
         private int min;
         private int max;
@@ -313,7 +309,7 @@ public class IntColumn implements Column {
         }
     }
 
-    class StatsInfoInt implements StatsInfo {
+    class StatsInfoInt implements Stats {
         private final int min;
         private final int max;
         private final boolean isIncreasing;
@@ -360,7 +356,7 @@ public class IntColumn implements Column {
         List<Integer> dataList = new ArrayList<Integer>(Arrays.asList(data));
         IntColumn column = new IntColumn(dataList);
 
-        StatsInfo stats = column.stats(8, 1);
+        Stats stats = column.stats(8, 1);
         System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
 
         dataList.set(7, 40);

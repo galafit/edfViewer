@@ -3,7 +3,7 @@ package com.biorecorder.data.frame;
 /**
  * Created by galafit on 10/3/19.
  */
-public interface StatsInfo {
+public interface Stats {
     double min();
 
     double max();

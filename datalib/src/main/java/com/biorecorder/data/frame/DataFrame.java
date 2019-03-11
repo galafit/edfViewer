@@ -13,8 +13,8 @@ import java.util.List;
  * in fact is simply a collection of columns
  */
 public class DataFrame {
-    private int length;
-    private int nLastChangeableRows;
+    private IntWrapper length = new IntWrapper(0);
+    private int nLastChangeable;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
@@ -27,7 +27,7 @@ public class DataFrame {
             columns.add(dataFrame.columns.get(columnOrder[i]));
             columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
             columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
-            nLastChangeableRows = dataFrame.nLastChangeableRows;
+            nLastChangeable = dataFrame.nLastChangeable;
             length = dataFrame.length;
         }
     }
@@ -85,7 +85,7 @@ public class DataFrame {
     }
 
     public int rowCount() {
-        return length;
+        return length.getValue();
     }
 
     public int columnCount() {
@@ -104,7 +104,7 @@ public class DataFrame {
         columnNames.set(columnNumber, name);
     }
 
-    public DataType getColumnType(int columnNumber) {
+    public DataType columnType(int columnNumber) {
         return columns.get(columnNumber).dataType();
     }
 
@@ -118,11 +118,11 @@ public class DataFrame {
         return columns.get(columnNumber).label(rowNumber);
     }
 
-    public StatsInfo getStats(int columnNumber) {
-        if(length < 1) {
+    public Stats stats(int columnNumber) {
+        if (length.getValue() < 1) {
             return null;
         }
-        return columns.get(columnNumber).stats(length, nLastChangeableRows);
+        return columns.get(columnNumber).stats(length.getValue(), nLastChangeable);
     }
 
     public boolean isColumnRegular(int columnNumber) {
@@ -137,6 +137,7 @@ public class DataFrame {
      * one will be found. If there is no element equal to the searched value function returns
      * the insertion point for <b>value</b> in the column to maintain sorted order
      * (i.e. index of the first element in the column which is bigger than the searched value).
+     *
      * @param sorter - Default null.
      *               Optional array of integer indices that sortedIndices column data
      *               into ascending order (if data column itself is not sorted).
@@ -144,12 +145,12 @@ public class DataFrame {
      */
     public int bisect(int columnNumber, double value, int[] sorter) {
         Column column = columns.get(columnNumber);
-        if(sorter != null) {
+        if (sorter != null) {
             column = column.view(sorter);
         }
-        int length1 = length;
-        if(sorter != null) {
-            length1 = Math.min(length, sorter.length);
+        int length1 = length.getValue();
+        if (sorter != null) {
+            length1 = Math.min(length.getValue(), sorter.length);
         }
         return column.bisect(value, 0, length1);
     }
@@ -169,11 +170,12 @@ public class DataFrame {
      * which represent sorted version (view) of the given column.
      * (Similar to numpy.argsort or google chart DataTable.getSortedRows -
      * https://developers.google.com/chart/interactive/docs/reference#DataTable,)
+     *
      * @return array of sorted rows (indices) for the given column.
      */
     public int[] sortedIndices(int sortColumn) {
         boolean isParallel = false;
-        return columns.get(sortColumn).sort(0, length, isParallel);
+        return columns.get(sortColumn).sort(0, length.getValue(), isParallel);
     }
 
     public DataFrame slice(int fromRowNumber, int length) {
@@ -226,11 +228,11 @@ public class DataFrame {
      * <p>
      * The most common "default" methods to divide data into bins:
      * <ol>
-     *  <li>Equal intervals [equal width binning] - each bin has equal range value or lengths. </li>
-     *  <li>Equal frequencies [equal height binning, quantiles] - each bin has equal number of elements or data points.
-     *  Percentile ranks - % of the total data to group into bins, or  the number of points in bins are specified. </li>
-     *  <li>Custom Edges - edge values of each bin are specified. The edge value is always the lower boundary of the bin.</li>
-     *  <li>Custom Elements [list] - the elements for each bin are specified manually.</li>
+     * <li>Equal intervals [equal width binning] - each bin has equal range value or lengths. </li>
+     * <li>Equal frequencies [equal height binning, quantiles] - each bin has equal number of elements or data points.
+     * Percentile ranks - % of the total data to group into bins, or  the number of points in bins are specified. </li>
+     * <li>Custom Edges - edge values of each bin are specified. The edge value is always the lower boundary of the bin.</li>
+     * <li>Custom Elements [list] - the elements for each bin are specified manually.</li>
      * </ol>
      * <p>
      * <a href="https://msdn.microsoft.com/library/en-us/Dn913065.aspx">MSDN: Group Data into Bins</a>,
@@ -242,26 +244,27 @@ public class DataFrame {
      * <a href="https://docs.tibco.com/pub/sfire-bauthor/7.6.0/doc/html/en-US/GUID-D82F7907-B3B4-45F6-AFDA-C3179361F455.html">Binning functions</a>,
      * <a href="https://devnet.logianalytics.com/rdPage.aspx?rdReport=Article&dnDocID=6029">Data Binning</a>,
      * <a href="http://www.cs.wustl.edu/~zhang/teaching/cs514/Spring11/Data-prep.pdf">Data Preprocessing</a>
-     *
+     * <p>
      * <p>
      * Implementation of the method implies that the data is sorted!!!
      */
     public DataFrame resampleByEqualFrequency(int points) {
         DataFrame resultantFrame = new DataFrame();
-         IntSequence groupIndexes = new IntSequence() {
+        IntSequence groupIndexes = new IntSequence() {
+
             @Override
             public int size() {
-                if (length % points == 0) {
-                    return length / points + 1;
+                if (length.getValue() % points == 0) {
+                    return length.getValue() / points + 1;
                 } else {
-                    return length / points + 2;
+                    return length.getValue() / points + 2;
                 }
             }
 
             @Override
             public int get(int index) {
                 if (index == size() - 1) {
-                    return length;
+                    return length.getValue();
                 } else {
                     return index * points;
                 }
@@ -296,7 +299,7 @@ public class DataFrame {
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
         DataFrame resultantFrame = new DataFrame();
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             AggregateFunction[] aggregations = columnAggFunctions.get(i);
@@ -312,7 +315,7 @@ public class DataFrame {
     }
 
     public void cacheColumn(int columnNumber) {
-        columns.get(columnNumber).cache(nLastChangeableRows);
+        columns.get(columnNumber).cache(nLastChangeable);
     }
 
     public void disableCaching() {
@@ -323,27 +326,28 @@ public class DataFrame {
 
     public void update() {
         if (columns.size() == 0) {
+            length.setValue(0);
             return;
         }
-        length = columns.get(0).size();
+        length.setValue(columns.get(0).size());
         for (int i = 1; i < columns.size(); i++) {
-            length = Math.min(length, columns.get(i).size());
+            length.setValue(Math.min(length.getValue(), columns.get(i).size()));
         }
     }
 
     private void rangeCheck(long rowNumber) {
-        if (rowNumber >= length || rowNumber < 0)
+        if (rowNumber >= length.getValue() || rowNumber < 0)
             throw new IndexOutOfBoundsException(outOfBoundsMsg(rowNumber));
     }
 
     private String outOfBoundsMsg(long index) {
-        return "Index: "+index+", Size: "+length;
+        return "Index: " + index + ", Size: " + length;
     }
 
-    public static void main(String [ ] args) {
+    public static void main(String[] args) {
         DataFrame df = new DataFrame();
         Integer[] xData = {2, 4, 5, 9, 12, 33, 34, 35, 40};
-        Integer[] yData = {1, 2, 3, 4, 5,  6,  7,  8,  9};
+        Integer[] yData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         List<Integer> xList = new ArrayList<Integer>(Arrays.asList(xData));
         List<Integer> yList = new ArrayList<Integer>(Arrays.asList(yData));
 
@@ -359,27 +363,27 @@ public class DataFrame {
         int[] expectedY1 = {2, 6, 9};
 
         int[] expectedX2 = {2, 4, 9, 12, 33, 40};
-        int[] expectedY2 = {1, 2, 4, 5,  7,  9};
+        int[] expectedY2 = {1, 2, 4, 5, 7, 9};
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(df1.getValue(i, 0) != expectedX1[i]) {
-                String errMsg = "ResampleByEqualFrequency error: "+ i + " expected x =  "+ expectedX1[i] + "  resultant x = " + df1.getValue(i, 0);
+            if (df1.getValue(i, 0) != expectedX1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: " + i + " expected x =  " + expectedX1[i] + "  resultant x = " + df1.getValue(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if(df1.getValue(i, 1) != expectedY1[i]) {
-                String errMsg = "ResampleByEqualFrequency error: "+ i + " expected y =  "+ expectedY1[i] + "  resultant y = " + df1.getValue(i, 1);
+            if (df1.getValue(i, 1) != expectedY1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: " + i + " expected y =  " + expectedY1[i] + "  resultant y = " + df1.getValue(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
         System.out.println("ResampleByEqualFrequency is OK");
 
         for (int i = 0; i < df2.rowCount(); i++) {
-            if(df2.getValue(i, 0) != expectedX2[i]) {
-                String errMsg = "ResampleByEqualInterval error: "+ i + " expected x =  "+ expectedX2[i] + "  resultant x = " + df2.getValue(i, 0);
+            if (df2.getValue(i, 0) != expectedX2[i]) {
+                String errMsg = "ResampleByEqualInterval error: " + i + " expected x =  " + expectedX2[i] + "  resultant x = " + df2.getValue(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if(df2.getValue(i, 1) != expectedY2[i]) {
-                String errMsg = "ResampleByEqualInterval error: "+ i + " expected y =  "+ expectedY2[i] + "  resultant y = " + df2.getValue(i, 1);
+            if (df2.getValue(i, 1) != expectedY2[i]) {
+                String errMsg = "ResampleByEqualInterval error: " + i + " expected y =  " + expectedY2[i] + "  resultant y = " + df2.getValue(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
@@ -392,7 +396,7 @@ public class DataFrame {
 
         yList.add(11);
         yList.add(10);
-       // df.update();
+        df.update();
         df1.update();
         df2.update();
 
@@ -400,27 +404,27 @@ public class DataFrame {
         int[] expectedY1_ = {2, 6, 10};
 
         int[] expectedX2_ = {2, 4, 9, 12, 33, 40, 50};
-        int[] expectedY2_ = {1, 2, 4, 5,  7,  10,  10};
+        int[] expectedY2_ = {1, 2, 4, 5, 7, 10, 10};
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(df1.getValue(i, 0) != expectedX1_[i]) {
-                String errMsg = "ResampleByEqualFrequency UPDATE error: "+ i + " expected x =  "+ expectedX1_[i] + "  resultant x = " + df1.getValue(i, 0);
+            if (df1.getValue(i, 0) != expectedX1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected x =  " + expectedX1_[i] + "  resultant x = " + df1.getValue(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if(df1.getValue(i, 1) != expectedY1_[i]) {
-                String errMsg = "ResampleByEqualFrequency UPDATE error: "+ i + " expected y =  "+ expectedY1_[i] + "  resultant y = " + df1.getValue(i, 1);
+            if (df1.getValue(i, 1) != expectedY1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected y =  " + expectedY1_[i] + "  resultant y = " + df1.getValue(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
         System.out.println("ResampleByEqualFrequency UPDATE is OK");
 
         for (int i = 0; i < df2.rowCount(); i++) {
-            if(df2.getValue(i, 0) != expectedX2_[i]) {
-                String errMsg = "ResampleByEqualInterval UPDATE error: "+ i + " expected x =  "+ expectedX2_[i] + "  resultant x = " + df2.getValue(i, 0);
+            if (df2.getValue(i, 0) != expectedX2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected x =  " + expectedX2_[i] + "  resultant x = " + df2.getValue(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if(df2.getValue(i, 1) != expectedY2_[i]) {
-                String errMsg = "ResampleByEqualInterval UPDATE error: "+ i + " expected y =  "+ expectedY2_[i] + "  resultant y = " + df2.getValue(i, 1);
+            if (df2.getValue(i, 1) != expectedY2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected y =  " + expectedY2_[i] + "  resultant y = " + df2.getValue(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
