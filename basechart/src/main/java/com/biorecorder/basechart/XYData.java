@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
+import com.biorecorder.data.frame.Function;
 import com.biorecorder.data.frame.Stats;
 import com.biorecorder.data.sequence.IntSequence;
 
@@ -20,6 +21,9 @@ public class XYData implements ChartData {
 
     public XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
+        for (int i = 0; i < dataFrame.columnCount(); i++) {
+            onColumnAdded(i);
+        }
     }
 
     public XYData() {
@@ -32,19 +36,28 @@ public class XYData implements ChartData {
     }
 
     private void onColumnAdded() {
-        int lastColumn = dataFrame.columnCount() - 1;
+        onColumnAdded(dataFrame.columnCount() - 1);
+    }
+
+    private void onColumnAdded(int columnNumber) {
         AggregateFunction agg = AggregateFunction.AVERAGE;
-        if(lastColumn == 0) {
+        if(columnNumber == 0) {
             agg = AggregateFunction.FIRST;
         }
-        dataFrame.setColumnName(lastColumn, "");
-        dataFrame.setColumnAggFunctions(lastColumn, agg);
+        dataFrame.setColumnName(columnNumber, "");
+        dataFrame.setColumnAggFunctions(columnNumber, agg);
+    }
+
+    public void addColumn(Function function, int argColumnNumber) {
+        dataFrame.addColumn(function, argColumnNumber);
+        onColumnAdded();
     }
 
     public void addColumn(IntSequence columnData) {
         dataFrame.addColumn(columnData);
         onColumnAdded();
     }
+
 
     public void addColumn(double start, double step) {
         dataFrame.addColumn(start, step);

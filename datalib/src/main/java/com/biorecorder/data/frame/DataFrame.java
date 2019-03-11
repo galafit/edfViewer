@@ -51,6 +51,10 @@ public class DataFrame {
         update();
     }
 
+    public void addColumn(Function function, int argColumnNumber) {
+        addColumn(new FunctionColumn(function, columns.get(argColumnNumber)));
+    }
+
     public void addColumn(IntSequence columnData) {
         addColumn(new IntColumn(columnData));
     }

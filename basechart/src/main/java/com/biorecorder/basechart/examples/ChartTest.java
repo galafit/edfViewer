@@ -3,6 +3,8 @@ package com.biorecorder.basechart.examples;
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.data.frame.DataFrame;
+import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -69,12 +71,18 @@ public class ChartTest extends JFrame {
         XYData xyData1 = new XYData(0, 1);
         xyData1.addColumn(yData1);
 
-        XYData xyData2 = new XYData();
-        xyData2.addColumn(xData2);
-        xyData2.addColumn(yData_col0);
-        xyData2.addColumn(yData_col1);
-        xyData2.addColumn(yData_col2);
-        xyData2.setColumnName(2, "eeg");
+        DataFrame df = new DataFrame();
+        df.addColumn(xData2);
+        df.addColumn(yData_col0);
+        df.addColumn(yData_col1);
+        df.addColumn(yData_col2);
+        df.addColumn(new SquareFunction(), 1);
+        df.setColumnName(2, "eeg");
+
+        int[] order = {0, 2, 3, 1, 4};
+        DataFrame df1 = new DataFrame(df, order);
+        XYData xyData2 = new XYData(df1);
+
 
         XYData xyData3 = new XYData();
         xyData3.addColumn(xData3);
@@ -82,8 +90,8 @@ public class ChartTest extends JFrame {
 
         Chart chart = new Chart(new WhiteTheme().getChartConfig());
 
-        chart.addTrace(new LineTrace(xyData1), false);
-        chart.addStack();
+       // chart.addTrace(new LineTrace(xyData1), false);
+       // chart.addStack();
         chart.addTrace(new LineTrace(xyData2), true);
 
         chartPanel = new ChartPanel(chart);
