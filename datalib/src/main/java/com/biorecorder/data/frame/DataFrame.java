@@ -224,6 +224,7 @@ public class DataFrame {
     public DataFrame view(int fromRowNumber, int length) {
         DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
         List<Integer> functionColumns = new ArrayList<>();
+        // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             if(column instanceof FunctionColumn) {
@@ -235,6 +236,7 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+        // put new function columns
         for (Integer i : functionColumns) {
           FunctionColumn fc = (FunctionColumn) columns.get(i);
             for (int j = 0; j < columns.size(); j++) {
@@ -253,6 +255,7 @@ public class DataFrame {
     public DataFrame view(int[] rowOrder) {
         DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
         List<Integer> functionColumns = new ArrayList<>();
+        // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             if(column instanceof FunctionColumn) {
@@ -263,6 +266,8 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+
+        // put new function columns
         for (Integer i : functionColumns) {
             FunctionColumn fc = (FunctionColumn) columns.get(i);
             for (int j = 0; j < columns.size(); j++) {
@@ -332,7 +337,7 @@ public class DataFrame {
                     if(argColumn == columns.get(j)) {
                         aggregations = columnAggFunctions.get(j).length;
                         functionColToArgCol.put(i, j);
-
+                        break;
                     }
                 }
             }
@@ -345,7 +350,7 @@ public class DataFrame {
             count += aggregations;
         }
 
-        // aggregate
+        // aggregate all columns except function columns
         DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = new IntSequence() {
             @Override
@@ -397,7 +402,7 @@ public class DataFrame {
             }
         }
 
-        // put function columns
+        // put new function columns (as functions on aggregated data)
         for (Integer fCol : functionColToArgCol.keySet()) {
             Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
             int argCol = functionColToArgCol.get(fCol);
@@ -432,7 +437,7 @@ public class DataFrame {
                     if(argColumn == columns.get(j)) {
                         aggregations = columnAggFunctions.get(j).length;
                         functionColToArgCol.put(i, j);
-
+                        break;
                     }
                 }
             }
@@ -445,7 +450,7 @@ public class DataFrame {
             count += aggregations;
         }
 
-        // aggregate
+        // aggregate all columns except function columns
         DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
         for (int i = 0; i < columns.size(); i++) {
@@ -468,7 +473,7 @@ public class DataFrame {
                 }
             }
         }
-        // put function columns
+        // put new function columns (as functions on aggregated data)
         for (Integer fCol : functionColToArgCol.keySet()) {
             Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
             int argCol = functionColToArgCol.get(fCol);
