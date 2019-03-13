@@ -4,6 +4,7 @@ import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.LineTrace;
@@ -17,8 +18,7 @@ import java.awt.event.ActionListener;
  * Created by galafit on 27/9/18.
  */
 public class NavigableChartTest extends JFrame{
-    IntArrayList yData1;
-    IntArrayList yData2;
+    IntArrayList yData;
     IntArrayList xData;
     ChartPanel chartPanel;
 
@@ -28,39 +28,37 @@ public class NavigableChartTest extends JFrame{
 
         setTitle("Test chart");
 
-        yData1 = new IntArrayList();
-        yData2 = new IntArrayList();
+        yData = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 0; i < 1600; i++) {
-            yData1.add(i);
+        for (int i = 1; i <= 150; i++) {
+            yData.add(i);
         }
 
-        for (int i = 0; i < 1600; i++) {
-            yData2.add(i);
-        }
 
-        for (int i = 0; i < 1600; i++) {
+        for (int i = 1; i <= 150; i++) {
             xData.add(i);
         }
 
-        XYData xyData1 = new XYData(0, 1);
-        xyData1.addColumn(yData1);
+        XYData xyData1 = new XYData(1, 1);
+        xyData1.addColumn(yData);
+        xyData1.addColumn(new SquareFunction(), 0);
 
         XYData xyData2 = new XYData();
         xyData2.addColumn(xData);
-        xyData2.addColumn(yData2);
+        xyData2.addColumn(yData);
+        xyData2.addColumn(new SquareFunction(), 0);
 
         NavigableChart chart = new NavigableChart(new WhiteTheme().getNavigableChartConfig());
-        chart.addChartTrace(new LineTrace(xyData1), false );
-        chart.addChartTrace(new LineTrace(xyData2), false , false, false);
+        chart.addChartTrace(new LineTrace(xyData2), true , false, false);
         chart.addChartStack();
-        chart.addChartTrace(new LineTrace(xyData1), false );
+        chart.addChartTrace(new LineTrace(xyData1), true );
 
 
-        chart.addNavigatorTrace( new LineTrace(xyData1), false);
-        chart.addNavigatorStack();
-        chart.addNavigatorTrace(new LineTrace(xyData2), false);
+        chart.addNavigatorTrace( new LineTrace(xyData2), true);
+        chart.setNavigatorStackWeigt(0, 4);
+        chart.setNavigatorStackWeigt(1, 4);
+
 
         chartPanel = new ChartPanel(chart);
 
@@ -75,7 +73,7 @@ public class NavigableChartTest extends JFrame{
 
     public void update() {
         for (int i = 1; i <= 80; i++) {
-            yData1.add(100);
+            yData.add(100);
         }
 
 
@@ -86,9 +84,7 @@ public class NavigableChartTest extends JFrame{
             }
             xData.add(lastValue + 1);
         }
-        for (int i = 1; i <= 80; i++) {
-            yData2.add(i);
-        }
+
         chartPanel.update();
     }
 

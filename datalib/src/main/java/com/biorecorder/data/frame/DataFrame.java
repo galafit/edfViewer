@@ -3,9 +3,8 @@ package com.biorecorder.data.frame;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.FileInputStream;
+import java.util.*;
 
 
 /**
@@ -26,17 +25,43 @@ public class DataFrame {
         this.isLastRowChangeable = isLastRowChangeable;
     }
 
-    public DataFrame(DataFrame dataFrame, int[] columnOrder) {
-        for (int i = 0; i < columnOrder.length; i++) {
-            columns.add(dataFrame.columns.get(columnOrder[i]));
-            columnNames.add(dataFrame.columnNames.get(columnOrder[i]));
-            columnAggFunctions.add(dataFrame.columnAggFunctions.get(columnOrder[i]));
-            isLastRowChangeable = dataFrame.isLastRowChangeable;
-            length = dataFrame.length;
+    public DataFrame(DataFrame dataFrame, int[] columnOrder) throws IllegalArgumentException {
+        isLastRowChangeable = dataFrame.isLastRowChangeable;
+        length = dataFrame.length;
+        for (int i : columnOrder) {
+            Column columnToAdd = dataFrame.columns.get(i);
+            if(columnToAdd instanceof FunctionColumn) {
+                // check that columnOrder contains the column used by this one
+                boolean isArgColumnPresent = false;
+                for (int j = 0; j < columnOrder.length; j++) {
+                    if (((FunctionColumn)columnToAdd).getArgColumn() == dataFrame.columns.get(columnOrder[j])) {
+                        isArgColumnPresent = true;
+                        break;
+                    }
+                }
+                if(!isArgColumnPresent) {
+                    String errMsg = "Column: " + i + " can not be added because it depends upon column that is not presented in the given columnOrder";
+                    throw new IllegalArgumentException(errMsg);
+                }
+            }
+
+            columns.add(columnToAdd);
+            columnNames.add(dataFrame.columnNames.get(i));
+            columnAggFunctions.add(dataFrame.columnAggFunctions.get(i));
         }
     }
 
-    public void removeColumn(int columnNumber) {
+    public void removeColumn(int columnNumber) throws IllegalArgumentException {
+        Column columnToRemove = columns.get(columnNumber);
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            if(column instanceof FunctionColumn) {
+                if(((FunctionColumn) column).getArgColumn() == columnToRemove) {
+                    String errMsg = "Column: " + columnNumber + " is used by function column: " + i + " and can not be removed";
+                    throw new IllegalArgumentException(errMsg);
+                }
+            }
+        }
         columns.remove(columnNumber);
         columnNames.remove(columnNumber);
         columnAggFunctions.remove(columnNumber);
@@ -197,22 +222,56 @@ public class DataFrame {
     }
 
     public DataFrame view(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame();
+        DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
+        List<Integer> functionColumns = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
-            resultantFrame.columns.add(columns.get(i).view(fromRowNumber, length));
+            Column column = columns.get(i);
+            if(column instanceof FunctionColumn) {
+                functionColumns.add(i);
+                resultantFrame.columns.add(null);
+            } else {
+                resultantFrame.columns.add(column.view(fromRowNumber, length));
+            }
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+        for (Integer i : functionColumns) {
+          FunctionColumn fc = (FunctionColumn) columns.get(i);
+            for (int j = 0; j < columns.size(); j++) {
+                Column column = columns.get(j);
+                if(fc.getArgColumn() == column) {
+                    resultantFrame.columns.set(i, new FunctionColumn(fc.getFunction(), resultantFrame.columns.get(j)));
+                    break;
+                }
+            }
+        }
+
         resultantFrame.update();
         return resultantFrame;
     }
 
     public DataFrame view(int[] rowOrder) {
-        DataFrame resultantFrame = new DataFrame();
+        DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
+        List<Integer> functionColumns = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
-            resultantFrame.columns.add(columns.get(i).view(rowOrder));
+            Column column = columns.get(i);
+            if(column instanceof FunctionColumn) {
+                resultantFrame.columns.add(null);
+            } else {
+                resultantFrame.columns.add(column.view(rowOrder));
+            }
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        for (Integer i : functionColumns) {
+            FunctionColumn fc = (FunctionColumn) columns.get(i);
+            for (int j = 0; j < columns.size(); j++) {
+                Column column = columns.get(j);
+                if(fc.getArgColumn() == column) {
+                    resultantFrame.columns.set(i, new FunctionColumn(fc.getFunction(), resultantFrame.columns.get(j)));
+                    break;
+                }
+            }
         }
         resultantFrame.update();
         return resultantFrame;
@@ -260,9 +319,35 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualFrequency(int points) {
+        // create maps
+        Map<Integer, Integer> functionColToArgCol = new HashMap<>();
+        Map<Integer, int[]> colToResultantCols = new HashMap<>();
+        int count = 0;
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            int aggregations = columnAggFunctions.get(i).length;
+            if(column instanceof FunctionColumn) {
+                Column argColumn = ((FunctionColumn) column).getArgColumn();
+                for (int j = 0; j < columns.size(); j++) {
+                    if(argColumn == columns.get(j)) {
+                        aggregations = columnAggFunctions.get(j).length;
+                        functionColToArgCol.put(i, j);
+
+                    }
+                }
+            }
+
+            int[] resultantColumns = new int[aggregations];
+            for (int j = 0; j < resultantColumns.length; j++) {
+                resultantColumns[j] = count + j;
+            }
+            colToResultantCols.put(i, resultantColumns);
+            count += aggregations;
+        }
+
+        // aggregate
         DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = new IntSequence() {
-
             @Override
             public int size() {
                 if (length.getValue() % points == 0) {
@@ -284,21 +369,42 @@ public class DataFrame {
 
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            AggregateFunction[] aggregations = columnAggFunctions.get(i);
-            if (column instanceof RegularColumn) {
+            if(column instanceof FunctionColumn) {
+                AggregateFunction[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
+                for (AggregateFunction aggregation : aggregations) {
+                    resultantFrame.columns.add(null);
+                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
+                    AggregateFunction[] resultantAgg = new AggregateFunction[0];
+                    resultantFrame.columnAggFunctions.add(resultantAgg);
+                }
+            }
+            else if (column instanceof RegularColumn) {
+                AggregateFunction[] aggregations = columnAggFunctions.get(i);
                 for (AggregateFunction aggregation : aggregations) {
                     resultantFrame.columns.add(((RegularColumn) column).aggregate(aggregation, points));
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     AggregateFunction[] resultantAgg = {aggregation};
                     resultantFrame.columnAggFunctions.add(resultantAgg);
                 }
-            } else {
+            } else  {
+                AggregateFunction[] aggregations = columnAggFunctions.get(i);
                 for (AggregateFunction aggregation : aggregations) {
                     resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     AggregateFunction[] resultantAgg = {aggregation};
                     resultantFrame.columnAggFunctions.add(resultantAgg);
                 }
+            }
+        }
+
+        // put function columns
+        for (Integer fCol : functionColToArgCol.keySet()) {
+            Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
+            int argCol = functionColToArgCol.get(fCol);
+            int[] resultantArgCols = colToResultantCols.get(argCol);
+            int[] resultantFCols = colToResultantCols.get(fCol);
+            for (int i = 0; i < resultantFCols.length; i++) {
+               resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
             }
         }
         resultantFrame.update();
@@ -313,16 +419,63 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
+        // create maps
+        Map<Integer, Integer> functionColToArgCol = new HashMap<>();
+        Map<Integer, int[]> colToResultantCols = new HashMap<>();
+        int count = 0;
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            int aggregations = columnAggFunctions.get(i).length;
+            if(column instanceof FunctionColumn) {
+                Column argColumn = ((FunctionColumn) column).getArgColumn();
+                for (int j = 0; j < columns.size(); j++) {
+                    if(argColumn == columns.get(j)) {
+                        aggregations = columnAggFunctions.get(j).length;
+                        functionColToArgCol.put(i, j);
+
+                    }
+                }
+            }
+
+            int[] resultantColumns = new int[aggregations];
+            for (int j = 0; j < resultantColumns.length; j++) {
+                resultantColumns[j] = count + j;
+            }
+            colToResultantCols.put(i, resultantColumns);
+            count += aggregations;
+        }
+
+        // aggregate
         DataFrame resultantFrame = new DataFrame(true);
         IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            AggregateFunction[] aggregations = columnAggFunctions.get(i);
-            for (AggregateFunction aggregation : aggregations) {
-                resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
-                resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                AggregateFunction[] resultantAgg = {aggregation};
-                resultantFrame.columnAggFunctions.add(resultantAgg);
+            if(column instanceof FunctionColumn) {
+                AggregateFunction[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
+                for (AggregateFunction aggregation : aggregations) {
+                    resultantFrame.columns.add(null);
+                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
+                    AggregateFunction[] resultantAgg = new AggregateFunction[0];
+                    resultantFrame.columnAggFunctions.add(resultantAgg);
+                }
+            } else {
+                AggregateFunction[] aggregations = columnAggFunctions.get(i);
+                for (AggregateFunction aggregation : aggregations) {
+                    resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
+                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
+                    AggregateFunction[] resultantAgg = {aggregation};
+                    resultantFrame.columnAggFunctions.add(resultantAgg);
+                }
+            }
+        }
+        // put function columns
+        for (Integer fCol : functionColToArgCol.keySet()) {
+            Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
+            int argCol = functionColToArgCol.get(fCol);
+            int[] resultantArgCols = colToResultantCols.get(argCol);
+            int[] resultantFCols = colToResultantCols.get(fCol);
+            for (int i = 0; i < resultantFCols.length; i++) {
+                resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
             }
         }
         resultantFrame.update();

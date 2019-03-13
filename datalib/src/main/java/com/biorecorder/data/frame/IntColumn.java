@@ -215,6 +215,7 @@ public class IntColumn implements Column {
 
     @Override
     public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
+        System.out.println("aggregate");
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);
             private int lastIndex = -1;

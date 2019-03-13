@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
 import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
@@ -10,22 +10,19 @@ import com.biorecorder.basechart.swing.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by galafit on 21/9/18.
  */
 public class ChartTest extends JFrame {
+
+    IntArrayList yUnsort = new IntArrayList();
+    IntArrayList xUnsort = new IntArrayList();
+
+    IntArrayList xData = new IntArrayList();
     IntArrayList yData1 = new IntArrayList();
     IntArrayList yData2 = new IntArrayList();
-    IntArrayList xData2 = new IntArrayList();
     IntArrayList yData3 = new IntArrayList();
-    IntArrayList xData3 = new IntArrayList();
-
-    IntArrayList yData_col0 = new IntArrayList();
-    IntArrayList yData_col1 = new IntArrayList();
-    IntArrayList yData_col2 = new IntArrayList();
     ChartPanel chartPanel;
 
     public ChartTest()  {
@@ -34,59 +31,55 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i <= 1600; i++) {
-            yData1.add(i);
-        }
-
-
-        for (int i = 1; i <= 160; i++) {
+        for (int i = 1; i <= 150; i++) {
             //yData1.add1((float) Math.sin(i));
-            yData_col0.add(i);
-            yData_col1.add(i + 20);
-            yData_col2.add(i + 50);
+            yData1.add(i);
+            yData2.add(i + 20);
+            yData3.add(i + 50);
         }
 
-        for (int i = 0; i < 160; i++) {
-            yData2.add(i);
-        }
-        for (int i = 1; i <= 160; i++) {
-            xData2.add(i);
+        for (int i = 1; i <= 150; i++) {
+            xData.add(i);
         }
 
 
-        xData3.add(50);
-        xData3.add(300);
-        xData3.add(200);
-        xData3.add(100);
-        xData3.add(150);
-        xData3.add(20);
+        xUnsort.add(50);
+        xUnsort.add(300);
+        xUnsort.add(200);
+        xUnsort.add(100);
+        xUnsort.add(150);
+        xUnsort.add(20);
 
-        yData3.add(100);
-        yData3.add(200);
-        yData3.add(150);
-        yData3.add(10);
-        yData3.add(300);
-        yData3.add(300);
+        yUnsort.add(100);
+        yUnsort.add(200);
+        yUnsort.add(150);
+        yUnsort.add(10);
+        yUnsort.add(300);
+        yUnsort.add(300);
 
-        XYData xyData1 = new XYData(0, 1);
+        XYData xyData1 = new XYData(1, 1);
         xyData1.addColumn(yData1);
 
         DataFrame df = new DataFrame();
-        df.addColumn(xData2);
-        df.addColumn(yData_col0);
-        df.addColumn(yData_col1);
-        df.addColumn(yData_col2);
+        df.addColumn(xData);
+        df.addColumn(yData1);
+        df.addColumn(yData2);
+        df.addColumn(yData3);
         df.addColumn(new SquareFunction(), 1);
         df.setColumnName(2, "eeg");
+        df.setColumnAggFunctions(0, AggregateFunction.FIRST);
+        df.setColumnAggFunctions(1, AggregateFunction.FIRST);
+        df.setColumnAggFunctions(2, AggregateFunction.FIRST);
+        df.setColumnAggFunctions(3, AggregateFunction.FIRST);
 
-        int[] order = {0, 2, 3, 1, 4};
+        int[] order = {0, 4, 4, 1};
         DataFrame df1 = new DataFrame(df, order);
         XYData xyData2 = new XYData(df1);
 
 
         XYData xyData3 = new XYData();
-        xyData3.addColumn(xData3);
-        xyData3.addColumn(yData3);
+        xyData3.addColumn(xUnsort);
+        xyData3.addColumn(yUnsort);
 
         Chart chart = new Chart(new WhiteTheme().getChartConfig());
 
