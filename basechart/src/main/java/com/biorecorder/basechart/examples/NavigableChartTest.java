@@ -56,8 +56,8 @@ public class NavigableChartTest extends JFrame{
 
 
         chart.addNavigatorTrace( new LineTrace(xyData2), true);
-        chart.setNavigatorStackWeigt(0, 4);
-        chart.setNavigatorStackWeigt(1, 4);
+      //  chart.setNavigatorStackWeigt(0, 4);
+      //  chart.setNavigatorStackWeigt(1, 4);
 
 
         chartPanel = new ChartPanel(chart);

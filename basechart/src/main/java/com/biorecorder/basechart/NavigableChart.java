@@ -151,6 +151,7 @@ public class NavigableChart {
         }
         if(dataUpdated) {
             updatePreviewMinMax(canvas);
+            dataUpdated = false;
         }
 
         canvas.setColor(config.getBackgroundColor());

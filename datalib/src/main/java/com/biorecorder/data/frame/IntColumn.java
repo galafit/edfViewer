@@ -128,7 +128,7 @@ public class IntColumn implements Column {
     @Override
     public void cache(boolean isLastChangeable) {
         int nLastExcluded = 0;
-        if(isLastChangeable) {
+        if (isLastChangeable) {
             nLastExcluded = 1;
         }
         if (!(dataSequence instanceof IntCachingSequence)) {
@@ -215,7 +215,6 @@ public class IntColumn implements Column {
 
     @Override
     public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
-        System.out.println("aggregate");
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);
             private int lastIndex = -1;
@@ -242,6 +241,35 @@ public class IntColumn implements Column {
         };
         return new IntColumn(resultantSequence);
     }
+
+    @Override
+    public Column aggregate(AggregateFunction aggregateFunction, int points) {
+        IntSequence groupIndexes = new IntSequence() {
+            int size;
+
+            @Override
+            public int size() {
+                int dataSize = dataSequence.size();
+                if (dataSize % points == 0) {
+                    size = dataSize / points + 1;
+                } else {
+                    size = dataSize / points + 2;
+                }
+                return size;
+            }
+
+            @Override
+            public int get(int index) {
+                if (index == size - 1) {
+                    return dataSequence.size();
+                } else {
+                    return index * points;
+                }
+            }
+        };
+        return aggregate(aggregateFunction, groupIndexes);
+    }
+
 
     class StatsCalculator {
         protected int count;
@@ -281,13 +309,14 @@ public class IntColumn implements Column {
             }
             int dataSize = dataSequence.size();
             int length1 = length;
-            if(isLastChangeable && length == dataSize) {
+            if (isLastChangeable && length == dataSize) {
                 length1--;
             }
 
             if (length1 < count) {
                 count = 0;
             }
+
             if (length1 > count) {
                 StatsInt stats = calculate(count, length1 - count);
                 if (count == 0) {
@@ -306,9 +335,16 @@ public class IntColumn implements Column {
             }
 
             if (length1 < length) {
-                int lastData = dataSequence.get(length1);
-                int diff = dataSequence.get(length1) - dataSequence.get(length1 - 1);
-                return new StatsInt(Math.min(min, lastData), Math.max(max, lastData), isIncreasing && diff >= 0, isDecreasing && diff <= 0);
+                if (length1 < 1) {
+                    int data = dataSequence.get(length1);
+                    return new StatsInt(data, data, true, true);
+
+                } else {
+                    int lastData = dataSequence.get(length1);
+                    int diff = lastData - dataSequence.get(length1 - 1);
+                    return new StatsInt(Math.min(min, lastData), Math.max(max, lastData), isIncreasing && diff >= 0, isDecreasing && diff <= 0);
+
+                }
             } else {
                 return new StatsInt(min, max, isIncreasing, isDecreasing);
             }

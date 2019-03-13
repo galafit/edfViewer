@@ -35,9 +35,6 @@ public class ChartPanel extends JPanel implements KeyListener {
     }
 
     private void init() {
-        BRectangle startArea = new BRectangle(0, 0, 200, 200);
-        chart.onResize(startArea);
-
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {

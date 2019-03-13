@@ -324,96 +324,7 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualFrequency(int points) {
-        // create maps
-        Map<Integer, Integer> functionColToArgCol = new HashMap<>();
-        Map<Integer, int[]> colToResultantCols = new HashMap<>();
-        int count = 0;
-        for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            int aggregations = columnAggFunctions.get(i).length;
-            if(column instanceof FunctionColumn) {
-                Column argColumn = ((FunctionColumn) column).getArgColumn();
-                for (int j = 0; j < columns.size(); j++) {
-                    if(argColumn == columns.get(j)) {
-                        aggregations = columnAggFunctions.get(j).length;
-                        functionColToArgCol.put(i, j);
-                        break;
-                    }
-                }
-            }
-
-            int[] resultantColumns = new int[aggregations];
-            for (int j = 0; j < resultantColumns.length; j++) {
-                resultantColumns[j] = count + j;
-            }
-            colToResultantCols.put(i, resultantColumns);
-            count += aggregations;
-        }
-
-        // aggregate all columns except function columns
-        DataFrame resultantFrame = new DataFrame(true);
-        IntSequence groupIndexes = new IntSequence() {
-            @Override
-            public int size() {
-                if (length.getValue() % points == 0) {
-                    return length.getValue() / points + 1;
-                } else {
-                    return length.getValue() / points + 2;
-                }
-            }
-
-            @Override
-            public int get(int index) {
-                if (index == size() - 1) {
-                    return length.getValue();
-                } else {
-                    return index * points;
-                }
-            }
-        };
-
-        for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            if(column instanceof FunctionColumn) {
-                AggregateFunction[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
-                for (AggregateFunction aggregation : aggregations) {
-                    resultantFrame.columns.add(null);
-                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                    AggregateFunction[] resultantAgg = new AggregateFunction[0];
-                    resultantFrame.columnAggFunctions.add(resultantAgg);
-                }
-            }
-            else if (column instanceof RegularColumn) {
-                AggregateFunction[] aggregations = columnAggFunctions.get(i);
-                for (AggregateFunction aggregation : aggregations) {
-                    resultantFrame.columns.add(((RegularColumn) column).aggregate(aggregation, points));
-                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                    AggregateFunction[] resultantAgg = {aggregation};
-                    resultantFrame.columnAggFunctions.add(resultantAgg);
-                }
-            } else  {
-                AggregateFunction[] aggregations = columnAggFunctions.get(i);
-                for (AggregateFunction aggregation : aggregations) {
-                    resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
-                    resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                    AggregateFunction[] resultantAgg = {aggregation};
-                    resultantFrame.columnAggFunctions.add(resultantAgg);
-                }
-            }
-        }
-
-        // put new function columns (as functions on aggregated data)
-        for (Integer fCol : functionColToArgCol.keySet()) {
-            Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
-            int argCol = functionColToArgCol.get(fCol);
-            int[] resultantArgCols = colToResultantCols.get(argCol);
-            int[] resultantFCols = colToResultantCols.get(fCol);
-            for (int i = 0; i < resultantFCols.length; i++) {
-               resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
-            }
-        }
-        resultantFrame.update();
-        return resultantFrame;
+        return resample(null, points);
     }
 
     /**
@@ -424,6 +335,11 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+        return resample(groupIndexes, 1);
+    }
+
+    public DataFrame resample(IntSequence groupIndexes, int points) {
         // create maps
         Map<Integer, Integer> functionColToArgCol = new HashMap<>();
         Map<Integer, int[]> colToResultantCols = new HashMap<>();
@@ -452,7 +368,7 @@ public class DataFrame {
 
         // aggregate all columns except function columns
         DataFrame resultantFrame = new DataFrame(true);
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             if(column instanceof FunctionColumn) {
@@ -466,7 +382,12 @@ public class DataFrame {
             } else {
                 AggregateFunction[] aggregations = columnAggFunctions.get(i);
                 for (AggregateFunction aggregation : aggregations) {
-                    resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
+                    if(groupIndexes != null) {
+                        resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
+                    } else {
+                        System.out.println("points "+points);
+                        resultantFrame.columns.add(column.aggregate(aggregation, points));
+                    }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     AggregateFunction[] resultantAgg = {aggregation};
                     resultantFrame.columnAggFunctions.add(resultantAgg);

@@ -43,4 +43,6 @@ public interface Column {
     IntSequence group(double interval, IntWrapper length);
 
     Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes);
+    Column aggregate(AggregateFunction aggregateFunction, int points);
+
 }

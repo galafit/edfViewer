@@ -32,7 +32,6 @@ public class ChartTest extends JFrame {
         setTitle("Test chart");
 
         for (int i = 1; i <= 150; i++) {
-            //yData1.add1((float) Math.sin(i));
             yData1.add(i);
             yData2.add(i + 20);
             yData3.add(i + 50);
@@ -61,6 +60,7 @@ public class ChartTest extends JFrame {
         xyData1.addColumn(yData1);
 
         DataFrame df = new DataFrame();
+        //df.addColumn(1, 1);
         df.addColumn(xData);
         df.addColumn(yData1);
         df.addColumn(yData2);

@@ -124,34 +124,34 @@ public class RegularColumn extends IntColumn {
         return slice(from, length);
     }
 
-
-    public Column aggregate(AggregateFunction aggregateFunction, int numberOfPoints) throws IllegalArgumentException {
+    @Override
+    public Column aggregate(AggregateFunction aggregateFunction, int points) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
                 double startNew = startValue;
-                double stepNew = step * numberOfPoints;
+                double stepNew = step * points;
                 return new RegularColumn(startNew, stepNew);
             }
             case MAX:
             case LAST: {
-                double startNew = startValue + step * numberOfPoints;
-                double stepNew = step * numberOfPoints;
+                double startNew = startValue + step * points;
+                double stepNew = step * points;
                 return new RegularColumn(startNew, stepNew);
             }
             case COUNT: {
-                double startNew = numberOfPoints;
+                double startNew = points;
                 double stepNew = 0;
                 return new RegularColumn(startNew, stepNew);
             }
             case SUM:{
-                double startNew = sum(0, numberOfPoints);
-                double stepNew = step * numberOfPoints * numberOfPoints;
+                double startNew = sum(0, points);
+                double stepNew = step * points * points;
                 return new RegularColumn(startNew, stepNew);
             }
             case AVERAGE:{
-                double startNew = avg(0, numberOfPoints);
-                double stepNew = step * numberOfPoints;
+                double startNew = avg(0, points);
+                double stepNew = step * points;
                 return new RegularColumn(startNew, stepNew);
             }
             default:

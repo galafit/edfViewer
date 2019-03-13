@@ -126,10 +126,8 @@ public class Chart {
     }
 
     private void setDirty() {
-        if(config.getMargin() == null) { // if margin is not fixed
-            margin = null;
-            graphArea = null;
-        }
+        margin = null;
+        graphArea = null;
     }
 
     private boolean isDirty() {
@@ -148,7 +146,7 @@ public class Chart {
     }
 
     BRectangle getGraphArea(BCanvas canvas) {
-        if (graphArea == null) {
+        if (isDirty()) {
             doCalculations(canvas);
         }
         return graphArea;
@@ -681,11 +679,7 @@ public class Chart {
     public void setStackWeight(int stack, int weight) {
         checkStackNumber(stack);
         stackWeights.set(stack, weight);
-        if(config.getMargin() != null) { // fixed margins
-            setYStartEnd(graphArea.y, graphArea.height);
-        } else {
-            setDirty();
-        }
+        setDirty();
     }
 
     public void addStack() {

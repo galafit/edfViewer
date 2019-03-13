@@ -78,12 +78,12 @@ public class XYData implements ChartData {
         dataFrame.setColumnName(columnNumber, columnName);
    }
 
-    public void setColumnAggFunctions(int columnNumber, AggregateFunction... aggFunctions) throws IllegalArgumentException {
-        if(aggFunctions.length == 0) {
-            String errMsg = "No aggregate function is specified for column " + columnNumber;
+    public void setColumnAggFunctions(int columnNumber, AggregateFunction aggFunction) throws IllegalArgumentException {
+        if(aggFunction == null) {
+            String errMsg = "Aggregate function must be not null";
             throw new IllegalArgumentException(errMsg);
         }
-        dataFrame.setColumnAggFunctions(columnNumber, aggFunctions);
+        dataFrame.setColumnAggFunctions(columnNumber, aggFunction);
     }
 
     @Override
