@@ -15,10 +15,12 @@ public interface BCanvas {
     public void enableAntiAliasAndHinting();
 
     public TextMetric getTextMetric(TextStyle textStyle);
+    public TextMetric getTextMetric();
 
     public void setColor(BColor color);
     public void setStroke(BStroke stroke);
     public void setTextStyle(TextStyle textStyle);
+
     public void setClip(int x, int y, int width, int height);
     public BRectangle getBounds();
 

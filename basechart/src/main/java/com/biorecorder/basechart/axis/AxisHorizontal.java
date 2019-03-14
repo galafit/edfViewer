@@ -5,6 +5,7 @@ import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.utils.StringUtils;
 
 /**
  * Created by galafit on 29/8/18.
@@ -12,6 +13,24 @@ import com.biorecorder.basechart.scales.Scale;
 abstract class AxisHorizontal extends Axis {
     public AxisHorizontal(Scale scale, AxisConfig axisConfig) {
         super(scale, axisConfig);
+    }
+
+    @Override
+    public int calculateWidth(BCanvas canvas) {
+        int width = 0;
+        width += config.getAxisLineStroke().getWidth() / 2;
+        width += config.getTickMarkOutsideSize();
+
+        if (config.isTickLabelOutside()) {
+            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+            width += config.getTickPadding() + tm.height();
+
+        }
+        if (! StringUtils.isNullOrBlank(title)) {
+            TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
+            width += config.getTitlePadding() + tm.height();
+        }
+        return width;
     }
 
     @Override
@@ -45,11 +64,6 @@ abstract class AxisHorizontal extends Axis {
     protected abstract int getLabelY();
 
     protected abstract TextAnchor getLabelVTextAnchor();
-
-    @Override
-    protected int labelSizeForWidth(TextMetric tm, int angle, String label) {
-        return tm.height();
-    }
 
     @Override
     protected int labelSizeForOverlap(TextMetric tm, int angle, String label) {

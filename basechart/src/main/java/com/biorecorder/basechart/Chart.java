@@ -5,6 +5,7 @@ import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.sun.istack.internal.Nullable;
@@ -53,7 +54,7 @@ public class Chart {
     }
 
     public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
-        this(chartConfig1, new LinearScale(), new LinearScale(), dataProcessingConfig);
+        this(chartConfig1, new TimeScale(), new LinearScale(), dataProcessingConfig);
     }
 
     public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale) {
@@ -295,7 +296,6 @@ public class Chart {
         }
 
         // all calculation with x axes must be done always first course data processing depends on it!!!
-
         if(config.getMargin() != null) { // fixed margin
             setMargin(config.getMargin(), canvas);
             return;
@@ -341,30 +341,14 @@ public class Chart {
         left += spacing.left();
         right += spacing.right();
 
-        // adjust XAxis ranges
-        setXStartEnd(fullArea.x + left, fullArea.width - left - right);
-        setXMinMax(canvas);
-        int topNew = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
-        int bottomNew = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
-        if (isLegendEnabled() && !legend.isAttachedToStacks()) {
-            if (legend.isTop()) {
-                topNew += legendHeight;
-            }
-            if (legend.isBottom()) {
-                bottomNew += legendHeight;
-            }
-        }
-        if (topNew != top || bottomNew != bottom) {
-            // adjust YAxis ranges
-            setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
-            setYMinMax(canvas);
-            top = topNew;
-            bottom = bottomNew;
-        }
-
         margin = new Insets(top, right, bottom, left);
         graphArea = new BRectangle(fullArea.x + left, fullArea.y + top,
                 Math.max(0, fullArea.width - left - right), Math.max(0, fullArea.height - top - bottom));
+
+
+        // adjust XAxis ranges
+        setXStartEnd(graphArea.x, graphArea.width);
+        setXMinMax(canvas);
 
         if (isLegendEnabled() && legend.isAttachedToStacks()) {
             legend.setArea(graphArea);

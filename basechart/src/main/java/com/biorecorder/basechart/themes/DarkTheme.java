@@ -42,7 +42,7 @@ public class DarkTheme implements Theme {
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
-        yAxisConfig.setTickMarkSize(4, 0);
+        yAxisConfig.setTickMarkSize(6, 0);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);

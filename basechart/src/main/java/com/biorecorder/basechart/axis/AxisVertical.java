@@ -5,12 +5,41 @@ import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.utils.StringUtils;
 
 
 /**
  * Created by galafit on 29/8/18.
  */
 abstract class AxisVertical extends Axis {
+
+    @Override
+    public int calculateWidth(BCanvas canvas) {
+        int width = 0;
+        width += config.getAxisLineStroke().getWidth() / 2;
+        width += config.getTickMarkOutsideSize();
+
+        if (config.isTickLabelOutside()) {
+            if (isTicksDirty()) {
+                createTicks(canvas);
+            }
+            if (tickLabels.size() > 0) {
+                TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+                String minTickLabel = tickLabels.get(0).getText();
+                String maxTickLabel = tickLabels.get(tickLabels.size() - 1).getText();
+
+                String longestLabel = minTickLabel.length() > maxTickLabel.length() ? minTickLabel : maxTickLabel;
+
+                width += config.getTickPadding() + tm.stringWidth(longestLabel);
+            }
+        }
+        if (! StringUtils.isNullOrBlank(title)) {
+            TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
+            width += config.getTitlePadding() + tm.height();
+        }
+        return width;
+    }
+
 
     @Override
     protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
@@ -49,11 +78,6 @@ abstract class AxisVertical extends Axis {
 
     public AxisVertical(Scale scale, AxisConfig axisConfig) {
         super(scale, axisConfig);
-    }
-
-    @Override
-    protected int labelSizeForWidth(TextMetric tm, int angle, String label) {
-        return tm.stringWidth(label);
     }
 
     @Override

@@ -75,6 +75,7 @@ public class SwingCanvas implements BCanvas {
         g2.setFont(getFont(textStyle));
     }
 
+
     private Font getFont(TextStyle textStyle) {
         String fontName = textStyle.getFontName();
         if(fontName == TextStyle.DEFAULT) {
@@ -89,6 +90,36 @@ public class SwingCanvas implements BCanvas {
         }
         return new Font(fontName, style, textStyle.getSize());
     }
+
+    @Override
+    public TextMetric getTextMetric() {
+        return new TextMetric() {
+            FontMetrics fm = g2.getFontMetrics();
+            @Override
+            public int ascent() {
+                return fm.getAscent();
+            }
+
+            @Override
+            public int descent() {
+                return fm.getDescent();
+            }
+
+            @Override
+            public int height() {
+                return fm.getHeight();
+            }
+
+            @Override
+            public int stringWidth(String str) {
+                if(str != null) {
+                    return fm.stringWidth(str);
+                }
+                return 0;
+            }
+        };
+    }
+
 
     @Override
     public TextMetric getTextMetric(TextStyle textStyle) {

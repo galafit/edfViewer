@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.frame.DataFrame;
@@ -81,7 +82,7 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(xUnsort);
         xyData3.addColumn(yUnsort);
 
-        Chart chart = new Chart(new WhiteTheme().getChartConfig());
+        Chart chart = new Chart(new DarkTheme().getChartConfig());
 
        // chart.addTrace(new LineTrace(xyData1), false);
        // chart.addStack();
