@@ -62,8 +62,8 @@ public class ChartTest extends JFrame {
         xyData1.addColumn(yData1);
 
         DataFrame df = new DataFrame();
-        //df.addColumn(1, 1);
-        df.addColumn(xData);
+        df.addColumn(1, 1);
+        //df.addColumn(xData);
         df.addColumn(yData1);
         df.addColumn(yData2);
         df.addColumn(yData3);

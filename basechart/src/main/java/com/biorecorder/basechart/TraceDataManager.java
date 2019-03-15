@@ -14,6 +14,7 @@ public class TraceDataManager {
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
 
     private ChartData processedData;
+    private boolean isWholeDataProcessed;
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
     private int prevTraceDataSize;
@@ -241,7 +242,8 @@ public class TraceDataManager {
 
 
         // if crop enabled
-        if(processingConfig.isCropEnabled()) {
+        if(processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax)) {
+            // we crop data first
             int cropShoulder = processingConfig.getCropShoulder() * pointsInGroup;
 
             int minIndex = 0;
@@ -261,46 +263,53 @@ public class TraceDataManager {
             }
 
             ChartData resultantData = traceData.view(minIndex, maxIndex - minIndex);
-            if(pointsInGroup > 1) { // group only visible data
+            // group only visible data
+            if(pointsInGroup > 1) {
                 if(isEqualFrequencyGrouping) {
                     resultantData = resultantData.resampleByEqualFrequency(pointsInGroup);
                 } else {
                     resultantData = resultantData.resampleByEqualInterval(0, groupInterval);
                 }
             }
-            System.out.println(isEqualFrequencyGrouping+" processing with crop  points in group " + pointsInGroup + "  "+ groupInterval + "  " +resultantData.getColumnMinMax(0));
+            isWholeDataProcessed = false;
             return resultantData;
-        }
-
-
-        // if crop disabled (mostly preview case) we group ALL data
-        // (so when it is possible we use already grouped data for further grouping)
-        if(pointsInGroup > 1) {
-            if(isEqualFrequencyGrouping) { // group by equal points number
-                if(processedData != null) {
-                    processedData.appendData();
-                    int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
-                    if(pointsInGroup1 > 1) {
-                        ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
-                        // force "lazy" grouping
-                        int rowCount = regroupedData.rowCount();
-                        for (int i = 0; i < regroupedData.columnCount(); i++) {
-                            regroupedData.getValue(rowCount - 1, i);
+        } else { // if crop disabled
+            if(pointsInGroup > 1) {
+                ChartData resultantData;
+                if(isEqualFrequencyGrouping) { // group by equal points number
+                    if(processedData != null && isWholeDataProcessed) {
+                        // we try to use already grouped data as it is or for further grouping
+                        processedData.appendData();
+                        int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
+                        if(pointsInGroup1 > 1) {
+                            ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
+                            // force "lazy" grouping
+                            int rowCount = regroupedData.rowCount();
+                            for (int i = 0; i < regroupedData.columnCount(); i++) {
+                                regroupedData.getValue(rowCount - 1, i);
+                            }
+                            processedData.disableCaching();
+                            System.out.println("regrouping "+pointsInGroup1);
+                            resultantData = regroupedData;
+                        } else {
+                            System.out.println(" no reprocess");
+                            resultantData = processedData;
                         }
-                        processedData.disableCaching();
-                        processedData = regroupedData;
+                    } else {
+                        System.out.println(" group by equal freq: "+pointsInGroup);
+                        resultantData = traceData.resampleByEqualFrequency(pointsInGroup);
                     }
                 } else {
-                    processedData = traceData.resampleByEqualFrequency(pointsInGroup);
+                    System.out.println(" group by equal interval: "+groupInterval);
+                    resultantData =  traceData.resampleByEqualInterval(0, groupInterval);
                 }
-                return processedData;
-            } else {
-                 return traceData.resampleByEqualInterval(0, groupInterval);
+                isWholeDataProcessed = true;
+                return resultantData;
             }
-        }
 
-        // disabled crop and no grouping
-        return traceData;
+            // disabled crop and no grouping
+            return traceData;
+        }
     }
 
     private double pointsNumberToGroupInterval(ChartData data, double pointsInGroup) {
