@@ -22,8 +22,8 @@ public abstract class Trace {
         initiateCurveNames(data);
     }
 
-    public void addDataAppendListener(DataAppendListener listener) {
-        dataManager.addDataAppendListener(listener);
+    public final void appendData() {
+        dataManager.appendData();
     }
 
     public final String getCurveName(int curveNumber) {

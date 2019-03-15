@@ -13,7 +13,6 @@ import java.util.List;
  */
 public class XYData implements ChartData {
     private DataFrame dataFrame;
-    private List<DataAppendListener> dataAppendListeners;
 
     public XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
@@ -171,19 +170,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public void onDataAppended() {
-        dataFrame.onDataAppended();
-        fireListeners();
+    public void appendData() {
+        dataFrame.appendData();
     }
 
-    @Override
-    public void addDataAppendListener(DataAppendListener listener) {
-        dataAppendListeners.add(listener);
-    }
-
-    private void fireListeners() {
-        for (DataAppendListener listener : dataAppendListeners) {
-            listener.onDataAppended();
-        }
-    }
 }

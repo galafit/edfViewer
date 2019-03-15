@@ -54,7 +54,7 @@ public class Chart {
     }
 
     public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
-        this(chartConfig1, new TimeScale(), new LinearScale(), dataProcessingConfig);
+        this(chartConfig1, new LinearScale(), new LinearScale(), dataProcessingConfig);
     }
 
     public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale) {
@@ -570,6 +570,12 @@ public class Chart {
     /**
      * =======================Base methods to interact==========================
      **/
+    public void appendData() {
+        for (Trace trace : traces) {
+            trace.appendData();
+        }
+        setDirty();
+    }
 
     public String[] getCurveNames() {
        List<String> names = new ArrayList<>();
@@ -732,12 +738,6 @@ public class Chart {
             String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
             throw new IllegalArgumentException(errMsg);
         }
-        trace.addDataAppendListener(new DataAppendListener() {
-            @Override
-            public void onDataAppended() {
-                setDirty();
-            }
-        });
 
         if(dataProcessingConfig != null) {
             trace.setDataProcessingConfig(dataProcessingConfig);

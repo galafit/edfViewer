@@ -12,9 +12,11 @@ public class TraceDataManager {
     private final ChartData traceData;
     private DataProcessingConfig processingConfig;
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
+
     private ChartData processedData;
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
+    private int prevTraceDataSize;
 
     private int[] sorter;
 
@@ -24,9 +26,10 @@ public class TraceDataManager {
         setConfig(new DataProcessingConfig());
     }
 
-    public void addDataAppendListener(DataAppendListener listener) {
-        traceData.addDataAppendListener(listener);
+    public void appendData() {
+       traceData.appendData();
     }
+
 
     public void setConfig(DataProcessingConfig processingConfig) {
         this.processingConfig = processingConfig;
@@ -51,7 +54,6 @@ public class TraceDataManager {
                 isEqualFrequencyGrouping = true;
                 break;
         }
-        processedData = traceData;
         prevXScale = null;
     }
 
@@ -75,17 +77,20 @@ public class TraceDataManager {
 
     public int nearest(double xValue) {
         // "lazy" sorting solo when "nearest" is called
+        ChartData data = traceData;
+        if(processedData != null) {
+            data = processedData;
+        }
         if (sorter == null) {
-            if (!processedData.isColumnIncreasing(0)) {
-                sorter = processedData.sortedIndices(0);
-                System.out.println("sort");
+            if (!data.isColumnIncreasing(0)) {
+                sorter = data.sortedIndices(0);
             }
         }
 
-        int nearest = processedData.bisect(0, xValue, sorter);
+        int nearest = data.bisect(0, xValue, sorter);
 
-        if (nearest >= processedData.rowCount()) {
-            nearest = processedData.rowCount() - 1;
+        if (nearest >= data.rowCount()) {
+            nearest = data.rowCount() - 1;
         }
 
         int nearest_prev = nearest;
@@ -98,7 +103,7 @@ public class TraceDataManager {
             nearest_prev = sorter[nearest_prev];
         }
         if(nearest != nearest_prev) {
-            if(Math.abs(processedData.getValue(nearest_prev, 0) - xValue) < Math.abs(processedData.getValue(nearest, 0) - xValue)) {
+            if(Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
                 nearest = nearest_prev;
             }
         }
@@ -119,6 +124,12 @@ public class TraceDataManager {
     }
 
     public ChartData getData(Scale xScale, int markSize) {
+        if(!isDataProcessingEnabled()){ // No processing
+            processedData = null;
+            prevTraceDataSize = traceData.rowCount();
+            return traceData;
+        }
+
         int pixelsPerDataPoint = 1;
         if (markSize > 0) {
             pixelsPerDataPoint = markSize;
@@ -128,10 +139,14 @@ public class TraceDataManager {
             prevXScale = xScale.copy();
             prevPixelsPerDataPoint = pixelsPerDataPoint;
         }
+        prevTraceDataSize = traceData.rowCount();
         return processedData;
     }
 
     private boolean isProcessedDataOk(Scale xScale, int pixelsPerDataPoint) {
+        if(processedData == null) {
+            return false;
+        }
         if(prevPixelsPerDataPoint != pixelsPerDataPoint) {
             return false;
         }
@@ -156,6 +171,14 @@ public class TraceDataManager {
             return false;
         }
 
+        if(traceData.rowCount() != prevTraceDataSize) {
+            double[] domain = xScale.getDomain();
+            Double xMax = domain[domain.length - 1];
+            if(traceData.getValue(prevTraceDataSize - 1, 0)  < xMax) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -166,15 +189,12 @@ public class TraceDataManager {
 
 
     public ChartData processData(Scale xScale, int pixelsPerDataPoint) {
-        if(!isDataProcessingEnabled()){
-            // No processing
-            return traceData;
-        }
-
-        Double xMin = xScale.getDomain()[0];
-        Double xMax = xScale.getDomain()[1];
-        double xStart =  xScale.getRange()[0];
-        double xEnd =  xScale.getRange()[1];
+        double[] range = xScale.getRange();
+        double[] domain = xScale.getDomain();
+        Double xMin = domain[0];
+        Double xMax = domain[domain.length - 1];
+        double xStart =  range[0];
+        double xEnd =  range[range.length - 1];
 
         Range dataMinMax = traceData.getColumnMinMax(0);
         double dataStart = xScale.scale(dataMinMax.getMin());
@@ -258,6 +278,7 @@ public class TraceDataManager {
         if(pointsInGroup > 1) {
             if(isEqualFrequencyGrouping) { // group by equal points number
                 if(processedData != null) {
+                    processedData.appendData();
                     int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
                     if(pointsInGroup1 > 1) {
                         ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);

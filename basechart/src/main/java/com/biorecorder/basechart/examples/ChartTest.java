@@ -24,6 +24,7 @@ public class ChartTest extends JFrame {
     IntArrayList yData1 = new IntArrayList();
     IntArrayList yData2 = new IntArrayList();
     IntArrayList yData3 = new IntArrayList();
+    Chart chart;
     ChartPanel chartPanel;
 
     public ChartTest()  {
@@ -82,7 +83,8 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(xUnsort);
         xyData3.addColumn(yUnsort);
 
-        Chart chart = new Chart(new DarkTheme().getChartConfig());
+        chart = new Chart(new DarkTheme().getChartConfig());
+        chart.setXMinMax(0, 0, 500);
 
        // chart.addTrace(new LineTrace(xyData1), false);
        // chart.addStack();
@@ -99,33 +101,34 @@ public class ChartTest extends JFrame {
         setVisible(true);
 
         Thread t = new Thread(new Runnable() {
-            int interval = 3000;
+            int interval = 1000;
             @Override
             public void run() {
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //chart.addStack();
-                chart.addTrace(new LineTrace(xyData2), true, false, false);
-                chartPanel.repaint();
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                chart.removeTrace(chart.traceCount() - 1);
-                chartPanel.repaint();
+                for (int count = 0; count < 5; count++) {
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-                String[] names = chart.getCurveNames();
-                for (String name : names) {
-                    System.out.println(name);
+                    int yData1Last = yData1.get(yData1.size() - 1);
+                    int yData2Last = yData2.get(yData2.size() - 1);
+                    int yData3Last = yData3.get(yData2.size() - 1);
+                    for (int i = 1; i <= 50; i++) {
+                        yData1.add(i + yData1Last);
+                        yData2.add(i + yData2Last);
+                        yData3.add(i + yData3Last);
+                    }
+                    int xDataLast = xData.get(xData.size() - 1);
+                    for (int i = 1; i <= 50; i++) {
+                        xData.add(i + xDataLast);
+                    }
+                    chart.appendData();
+                    chartPanel.repaint();
                 }
-
             }
         });
-       // t.start();
+        t.start();
 
     }
 

@@ -37,7 +37,6 @@ public interface ChartData {
     void cache();
     void disableCaching();
 
-    void onDataAppended();
-    void addDataAppendListener(DataAppendListener listener);
+    void appendData();
 }
 

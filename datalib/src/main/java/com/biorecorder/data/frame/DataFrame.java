@@ -64,7 +64,7 @@ public class DataFrame {
         columns.remove(columnNumber);
         columnNames.remove(columnNumber);
         columnAggFunctions.remove(columnNumber);
-        onDataAppended();
+        appendData();
     }
 
     private void addColumn(Column column) {
@@ -72,7 +72,7 @@ public class DataFrame {
         columnNames.add("Column " + (columns.size() - 1));
         AggregateFunction[] agg = new AggregateFunction[0];
         columnAggFunctions.add(agg);
-        onDataAppended();
+        appendData();
     }
 
     public void addColumn(Function function, int argColumnNumber) {
@@ -216,7 +216,7 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
-        resultantFrame.onDataAppended();
+        resultantFrame.appendData();
         return resultantFrame;
     }
 
@@ -247,7 +247,7 @@ public class DataFrame {
             }
         }
 
-        resultantFrame.onDataAppended();
+        resultantFrame.appendData();
         return resultantFrame;
     }
 
@@ -277,7 +277,7 @@ public class DataFrame {
                 }
             }
         }
-        resultantFrame.onDataAppended();
+        resultantFrame.appendData();
         return resultantFrame;
     }
 
@@ -402,7 +402,7 @@ public class DataFrame {
                 resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
             }
         }
-        resultantFrame.onDataAppended();
+        resultantFrame.appendData();
         return resultantFrame;
     }
 
@@ -416,7 +416,7 @@ public class DataFrame {
         }
     }
 
-    public void onDataAppended() {
+    public void appendData() {
         if (columns.size() == 0) {
             length.setValue(0);
             return;
@@ -483,16 +483,16 @@ public class DataFrame {
         }
         System.out.println("ResampleByEqualInterval is OK");
 
-        // Test onDataAppended
+        // Test appendData
 
         xList.add(42);
         xList.add(50);
 
         yList.add(1);
         yList.add(2);
-        df.onDataAppended();
-        df1.onDataAppended();
-        df2.onDataAppended();
+        df.appendData();
+        df1.appendData();
+        df2.appendData();
 
         int[] expectedX1_ = {2, 12, 40};
         int[] expectedY1_ = {2, 6, 4};
