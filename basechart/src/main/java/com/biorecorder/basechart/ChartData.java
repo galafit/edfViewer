@@ -6,8 +6,6 @@ package com.biorecorder.basechart;
  * in fact is simply a collection of columns
  */
 public interface ChartData {
-    void addDataAppendListener(DataAppendListener listener);
-
     int rowCount();
 
     int columnCount();
@@ -39,5 +37,7 @@ public interface ChartData {
     void cache();
     void disableCaching();
 
+    void onDataAppended();
+    void addDataAppendListener(DataAppendListener listener);
 }
 

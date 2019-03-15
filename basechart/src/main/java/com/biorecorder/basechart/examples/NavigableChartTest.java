@@ -49,8 +49,8 @@ public class NavigableChartTest extends JFrame{
         xyData2.addColumn(yData);
         xyData2.addColumn(new SquareFunction(), 0);
 
-        NavigableChart chart = new NavigableChart(new WhiteTheme().getNavigableChartConfig());
-        chart.addChartTrace(new LineTrace(xyData2), true , false, false);
+        NavigableChart chart = new NavigableChart(new DarkTheme(true).getNavigableChartConfig());
+        chart.addChartTrace(new LineTrace(xyData2), true , true, false);
         chart.addChartStack();
         chart.addChartTrace(new LineTrace(xyData1), true );
 

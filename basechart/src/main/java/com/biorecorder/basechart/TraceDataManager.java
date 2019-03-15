@@ -12,7 +12,6 @@ public class TraceDataManager {
     private final ChartData traceData;
     private DataProcessingConfig processingConfig;
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
-
     private ChartData processedData;
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
@@ -23,6 +22,10 @@ public class TraceDataManager {
     public TraceDataManager(ChartData traceData) {
         this.traceData = traceData;
         setConfig(new DataProcessingConfig());
+    }
+
+    public void addDataAppendListener(DataAppendListener listener) {
+        traceData.addDataAppendListener(listener);
     }
 
     public void setConfig(DataProcessingConfig processingConfig) {

@@ -732,6 +732,13 @@ public class Chart {
             String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
             throw new IllegalArgumentException(errMsg);
         }
+        trace.addDataAppendListener(new DataAppendListener() {
+            @Override
+            public void onDataAppended() {
+                setDirty();
+            }
+        });
+
         if(dataProcessingConfig != null) {
             trace.setDataProcessingConfig(dataProcessingConfig);
         }

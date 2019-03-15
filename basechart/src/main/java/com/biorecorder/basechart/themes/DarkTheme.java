@@ -14,6 +14,10 @@ public class DarkTheme implements Theme {
     private final NavigableChartConfig navigableChartConfig;
 
     public DarkTheme() {
+        this(false);
+    }
+
+    public DarkTheme(boolean isYRoundingEnabled) {
         final BColor CYAN = new BColor(0, 200, 220);
         final BColor BLUE = new BColor(100, 120, 250);
         final BColor MAGENTA = new BColor(165, 80, 220);
@@ -28,7 +32,7 @@ public class DarkTheme implements Theme {
         final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
 
         /**========================== CHART ==========================**/
-        BColor chartBgColor =  BColor.STEEL_DARK; new BColor(18, 15, 18);
+        BColor chartBgColor =  BColor.STEEL_DARK; // new BColor(18, 15, 18);
         BColor chartMarginColor = BColor.BLACK_LIGHT;
         BColor titleColor = BColor.BEIGE;
         BColor axisColor = titleColor;
@@ -43,6 +47,11 @@ public class DarkTheme implements Theme {
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
+        int tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_DISABLED;
+        if(isYRoundingEnabled) {
+            tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED;
+        }
+        yAxisConfig.setRoundingEnabled(isYRoundingEnabled, tick_accuracy);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);

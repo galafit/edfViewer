@@ -14,6 +14,10 @@ public class WhiteTheme implements Theme {
     private final NavigableChartConfig navigableChartConfig;
 
     public WhiteTheme() {
+        this(false);
+    }
+
+    public WhiteTheme(boolean isYRoundingEnabled) {
         final BColor BLUE = new BColor(0, 130, 230);
         final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
         final BColor GREEN_DARK = new BColor(0, 130, 0);
@@ -44,6 +48,12 @@ public class WhiteTheme implements Theme {
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
+        int tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_DISABLED;
+        if(isYRoundingEnabled) {
+            tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED;
+        }
+        yAxisConfig.setRoundingEnabled(isYRoundingEnabled, tick_accuracy);
+
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);

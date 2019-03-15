@@ -38,7 +38,7 @@ abstract class AxisHorizontal extends Axis {
         int charSize = tm.stringWidth("0");
         int space = 2;// px
         int charHalfWidth = charSize/2;
-        int labelSize = charSize * tickLabel.length();
+        int labelSize = tm.stringWidth(tickLabel);
         TextAnchor labelVAnchor = getLabelVTextAnchor();
         int y = getLabelY();
         int x;
@@ -51,8 +51,8 @@ abstract class AxisHorizontal extends Axis {
             x = tickPosition + space;
         }
 
-        if(x + charSize * tickLabel.length() > getEnd()) {
-            int x1 = x - (tickPixelInterval - 2 * labelSize);
+        if(x + labelSize > getEnd()) {
+            int x1 = x - (tickPixelInterval - 2 * labelSize - 2 * charSize);
             int x2 = (int)getEnd();
             x = Math.max(x1, x2);
             return new BText(tickLabel, x , y, TextAnchor.END, labelVAnchor, tm);

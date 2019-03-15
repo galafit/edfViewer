@@ -3,7 +3,6 @@ package com.biorecorder.data.frame;
 import com.biorecorder.data.aggregation.AggregateFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
-import java.io.FileInputStream;
 import java.util.*;
 
 
@@ -65,7 +64,7 @@ public class DataFrame {
         columns.remove(columnNumber);
         columnNames.remove(columnNumber);
         columnAggFunctions.remove(columnNumber);
-        update();
+        onDataAppended();
     }
 
     private void addColumn(Column column) {
@@ -73,7 +72,7 @@ public class DataFrame {
         columnNames.add("Column " + (columns.size() - 1));
         AggregateFunction[] agg = new AggregateFunction[0];
         columnAggFunctions.add(agg);
-        update();
+        onDataAppended();
     }
 
     public void addColumn(Function function, int argColumnNumber) {
@@ -217,7 +216,7 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
-        resultantFrame.update();
+        resultantFrame.onDataAppended();
         return resultantFrame;
     }
 
@@ -248,7 +247,7 @@ public class DataFrame {
             }
         }
 
-        resultantFrame.update();
+        resultantFrame.onDataAppended();
         return resultantFrame;
     }
 
@@ -278,7 +277,7 @@ public class DataFrame {
                 }
             }
         }
-        resultantFrame.update();
+        resultantFrame.onDataAppended();
         return resultantFrame;
     }
 
@@ -385,7 +384,6 @@ public class DataFrame {
                     if(groupIndexes != null) {
                         resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
                     } else {
-                        System.out.println("points "+points);
                         resultantFrame.columns.add(column.aggregate(aggregation, points));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
@@ -404,7 +402,7 @@ public class DataFrame {
                 resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
             }
         }
-        resultantFrame.update();
+        resultantFrame.onDataAppended();
         return resultantFrame;
     }
 
@@ -418,7 +416,7 @@ public class DataFrame {
         }
     }
 
-    public void update() {
+    public void onDataAppended() {
         if (columns.size() == 0) {
             length.setValue(0);
             return;
@@ -485,16 +483,16 @@ public class DataFrame {
         }
         System.out.println("ResampleByEqualInterval is OK");
 
-        // Test update
+        // Test onDataAppended
 
         xList.add(42);
         xList.add(50);
 
         yList.add(1);
         yList.add(2);
-        df.update();
-        df1.update();
-        df2.update();
+        df.onDataAppended();
+        df1.onDataAppended();
+        df2.onDataAppended();
 
         int[] expectedX1_ = {2, 12, 40};
         int[] expectedY1_ = {2, 6, 4};
