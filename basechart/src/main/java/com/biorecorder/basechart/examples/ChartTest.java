@@ -84,7 +84,7 @@ public class ChartTest extends JFrame {
         xyData3.addColumn(yUnsort);
 
         chart = new Chart(new DarkTheme().getChartConfig());
-        chart.setXMinMax(0, 0, 500);
+       // chart.setXMinMax(0, 0, 500);
 
        // chart.addTrace(new LineTrace(xyData1), false);
        // chart.addStack();
@@ -104,7 +104,7 @@ public class ChartTest extends JFrame {
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 5; count++) {
+                for (int count = 0; count < 10; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -114,7 +114,7 @@ public class ChartTest extends JFrame {
                     int yData1Last = yData1.get(yData1.size() - 1);
                     int yData2Last = yData2.get(yData2.size() - 1);
                     int yData3Last = yData3.get(yData2.size() - 1);
-                    for (int i = 1; i <= 50; i++) {
+                    for (int i = 1; i <= 100; i++) {
                         yData1.add(i + yData1Last);
                         yData2.add(i + yData2Last);
                         yData3.add(i + yData3Last);
@@ -128,7 +128,7 @@ public class ChartTest extends JFrame {
                 }
             }
         });
-        t.start();
+       // t.start();
 
     }
 

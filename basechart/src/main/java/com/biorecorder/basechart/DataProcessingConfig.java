@@ -7,7 +7,7 @@ package com.biorecorder.basechart;
  */
 public class DataProcessingConfig {
     private int cropShoulder = 2; // number of additional points that we leave on every side during crop
-    int lengthChangeMax = 30; // 30%
+    int lengthChangeMax = 20; // percents
 
 
     private boolean isCropEnabled = true;

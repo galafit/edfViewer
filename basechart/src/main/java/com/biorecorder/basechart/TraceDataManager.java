@@ -201,13 +201,13 @@ public class TraceDataManager {
         double dataStart = xScale.scale(dataMinMax.getMin());
         double dataEnd = xScale.scale(dataMinMax.getMax());
 
-
         int drawingAreaWidth = 0;
         Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
         if(intersection != null) {
             drawingAreaWidth = (int)intersection.length();
         }
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
+
 
 
         if(drawingAreaWidth < 1) {
@@ -223,7 +223,6 @@ public class TraceDataManager {
         double groupInterval = bestInterval;
 
         if(processingConfig.isGroupEnabled()  && pointsInGroup > 1) {
-
             // if available intervals are specified we choose the interval among the available ones
             double[] availableIntervals = processingConfig.getGroupIntervals();
             if(availableIntervals != null) {
@@ -274,14 +273,14 @@ public class TraceDataManager {
             isWholeDataProcessed = false;
             return resultantData;
         } else { // if crop disabled
+            System.out.println(pointsInGroup + " "+groupInterval);
             if(pointsInGroup > 1) {
-                ChartData resultantData;
                 if(isEqualFrequencyGrouping) { // group by equal points number
                     if(processedData != null && isWholeDataProcessed) {
                         // we try to use already grouped data as it is or for further grouping
-                        processedData.appendData();
                         int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
                         if(pointsInGroup1 > 1) {
+                            processedData.appendData();
                             ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
                             // force "lazy" grouping
                             int rowCount = regroupedData.rowCount();
@@ -290,24 +289,30 @@ public class TraceDataManager {
                             }
                             processedData.disableCaching();
                             System.out.println("regrouping "+pointsInGroup1);
-                            resultantData = regroupedData;
+                            return regroupedData;
+                        } else if(pointsInGroup1 == 1){
+                            processedData.appendData();
+                            //System.out.println(" no reprocess");
+                            return processedData;
                         } else {
-                            System.out.println(" no reprocess");
-                            resultantData = processedData;
+                            System.out.println(" group by equal freq: "+pointsInGroup);
+                            return traceData.resampleByEqualFrequency(pointsInGroup);
                         }
                     } else {
-                        System.out.println(" group by equal freq: "+pointsInGroup);
-                        resultantData = traceData.resampleByEqualFrequency(pointsInGroup);
+                        System.out.println(" group by equal freq1: "+pointsInGroup);
+                        isWholeDataProcessed = true;
+                        return traceData.resampleByEqualFrequency(pointsInGroup);
                     }
                 } else {
                     System.out.println(" group by equal interval: "+groupInterval);
-                    resultantData =  traceData.resampleByEqualInterval(0, groupInterval);
+                    isWholeDataProcessed = true;
+                    return traceData.resampleByEqualInterval(0, groupInterval);
                 }
-                isWholeDataProcessed = true;
-                return resultantData;
             }
 
             // disabled crop and no grouping
+            System.out.println("original data "+pointsInGroup);
+            isWholeDataProcessed = false;
             return traceData;
         }
     }
