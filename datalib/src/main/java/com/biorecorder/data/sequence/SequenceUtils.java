@@ -55,7 +55,6 @@ public class SequenceUtils {
      * (i.e. index of the first element which is bigger than the searched value).
      */
     public static int bisect(IntSequence data, int value, int fromIndex, int length) {
-
         int low = fromIndex;
         int high = fromIndex + length;
         while (low < high) {
@@ -140,10 +139,32 @@ public class SequenceUtils {
         int from = 2;
         int length = 8;
         int[] sorted = sort(dataSequence, from, length, false);
+        int[] resultantSorted = new int[sorted.length];
 
         System.out.println("\nResultant sorted data: " + "from = " + from + "  length = " + length);
         for (int i = 0; i < sorted.length; i++) {
-            System.out.println(i + "  " + dataSequence.get(sorted[i]));
+            resultantSorted[i] = dataSequence.get(sorted[i]);
+            System.out.println(i + "  " + resultantSorted[i]);
         }
+
+
+
+        IntSequence sortedSequence = new IntSequence() {
+            @Override
+            public int size() {
+                return resultantSorted.length;
+            }
+
+            @Override
+            public int get(int index) {
+                return resultantSorted[index];
+            }
+        };
+
+        int value = 9;
+        System.out.println("bisect: " +value + " index: "+ bisect(sortedSequence, value, 0, length));
+        System.out.println("bisect Left: " +value + " index: "+ bisectLeft(sortedSequence, value, 0, length));
+        System.out.println("bisect Right: " +value + " index: "+ bisectRight(sortedSequence, value, 0, length));
+
     }
 }

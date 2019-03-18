@@ -21,14 +21,13 @@ public class TraceDataManager {
 
     private int[] sorter;
 
-
     public TraceDataManager(ChartData traceData) {
         this.traceData = traceData;
         setConfig(new DataProcessingConfig());
     }
 
     public void appendData() {
-       traceData.appendData();
+        traceData.appendData();
     }
 
 
@@ -44,7 +43,7 @@ public class TraceDataManager {
                 break;
 
             case AUTO:
-                if(traceData.isColumnRegular(0)) {
+                if (traceData.isColumnRegular(0)) {
                     isEqualFrequencyGrouping = true;
                 } else {
                     isEqualFrequencyGrouping = false;
@@ -59,7 +58,7 @@ public class TraceDataManager {
     }
 
     public Range getFullXMinMax() {
-        if(traceData.columnCount() == 0) {
+        if (traceData.columnCount() == 0) {
             return null;
         }
         return traceData.getColumnMinMax(0);
@@ -68,7 +67,7 @@ public class TraceDataManager {
     public double getBestExtent(int drawingAreaWidth, int markSize) {
         if (traceData.rowCount() > 1) {
             double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth;
-            if(markSize > 0) {
+            if (markSize > 0) {
                 traceExtent = traceExtent / markSize;
             }
             return traceExtent;
@@ -79,7 +78,7 @@ public class TraceDataManager {
     public int nearest(double xValue) {
         // "lazy" sorting solo when "nearest" is called
         ChartData data = traceData;
-        if(processedData != null) {
+        if (processedData != null) {
             data = processedData;
         }
         if (sorter == null) {
@@ -95,16 +94,16 @@ public class TraceDataManager {
         }
 
         int nearest_prev = nearest;
-        if (nearest > 0){
+        if (nearest > 0) {
             nearest_prev = nearest - 1;
         }
 
-        if(sorter != null) {
+        if (sorter != null) {
             nearest = sorter[nearest];
             nearest_prev = sorter[nearest_prev];
         }
-        if(nearest != nearest_prev) {
-            if(Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
+        if (nearest != nearest_prev) {
+            if (Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
                 nearest = nearest_prev;
             }
         }
@@ -113,10 +112,10 @@ public class TraceDataManager {
     }
 
     private boolean isDataProcessingEnabled() {
-        if((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
+        if ((!processingConfig.isCropEnabled() && !processingConfig.isGroupEnabled())
                 || traceData.rowCount() <= 1
                 || traceData.columnCount() == 0
-                || !traceData.isColumnIncreasing(0) ) // if data not sorted (not increasing)
+                || !traceData.isColumnIncreasing(0)) // if data not sorted (not increasing)
         {
             // No processing
             return false;
@@ -125,7 +124,7 @@ public class TraceDataManager {
     }
 
     public ChartData getData(Scale xScale, int markSize) {
-        if(!isDataProcessingEnabled()){ // No processing
+        if (!isDataProcessingEnabled()) { // No processing
             processedData = null;
             prevTraceDataSize = traceData.rowCount();
             return traceData;
@@ -135,7 +134,7 @@ public class TraceDataManager {
         if (markSize > 0) {
             pixelsPerDataPoint = markSize;
         }
-        if(!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
+        if (!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
             processedData = processData(xScale, pixelsPerDataPoint);
             prevXScale = xScale.copy();
             prevPixelsPerDataPoint = pixelsPerDataPoint;
@@ -145,37 +144,37 @@ public class TraceDataManager {
     }
 
     private boolean isProcessedDataOk(Scale xScale, int pixelsPerDataPoint) {
-        if(processedData == null) {
+        if (processedData == null) {
             return false;
         }
-        if(prevPixelsPerDataPoint != pixelsPerDataPoint) {
+        if (prevPixelsPerDataPoint != pixelsPerDataPoint) {
             return false;
         }
-        if(prevXScale == null) {
+        if (prevXScale == null) {
             return false;
         }
-        if(!prevXScale.getClass().equals(xScale.getClass())) {
-           return false;
+        if (!prevXScale.getClass().equals(xScale.getClass())) {
+            return false;
         }
 
-        if(!Arrays.equals(prevXScale.getDomain(), xScale.getDomain())) {
-           return false;
+        if (!Arrays.equals(prevXScale.getDomain(), xScale.getDomain())) {
+            return false;
         }
 
         int prevLength = length(prevXScale);
         int length = length(xScale);
-        if(prevLength == 0 || length == 0) {
+        if (prevLength == 0 || length == 0) {
             return false;
         }
 
-        if(Math.abs(prevLength - length) * 100 / length > processingConfig.getLengthChangeMax()) {
+        if (Math.abs(prevLength - length) * 100 / length > processingConfig.getLengthChangeMax()) {
             return false;
         }
 
-        if(traceData.rowCount() != prevTraceDataSize) {
+        if (traceData.rowCount() != prevTraceDataSize) {
             double[] domain = xScale.getDomain();
             Double xMax = domain[domain.length - 1];
-            if(traceData.getValue(prevTraceDataSize - 1, 0)  < xMax) {
+            if (traceData.getValue(prevTraceDataSize - 1, 0) < xMax) {
                 return false;
             }
         }
@@ -194,8 +193,8 @@ public class TraceDataManager {
         double[] domain = xScale.getDomain();
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
-        double xStart =  range[0];
-        double xEnd =  range[range.length - 1];
+        double xStart = range[0];
+        double xEnd = range[range.length - 1];
 
         Range dataMinMax = traceData.getColumnMinMax(0);
         double dataStart = xScale.scale(dataMinMax.getMin());
@@ -203,14 +202,13 @@ public class TraceDataManager {
 
         int drawingAreaWidth = 0;
         Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
-        if(intersection != null) {
-            drawingAreaWidth = (int)intersection.length();
+        if (intersection != null) {
+            drawingAreaWidth = (int) intersection.length();
         }
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
 
-
-        if(drawingAreaWidth < 1) {
+        if (drawingAreaWidth < 1) {
             return traceData.view(0, 0);
         }
 
@@ -222,111 +220,110 @@ public class TraceDataManager {
 
         double groupInterval = bestInterval;
 
-        if(processingConfig.isGroupEnabled()  && pointsInGroup > 1) {
+        if (processingConfig.isGroupEnabled() && pointsInGroup > 1) {
             // if available intervals are specified we choose the interval among the available ones
             double[] availableIntervals = processingConfig.getGroupIntervals();
-            if(availableIntervals != null) {
+            if (availableIntervals != null) {
                 for (int i = 0; i < availableIntervals.length; i++) {
-                    if(availableIntervals[i] >= bestInterval) {
+                    if (availableIntervals[i] >= bestInterval) {
                         groupInterval = availableIntervals[i];
                         break;
                     }
                 }
-                if(groupInterval == 0) {
+                if (groupInterval == 0) {
                     groupInterval = availableIntervals[availableIntervals.length - 1];
                 }
                 pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
             }
-         }
+        }
 
 
         // if crop enabled
-        if(processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax)) {
+        if (processingConfig.isCropEnabled() && (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax)) {
             // we crop data first
             int cropShoulder = processingConfig.getCropShoulder() * pointsInGroup;
 
             int minIndex = 0;
-            if(dataMinMax.getMin() < xMin) {
+            if (dataMinMax.getMin() < xMin) {
                 minIndex = traceData.bisect(0, minMax.getMin(), null) - cropShoulder;
             }
 
             int maxIndex = traceData.rowCount() - 1;
-            if(dataMinMax.getMax() > xMax) {
+            if (dataMinMax.getMax() > xMax) {
                 maxIndex = traceData.bisect(0, minMax.getMax(), null) + cropShoulder;
             }
-            if(minIndex < 0) {
+            if (minIndex < 0) {
                 minIndex = 0;
             }
-            if(maxIndex >= traceData.rowCount()) {
+            if (maxIndex >= traceData.rowCount()) {
                 maxIndex = traceData.rowCount() - 1;
             }
 
             ChartData resultantData = traceData.view(minIndex, maxIndex - minIndex);
             // group only visible data
-            if(pointsInGroup > 1) {
-                if(isEqualFrequencyGrouping) {
+            if (pointsInGroup > 1) {
+                if (isEqualFrequencyGrouping) {
                     resultantData = resultantData.resampleByEqualFrequency(pointsInGroup);
                 } else {
                     resultantData = resultantData.resampleByEqualInterval(0, groupInterval);
                 }
+                resultantData.cache();
             }
             isWholeDataProcessed = false;
             return resultantData;
         } else { // if crop disabled
-            System.out.println(pointsInGroup + " "+groupInterval);
-            if(pointsInGroup > 1) {
-                if(isEqualFrequencyGrouping) { // group by equal points number
-                    if(processedData != null && isWholeDataProcessed) {
-                        // we try to use already grouped data as it is or for further grouping
-                        int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
-                        if(pointsInGroup1 > 1) {
-                            processedData.appendData();
-                            ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
-                            // force "lazy" grouping
-                            int rowCount = regroupedData.rowCount();
-                            for (int i = 0; i < regroupedData.columnCount(); i++) {
-                                regroupedData.getValue(rowCount - 1, i);
-                            }
-                            processedData.disableCaching();
-                            System.out.println("regrouping "+pointsInGroup1);
-                            return regroupedData;
-                        } else if(pointsInGroup1 == 1){
-                            processedData.appendData();
-                            //System.out.println(" no reprocess");
-                            return processedData;
-                        } else {
-                            System.out.println(" group by equal freq: "+pointsInGroup);
-                            return traceData.resampleByEqualFrequency(pointsInGroup);
+            if (pointsInGroup > 1) {
+                if (processedData != null && isWholeDataProcessed) {
+                    // we try to use already grouped data as it is or for further grouping
+                    int pointsInGroup1 = groupIntervalToPointsNumber(processedData, groupInterval);
+                    if (pointsInGroup1 == 1) { // no resample
+                        processedData.appendData();
+                        return processedData;
+                    } else if (pointsInGroup1 > 1 && isEqualFrequencyGrouping) { // "cheap" resample on the base of already grouped data
+                        ChartData regroupedData = processedData.resampleByEqualFrequency(pointsInGroup1);
+                        regroupedData.cache();
+                        // force "lazy" grouping
+                        int rowCount = regroupedData.rowCount();
+                        for (int i = 0; i < regroupedData.columnCount(); i++) {
+                            regroupedData.getValue(rowCount - 1, i);
                         }
-                    } else {
-                        System.out.println(" group by equal freq1: "+pointsInGroup);
-                        isWholeDataProcessed = true;
-                        return traceData.resampleByEqualFrequency(pointsInGroup);
+                        processedData.disableCaching();
+                        return regroupedData;
                     }
-                } else {
-                    System.out.println(" group by equal interval: "+groupInterval);
-                    isWholeDataProcessed = true;
-                    return traceData.resampleByEqualInterval(0, groupInterval);
                 }
+
+                ChartData groupedData;
+                if (isEqualFrequencyGrouping) { // group by equal points number
+                    groupedData = traceData.resampleByEqualFrequency(pointsInGroup);
+                } else {
+                    groupedData = traceData.resampleByEqualInterval(0, groupInterval);
+                }
+                groupedData.cache();
+                isWholeDataProcessed = true;
+                return groupedData;
             }
 
             // disabled crop and no grouping
-            System.out.println("original data "+pointsInGroup);
             isWholeDataProcessed = false;
             return traceData;
         }
     }
 
     private double pointsNumberToGroupInterval(ChartData data, double pointsInGroup) {
-        return pointsInGroup  * getDataAvgStep(data);
+        return pointsInGroup * getDataAvgStep(data);
     }
 
+
     private int groupIntervalToPointsNumber(ChartData data, double groupInterval) {
-        return (int) Math.round(groupInterval / getDataAvgStep(data));
+        double points = groupInterval / getDataAvgStep(data);
+        if (points >= 0.9) {
+            return (int) Math.ceil(points);
+        }
+        return 0;
     }
 
     double getDataAvgStep(ChartData data) {
         int dataSize = data.rowCount();
-        return  (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
+        return (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
     }
 }

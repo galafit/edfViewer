@@ -49,15 +49,15 @@ public class PrimitiveUtils {
     }
 
     public static long doubleToLong(double d) {
-        return (long)d;
+        return Math.round(d);
     }
 
     public static int doubleToInt(double d) {
-        return (int) d;
+        return (int) Math.round(d);
     }
 
     public static short doubleToShort(double d) {
-        int i = (int) d;
+        int i = (int) Math.round(d);
         if(i > Short.MAX_VALUE) {
             return Short.MAX_VALUE;
         }

@@ -33,13 +33,13 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 1; i <= 150; i++) {
+        for (int i = 0; i < 15; i++) {
             yData1.add(i);
             yData2.add(i + 20);
             yData3.add(i + 50);
         }
 
-        for (int i = 1; i <= 150; i++) {
+        for (int i = 0; i < 15; i++) {
             xData.add(i);
         }
 
@@ -58,36 +58,33 @@ public class ChartTest extends JFrame {
         yUnsort.add(300);
         yUnsort.add(300);
 
-        XYData xyData1 = new XYData(1, 1);
-        xyData1.addColumn(yData1);
 
-        DataFrame df = new DataFrame();
-        df.addColumn(1, 1);
-        //df.addColumn(xData);
-        df.addColumn(yData1);
-        df.addColumn(yData2);
-        df.addColumn(yData3);
-        df.addColumn(new SquareFunction(), 1);
-        df.setColumnName(2, "eeg");
-        df.setColumnAggFunctions(0, AggregateFunction.FIRST);
-        df.setColumnAggFunctions(1, AggregateFunction.FIRST);
-        df.setColumnAggFunctions(2, AggregateFunction.FIRST);
-        df.setColumnAggFunctions(3, AggregateFunction.FIRST);
 
-        int[] order = {0, 4, 4, 1};
-        DataFrame df1 = new DataFrame(df, order);
-        XYData xyData2 = new XYData(df1);
+        XYData xyData2 = new XYData();
+        xyData2.addColumn(xData);
+        xyData2.addColumn(yData1);
+        xyData2.addColumn(new SquareFunction(), 1);
+        xyData2.setColumnName(2, "eeg");
+        //xyData2.addColumn(yData2);
+        //xyData2.addColumn(yData3);
 
 
         XYData xyData3 = new XYData();
         xyData3.addColumn(xUnsort);
         xyData3.addColumn(yUnsort);
 
+
+        XYData regularData = new XYData(0, 1);
+        regularData.addColumn(yData1);
+        XYData noRegularData = new XYData();
+        noRegularData.addColumn(yData1);
+        noRegularData.addColumn(yData1);
+
+
         chart = new Chart(new DarkTheme().getChartConfig());
        // chart.setXMinMax(0, 0, 500);
-
-       // chart.addTrace(new LineTrace(xyData1), false);
-       // chart.addStack();
+        chart.addTrace(new LineTrace(xyData3), false, true, false);
+        chart.addStack();
         chart.addTrace(new LineTrace(xyData2), true);
 
         chartPanel = new ChartPanel(chart);
@@ -104,7 +101,7 @@ public class ChartTest extends JFrame {
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 10; count++) {
+                for (int count = 0; count < 20; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -114,13 +111,13 @@ public class ChartTest extends JFrame {
                     int yData1Last = yData1.get(yData1.size() - 1);
                     int yData2Last = yData2.get(yData2.size() - 1);
                     int yData3Last = yData3.get(yData2.size() - 1);
-                    for (int i = 1; i <= 100; i++) {
+                    for (int i = 1; i <= 171; i++) {
                         yData1.add(i + yData1Last);
                         yData2.add(i + yData2Last);
                         yData3.add(i + yData3Last);
                     }
                     int xDataLast = xData.get(xData.size() - 1);
-                    for (int i = 1; i <= 50; i++) {
+                    for (int i = 1; i <= 171; i++) {
                         xData.add(i + xDataLast);
                     }
                     chart.appendData();

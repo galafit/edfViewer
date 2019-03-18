@@ -14,10 +14,10 @@ import java.util.List;
 public class XYData implements ChartData {
     private DataFrame dataFrame;
 
-    public XYData(DataFrame dataFrame) {
+   private XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
         for (int i = 0; i < dataFrame.columnCount(); i++) {
-           // onColumnAdded(i);
+            onColumnAdded(i);
         }
     }
 
@@ -158,7 +158,7 @@ public class XYData implements ChartData {
     @Override
     public void cache() {
         for (int i = 0; i < dataFrame.columnCount(); i++) {
-            if(!dataFrame.isColumnRegular(i)) {
+            if(!dataFrame.isColumnRegular(i) && !dataFrame.isColumnFunction(i)) {
                 dataFrame.cacheColumn(i);
             }
         }
@@ -166,7 +166,10 @@ public class XYData implements ChartData {
 
     @Override
     public void disableCaching() {
-        dataFrame.disableCaching();
+        for (int i = 0; i < dataFrame.columnCount(); i++) {
+            dataFrame.disableCaching(i);
+        }
+
     }
 
     @Override

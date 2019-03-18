@@ -72,6 +72,9 @@ public class RegularColumn extends IntColumn {
     @Override
     public int bisect(double value, int from, int length) {
         int index = (int) ((value - value(0)) / step);
+        if(value(index) != value) { //to maintain sorted order
+            index++;
+        }
         if(index < from) {
             return from;
         } else if(index > from + length) {

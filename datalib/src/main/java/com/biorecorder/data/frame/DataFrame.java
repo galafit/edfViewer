@@ -160,6 +160,9 @@ public class DataFrame {
         return columns.get(columnNumber) instanceof RegularColumn;
     }
 
+    public boolean isColumnFunction(int columnNumber) {
+        return columns.get(columnNumber) instanceof FunctionColumn;
+    }
 
     /**
      * Binary search algorithm. The column data must be sorted!
@@ -410,10 +413,8 @@ public class DataFrame {
         columns.get(columnNumber).cache(isLastRowChangeable);
     }
 
-    public void disableCaching() {
-        for (Column column : columns) {
-            column.disableCaching();
-        }
+    public void disableCaching(int columnNumber) {
+        columns.get(columnNumber).disableCaching();
     }
 
     public void appendData() {

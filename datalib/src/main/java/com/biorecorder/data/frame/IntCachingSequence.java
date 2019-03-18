@@ -11,16 +11,24 @@ import com.biorecorder.data.sequence.IntSequence;
  */
 
 public class IntCachingSequence implements IntSequence {
+    static final int REASONABLE_SIZE = 3000;
     private IntSequence innerData;
     private IntArrayList cachedData;
     private int nLastExcluded;
+    private int size;
 
 
     public IntCachingSequence(IntSequence data, int nLastExcluded) {
         this.innerData = data;
         this.nLastExcluded = nLastExcluded;
-        cachedData = new IntArrayList(innerData.size() - nLastExcluded);
-        cacheData();
+        size = innerData.size();
+        if(size < REASONABLE_SIZE) {
+            cachedData = new IntArrayList(size - nLastExcluded);
+        } else {
+            cachedData = new IntArrayList();
+        }
+
+
     }
 
     private void cacheData() {
@@ -36,10 +44,13 @@ public class IntCachingSequence implements IntSequence {
 
     @Override
     public int get(int index) {
-        if(index < cachedData.size()) {
-            return cachedData.get(index);
+        // cache data
+        if(index < size - nLastExcluded) {
+            for (int i = cachedData.size(); i <= index; i++) {
+                cachedData.add(innerData.get(i));
+            }
         }
-        cacheData();
+
         if(index < cachedData.size()) {
             return cachedData.get(index);
         } else {
@@ -50,7 +61,8 @@ public class IntCachingSequence implements IntSequence {
 
     @Override
     public int size() {
-        return innerData.size();
+        size = innerData.size();
+        return size;
     }
 
     public IntSequence getInnerData() {
