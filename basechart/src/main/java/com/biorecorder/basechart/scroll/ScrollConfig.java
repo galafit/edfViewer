@@ -15,9 +15,11 @@ public class ScrollConfig {
     public ScrollConfig() {
     }
 
-    public ScrollConfig(ScrollConfig scrollConfig) {
-        color = scrollConfig.color;
-        touchRadius = scrollConfig.touchRadius;
+    public ScrollConfig(ScrollConfig config) {
+        color = config.color;
+        fillColor = config.fillColor;
+        touchRadius = config.touchRadius;
+        borderWidth = config.borderWidth;
     }
 
     public BColor getFillColor() {

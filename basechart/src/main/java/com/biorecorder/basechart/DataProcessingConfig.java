@@ -22,6 +22,28 @@ public class DataProcessingConfig {
     // otherwise every time "the best interval" will be calculated automatically
     private double[] groupIntervals = null;
 
+    public DataProcessingConfig() {
+    }
+
+    public DataProcessingConfig(boolean isCropEnabled, boolean isGroupEnabled) {
+        this.isCropEnabled = isCropEnabled;
+        this.isGroupEnabled = isGroupEnabled;
+    }
+
+    public DataProcessingConfig(DataProcessingConfig config) {
+        cropShoulder = config.cropShoulder;
+        lengthChangeMax = config.lengthChangeMax;
+        isCropEnabled = config.isCropEnabled;
+        isGroupEnabled = config.isGroupEnabled;
+        groupingType = config.groupingType;
+        if(config.groupIntervals != null) {
+            groupIntervals = new double[config.groupIntervals.length];
+            for (int i = 0; i < groupIntervals.length; i++) {
+                groupIntervals[i] = config.groupIntervals[i];
+            }
+        }
+    }
+
     public int getCropShoulder() {
         return cropShoulder;
     }

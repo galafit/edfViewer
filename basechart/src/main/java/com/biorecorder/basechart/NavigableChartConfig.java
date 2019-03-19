@@ -16,8 +16,8 @@ public class NavigableChartConfig {
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 30; // px
-    private boolean autoScrollEnable = true;
-    private boolean autoScaleEnable = true; // chart Y auto scale during scrolling
+    private boolean autoScrollEnabled = true;
+    private boolean autoScaleEnabled = true; // chart Y auto scale during scrolling
 
     public NavigableChartConfig() {
         BColor navigatorBgColor = BColor.BEIGE_WHITE;
@@ -51,6 +51,19 @@ public class NavigableChartConfig {
         this.scrollConfig = scrollConfig;
     }
 
+    public NavigableChartConfig(NavigableChartConfig config) {
+        chartConfig = new ChartConfig(config.chartConfig);
+        navigatorConfig = new ChartConfig(config.navigatorConfig);
+        scrollConfig = new ScrollConfig(config.scrollConfig);
+
+        backgroundColor = config.backgroundColor;
+        gap = config.gap;
+        spacing = config.spacing;
+        navigatorHeightMin = config.navigatorHeightMin;
+        autoScrollEnabled = config.autoScrollEnabled;
+        autoScaleEnabled = config.autoScaleEnabled;
+    }
+
 
     public ChartConfig getChartConfig() {
         return chartConfig;
@@ -64,20 +77,20 @@ public class NavigableChartConfig {
         return scrollConfig;
     }
 
-    public boolean isAutoScrollEnable() {
-        return autoScrollEnable;
+    public boolean isAutoScrollEnabled() {
+        return autoScrollEnabled;
     }
 
-    public void setAutoScrollEnable(boolean autoScrollEnable) {
-        this.autoScrollEnable = autoScrollEnable;
+    public void setAutoScrollEnabled(boolean autoScrollEnabled) {
+        this.autoScrollEnabled = autoScrollEnabled;
     }
 
-    public boolean isAutoScaleEnable() {
-        return autoScaleEnable;
+    public boolean isAutoScaleEnabled() {
+        return autoScaleEnabled;
     }
 
-    public void setAutoScaleEnable(boolean autoScaleEnable) {
-        this.autoScaleEnable = autoScaleEnable;
+    public void setAutoScaleEnabled(boolean autoScaleEnabled) {
+        this.autoScaleEnabled = autoScaleEnabled;
     }
 
     public BColor getBackgroundColor() {

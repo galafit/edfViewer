@@ -2,10 +2,12 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 import com.biorecorder.basechart.scroll.ScrollListener;
+import com.biorecorder.basechart.themes.WhiteTheme;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -18,7 +20,7 @@ public class NavigableChart {
     private Chart chart;
     private Chart navigator;
     private boolean scrollsDirty = true;
-    private boolean dataUpdated = true;
+    private boolean isDataAppended = true;
 
     private BRectangle fullArea;
     private BRectangle chartArea;
@@ -28,15 +30,25 @@ public class NavigableChart {
     private NavigableChartConfig config;
 
     public NavigableChart() {
-        this(new NavigableChartConfig());
+        this(new WhiteTheme().getNavigableChartConfig());
     }
 
     public NavigableChart(NavigableChartConfig config) {
-        this.config = config;
-        chart = new Chart(config.getChartConfig());
-        DataProcessingConfig previewDataProcessingConfig = new DataProcessingConfig();
-        previewDataProcessingConfig.setCropEnabled(false);
-        navigator = new Chart(config.getNavigatorConfig(), previewDataProcessingConfig);
+        this(config, new LinearScale(), new LinearScale());
+    }
+
+    public NavigableChart(Scale xScale, Scale yScale) {
+        this(new WhiteTheme().getNavigableChartConfig(), xScale, yScale);
+    }
+
+    public NavigableChart(NavigableChartConfig config, Scale xScale, Scale yScale) {
+        this(config, xScale, yScale, new DataProcessingConfig(true, true), new DataProcessingConfig(false, true));
+    }
+
+    public NavigableChart(NavigableChartConfig config1, Scale xScale, Scale yScale,  DataProcessingConfig chartDataProcessingConfig, DataProcessingConfig navigatorDataProcessingConfig) {
+        this.config = new NavigableChartConfig(config1);
+        chart = new Chart(config.getChartConfig(), xScale, yScale, chartDataProcessingConfig);
+        navigator = new Chart(config.getNavigatorConfig(), xScale, yScale, navigatorDataProcessingConfig);
     }
 
     private void setAreasDirty() {
@@ -73,7 +85,7 @@ public class NavigableChart {
                         Range xRange = new Range(scrollValue, scrollValue + scrollExtent);
                         chart.setXMinMax(scrollXIndex, xRange.getMin(), xRange.getMax());
                         isScrollsAtTheEnd = isScrollAtTheEnd(scrollXIndex);
-                        if (config.isAutoScaleEnable()) {
+                        if (config.isAutoScaleEnabled()) {
                             autoScaleChartY();
                         }
                     }
@@ -84,7 +96,7 @@ public class NavigableChart {
                 scrolls.remove(xIndex);
             }
         }
-        if (config.isAutoScrollEnable()) {
+        if (config.isAutoScrollEnabled()) {
                scrollToEnd();
         }
     }
@@ -149,9 +161,9 @@ public class NavigableChart {
         if(isAreasDirty()) {
             calculateAndSetAreas();
         }
-        if(dataUpdated) {
+        if(isDataAppended) {
             updatePreviewMinMax(canvas);
-            dataUpdated = false;
+            isDataAppended = false;
         }
 
         canvas.setColor(config.getBackgroundColor());
@@ -283,16 +295,18 @@ public class NavigableChart {
      * =======================Base methods to interact==========================
      **/
 
-    public void setArea(BRectangle area) {
-        fullArea = area;
-        setAreasDirty();
-    }
-
-    public void update() {
-        dataUpdated = true;
+    public void appendData() {
+        isDataAppended = true;
+        chart.appendData();
+        navigator.appendData();
         if(isScrollsAtTheEnd) {
             scrollToEnd();
         }
+    }
+
+    public void setArea(BRectangle area) {
+        fullArea = area;
+        setAreasDirty();
     }
 
     public boolean hoverOff() {
@@ -487,7 +501,7 @@ public class NavigableChart {
 
     public void setChartYScale(int yIndex, Scale scale) {
         chart.setYScale(yIndex, scale);
-        if(config.isAutoScaleEnable()) {
+        if(config.isAutoScaleEnabled()) {
             chart.autoScaleY(yIndex);
         }
     }
@@ -495,6 +509,7 @@ public class NavigableChart {
     public void setChartXConfig(int xIndex, AxisConfig axisConfig) {
         chart.setXConfig(xIndex, axisConfig);
     }
+
     public void setChartYConfig(int yIndex, AxisConfig axisConfig) {
         chart.setYConfig(yIndex, axisConfig);
     }
@@ -598,21 +613,21 @@ public class NavigableChart {
 
     public void addNavigatorTrace(Trace trace, boolean isSplit) {
         navigator.addTrace(trace, isSplit);
-        if (config.isAutoScaleEnable()) {
+        if (config.isAutoScaleEnabled()) {
             autoScaleNavigatorY();
         }
     }
 
     public void addNavigatorTrace(int stackNumber, Trace trace, boolean isSplit) {
         navigator.addTrace(stackNumber, trace, isSplit);
-        if (config.isAutoScaleEnable()) {
+        if (config.isAutoScaleEnabled()) {
             autoScaleNavigatorY();
         }
     }
 
     public void removeNavigatorTrace(int traceNumber) {
         navigator.removeTrace(traceNumber);
-        if (config.isAutoScaleEnable()) {
+        if (config.isAutoScaleEnabled()) {
             autoScaleNavigatorY();
         }
     }
@@ -636,7 +651,7 @@ public class NavigableChart {
 
     public void setNavigatorYScale(int yIndex, Scale scale) {
         navigator.setYScale(yIndex, scale);
-        if(config.isAutoScaleEnable()) {
+        if(config.isAutoScaleEnabled()) {
             navigator.autoScaleY(yIndex);
         }
     }

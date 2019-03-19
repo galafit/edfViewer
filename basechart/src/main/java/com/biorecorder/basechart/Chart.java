@@ -49,25 +49,21 @@ public class Chart {
        this(new WhiteTheme().getChartConfig());
     }
 
-    public Chart(ChartConfig chartConfig) {
-        this(chartConfig, null);
-    }
-
-    public Chart(ChartConfig chartConfig1, @Nullable DataProcessingConfig dataProcessingConfig) {
-        this(chartConfig1, new LinearScale(), new LinearScale(), dataProcessingConfig);
-    }
-
-    public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale) {
-        this(chartConfig1, xScale, yScale, null);
+    public Chart(ChartConfig config) {
+        this(config, new LinearScale(), new LinearScale(), new DataProcessingConfig());
     }
 
     public Chart(Scale xScale, Scale yScale) {
-        this(new WhiteTheme().getChartConfig(), xScale, yScale, null);
+        this(new WhiteTheme().getChartConfig(), xScale, yScale, new DataProcessingConfig());
     }
 
-    public Chart(ChartConfig chartConfig1, Scale xScale, Scale yScale, @Nullable DataProcessingConfig dataProcessingConfig) {
-        this.dataProcessingConfig = dataProcessingConfig;
-        this.config = new ChartConfig(chartConfig1);
+    public Chart(ChartConfig config, Scale xScale, Scale yScale) {
+        this(config, xScale, yScale, new DataProcessingConfig());
+    }
+
+    public Chart(ChartConfig config, Scale xScale, Scale yScale, DataProcessingConfig dataProcessingConfig) {
+        this.dataProcessingConfig = new DataProcessingConfig(dataProcessingConfig);
+        this.config = new ChartConfig(config);
         this.yScale = yScale;
 
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getXAxisConfig()));

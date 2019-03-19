@@ -38,7 +38,7 @@ public class DarkTheme implements Theme {
         BColor axisColor = titleColor;
         BColor gridColor = BColor.BEIGE_LIGHT;
 
-        BColor crosshairColor = axisColor;
+        BColor crosshairColor = BColor.WHITE_DARK;
 
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);

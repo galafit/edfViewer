@@ -174,7 +174,7 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
 
     @Override
     public boolean update() {
-        chart.update();
+        chart.appendData();
         return true;
     }
 }

@@ -14,7 +14,7 @@ public class LineTraceConfig {
     private BStroke lineStroke = new BStroke();
     private int mode;
     private boolean isFilled = false;
-    private int markSize = 10 ; // point size
+    private int markSize = 20 ; // point size
     private BColor[] curveColors;
 
     public LineTraceConfig() {
