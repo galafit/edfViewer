@@ -316,10 +316,16 @@ public class TraceDataManager {
 
     private int groupIntervalToPointsNumber(ChartData data, double groupInterval) {
         double points = groupInterval / getDataAvgStep(data);
-        if (points >= 0.9) {
-            return (int) Math.ceil(points);
+        double precision = 0.1;
+        if (points < 1 - precision) {
+            return 0;
         }
-        return 0;
+
+        int points_ceil = (int) Math.ceil(points);
+        if (points_ceil - points > 1 - precision) {
+            points_ceil--;
+        }
+        return points_ceil;
     }
 
     double getDataAvgStep(ChartData data) {
