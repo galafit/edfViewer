@@ -45,7 +45,9 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
             chart.autoScaleChartY(yIndex);
         } else { // if no selected trace in chart we scale all x and y axis
             for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                chart.autoScaleScrollExtent(i);
+                if(chart.hasScroll(i)) {
+                    chart.autoScaleScrollExtent(i);
+                }
             }
             for (int i = 0; i < chart.chartYAxisCount(); i++) {
                 chart.autoScaleChartY(i);
@@ -86,7 +88,9 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
             chart.zoomScrollExtent(xIndex, scaleFactor);
         } else {
             for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                chart.zoomScrollExtent(i, scaleFactor);
+                if(chart.hasScroll(i)) {
+                    chart.zoomScrollExtent(i, scaleFactor);
+                }
             }
         }
         return true;
@@ -119,7 +123,7 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
 
         if(startPoint != null && !startPoint.equals(lastStartPoint)){
             lastStartPoint = startPoint;
-            isScrollMoving = chart.isScrollContains(startPoint.getX(), startPoint.getY());
+            isScrollMoving = chart.isScrollContain(startPoint.getX(), startPoint.getY());
         }
 
         if(isScrollMoving) {
@@ -134,8 +138,11 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
                 scrollTranslation = chart.getScrollWidth(xIndex) / chart.getArea().width;
             } else {
                 for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                    double translation = chart.getScrollWidth(i) / chart.getArea().width;
-                    scrollTranslation = Math.max(scrollTranslation, translation);
+                    if(chart.hasScroll(i)) {
+                        double translation = chart.getScrollWidth(i) / chart.getArea().width;
+                        scrollTranslation = Math.max(scrollTranslation, translation);
+
+                    }
                 }
             }
             chart.translateScrolls(dx * scrollTranslation);

@@ -115,43 +115,47 @@ public class NavigableChart {
 
     // navigator have all X axes synchronized (the same min and max)
     private void updatePreviewMinMax(BCanvas canvas) {
-        Range dataMinMax = chart.getAllTracesFullMinMax();
-        navigator.setXMinMax(0, dataMinMax.getMin(), dataMinMax.getMax());
-        navigator.setXMinMax(1, dataMinMax.getMin(), dataMinMax.getMax());
+        Range chartDataMinMax = chart.getAllTracesFullMinMax();
+        Range navigatorBestRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin() + navigator.getBestExtent(0));
+        Range minMax = Range.join(chartDataMinMax, navigatorBestRange);
+        navigator.setXMinMax(0, minMax.getMin(), minMax.getMax());
+        navigator.setXMinMax(1, minMax.getMin(), minMax.getMax());
         if(scrollsDirty) {
-            createScrolls(dataMinMax);
+            createScrolls(chartDataMinMax);
             scrollsDirty = false;
         } else {
             for (Integer xAxis : scrolls.keySet()) {
-                scrolls.get(xAxis).setMinMax(dataMinMax);
+                scrolls.get(xAxis).setMinMax(chartDataMinMax);
             }
         }
     }
 
     private boolean scrollToEnd() {
-        Range dataMinMax = chart.getAllTracesFullMinMax();
-        double minExtent = 0;
-
+        boolean isMoved = false;
         for (Integer xAxisIndex : scrolls.keySet()) {
-            double scrollExtent = scrolls.get(xAxisIndex).getExtent();
-            minExtent = (minExtent == 0) ? scrollExtent : Math.min(minExtent, scrollExtent);
+            Scroll scroll = scrolls.get(xAxisIndex);
+            if(scroll.setValue(scroll.getMax() - scroll.getExtent())) {
+                isMoved = true;
+            }
         }
-        return setScrollsValue(dataMinMax.getMax() - minExtent);
+        return isMoved;
     }
 
 
     private boolean isScrollAtTheEnd(int xAxisIndex) {
-        Range dataRange = chart.getAllTracesFullMinMax();
-        if (dataRange != null) {
-            double dataMax = dataRange.getMax();
-            double scrollEnd = scrolls.get(xAxisIndex).getValue() + scrolls.get(xAxisIndex).getExtent();
-            if (dataMax - scrollEnd > 0) {
-                return false;
-            } else {
-                return true;
-            }
+        int gap = 5;
+        Scroll scroll = scrolls.get(xAxisIndex);
+        double max = scroll.getMax();
+        double scrollEnd = scroll.getValue() + scroll.getExtent();
+        int max_position = (int)navigatorScale(max);
+        int scrollEndPosition = (int) navigatorScale(scrollEnd);
+        int distance = max_position - scrollEndPosition;
+       // System.out.println("distance "+distance);
+        if (distance > gap) {
+            return false;
+        } else {
+            return true;
         }
-        return false;
     }
 
     public void draw(BCanvas canvas) {
@@ -163,6 +167,9 @@ public class NavigableChart {
         }
         if(isDataAppended) {
             updatePreviewMinMax(canvas);
+            if(isScrollsAtTheEnd) {
+                scrollToEnd();
+            }
             isDataAppended = false;
         }
 
@@ -299,9 +306,6 @@ public class NavigableChart {
         isDataAppended = true;
         chart.appendData();
         navigator.appendData();
-        if(isScrollsAtTheEnd) {
-            scrollToEnd();
-        }
     }
 
     public void setArea(BRectangle area) {
@@ -331,7 +335,8 @@ public class NavigableChart {
     }
 
 
-    public boolean isScrollContains(int x, int y) {
+
+    public boolean isScrollContain(int x, int y) {
         if(!navigatorArea.contains(x, y)) {
             return false;
         }
@@ -408,6 +413,10 @@ public class NavigableChart {
         if (scroll != null) {
             scroll.setExtent(extent);
         }
+    }
+
+    public boolean hasScroll(int xIndex) {
+       return scrolls.get(xIndex) != null;
     }
 
     public void autoScaleScrollExtent(int xIndex) {

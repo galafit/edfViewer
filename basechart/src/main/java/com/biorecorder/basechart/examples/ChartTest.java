@@ -101,7 +101,7 @@ public class ChartTest extends JFrame {
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 20; count++) {
+                for (int count = 0; count < 10; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -112,7 +112,8 @@ public class ChartTest extends JFrame {
                     int yData2Last = yData2.get(yData2.size() - 1);
                     int yData3Last = yData3.get(yData2.size() - 1);
                     for (int i = 1; i <= 171; i++) {
-                        yData1.add(i + yData1Last);
+                        yData1.add(10);
+                        //yData1.add(i + yData1Last);
                         yData2.add(i + yData2Last);
                         yData3.add(i + yData3Last);
                     }
@@ -125,7 +126,7 @@ public class ChartTest extends JFrame {
                 }
             }
         });
-       // t.start();
+        t.start();
 
     }
 

@@ -21,6 +21,8 @@ public class DataProcessingConfig {
     // if defined (not null) group intervals will be taken only from that array,
     // otherwise every time "the best interval" will be calculated automatically
     private double[] groupIntervals = null;
+    // if groupIntervals are specified (not null) and isGroupingForced = true then grouping will be done in any case
+    private boolean isGroupingForced = false;
 
     public DataProcessingConfig() {
     }
@@ -36,12 +38,21 @@ public class DataProcessingConfig {
         isCropEnabled = config.isCropEnabled;
         isGroupEnabled = config.isGroupEnabled;
         groupingType = config.groupingType;
+        isGroupingForced = config.isGroupingForced;
         if(config.groupIntervals != null) {
             groupIntervals = new double[config.groupIntervals.length];
             for (int i = 0; i < groupIntervals.length; i++) {
                 groupIntervals[i] = config.groupIntervals[i];
             }
         }
+    }
+
+    public boolean isGroupingForced() {
+        return isGroupingForced;
+    }
+
+    public void setGroupingForced(boolean groupingForced) {
+        isGroupingForced = groupingForced;
     }
 
     public int getCropShoulder() {

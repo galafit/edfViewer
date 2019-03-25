@@ -1,7 +1,9 @@
 package com.biorecorder.basechart.examples;
 
+import com.biorecorder.basechart.DataProcessingConfig;
 import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
+import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.frame.SquareFunction;
@@ -21,9 +23,11 @@ public class NavigableChartTest extends JFrame{
     IntArrayList yData;
     IntArrayList xData;
     ChartPanel chartPanel;
+    NavigableChart chart;
+    XYData xyData;
 
     public NavigableChartTest() {
-        int width = 500;
+        int width = 400;
         int height = 500;
 
         setTitle("Test chart");
@@ -31,34 +35,33 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 1; i <= 150; i++) {
+        for (int i = 0; i < 200; i++) {
             yData.add(i);
         }
 
 
-        for (int i = 1; i <= 150; i++) {
+        for (int i = 0; i < 200; i++) {
             xData.add(i);
         }
 
-        XYData xyData1 = new XYData(1, 1);
-        xyData1.addColumn(yData);
-        xyData1.addColumn(new SquareFunction(), 0);
+        xyData = new XYData();
+        xyData.addColumn(xData);
+        xyData.addColumn(yData);
+       // xyData.addColumn(new SquareFunction(), 0);
 
-        XYData xyData2 = new XYData();
-        xyData2.addColumn(xData);
-        xyData2.addColumn(yData);
-        xyData2.addColumn(new SquareFunction(), 0);
+        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
 
-        NavigableChart chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
-        chart.addChartTrace(new LineTrace(xyData2), true , true, false);
-        chart.addChartStack();
-        chart.addChartTrace(new LineTrace(xyData1), true );
+        DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
+        double[] groupingIntervals = {30, 40};
+        navigatorProcessing.setGroupIntervals(groupingIntervals);
+        navigatorProcessing.setGroupingForced(true);
+        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
 
 
-        chart.addNavigatorTrace( new LineTrace(xyData2), true);
-      //  chart.setNavigatorStackWeigt(0, 4);
-      //  chart.setNavigatorStackWeigt(1, 4);
 
+        chart.addChartTrace(new LineTrace(xyData), true , false, false);
+
+        chart.addNavigatorTrace( new LineTrace(xyData), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -69,42 +72,38 @@ public class NavigableChartTest extends JFrame{
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
-    }
 
-    public void update() {
-        for (int i = 1; i <= 80; i++) {
-            yData.add(100);
-        }
+        Thread t = new Thread(new Runnable() {
+            int interval = 2000;
+            @Override
+            public void run() {
+                for (int count = 0; count < 10; count++) {
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
+                    int yDataLast = yData.get(yData.size() - 1);
+                    int xDataLast = xData.get(xData.size() - 1);
 
-        for (int i = 1; i <= 80; i++) {
-            int lastValue = 0;
-            if (xData.size() > 0) {
-                lastValue = xData.get(xData.size() - 1);
+                    for (int i = 1; i <= 100; i++) {
+                        yData.add(i + yDataLast);
+                        xData.add(i + xDataLast);
+
+                    }
+                    System.out.println("\ndata size: "+yData.size());
+
+                    chart.appendData();
+                    chartPanel.repaint();
+                }
             }
-            xData.add(lastValue + 1);
-        }
-
-        chartPanel.update();
+        });
+       t.start();
     }
 
 
     public static void main(String[] args) {
         NavigableChartTest chartTest = new NavigableChartTest();
-
-        final Timer timer = new Timer(10, new ActionListener() {
-            int counter = 0;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (counter < 20) {
-                    chartTest.update();
-                    counter++;
-                }
-            }
-        });
-        timer.setInitialDelay(0);
-        //  timer.start();
-
     }
 }
