@@ -17,6 +17,8 @@ public class DataProcessingConfig {
     // and non-regular by equal intervals
     private GroupingType groupingType = GroupingType.AUTO;
 
+    private int groupingStep = 2;
+
 
     // if defined (not null) group intervals will be taken only from that array,
     // otherwise every time "the best interval" will be calculated automatically
@@ -39,12 +41,21 @@ public class DataProcessingConfig {
         isGroupEnabled = config.isGroupEnabled;
         groupingType = config.groupingType;
         isGroupingForced = config.isGroupingForced;
+        groupingStep = config.groupingStep;
         if(config.groupIntervals != null) {
             groupIntervals = new double[config.groupIntervals.length];
             for (int i = 0; i < groupIntervals.length; i++) {
                 groupIntervals[i] = config.groupIntervals[i];
             }
         }
+    }
+
+    public int getGroupingStep() {
+        return groupingStep;
+    }
+
+    public void setGroupingStep(int groupingStep) {
+        this.groupingStep = groupingStep;
     }
 
     public boolean isGroupingForced() {
