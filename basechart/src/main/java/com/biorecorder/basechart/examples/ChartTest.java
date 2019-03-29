@@ -34,7 +34,7 @@ public class ChartTest extends JFrame {
         setTitle("Test chart");
 
         for (int i = 0; i < 15; i++) {
-            yData1.add(i);
+            yData1.add(50);
             yData2.add(i + 20);
             yData3.add(i + 50);
         }
@@ -60,8 +60,8 @@ public class ChartTest extends JFrame {
 
 
 
-        XYData xyData2 = new XYData();
-        xyData2.addColumn(xData);
+        XYData xyData2 = new XYData(0, 1);
+        //xyData2.addColumn(xData);
         xyData2.addColumn(yData1);
         xyData2.addColumn(new SquareFunction(), 1);
         xyData2.setColumnName(2, "eeg");
