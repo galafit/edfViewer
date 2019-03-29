@@ -4,17 +4,13 @@ import com.biorecorder.basechart.DataProcessingConfig;
 import com.biorecorder.basechart.NavigableChart;
 import com.biorecorder.basechart.XYData;
 import com.biorecorder.basechart.scales.LinearScale;
-import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
-import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.basechart.LineTrace;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by galafit on 27/9/18.
@@ -53,7 +49,7 @@ public class NavigableChartTest extends JFrame{
 
         DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {30, 40};
-        navigatorProcessing.setGroupIntervals(groupingIntervals);
+        navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
         chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
 

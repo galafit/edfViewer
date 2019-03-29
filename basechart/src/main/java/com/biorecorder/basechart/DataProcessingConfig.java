@@ -7,7 +7,8 @@ package com.biorecorder.basechart;
  */
 public class DataProcessingConfig {
     private int cropShoulder = 2; // number of additional points that we leave on every side during crop
-    int lengthChangeMax = 20; // percents
+    // NO REGROUPING if axis length change less then groupingStability
+    int groupingStability = 20; // percents
 
 
     private boolean isCropEnabled = true;
@@ -19,14 +20,13 @@ public class DataProcessingConfig {
 
     private int groupingStep = 2;
 
-    private boolean isGroupAll = false;
-
-
     // if defined (not null) group intervals will be taken only from that array,
     // otherwise every time "the best interval" will be calculated automatically
-    private double[] groupIntervals = null;
-    // if groupIntervals are specified (not null) and isGroupingForced = true then grouping will be done in any case
+    private double[] groupingIntervals = null;
+    // if groupingIntervals are specified (not null) and isGroupingForced = true then grouping will be done in any case
     private boolean isGroupingForced = false;
+
+    private boolean isGroupAll = false;
 
     public DataProcessingConfig() {
     }
@@ -38,17 +38,17 @@ public class DataProcessingConfig {
 
     public DataProcessingConfig(DataProcessingConfig config) {
         cropShoulder = config.cropShoulder;
-        lengthChangeMax = config.lengthChangeMax;
+        groupingStability = config.groupingStability;
         isCropEnabled = config.isCropEnabled;
         isGroupEnabled = config.isGroupEnabled;
         groupingType = config.groupingType;
         isGroupingForced = config.isGroupingForced;
         groupingStep = config.groupingStep;
         isGroupAll = config.isGroupAll;
-        if(config.groupIntervals != null) {
-            groupIntervals = new double[config.groupIntervals.length];
-            for (int i = 0; i < groupIntervals.length; i++) {
-                groupIntervals[i] = config.groupIntervals[i];
+        if(config.groupingIntervals != null) {
+            groupingIntervals = new double[config.groupingIntervals.length];
+            for (int i = 0; i < groupingIntervals.length; i++) {
+                groupingIntervals[i] = config.groupingIntervals[i];
             }
         }
     }
@@ -85,20 +85,20 @@ public class DataProcessingConfig {
         this.cropShoulder = cropShoulder;
     }
 
-    public int getLengthChangeMax() {
-        return lengthChangeMax;
+    public int getGroupingStability() {
+        return groupingStability;
     }
 
-    public void setLengthChangeMax(int lengthChangeMax) {
-        this.lengthChangeMax = lengthChangeMax;
+    public void setGroupingStability(int groupingStability) {
+        this.groupingStability = groupingStability;
     }
 
-    public double[] getGroupIntervals() {
-        return groupIntervals;
+    public double[] getGroupingIntervals() {
+        return groupingIntervals;
     }
 
-    public void setGroupIntervals(double[] groupIntervals) {
-        this.groupIntervals = groupIntervals;
+    public void setGroupingIntervals(double[] groupingIntervals) {
+        this.groupingIntervals = groupingIntervals;
     }
 
     public GroupingType getGroupingType() {
