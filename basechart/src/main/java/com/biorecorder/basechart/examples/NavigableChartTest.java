@@ -40,20 +40,18 @@ public class NavigableChartTest extends JFrame{
             xData.add(i);
         }
 
-        xyData = new XYData();
-        xyData.addColumn(xData);
+        xyData = new XYData(0, 1);
+        //xyData.addColumn(xData);
         xyData.addColumn(yData);
        // xyData.addColumn(new SquareFunction(), 0);
 
         chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
 
         DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
-        double[] groupingIntervals = {30, 40};
+        double[] groupingIntervals = {20, 40};
         navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
         chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
-
-
 
         chart.addChartTrace(new LineTrace(xyData), true , false, false);
 

@@ -6,44 +6,49 @@ package com.biorecorder.basechart;
  * Created by galafit on 9/7/18.
  */
 public class DataProcessingConfig {
+    private boolean isCropEnabled = true;
     private int cropShoulder = 2; // number of additional points that we leave on every side during crop
+
+    private boolean isGroupingEnabled = true;
     // NO REGROUPING if axis length change less then groupingStability
     int groupingStability = 20; // percents
 
-
-    private boolean isCropEnabled = true;
-    private boolean isGroupEnabled = true;
 
     // In case of GroupType.AUTO regular DataSeries will be grouped by equal points number
     // and non-regular by equal intervals
     private GroupingType groupingType = GroupingType.AUTO;
 
-    private int groupingStep = 2;
+    // if all data grouped and groupingIntervals = null then regrouping will be
+    // done only if the "new best groping interval" bigger or less then the interval
+    // of already grouped data in reGroupingStep times
+    // If step <= 1 then already grouped data never will be used and new grouping will be done every time
+    private int reGroupingStep = 2;
 
     // if defined (not null) group intervals will be taken only from that array,
-    // otherwise every time "the best interval" will be calculated automatically
+    // otherwise every time "the best group interval" will be calculated automatically
     private double[] groupingIntervals = null;
     // if groupingIntervals are specified (not null) and isGroupingForced = true then grouping will be done in any case
     private boolean isGroupingForced = false;
 
+    // group all data or only visible ones
     private boolean isGroupAll = false;
 
     public DataProcessingConfig() {
     }
 
-    public DataProcessingConfig(boolean isCropEnabled, boolean isGroupEnabled) {
+    public DataProcessingConfig(boolean isCropEnabled, boolean isGroupingEnabled) {
         this.isCropEnabled = isCropEnabled;
-        this.isGroupEnabled = isGroupEnabled;
+        this.isGroupingEnabled = isGroupingEnabled;
     }
 
     public DataProcessingConfig(DataProcessingConfig config) {
         cropShoulder = config.cropShoulder;
         groupingStability = config.groupingStability;
         isCropEnabled = config.isCropEnabled;
-        isGroupEnabled = config.isGroupEnabled;
+        isGroupingEnabled = config.isGroupingEnabled;
         groupingType = config.groupingType;
         isGroupingForced = config.isGroupingForced;
-        groupingStep = config.groupingStep;
+        reGroupingStep = config.reGroupingStep;
         isGroupAll = config.isGroupAll;
         if(config.groupingIntervals != null) {
             groupingIntervals = new double[config.groupingIntervals.length];
@@ -61,12 +66,13 @@ public class DataProcessingConfig {
         isGroupAll = groupAll;
     }
 
-    public int getGroupingStep() {
-        return groupingStep;
+    public int getReGroupingStep() {
+        return reGroupingStep;
     }
 
-    public void setGroupingStep(int groupingStep) {
-        this.groupingStep = groupingStep;
+
+    public void setReGroupingStep(int reGroupingStep) throws IllegalArgumentException {
+        this.reGroupingStep = reGroupingStep;
     }
 
     public boolean isGroupingForced() {
@@ -118,12 +124,12 @@ public class DataProcessingConfig {
     }
 
 
-    public boolean isGroupEnabled() {
-        return isGroupEnabled;
+    public boolean isGroupingEnabled() {
+        return isGroupingEnabled;
     }
 
-    public void setGroupEnabled(boolean groupEnabled) {
-        isGroupEnabled = groupEnabled;
+    public void setGroupingEnabled(boolean groupingEnabled) {
+        isGroupingEnabled = groupingEnabled;
     }
 
 }
