@@ -1,13 +1,12 @@
 package com.biorecorder.basechart.examples;
 
-import com.biorecorder.basechart.DataProcessingConfig;
-import com.biorecorder.basechart.NavigableChart;
-import com.biorecorder.basechart.XYData;
+import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.scales.LinearScale;
+import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
-import com.biorecorder.basechart.LineTrace;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,6 +66,35 @@ public class NavigableChartTest extends JFrame{
         setLocationRelativeTo(null);
         setVisible(true);
 
+        Thread t1 = new Thread(new Runnable() {
+            int interval = 2000;
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                NavigableChartConfig config = new DarkTheme().getNavigableChartConfig();
+                config.setGap(20);
+                chart.setConfig(config, true);
+                chartPanel.repaint();
+
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                chart.setChartYTitle(1, "title");
+
+                xyData.addColumn(new SquareFunction(), 0);
+                chart.addChartTrace(new LineTrace(xyData), true);
+                chartPanel.repaint();
+            }
+        });
+        t1.start();
+
         Thread t = new Thread(new Runnable() {
             int interval = 1000;
             @Override
@@ -93,7 +121,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-       t.start();
+     //  t.start();
     }
 
 
