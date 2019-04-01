@@ -284,7 +284,7 @@ public class Chart {
     }
 
 
-    void doCalculations(BCanvas canvas) {
+    private void doCalculations(BCanvas canvas) {
         if(fullArea.width == 0 || fullArea.height == 0) {
             graphArea = fullArea;
             margin = new Insets(0);
@@ -351,7 +351,7 @@ public class Chart {
         }
     }
 
-    public int getStacksSumWeight() {
+    int getStacksSumWeight() {
         int weightSum = 0;
         for (Integer weight : stackWeights) {
             weightSum += weight;
@@ -411,6 +411,11 @@ public class Chart {
             return true;
         }
         return false;
+    }
+
+    Range getYMinMax(int yIndex) {
+        AxisWrapper yAxis = yAxisList.get(yIndex);
+        return new Range(yAxis.getMin(), yAxis.getMax());
     }
 
     private int chooseXAxisWithGrid(int stackNumber) {
@@ -710,10 +715,10 @@ public class Chart {
     /**
      * add trace to the last stack
      */
-    public void addTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
-        int stackCount = yAxisList.size() / 2;
-        addTrace(Math.max(0, stackCount - 1), trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    public void addTrace(Trace trace) {
+        addTrace(trace, true);
     }
+
 
     /**
      * add trace to the last stack
@@ -722,6 +727,18 @@ public class Chart {
         addTrace(trace, isSplit, false, false);
     }
 
+
+    /**
+     * add trace to the last stack
+     */
+    public void addTrace(Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) {
+        int stackCount = yAxisList.size() / 2;
+        addTrace(Math.max(0, stackCount - 1), trace, isSplit, isXAxisOpposite, isYAxisOpposite);
+    }
+
+    /**
+     * add trace to the stack with the given number
+     */
     public void addTrace(int stack, Trace trace, boolean isSplit) {
         addTrace(stack, trace, isSplit, false, false);
     }
@@ -908,6 +925,7 @@ public class Chart {
         yAxisToMinMax.put(yIndex, new Range(min, max));
         setDirty();
     }
+
 
     public void autoScaleX(int xIndex) {
         xAxisToMinMax.remove(xIndex);

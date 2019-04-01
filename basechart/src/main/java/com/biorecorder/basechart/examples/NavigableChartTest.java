@@ -42,7 +42,7 @@ public class NavigableChartTest extends JFrame{
         xyData = new XYData(0, 1);
         //xyData.addColumn(xData);
         xyData.addColumn(yData);
-       // xyData.addColumn(new SquareFunction(), 0);
+        xyData.addColumn(new SquareFunction(), 0);
 
         chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
 
@@ -50,7 +50,7 @@ public class NavigableChartTest extends JFrame{
         double[] groupingIntervals = {20, 40};
         navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
-        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
+       // chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
 
         chart.addChartTrace(new LineTrace(xyData), true , false, false);
 
@@ -89,11 +89,19 @@ public class NavigableChartTest extends JFrame{
                 chart.setChartYTitle(1, "title");
 
                 xyData.addColumn(new SquareFunction(), 0);
-                chart.addChartTrace(new LineTrace(xyData), true);
+                chart.addNavigatorTrace(new LineTrace(xyData));
                 chartPanel.repaint();
+
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+               // chart.removeChartTrace(0);
+               // chartPanel.repaint();
             }
         });
-        t1.start();
+        //t1.start();
 
         Thread t = new Thread(new Runnable() {
             int interval = 1000;
