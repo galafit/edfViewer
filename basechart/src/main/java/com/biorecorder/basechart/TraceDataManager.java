@@ -20,6 +20,7 @@ public class TraceDataManager {
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
     private int prevTraceDataSize;
+    double roundPrecision = 0.2;
 
     private int[] sorter;
 
@@ -30,9 +31,6 @@ public class TraceDataManager {
 
     public void appendData() {
         traceData.appendData();
-        for (ChartData data : groupedDataList) {
-            data.appendData();
-        }
     }
 
 
@@ -64,7 +62,7 @@ public class TraceDataManager {
                 isEqualFrequencyGrouping = true;
                 break;
         }
-        prevXScale = null;
+        processedData = null;
     }
 
     public Range getFullXMinMax() {
@@ -257,9 +255,6 @@ public class TraceDataManager {
             }
         }
 
-        System.out.println(groupInterval+ "  " + pointsInGroup+" pointsInGroupRound "+pointsInGroupRound);
-
-
         boolean isAlreadyGrouped;
         int cropShoulder;
         if(isGroupingEnabled && processingConfig.isGroupAll()) {
@@ -294,7 +289,9 @@ public class TraceDataManager {
             // if data was not grouped before we group only visible data
             if (isGroupingEnabled  && !isAlreadyGrouped) {
                 processedData = group(processedData, groupInterval);
-                System.out.println("crop and group "+pointsInGroupRound);
+            }
+            if(processingConfig.isCroppedDataCachingEnabled()) {
+                processedData.cache();
             }
         } else { // if crop disabled
             // if grouping was not done before
@@ -316,17 +313,17 @@ public class TraceDataManager {
 
     private ChartData groupAllIfIntervalsNotSpecified(double groupInterval) {
         ChartData groupedDataNew = null;
-        if(groupedDataList.size() > 0 &&  processingConfig.getReGroupingStep() > 1) {
+        if(groupedDataList.size() > 0) {
             // we try to use already grouped data
             ChartData groupedData = groupedDataList.get(0);
             double groupedPointsInGroup = groupIntervalToPointsNumber(groupedData, groupInterval);
             int groupedPointsInGroupRound = roundPointsNumber(groupedPointsInGroup);
 
-            boolean isNextStepGrouping = groupedPointsInGroupRound >= processingConfig.getReGroupingStep();
-            boolean isPrevStepGrouping = groupedPointsInGroup < 1.0 / processingConfig.getReGroupingStep();
+            boolean isNextStepGrouping = groupedPointsInGroupRound > 1 && groupedPointsInGroupRound >= processingConfig.getReGroupingStep();
+            boolean isPrevStepGrouping = (1 - groupedPointsInGroup) > roundPrecision && groupedPointsInGroup < 1.0 / processingConfig.getReGroupingStep();
 
             if(isNextStepGrouping) {
-                if(isEqualFrequencyGrouping ) {
+                if(isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
                     groupedDataNew = groupedData.resampleByEqualFrequency(groupedPointsInGroupRound);
                     groupedDataNew.cache();
@@ -337,7 +334,6 @@ public class TraceDataManager {
                     }
                     // Very important to clean memory!!!
                     groupedData.disableCaching();
-                    System.out.println("regroup  " + groupedPointsInGroupRound);
                 } else {
                     double nextStepInterval = pointsNumberToGroupInterval(groupedData, groupedPointsInGroupRound);
                     groupedDataNew = traceData.resampleByEqualInterval(0, nextStepInterval);
@@ -347,8 +343,10 @@ public class TraceDataManager {
 
             if(!isNextStepGrouping && !isPrevStepGrouping) {
                 // no resample (we use already grouped data as it is)
-                System.out.println("the same data ");
                 groupedDataNew = groupedDataList.get(0);
+                if(traceData.rowCount() > prevTraceDataSize) {
+                   groupedDataNew.appendData();
+                }
             }
         }
 
@@ -375,11 +373,9 @@ public class TraceDataManager {
                             // regroup on the base of already grouped data
                             groupedData = groupedDataList.get(i - 1).resampleByEqualFrequency(pointsRatio);
                             groupedData.cache();
-                            System.out.println("regroup  " + pointsRatio);
                         } else if(pointsRatio == 1) {
                             // use already grouped data as it is
                             groupedData = groupedDataList.get(i - 1);
-                            System.out.println("the same data ");
                         }
                     }
                 }
@@ -388,6 +384,11 @@ public class TraceDataManager {
                 groupedData = group(traceData, groupIntervals[i]);
             }
             groupedDataList.add(groupedData);
+        }
+        if(traceData.rowCount() > prevTraceDataSize) {
+            for (ChartData data : groupedDataList) {
+                data.appendData();
+            }
         }
         return groupedDataList.get(groupIntervalIndex);
     }
@@ -406,13 +407,11 @@ public class TraceDataManager {
             groupedData = data.resampleByEqualInterval(0, groupInterval);
             groupedData.cache();
         }
-        System.out.println("new group  " + groupInterval + "  " + roundPointsNumber(groupIntervalToPointsNumber(data, groupInterval)));
-
         return groupedData;
 
     }
 
-    public double getBestExtent(int drawingAreaWidth, int markSize) {
+    public double getBestExtent(double drawingAreaWidth, int markSize) {
         if (traceData.rowCount() > 1) {
             double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth;
             if (markSize > 0) {
@@ -421,9 +420,14 @@ public class TraceDataManager {
             if(processingConfig.isGroupingForced() && isGroupIntervalsSpecified()) {
                 double groupInterval = processingConfig.getGroupingIntervals()[0];
                 double pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
-                if(roundPointsNumber(pointsInGroup) > 1) {
-                    traceExtent *= pointsInGroup;
+                if(pointsInGroup > 1) {
+                    if(isEqualFrequencyGrouping) {
+                        traceExtent *= roundPointsNumber(pointsInGroup);
+                    } else {
+                        traceExtent *= pointsInGroup;
+                    }
                 }
+
             }
             return traceExtent;
         }
@@ -447,13 +451,12 @@ public class TraceDataManager {
     }
 
     private int roundPointsNumber(double points) {
-        double precision = 0.2;
-        if(points < 1 + precision) {
+        if(points < 1 + roundPrecision) {
            return 1;
         }
 
         int points_ceil = (int) Math.ceil(points);
-        if (points_ceil - points > 1 - precision) {
+        if (points_ceil - points > 1 - roundPrecision) {
             points_ceil--;
         }
         return points_ceil;

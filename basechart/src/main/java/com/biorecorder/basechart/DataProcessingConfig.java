@@ -13,6 +13,9 @@ public class DataProcessingConfig {
     // NO REGROUPING if axis length change less then groupingStability
     int groupingStability = 20; // percents
 
+    // cropped data will be caching like grouped data. It make sense in the case
+    // of heavy data (when data read from a file or calculated)
+    boolean isCroppedDataCachingEnabled = false;
 
     // In case of GroupType.AUTO regular DataSeries will be grouped by equal points number
     // and non-regular by equal intervals
@@ -21,7 +24,6 @@ public class DataProcessingConfig {
     // if all data grouped and groupingIntervals = null then regrouping will be
     // done only if the "new best groping interval" bigger or less then the interval
     // of already grouped data in reGroupingStep times
-    // If step <= 1 then already grouped data never will be used and new grouping will be done every time
     private int reGroupingStep = 2;
 
     // if defined (not null) group intervals will be taken only from that array,
@@ -50,12 +52,21 @@ public class DataProcessingConfig {
         isGroupingForced = config.isGroupingForced;
         reGroupingStep = config.reGroupingStep;
         isGroupAll = config.isGroupAll;
+        isCroppedDataCachingEnabled = config.isCroppedDataCachingEnabled;
         if(config.groupingIntervals != null) {
             groupingIntervals = new double[config.groupingIntervals.length];
             for (int i = 0; i < groupingIntervals.length; i++) {
                 groupingIntervals[i] = config.groupingIntervals[i];
             }
         }
+    }
+
+    public boolean isCroppedDataCachingEnabled() {
+        return isCroppedDataCachingEnabled;
+    }
+
+    public void setCroppedDataCachingEnabled(boolean croppedDataCachingEnabled) {
+        isCroppedDataCachingEnabled = croppedDataCachingEnabled;
     }
 
     public boolean isGroupAll() {
@@ -70,8 +81,11 @@ public class DataProcessingConfig {
         return reGroupingStep;
     }
 
-
     public void setReGroupingStep(int reGroupingStep) throws IllegalArgumentException {
+        if(reGroupingStep < 1) {
+            String errMsg = "Re grouping step: " + reGroupingStep + " Expected > 0";
+            throw new IllegalArgumentException(errMsg);
+        }
         this.reGroupingStep = reGroupingStep;
     }
 

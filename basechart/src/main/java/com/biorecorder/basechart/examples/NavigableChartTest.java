@@ -68,7 +68,7 @@ public class NavigableChartTest extends JFrame{
         setVisible(true);
 
         Thread t = new Thread(new Runnable() {
-            int interval = 2000;
+            int interval = 1000;
             @Override
             public void run() {
                 for (int count = 0; count < 10; count++) {
