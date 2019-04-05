@@ -27,6 +27,7 @@ public class NavigableChart {
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
     private boolean isScrollsAtTheEnd = true;
     private NavigableChartConfig config;
+    private boolean isChartAutoscaleNeedDisable;
 
     public NavigableChart() {
         this(new WhiteTheme().getNavigableChartConfig());
@@ -46,6 +47,9 @@ public class NavigableChart {
 
     public NavigableChart(NavigableChartConfig config1, Scale xScale, Scale yScale,  DataProcessingConfig chartDataProcessingConfig, DataProcessingConfig navigatorDataProcessingConfig) {
         this.config = new NavigableChartConfig(config1);
+        if(!config.isAutoScaleEnabled()) {
+            isChartAutoscaleNeedDisable = true;
+        }
         chart = new Chart(config.getChartConfig(), xScale, yScale, chartDataProcessingConfig);
         navigator = new Chart(config.getNavigatorConfig(), xScale, yScale, navigatorDataProcessingConfig);
     }
@@ -83,14 +87,14 @@ public class NavigableChart {
                         isScrollsAtTheEnd = isScrollAtTheEnd(scrollXIndex);
                     }
                 });
+                if (config.isAutoScrollEnabled()) {
+                    scrollToEnd();
+                }
             }
 
             if (scrolls.get(xIndex) != null  && !chart.isXAxisVisible(xIndex)) {
                 scrolls.remove(xIndex);
             }
-        }
-        if (config.isAutoScrollEnabled()) {
-               scrollToEnd();
         }
     }
 
@@ -287,6 +291,13 @@ public class NavigableChart {
         for (Integer key : scrolls.keySet()) {
             drawScroll(canvas, scrolls.get(key));
         }
+        if(isChartAutoscaleNeedDisable) {
+            for (int i = 0; i < chart.yAxesCount(); i++) {
+                Range minMax = chart.getYMinMax(i, canvas);
+                chart.setYMinMax(i, minMax.getMin(), minMax.getMax());
+                isChartAutoscaleNeedDisable = false;
+            }
+        }
     }
 
 
@@ -307,13 +318,16 @@ public class NavigableChart {
         isDirty = true;
     }
 
-    public void setConfig(NavigableChartConfig config, boolean isTraceColorChangeEnabled) {
-        this.config = config;
+    public void setConfig(NavigableChartConfig config1, boolean isTraceColorChangeEnabled) {
+        this.config = new NavigableChartConfig(config1);
         chart.setConfig(config.getChartConfig(), isTraceColorChangeEnabled);
         navigator.setConfig(config.getNavigatorConfig(), isTraceColorChangeEnabled);
         scrolls.clear();
         setAreasDirty();
         isDirty = true;
+        if(!config.isAutoScaleEnabled()) {
+            isChartAutoscaleNeedDisable = true;
+        }
     }
 
     public boolean hoverOff() {
@@ -453,6 +467,9 @@ public class NavigableChart {
 
     public void autoScaleChartY(int yIndex) {
         chart.autoScaleY(yIndex);
+        if(!config.isAutoScaleEnabled()) {
+            isChartAutoscaleNeedDisable = true;
+        }
     }
 
     public void addChartStack(int weight) {
@@ -551,6 +568,14 @@ public class NavigableChart {
 
     public String[] getChartCurveNames() {
         return chart.getCurveNames();
+    }
+
+    public void setChartCurveColor(int traceNumber, int curveNumber, BColor color) {
+        chart.setCurveColor(traceNumber, curveNumber, color);
+    }
+
+    public void setChartCurveName(int traceNumber, int curveNumber, String name) {
+        chart.setCurveName(traceNumber, curveNumber, name);
     }
 
     public int chartTraceCurveCount(int traceNumber) {
@@ -665,6 +690,15 @@ public class NavigableChart {
     public int navigatorTraceCount() {
         return navigator.traceCount();
     }
+
+    public void setNavigatorCurveColor(int traceNumber, int curveNumber, BColor color) {
+        navigator.setCurveColor(traceNumber, curveNumber, color);
+    }
+
+    public void setNavigatorCurveName(int traceNumber, int curveNumber, String name) {
+        navigator.setCurveName(traceNumber, curveNumber, name);
+    }
+
 
     public void setNavigatorXTitle(int xIndex, String title) {
         navigator.setXTitle(xIndex, title);

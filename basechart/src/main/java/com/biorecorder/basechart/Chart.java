@@ -79,27 +79,6 @@ public class Chart {
         title = new Title(config.getTitleConfig());
     }
 
-    double getBestExtent(int xIndex) {
-        double maxExtent = 0;
-        for (Trace trace : traces) {
-            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                maxExtent = Math.max(maxExtent, trace.getBestExtent(fullArea.width));
-            }
-        }
-        return maxExtent;
-    }
-
-
-    // for all x axis
-    Range getAllTracesFullMinMax() {
-        Range minMax = null;
-        for (int i = 0; i < traces.size(); i++) {
-            minMax = Range.join(minMax, traces.get(i).getFullXMinMax());
-        }
-        return minMax;
-    }
-
-
     /**
      * 2 Y-axis for every section(stack): even - LEFT and odd - RIGHT;
      */
@@ -132,29 +111,6 @@ public class Chart {
             return true;
         }
         return false;
-    }
-
-
-    Insets getMargin(BCanvas canvas) {
-        if (isDirty()) {
-            doCalculations(canvas);
-        }
-        return margin;
-    }
-
-    BRectangle getGraphArea(BCanvas canvas) {
-        if (isDirty()) {
-            doCalculations(canvas);
-        }
-        return graphArea;
-    }
-
-    double scale(int xIndex, double value) {
-        return xAxisList.get(xIndex).getScale().scale(value);
-    }
-
-    double invert(int xIndex, double value) {
-        return xAxisList.get(xIndex).getScale().invert(value);
     }
 
     private Insets calculateSpacing() {
@@ -261,29 +217,6 @@ public class Chart {
         }
     }
 
-    void setMargin(Insets margin, BCanvas canvas) {
-        this.margin = margin;
-        if(fullArea != null) {
-            int graphAreaWidth = fullArea.width - margin.left() - margin.right();
-            int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
-            if(graphAreaHeight < 0) {
-                graphAreaHeight = 0;
-            }
-            if(graphAreaWidth < 0) {
-                graphAreaWidth = 0;
-            }
-            graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
-            if (isLegendEnabled() && legend.isAttachedToStacks()) {
-                legend.setArea(graphArea);
-            }
-            setXStartEnd(graphArea.x, graphArea.width);
-            setYStartEnd(graphArea.y, graphArea.height);
-            setXMinMax(canvas);
-            setYMinMax(canvas);
-        }
-    }
-
-
     private void doCalculations(BCanvas canvas) {
         if(fullArea.width == 0 || fullArea.height == 0) {
             graphArea = fullArea;
@@ -351,15 +284,6 @@ public class Chart {
         }
     }
 
-    int getStacksSumWeight() {
-        int weightSum = 0;
-        for (Integer weight : stackWeights) {
-            weightSum += weight;
-        }
-        return weightSum;
-    }
-
-
     private void setXStartEnd(int areaX, int areaWidth) {
         for (AxisWrapper axis : xAxisList) {
             axis.setStartEnd(areaX, areaX + areaWidth);
@@ -406,18 +330,6 @@ public class Chart {
         }
     }
 
-    boolean isXAxisVisible(int xIndex) {
-        if(xAxisList.get(xIndex).isVisible()) {
-            return true;
-        }
-        return false;
-    }
-
-    Range getYMinMax(int yIndex) {
-        AxisWrapper yAxis = yAxisList.get(yIndex);
-        return new Range(yAxis.getMin(), yAxis.getMax());
-    }
-
     private int chooseXAxisWithGrid(int stackNumber) {
         int bottomAxisIndex = 0;
         int topAxisIndex = 1;
@@ -449,7 +361,129 @@ public class Chart {
         }
     }
 
+    private int getCurveXIndex(Trace trace) {
+        for (int i = 0; i < xAxisList.size(); i++) {
+            if (xAxisList.get(i).getScale() == trace.getXScale()) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
+    private int getCurveYIndex(Trace trace, int curveNumber) {
+        for (int i = 0; i < yAxisList.size(); i++) {
+            if (yAxisList.get(i).getScale() == trace.getYScale(curveNumber)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void checkStackNumber(int stack) {
+        int stackCount = yAxisList.size() / 2;
+        if(stack >= stackCount) {
+            String errMsg = "Stack = " + stack + " Number of stacks: " + stackCount;
+            throw new IllegalArgumentException(errMsg);
+        }
+    }
+
+
+    /**
+     * ===================== Protected method for careful use (in NavigableChart)=========
+     **/
+    double getBestExtent(int xIndex) {
+        double maxExtent = 0;
+        for (Trace trace : traces) {
+            if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
+                maxExtent = Math.max(maxExtent, trace.getBestExtent(fullArea.width));
+            }
+        }
+        return maxExtent;
+    }
+
+
+    // for all x axis
+    Range getAllTracesFullMinMax() {
+        Range minMax = null;
+        for (int i = 0; i < traces.size(); i++) {
+            minMax = Range.join(minMax, traces.get(i).getFullXMinMax());
+        }
+        return minMax;
+    }
+
+
+    int getStacksSumWeight() {
+        int weightSum = 0;
+        for (Integer weight : stackWeights) {
+            weightSum += weight;
+        }
+        return weightSum;
+    }
+
+    boolean isXAxisVisible(int xIndex) {
+        if(xAxisList.get(xIndex).isVisible()) {
+            return true;
+        }
+        return false;
+    }
+
+    Range getYMinMax(int yIndex, BCanvas canvas) {
+        if (isDirty()) {
+            doCalculations(canvas);
+        }
+        AxisWrapper yAxis = yAxisList.get(yIndex);
+        return new Range(yAxis.getMin(), yAxis.getMax());
+    }
+
+    void setMargin(Insets margin, BCanvas canvas) {
+        this.margin = margin;
+        if(fullArea != null) {
+            int graphAreaWidth = fullArea.width - margin.left() - margin.right();
+            int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
+            if(graphAreaHeight < 0) {
+                graphAreaHeight = 0;
+            }
+            if(graphAreaWidth < 0) {
+                graphAreaWidth = 0;
+            }
+            graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
+            if (isLegendEnabled() && legend.isAttachedToStacks()) {
+                legend.setArea(graphArea);
+            }
+            setXStartEnd(graphArea.x, graphArea.width);
+            setYStartEnd(graphArea.y, graphArea.height);
+            setXMinMax(canvas);
+            setYMinMax(canvas);
+        }
+    }
+
+
+    Insets getMargin(BCanvas canvas) {
+        if (isDirty()) {
+            doCalculations(canvas);
+        }
+        return margin;
+    }
+
+    BRectangle getGraphArea(BCanvas canvas) {
+        if (isDirty()) {
+            doCalculations(canvas);
+        }
+        return graphArea;
+    }
+
+    double scale(int xIndex, double value) {
+        return xAxisList.get(xIndex).getScale().scale(value);
+    }
+
+    double invert(int xIndex, double value) {
+        return xAxisList.get(xIndex).getScale().invert(value);
+    }
+
+
+    /**
+     * =======================Base methods to interact==========================
+     **/
     public void draw(BCanvas canvas) {
         if(fullArea == null) {
             setArea(canvas.getBounds());
@@ -542,35 +576,7 @@ public class Chart {
         }
     }
 
-    private int getCurveXIndex(Trace trace) {
-        for (int i = 0; i < xAxisList.size(); i++) {
-            if (xAxisList.get(i).getScale() == trace.getXScale()) {
-                return i;
-            }
-        }
-        return -1;
-    }
 
-    private int getCurveYIndex(Trace trace, int curveNumber) {
-        for (int i = 0; i < yAxisList.size(); i++) {
-            if (yAxisList.get(i).getScale() == trace.getYScale(curveNumber)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void checkStackNumber(int stack) {
-        int stackCount = yAxisList.size() / 2;
-        if(stack >= stackCount) {
-            String errMsg = "Stack = " + stack + " Number of stacks: " + stackCount;
-            throw new IllegalArgumentException(errMsg);
-        }
-    }
-
-    /**
-     * =======================Base methods to interact==========================
-     **/
     public void appendData() {
         for (Trace trace : traces) {
             trace.appendData();
