@@ -16,6 +16,13 @@ public class Scroll {
     private double extent = 1; // viewportWidth
     private List<ScrollListener> eventListeners = new ArrayList<ScrollListener>();
 
+    public Scroll(double min, double max,  double extent) {
+        this.min = min;
+        this.max = max;
+        this.extent = extent;
+        value = min;
+    }
+
     public void addListener(ScrollListener listener) {
         eventListeners.add(listener);
     }
@@ -50,19 +57,17 @@ public class Scroll {
         }
     }
 
-
     public double getExtent() {
         return extent;
     }
-
 
     public double getValue() {
         return value;
     }
 
-    public void setMinMax(Range minMax) {
-        this.min = minMax.getMin();
-        this.max = minMax.getMax();
+    public void setMinMax(double min, double max) {
+        this.min = min;
+        this.max = max;
         double oldExtent = extent;
         double oldValue = value;
         if(extent > max - min) {

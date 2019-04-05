@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
@@ -70,6 +71,17 @@ public class NavigableChartTest extends JFrame{
             int interval = 2000;
             @Override
             public void run() {
+
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                chart.setChartCurveColor(0, 1, BColor.RED);
+                chart.setChartCurveName(0, 1, "new Name");
+                chartPanel.repaint();
+
                 try {
                     Thread.sleep(interval);
                 } catch (InterruptedException e) {
@@ -77,31 +89,11 @@ public class NavigableChartTest extends JFrame{
                 }
                 NavigableChartConfig config = new DarkTheme().getNavigableChartConfig();
                 config.setGap(20);
-                chart.setConfig(config, true);
+                chart.setConfig(config, false);
                 chartPanel.repaint();
-
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                chart.setChartYTitle(1, "title");
-
-                xyData.addColumn(new SquareFunction(), 0);
-                chart.addNavigatorTrace(new LineTrace(xyData));
-                chartPanel.repaint();
-
-                try {
-                    Thread.sleep(interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-               // chart.removeChartTrace(0);
-               // chartPanel.repaint();
             }
         });
-        //t1.start();
+        t1.start();
 
         Thread t = new Thread(new Runnable() {
             int interval = 1000;
