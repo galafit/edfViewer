@@ -40,6 +40,27 @@ public class PrimitiveUtils {
                         1));                          // (0.0, -0.0) or (NaN, !NaN)
     }
 
+
+    public static int longToInt(long l) {
+        if(l > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        if(l < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) l;
+    }
+
+    public static short longToShort(long l) {
+        if(l > Short.MAX_VALUE) {
+            return Short.MAX_VALUE;
+        }
+        if(l < Short.MIN_VALUE) {
+            return Short.MIN_VALUE;
+        }
+        return (short) l;
+    }
+
     public static double doubleToDouble(double d) {
         return d;
     }
@@ -53,18 +74,11 @@ public class PrimitiveUtils {
     }
 
     public static int doubleToInt(double d) {
-        return (int) Math.round(d);
+        return longToInt(doubleToLong(d));
     }
 
     public static short doubleToShort(double d) {
-        int i = (int) Math.round(d);
-        if(i > Short.MAX_VALUE) {
-            return Short.MAX_VALUE;
-        }
-        if(i < Short.MIN_VALUE) {
-            return Short.MIN_VALUE;
-        }
-        return (short) i;
+        return longToShort(doubleToLong(d));
     }
 
     public static void main(String[] args) {

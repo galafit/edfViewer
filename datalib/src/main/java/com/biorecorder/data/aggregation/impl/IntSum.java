@@ -5,16 +5,16 @@ import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.PrimitiveUtils;
 
 /**
- * Created by galafit on 9/3/19.
+ * Created by galafit on 5/4/19.
  */
-public class IntAverage implements IntAggFunction {
+public class IntSum implements IntAggFunction {
     protected int count;
     private long sum;
 
     @Override
     public int add(IntSequence sequence, int from, int length) {
         for (int i = 0; i < length; i++) {
-           sum += sequence.get(from + i);
+            sum += sequence.get(from + i);
         }
         count +=length;
         return count;
@@ -23,7 +23,7 @@ public class IntAverage implements IntAggFunction {
     @Override
     public int getValue() {
         checkIfEmpty();
-        return PrimitiveUtils.longToInt(sum / count);
+        return PrimitiveUtils.longToInt(sum);
     }
 
     @Override
