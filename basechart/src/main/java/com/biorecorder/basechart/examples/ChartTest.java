@@ -33,13 +33,13 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 15; i++) {
-            yData1.add(50);
-            yData2.add(i + 20);
+        for (int i = 0; i < 150; i++) {
+            yData1.add(i);
+            yData2.add(i);
             yData3.add(i + 50);
         }
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 150; i++) {
             xData.add(i);
         }
 
@@ -63,10 +63,8 @@ public class ChartTest extends JFrame {
         XYData xyData2 = new XYData(0, 1);
         //xyData2.addColumn(xData);
         xyData2.addColumn(yData1);
-        xyData2.addColumn(new SquareFunction(), 1);
+        xyData2.addColumn(yData2);
         xyData2.setColumnName(2, "eeg");
-        //xyData2.addColumn(yData2);
-        //xyData2.addColumn(yData3);
 
 
         XYData xyData3 = new XYData();
@@ -85,7 +83,10 @@ public class ChartTest extends JFrame {
        // chart.setXMinMax(0, 0, 500);
         chart.addTrace(new LineTrace(xyData3), false, true, false);
         chart.addStack();
-        chart.addTrace(new LineTrace(xyData2), true);
+        xyData2.setColumnAggFunctions(1, AggregateFunction.MIN);
+        xyData2.setColumnAggFunctions(2, AggregateFunction.MAX);
+
+        chart.addTrace(new LineTrace(xyData2), false);
 
         chartPanel = new ChartPanel(chart);
 
@@ -126,7 +127,7 @@ public class ChartTest extends JFrame {
                 }
             }
         });
-        t.start();
+       // t.start();
 
     }
 

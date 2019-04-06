@@ -7,12 +7,14 @@ import com.biorecorder.data.sequence.PrimitiveUtils;
 /**
  * Created by galafit on 9/3/19.
  */
-public class IntAverage implements IntAggFunction {
-    protected int count;
+public class IntAverage extends IntAggFunction {
     private long sum;
 
     @Override
     public int add(IntSequence sequence, int from, int length) {
+        if(count == 0) {
+            sum = 0;
+        }
         for (int i = 0; i < length; i++) {
            sum += sequence.get(from + i);
         }
@@ -21,26 +23,7 @@ public class IntAverage implements IntAggFunction {
     }
 
     @Override
-    public int getValue() {
-        checkIfEmpty();
+    protected int getValue1() {
         return PrimitiveUtils.longToInt(sum / count);
-    }
-
-    @Override
-    public int getN() {
-        return count;
-    }
-
-    @Override
-    public void reset() {
-        count = 0;
-        sum = 0;
-    }
-
-    private void checkIfEmpty() {
-        if(count == 0) {
-            String errMsg = "No elements was added to group. Grouping function can not be calculated.";
-            throw new IllegalStateException(errMsg);
-        }
     }
 }
