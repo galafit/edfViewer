@@ -1,18 +1,21 @@
-package com.biorecorder.data.aggregation.impl;
+package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.utils.PrimitiveUtils;
 
-public class IntMax extends IntAggFunction {
-    private int max;
+/**
+ * Created by galafit on 9/3/19.
+ */
+class IntAverage extends IntAggFunction {
+    private long sum;
 
     @Override
     public int add(IntSequence sequence, int from, int length) {
         if(count == 0) {
-            max = sequence.get(from);
+            sum = 0;
         }
         for (int i = 0; i < length; i++) {
-            max = Math.max(max, sequence.get(from + i));
+           sum += sequence.get(from + i);
         }
         count +=length;
         return count;
@@ -20,6 +23,6 @@ public class IntMax extends IntAggFunction {
 
     @Override
     protected int getValue1() {
-        return max;
+        return PrimitiveUtils.longToInt(sum / count);
     }
 }

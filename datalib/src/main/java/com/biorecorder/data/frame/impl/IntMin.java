@@ -1,12 +1,11 @@
-package com.biorecorder.data.aggregation.impl;
+package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.sequence.IntSequence;
 
 /**
  * Created by galafit on 6/4/19.
  */
-public class IntMin extends IntAggFunction {
+class IntMin extends IntAggFunction {
     private int min;
 
     @Override

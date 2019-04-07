@@ -1,6 +1,6 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.data.aggregation.AggregateFunction;
+import com.biorecorder.data.frame.impl.IntColumn;
 import com.biorecorder.data.sequence.IntSequence;
 
 import java.util.*;
@@ -15,7 +15,7 @@ public class DataFrame {
     private boolean isLastRowChangeable = false;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
-    protected List<AggregateFunction[]> columnAggFunctions = new ArrayList<>();
+    protected List<Aggregation[]> columnAggFunctions = new ArrayList<>();
 
     public DataFrame() {
     }
@@ -70,7 +70,7 @@ public class DataFrame {
     private void addColumn(Column column) {
         columns.add(column);
         columnNames.add("Column " + (columns.size() - 1));
-        AggregateFunction[] agg = new AggregateFunction[0];
+        Aggregation[] agg = new Aggregation[0];
         columnAggFunctions.add(agg);
         appendData();
     }
@@ -123,7 +123,7 @@ public class DataFrame {
         return columns.size();
     }
 
-    public void setColumnAggFunctions(int columnNumber, AggregateFunction... aggFunctions) {
+    public void setColumnAggFunctions(int columnNumber, Aggregation... aggFunctions) {
         columnAggFunctions.set(columnNumber, aggFunctions);
     }
 
@@ -374,23 +374,23 @@ public class DataFrame {
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             if(column instanceof FunctionColumn) {
-                AggregateFunction[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
-                for (AggregateFunction aggregation : aggregations) {
+                Aggregation[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
+                for (Aggregation aggregation : aggregations) {
                     resultantFrame.columns.add(null);
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                    AggregateFunction[] resultantAgg = new AggregateFunction[0];
+                    Aggregation[] resultantAgg = new Aggregation[0];
                     resultantFrame.columnAggFunctions.add(resultantAgg);
                 }
             } else {
-                AggregateFunction[] aggregations = columnAggFunctions.get(i);
-                for (AggregateFunction aggregation : aggregations) {
+                Aggregation[] aggregations = columnAggFunctions.get(i);
+                for (Aggregation aggregation : aggregations) {
                     if(groupIndexes != null) {
                         resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
                     } else {
                         resultantFrame.columns.add(column.aggregate(aggregation, points));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
-                    AggregateFunction[] resultantAgg = {aggregation};
+                    Aggregation[] resultantAgg = {aggregation};
                     resultantFrame.columnAggFunctions.add(resultantAgg);
                 }
             }
@@ -446,8 +446,8 @@ public class DataFrame {
 
         df.addColumn(xList);
         df.addColumn(yList);
-        df.setColumnAggFunctions(0, AggregateFunction.FIRST);
-        df.setColumnAggFunctions(1, AggregateFunction.AVERAGE);
+        df.setColumnAggFunctions(0, Aggregation.FIRST);
+        df.setColumnAggFunctions(1, Aggregation.AVERAGE);
 
         DataFrame df1 = df.resampleByEqualFrequency(4);
         DataFrame df2 = df.resampleByEqualInterval(0, 4);

@@ -1,6 +1,6 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.aggregation.AggregateFunction;
+import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.frame.DataFrame;
 import com.biorecorder.data.frame.Function;
 import com.biorecorder.data.frame.Stats;
@@ -35,9 +35,9 @@ public class XYData implements ChartData {
     }
 
     private void onColumnAdded(int columnNumber) {
-        AggregateFunction agg = AggregateFunction.AVERAGE;
+        Aggregation agg = Aggregation.AVERAGE;
         if(columnNumber == 0) {
-            agg = AggregateFunction.FIRST;
+            agg = Aggregation.FIRST;
         }
         dataFrame.setColumnName(columnNumber, "");
         dataFrame.setColumnAggFunctions(columnNumber, agg);
@@ -73,7 +73,7 @@ public class XYData implements ChartData {
         dataFrame.setColumnName(columnNumber, columnName);
    }
 
-    public void setColumnAggFunctions(int columnNumber, AggregateFunction aggFunction) throws IllegalArgumentException {
+    public void setColumnAggFunctions(int columnNumber, Aggregation aggFunction) throws IllegalArgumentException {
         if(aggFunction == null) {
             String errMsg = "Aggregate function must be not null";
             throw new IllegalArgumentException(errMsg);

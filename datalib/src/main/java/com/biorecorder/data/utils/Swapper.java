@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.biorecorder.data.frame;
+package com.biorecorder.data.utils;
 
 /**
  * An interface to an ordered collection that can swap elements whose position is specified by integers

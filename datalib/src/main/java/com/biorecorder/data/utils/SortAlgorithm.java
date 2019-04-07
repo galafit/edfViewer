@@ -19,14 +19,15 @@
  * <a href="https://github.com/zavtech/morpheus-core/blob/master/src/main/java/com/zavtech/morpheus/util/SortAlgorithm.java">Morpheus SortAlgorithm.java</a>
  *
  */
-package com.biorecorder.data.sequence;
-
-import com.biorecorder.data.frame.IntComparator;
-import com.biorecorder.data.frame.Swapper;
+package com.biorecorder.data.utils;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-
+/**
+ * This class is get from Morpheus visualization library:
+ * @see <a href="https://github.com/zavtech/morpheus-core/blob/master/src/main/java/com/zavtech/morpheus/util/SortAlgorithm.java">SortAlgorithm.java</a>
+ * @see <a href="http://www.zavtech.com/morpheus/docs/viz/charts/overview/">Morpheus visualization library</a>
+ */
 
 /**
  * This is a standard interface to a sorting algorithm that works off an IntComparator and a Swapper.

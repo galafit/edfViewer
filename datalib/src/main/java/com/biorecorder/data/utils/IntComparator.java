@@ -1,4 +1,4 @@
-package com.biorecorder.data.frame;
+package com.biorecorder.data.utils;
 
 /*
 Copyright � 1999 CERN - European Organization for Nuclear Research.

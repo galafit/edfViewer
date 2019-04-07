@@ -1,7 +1,7 @@
-package com.biorecorder.data.sequence;
+package com.biorecorder.data.utils;
 
 /**
- * A class that defines "compare" methods for different types
+ * A class that defines "compare" and "convert" methods for different types
  */
 public class PrimitiveUtils {
     public static int compareInt(int x, int y) {
@@ -84,6 +84,7 @@ public class PrimitiveUtils {
     public static void main(String[] args) {
 
         double d = 4786777867867868654674678346734763478673478654478967.77;
+        //d = Double.MIN_VALUE;
         System.out.printf("float  %f\n", (float)d);
         System.out.printf("long   %d\n", (long)d);
         System.out.printf("int    %d\n", (int)d);
@@ -103,6 +104,12 @@ public class PrimitiveUtils {
         System.out.printf("int    %d\n", doubleToInt(d));
         System.out.printf("short  %d\n", doubleToShort(d));
 
+        double interval = 0.3;
+        double v = 0;
+        for (int i = 0; i < 100; i++) {
+            System.out.println(interval * i + " value " + v);
+            v += interval;
+        }
 
     }
 

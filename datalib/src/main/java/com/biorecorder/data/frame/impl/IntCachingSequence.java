@@ -1,4 +1,4 @@
-package com.biorecorder.data.frame;
+package com.biorecorder.data.frame.impl;
 
 
 import com.biorecorder.data.list.IntArrayList;

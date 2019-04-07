@@ -1,14 +1,11 @@
-package com.biorecorder.data.frame;
+package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.aggregation.IntAggFunction;
+import com.biorecorder.data.frame.*;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
-import com.biorecorder.data.sequence.PrimitiveUtils;
+import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -162,7 +159,7 @@ public class IntColumn implements Column {
     @Override
     public IntSequence group(double interval, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
-            int intervalValue = (int) interval;
+
             IntArrayList groupIndexesList = new IntArrayList(length.getValue());
 
             @Override
@@ -192,17 +189,16 @@ public class IntColumn implements Column {
                     from = groupIndexesList.get(groupListSize - 2);
                 }
 
-                int groupValue = ((dataSequence.get(from) / intervalValue)) * intervalValue;
-                groupValue += intervalValue;
+                double groupValue = ((int)(dataSequence.get(from) / interval) + 1) * interval;
                 for (int i = from + 1; i < length.getValue(); i++) {
                     int data = dataSequence.get(i);
                     if (dataSequence.get(i) >= groupValue) {
                         groupIndexesList.add(i);
-                        groupValue += intervalValue; // often situation
+                        groupValue += interval; // often situation
 
                         if (data > groupValue) { // rare situation
-                            groupValue = ((dataSequence.get(i) / intervalValue)) * intervalValue;
-                            groupValue += intervalValue;
+                            groupValue = ((int)(dataSequence.get(i) / interval) + 1) * interval;
+
                         }
                     }
                 }
@@ -213,10 +209,26 @@ public class IntColumn implements Column {
         return groupIndexes;
     }
 
+
+    /**
+     * @return grouping function Object corresponding
+     * to the given type of data (IntGroupingAvg, FloatGroupingMin and so on)
+     */
+    private IntAggFunction getAggFunction(Aggregation aggregation) {
+        // Capitalize the first letter of dataType string
+        String type = dataType.toString().substring(0, 1).toUpperCase() + dataType.toString().substring(1);
+        String functionClassName = "com.biorecorder.data.frame.impl."+ type + aggregation.toString();
+        try {
+            return (IntAggFunction) (Class.forName(functionClassName)).newInstance();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
-    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) {
+    public Column aggregate(Aggregation aggregation, IntSequence groupIndexes) {
         IntSequence resultantSequence = new IntSequence() {
-            private IntAggFunction aggFunction = (IntAggFunction) aggregateFunction.getFunctionImpl(dataType);
+            private IntAggFunction aggFunction = getAggFunction(aggregation);
             private int lastIndex = -1;
 
             @Override
@@ -243,7 +255,7 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public Column aggregate(AggregateFunction aggregateFunction, int points) {
+    public Column aggregate(Aggregation aggregation, int points) {
         IntSequence groupIndexes = new IntSequence() {
             int size;
 
@@ -267,7 +279,7 @@ public class IntColumn implements Column {
                 }
             }
         };
-        return aggregate(aggregateFunction, groupIndexes);
+        return aggregate(aggregation, groupIndexes);
     }
 
 
@@ -392,24 +404,5 @@ public class IntColumn implements Column {
         public boolean isDecreasing() {
             return isDecreasing;
         }
-    }
-
-    public static void main(String[] args) {
-        Integer[] data = {2, 5, 6, 8, 15, 15, 34, 40};
-        List<Integer> dataList = new ArrayList<Integer>(Arrays.asList(data));
-        IntColumn column = new IntColumn(dataList);
-
-        Stats stats = column.stats(8, true);
-        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
-
-        dataList.set(7, -10);
-        dataList.add(50);
-
-        stats = column.stats(9, true);
-        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
-
-        stats = column.stats(3, true);
-        System.out.println(stats.min() + " min max " + stats.max() + " " + stats.isIncreasing());
-
     }
 }

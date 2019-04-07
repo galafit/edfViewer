@@ -1,6 +1,7 @@
 package com.biorecorder.data.frame;
 
 
+import com.biorecorder.data.frame.impl.IntColumn;
 import com.biorecorder.data.sequence.IntSequence;
 
 /**

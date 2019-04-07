@@ -2,10 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.themes.WhiteTheme;
-import com.biorecorder.data.aggregation.AggregateFunction;
-import com.biorecorder.data.frame.DataFrame;
-import com.biorecorder.data.frame.SquareFunction;
+import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -83,8 +80,8 @@ public class ChartTest extends JFrame {
        // chart.setXMinMax(0, 0, 500);
         chart.addTrace(new LineTrace(xyData3), false, true, false);
         chart.addStack();
-        xyData2.setColumnAggFunctions(1, AggregateFunction.MIN);
-        xyData2.setColumnAggFunctions(2, AggregateFunction.MAX);
+        xyData2.setColumnAggFunctions(1, Aggregation.MIN);
+        xyData2.setColumnAggFunctions(2, Aggregation.MAX);
 
         chart.addTrace(new LineTrace(xyData2), false);
 

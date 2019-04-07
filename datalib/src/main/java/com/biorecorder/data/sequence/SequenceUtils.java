@@ -1,8 +1,9 @@
 package com.biorecorder.data.sequence;
 
-
-import com.biorecorder.data.frame.IntComparator;
-import com.biorecorder.data.frame.Swapper;
+import com.biorecorder.data.utils.IntComparator;
+import com.biorecorder.data.utils.PrimitiveUtils;
+import com.biorecorder.data.utils.SortAlgorithm;
+import com.biorecorder.data.utils.Swapper;
 
 /**
  * Based on:
@@ -11,6 +12,20 @@ import com.biorecorder.data.frame.Swapper;
  * <br><a href="https://rosettacode.org/wiki/Binary_search">Binary search</a>
  */
 public class SequenceUtils {
+    static class ArrSwapper implements Swapper {
+        private int[] arr;
+        public ArrSwapper(int[] arr) {
+            this.arr = arr;
+        }
+        @Override
+        public void swap(int index1, int index2) {
+            int v1 = arr[index1];
+            int v2 = arr[index2];
+            arr[index1] = v2;
+            arr[index2] = v1;
+        }
+    }
+
 
     /**
      * This method do not modifying the order of the underlying data!
@@ -31,16 +46,8 @@ public class SequenceUtils {
                 return PrimitiveUtils.compareInt(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
             }
         };
-        Swapper swapper = new Swapper() {
-            @Override
-            public void swap(int index1, int index2) {
-                int v1 = orderedIndexes[index1];
-                int v2 = orderedIndexes[index2];
-                orderedIndexes[index1] = v2;
-                orderedIndexes[index2] = v1;
-            }
-        };
-        SortAlgorithm.getDefault(isParallel).sort(0, length, comparator, swapper);
+
+        SortAlgorithm.getDefault(isParallel).sort(0, length, comparator, new ArrSwapper(orderedIndexes));
 
         return orderedIndexes;
     }

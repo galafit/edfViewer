@@ -1,11 +1,11 @@
-package com.biorecorder.data.aggregation;
+package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.sequence.IntSequence;
 
 /**
  * Created by galafit on 16/1/19.
  */
-public abstract class  IntAggFunction {
+abstract class  IntAggFunction {
     protected int count;
 
     public abstract int add(IntSequence sequence, int from, int length);

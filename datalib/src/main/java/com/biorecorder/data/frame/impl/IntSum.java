@@ -1,13 +1,12 @@
-package com.biorecorder.data.aggregation.impl;
+package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.aggregation.IntAggFunction;
 import com.biorecorder.data.sequence.IntSequence;
-import com.biorecorder.data.sequence.PrimitiveUtils;
+import com.biorecorder.data.utils.PrimitiveUtils;
 
 /**
  * Created by galafit on 5/4/19.
  */
-public class IntSum extends IntAggFunction {
+class IntSum extends IntAggFunction {
     private long sum;
 
     @Override

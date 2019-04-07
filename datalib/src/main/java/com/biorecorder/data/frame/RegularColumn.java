@@ -1,7 +1,7 @@
 package com.biorecorder.data.frame;
 
 
-import com.biorecorder.data.aggregation.AggregateFunction;
+import com.biorecorder.data.frame.impl.IntColumn;
 import com.biorecorder.data.sequence.IntSequence;
 
 /**
@@ -128,8 +128,8 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(AggregateFunction aggregateFunction, int points) throws IllegalArgumentException {
-        switch (aggregateFunction) {
+    public Column aggregate(Aggregation aggregation, int points) throws IllegalArgumentException {
+        switch (aggregation) {
             case MIN:
             case FIRST: {
                 double startNew = startValue;
@@ -158,13 +158,13 @@ public class RegularColumn extends IntColumn {
                 return new RegularColumn(startNew, stepNew);
             }
             default:
-                String errMsg = "Unsupported Aggregate function: "+aggregateFunction;
+                String errMsg = "Unsupported Aggregate function: "+ aggregation;
                 throw new IllegalArgumentException(errMsg);
         }
     }
 
     @Override
-    public Column aggregate(AggregateFunction aggregateFunction, IntSequence groupIndexes) throws IllegalArgumentException {
+    public Column aggregate(Aggregation aggregateFunction, IntSequence groupIndexes) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
