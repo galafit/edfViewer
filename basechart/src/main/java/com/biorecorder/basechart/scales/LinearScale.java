@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.data.utils.NormalizedNumber;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -75,7 +76,7 @@ public class LinearScale implements Scale {
             float rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
             double domainLength = domain[domain.length - 1] - domain[0];
             NormalizedNumber pointInterval = new NormalizedNumber(domainLength / rangePointsCount);
-            numberFormatter = getNumberFormat(pointInterval.getPower(), null);
+            numberFormatter = getNumberFormat(pointInterval.getDigitsPower(), null);
         }
         long longPart = (long) value;
         if(value == longPart) {
@@ -125,21 +126,18 @@ public class LinearScale implements Scale {
 
 
     class LinearTickProvider implements TickProvider {
-        int tickDigits;
-        int tickPower;
+        NormalizedNumber tickInterval;
         private LabelPrefixAndSuffix labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
-        private int lastTickDigits;
+        private int currentTickNumber;
 
         public LinearTickProvider(LabelPrefixAndSuffix labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
         }
 
         public void setTickInterval(double tickInterval) {
-            NormalizedNumber normalizedInterval = new NormalizedNumber(tickInterval);
-            tickPower = normalizedInterval.getPowerOfLastSignificantDigit();
-            tickDigits = (int) (normalizedInterval.getMantissa() * Math.pow(10, tickPower));
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
+            this.tickInterval = new NormalizedNumber(tickInterval);
+            labelFormat = getNumberFormat(this.tickInterval.getDigitsPower(), labelFormatInfo);
         }
 
         /**
@@ -156,7 +154,7 @@ public class LinearScale implements Scale {
             double min = domain[0];
             double interval = (max - min) / tickIntervalCount;
             NormalizedNumber normalizedInterval = new NormalizedNumber(interval);
-            int power = normalizedInterval.getPower();
+            int power = normalizedInterval.getMantissaPower();
             int firstDigit = (int) Math.round(normalizedInterval.getMantissa());
             switch (firstDigit) {
                 case 3:
@@ -184,55 +182,49 @@ public class LinearScale implements Scale {
                     power++;
                     break;
             }
-            tickPower = power;
-            tickDigits = firstDigit;
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
+            tickInterval = new NormalizedNumber(firstDigit, power);
+            labelFormat = getNumberFormat(power, labelFormatInfo);
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
-            tickDigits *= increaseFactor;
-            while (tickDigits % 10 == 0) {
-                tickDigits /= 10;
-                tickPower++;
-            }
-            labelFormat = getNumberFormat(tickPower, labelFormatInfo);
+            tickInterval = tickInterval.multiply(increaseFactor);
+            labelFormat = getNumberFormat(tickInterval.getDigitsPower(), labelFormatInfo);
         }
 
         @Override
         public Tick getNextTick() {
-            lastTickDigits += tickDigits;
-            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            currentTickNumber++;
+            NormalizedNumber tickValue = tickInterval.multiply(currentTickNumber);
             return new Tick(tickValue, format(tickValue.getValue()));
         }
 
         @Override
         public Tick getPreviousTick() {
-            lastTickDigits -= tickDigits;
-            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            currentTickNumber--;
+            NormalizedNumber tickValue = tickInterval.multiply(currentTickNumber);
             return new Tick(tickValue, format(tickValue.getValue()));
         }
 
         @Override
         public Tick getUpperTick(double value) {
-            if(tickPower >= 0) {
-                lastTickDigits = ((int) Math.ceil (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
+            if(tickInterval.getDigitsPower() >= 0) {
+                currentTickNumber = ((int) Math.ceil (value / (tickInterval.getDigits() * Math.pow(10, tickInterval.getDigitsPower()))));
             } else {
-                lastTickDigits = ((int) Math.ceil (value * Math.pow(10, -tickPower) / tickDigits)) * tickDigits;
-
+                currentTickNumber = ((int) Math.ceil (value * Math.pow(10, -tickInterval.getDigitsPower()) / tickInterval.getDigits()));
             }
-            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.getDigits(), tickInterval.getDigitsPower());
             return new Tick(tickValue, format(tickValue.getValue()));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            if(tickPower >= 0) {
-                lastTickDigits = ((int) Math.floor (value / (tickDigits * Math.pow(10, tickPower)))) * tickDigits;
+            if(tickInterval.getDigitsPower() >= 0) {
+                currentTickNumber = ((int) Math.floor (value / (tickInterval.getDigits() * Math.pow(10, tickInterval.getDigitsPower()))));
             } else {
-                lastTickDigits = ((int) Math.floor (value * Math.pow(10, -tickPower) / tickDigits)) * tickDigits;
-
-            }            TickValue tickValue = new TickValue(lastTickDigits, tickPower);
+                currentTickNumber = ((int) Math.floor (value * Math.pow(10, -tickInterval.getDigitsPower()) / tickInterval.getDigits()));
+            }
+            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.getDigits(), tickInterval.getDigitsPower());
             return new Tick(tickValue, format(tickValue.getValue()));
         }
 

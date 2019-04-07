@@ -1,18 +1,20 @@
 package com.biorecorder.basechart.scales;
 
+import com.biorecorder.data.utils.NormalizedNumber;
+
 /**
  * Created by galafit on 5/9/17.
  */
 public class Tick {
-    private TickValue value;
+    private NormalizedNumber value;
     private String label;
 
-    public Tick(TickValue value, String label) {
+    public Tick(NormalizedNumber value, String label) {
         this.value = value;
         this.label = label;
     }
 
-    public TickValue getTickValue() {
+    public NormalizedNumber getTickValue() {
         return value;
     }
 
