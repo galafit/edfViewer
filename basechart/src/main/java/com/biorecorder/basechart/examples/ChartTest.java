@@ -1,6 +1,8 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.scales.LinearScale;
+import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.list.IntArrayList;
@@ -76,7 +78,7 @@ public class ChartTest extends JFrame {
         noRegularData.addColumn(yData1);
 
 
-        chart = new Chart(new DarkTheme(true).getChartConfig());
+        chart = new Chart(new DarkTheme(true).getChartConfig(), new TimeScale(), new LinearScale());
         //chart.setXMinMax(0, 0, 500);
         chart.addTrace(new LineTrace(xyData3), false, true, false);
         chart.addStack();

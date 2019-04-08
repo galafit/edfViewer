@@ -137,7 +137,7 @@ public class TimeScale implements Scale {
     class TimeTickProvider implements TickProvider {
         private long tickInterval = 1;
         private DateFormat dateFormat;
-        private Tick lastTick;
+        private long currentTickNumber;
 
         public void setTickInterval(double tickInterval) {
             this.tickInterval = (long) tickInterval;
@@ -157,40 +157,40 @@ public class TimeScale implements Scale {
 
         @Override
         public Tick getNextTick() {
-            if (lastTick == null) {
-                long min = domain[0];
-                lastTick = getLowerTick(min);
-            } else {
-                long tickValue = lastTick.getTickValue().mantissaDigits() + tickInterval;
-                lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
-            }
-            return lastTick;
+            currentTickNumber++;
+            long tickValue = currentTickNumber * tickInterval;
+            return new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
         }
 
         @Override
         public Tick getPreviousTick() {
-            if (lastTick == null) {
-                long min = domain[0];
-                lastTick = getLowerTick(min);
-            } else {
-                long tickValue = lastTick.getTickValue().mantissaDigits() - tickInterval;
-                lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
-            }
-            return lastTick;
+            currentTickNumber--;
+            long tickValue = currentTickNumber * tickInterval;
+            return new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
         }
 
         @Override
         public Tick getUpperTick(double value) {
-            long tickValue = (long) (Math.ceil(value / tickInterval) * tickInterval);
-            lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
-            return lastTick;
+            long valueLong = (long)(value);
+            currentTickNumber = valueLong / tickInterval;
+            if(currentTickNumber * tickInterval < valueLong) {
+                currentTickNumber++;
+            }
+
+            long tickValue = currentTickNumber * tickInterval;
+            return new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            long tickValue = (long) (Math.floor(value / tickInterval) * tickInterval);
-            lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
-            return lastTick;
+            long valueLong = (long)(value);
+            currentTickNumber = valueLong / tickInterval;
+            if(currentTickNumber * tickInterval > valueLong) {
+                currentTickNumber--;
+            }
+
+            long tickValue = currentTickNumber * tickInterval;
+            return new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
         }
 
 
