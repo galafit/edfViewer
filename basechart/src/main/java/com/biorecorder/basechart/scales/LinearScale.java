@@ -6,6 +6,7 @@ import com.biorecorder.data.utils.NormalizedNumber;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 /**
@@ -75,8 +76,8 @@ public class LinearScale implements Scale {
         if (numberFormatter == null) {
             float rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
             double domainLength = domain[domain.length - 1] - domain[0];
-            NormalizedNumber pointInterval = new NormalizedNumber(domainLength / rangePointsCount);
-            numberFormatter = getNumberFormat(pointInterval.getDigitsPower(), null);
+            double pointInterval = domainLength / rangePointsCount;
+            numberFormatter = getNumberFormat(NormalizedNumber.firstDigitExponent(pointInterval), null);
         }
         long longPart = (long) value;
         if(value == longPart) {
@@ -129,7 +130,7 @@ public class LinearScale implements Scale {
         NormalizedNumber tickInterval;
         private LabelPrefixAndSuffix labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
-        private int currentTickNumber;
+        private long currentTickNumber;
 
         public LinearTickProvider(LabelPrefixAndSuffix labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
@@ -137,7 +138,7 @@ public class LinearScale implements Scale {
 
         public void setTickInterval(double tickInterval) {
             this.tickInterval = new NormalizedNumber(tickInterval);
-            labelFormat = getNumberFormat(this.tickInterval.getDigitsPower(), labelFormatInfo);
+            labelFormat = getNumberFormat(this.tickInterval.exponent(), labelFormatInfo);
         }
 
         /**
@@ -153,9 +154,9 @@ public class LinearScale implements Scale {
             double max = domain[domain.length - 1];
             double min = domain[0];
             double interval = (max - min) / tickIntervalCount;
-            NormalizedNumber normalizedInterval = new NormalizedNumber(interval);
-            int power = normalizedInterval.getMantissaPower();
-            int firstDigit = (int) Math.round(normalizedInterval.getMantissa());
+
+            int exponent = NormalizedNumber.firstDigitExponent(interval);
+            int firstDigit = (int) Math.round(interval / Math.pow(10, exponent));
             switch (firstDigit) {
                 case 3:
                     firstDigit = 2;
@@ -171,61 +172,53 @@ public class LinearScale implements Scale {
                     break;
                 case 8:
                     firstDigit = 1;
-                    power++;
+                    exponent++;
                     break;
                 case 9:
                     firstDigit = 1;
-                    power++;
+                    exponent++;
                     break;
                 case 10:
                     firstDigit = 1;
-                    power++;
+                    exponent++;
                     break;
             }
-            tickInterval = new NormalizedNumber(firstDigit, power);
-            labelFormat = getNumberFormat(power, labelFormatInfo);
+            tickInterval = new NormalizedNumber(firstDigit, exponent);
+            labelFormat = getNumberFormat(exponent, labelFormatInfo);
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
             tickInterval = tickInterval.multiply(increaseFactor);
-            labelFormat = getNumberFormat(tickInterval.getDigitsPower(), labelFormatInfo);
+            labelFormat = getNumberFormat(tickInterval.exponent(), labelFormatInfo);
         }
 
         @Override
         public Tick getNextTick() {
             currentTickNumber++;
             NormalizedNumber tickValue = tickInterval.multiply(currentTickNumber);
-            return new Tick(tickValue, format(tickValue.getValue()));
+            return new Tick(tickValue, format(tickValue.value()));
         }
 
         @Override
         public Tick getPreviousTick() {
             currentTickNumber--;
             NormalizedNumber tickValue = tickInterval.multiply(currentTickNumber);
-            return new Tick(tickValue, format(tickValue.getValue()));
+            return new Tick(tickValue, format(tickValue.value()));
         }
 
         @Override
         public Tick getUpperTick(double value) {
-            if(tickInterval.getDigitsPower() >= 0) {
-                currentTickNumber = ((int) Math.ceil (value / (tickInterval.getDigits() * Math.pow(10, tickInterval.getDigitsPower()))));
-            } else {
-                currentTickNumber = ((int) Math.ceil (value * Math.pow(10, -tickInterval.getDigitsPower()) / tickInterval.getDigits()));
-            }
-            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.getDigits(), tickInterval.getDigitsPower());
-            return new Tick(tickValue, format(tickValue.getValue()));
+            currentTickNumber = tickInterval.upperScaleFactor(value);
+            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.mantissaDigits(), tickInterval.exponent());
+            return new Tick(tickValue, format(tickValue.value()));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            if(tickInterval.getDigitsPower() >= 0) {
-                currentTickNumber = ((int) Math.floor (value / (tickInterval.getDigits() * Math.pow(10, tickInterval.getDigitsPower()))));
-            } else {
-                currentTickNumber = ((int) Math.floor (value * Math.pow(10, -tickInterval.getDigitsPower()) / tickInterval.getDigits()));
-            }
-            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.getDigits(), tickInterval.getDigitsPower());
-            return new Tick(tickValue, format(tickValue.getValue()));
+            currentTickNumber = tickInterval.lowerScaleFactor(value);
+            NormalizedNumber tickValue = new NormalizedNumber(currentTickNumber * tickInterval.mantissaDigits(), tickInterval.exponent());
+            return new Tick(tickValue, format(tickValue.value()));
         }
 
         public String format(double value) {

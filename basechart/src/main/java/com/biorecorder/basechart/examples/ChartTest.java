@@ -30,13 +30,13 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 4; i++) {
             yData1.add(i);
             yData2.add(i);
             yData3.add(i + 50);
         }
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 4; i++) {
             xData.add(i);
         }
 
@@ -76,8 +76,8 @@ public class ChartTest extends JFrame {
         noRegularData.addColumn(yData1);
 
 
-        chart = new Chart(new DarkTheme().getChartConfig());
-       // chart.setXMinMax(0, 0, 500);
+        chart = new Chart(new DarkTheme(true).getChartConfig());
+        //chart.setXMinMax(0, 0, 500);
         chart.addTrace(new LineTrace(xyData3), false, true, false);
         chart.addStack();
         xyData2.setColumnAggFunctions(1, Aggregation.MIN);

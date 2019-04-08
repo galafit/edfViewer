@@ -9,9 +9,9 @@ public class Tick {
     private NormalizedNumber value;
     private String label;
 
-    public Tick(NormalizedNumber value, String label) {
-        this.value = value;
-        this.label = label;
+    public Tick(NormalizedNumber tickValue, String tickLabel) {
+        this.value = tickValue;
+        this.label = tickLabel;
     }
 
     public NormalizedNumber getTickValue() {

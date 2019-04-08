@@ -2,7 +2,6 @@ package com.biorecorder.basechart.axis;
 
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
@@ -306,8 +305,8 @@ public abstract class Axis {
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
 
         if (ticksSkipStep > 1) {
-            double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue()));
-            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue())) / tickPixelInterval);
+            double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().value()) - scale(tickMin.getTickValue().value()));
+            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().value()) - scale(tickMin.getTickValue().value())) / tickPixelInterval);
             if (tickIntervalCount / ticksSkipStep < 3) {
                 if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
                     if (tickIntervalCount % 2 != 0) {
@@ -328,7 +327,7 @@ public abstract class Axis {
                 }
             }
         }
-        scale.setDomain(tickMin.getTickValue().getValue(), tickMax.getTickValue().getValue());
+        scale.setDomain(tickMin.getTickValue().value(), tickMax.getTickValue().value());
     }
 
 
@@ -463,10 +462,10 @@ public abstract class Axis {
         String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
         int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
 
-        double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue()));
+        double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().value()) - scale(tickMin.getTickValue().value()));
 
         // real resultant number of tick intervals
-        int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().getValue()) - scale(tickMin.getTickValue().getValue())) / tickPixelInterval);
+        int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().value()) - scale(tickMin.getTickValue().value())) / tickPixelInterval);
         // Calculate how many ticks need to be skipped to avoid labels overlapping.
         // When ticksSkipStep = n, only every n'th label on the axis will be shown.
         // For example if ticksSkipStep = 2 every other label will be shown.
@@ -531,10 +530,10 @@ public abstract class Axis {
         Tick nextTick = tickProvider.getNextTick();
         tickProvider.getPreviousTick();
 
-        int tickPixelInterval = ticksSkipStep * ((int)Math.abs(scale(currentTick.getTickValue().getValue()) - scale(nextTick.getTickValue().getValue())));
+        int tickPixelInterval = ticksSkipStep * ((int)Math.abs(scale(currentTick.getTickValue().value()) - scale(nextTick.getTickValue().value())));
 
         while (currentTick.getTickValue().compare(max) <= 0) {
-            int position = (int) Math.round(scale(currentTick.getTickValue().getValue()));
+            int position = (int) Math.round(scale(currentTick.getTickValue().value()));
             // tick position
             tickPositions.add(position);
             // tick label
@@ -545,8 +544,8 @@ public abstract class Axis {
 
             if (minorTickIntervalCount > 0) {
                 // minor tick positions
-                double minorTickInterval = (nextTick.getTickValue().getValue() - currentTick.getTickValue().getValue()) / minorTickIntervalCount;
-                double minorTickValue = currentTick.getTickValue().getValue();
+                double minorTickInterval = (nextTick.getTickValue().value() - currentTick.getTickValue().value()) / minorTickIntervalCount;
+                double minorTickValue = currentTick.getTickValue().value();
                 for (int i = 1; i < minorTickIntervalCount; i++) {
                     minorTickValue += minorTickInterval;
                     if (minorTickValue <= max) {
@@ -571,8 +570,8 @@ public abstract class Axis {
             for (int i = 0; i < ticksSkipStep; i++) {
                 previousTick = tickProvider.getPreviousTick();
             }
-            double minorTickInterval = (currentTick.getTickValue().getValue() - previousTick.getTickValue().getValue()) / minorTickIntervalCount;
-            double minorTickValue = currentTick.getTickValue().getValue();
+            double minorTickInterval = (currentTick.getTickValue().value() - previousTick.getTickValue().value()) / minorTickIntervalCount;
+            double minorTickValue = currentTick.getTickValue().value();
             IntArrayList positions = new IntArrayList();
             for (int i = 1; i < minorTickIntervalCount; i++) {
                 minorTickValue -= minorTickInterval;

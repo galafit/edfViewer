@@ -161,7 +161,7 @@ public class TimeScale implements Scale {
                 long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                long tickValue = lastTick.getTickValue().getDigits() + tickInterval;
+                long tickValue = lastTick.getTickValue().mantissaDigits() + tickInterval;
                 lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
             }
             return lastTick;
@@ -173,7 +173,7 @@ public class TimeScale implements Scale {
                 long min = domain[0];
                 lastTick = getLowerTick(min);
             } else {
-                long tickValue = lastTick.getTickValue().getDigits() - tickInterval;
+                long tickValue = lastTick.getTickValue().mantissaDigits() - tickInterval;
                 lastTick = new Tick(new NormalizedNumber(tickValue, 0), dateFormat.format(tickValue));
             }
             return lastTick;
