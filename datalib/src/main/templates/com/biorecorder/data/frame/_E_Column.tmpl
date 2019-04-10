@@ -140,7 +140,7 @@ public class #E#Column implements Column {
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.doubleTo#E#(value), from, length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDoubleTo#E#(value), from, length);
     }
 
 

@@ -4,7 +4,6 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -19,10 +18,9 @@ public class ChartTest extends JFrame {
     IntArrayList yUnsort = new IntArrayList();
     IntArrayList xUnsort = new IntArrayList();
 
-    IntArrayList xData = new IntArrayList();
-    IntArrayList yData1 = new IntArrayList();
-    IntArrayList yData2 = new IntArrayList();
-    IntArrayList yData3 = new IntArrayList();
+    IntArrayList list1 = new IntArrayList();
+    IntArrayList list2 = new IntArrayList();
+
     Chart chart;
     ChartPanel chartPanel;
 
@@ -32,14 +30,9 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 4; i++) {
-            yData1.add(i);
-            yData2.add(i);
-            yData3.add(i + 50);
-        }
-
-        for (int i = 0; i < 4; i++) {
-            xData.add(i);
+        for (int i = 0; i < 150; i++) {
+            list1.add(i);
+            list2.add(i + 50);
         }
 
 
@@ -58,34 +51,29 @@ public class ChartTest extends JFrame {
         yUnsort.add(300);
 
 
-
-        XYData xyData2 = new XYData(0, 1);
-        //xyData2.addColumn(xData);
-        xyData2.addColumn(yData1);
-        xyData2.addColumn(yData2);
-        xyData2.setColumnName(2, "eeg");
-
-
-        XYData xyData3 = new XYData();
-        xyData3.addColumn(xUnsort);
-        xyData3.addColumn(yUnsort);
-
-
         XYData regularData = new XYData(0, 1);
-        regularData.addColumn(yData1);
+        regularData.addColumn(list1);
+       // regularData.addColumn(list2);
+
         XYData noRegularData = new XYData();
-        noRegularData.addColumn(yData1);
-        noRegularData.addColumn(yData1);
+        noRegularData.addColumn(list1);
+        noRegularData.addColumn(list1);
+
+
+        XYData unsortedData = new XYData();
+        unsortedData.addColumn(xUnsort);
+        unsortedData.addColumn(yUnsort);
+
+
+
 
 
         chart = new Chart(new DarkTheme(true).getChartConfig(), new TimeScale(), new LinearScale());
-        //chart.setXMinMax(0, 0, 500);
-        chart.addTrace(new LineTrace(xyData3), false, true, false);
+        chart.setXScale(0, new LinearScale());
+        chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addStack();
-        xyData2.setColumnAggFunctions(1, Aggregation.MIN);
-        xyData2.setColumnAggFunctions(2, Aggregation.MAX);
-
-        chart.addTrace(new LineTrace(xyData2), false);
+        chart.addTrace(new LineTrace(regularData), true);
+        chart.addTrace(new LineTrace(noRegularData), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -108,19 +96,15 @@ public class ChartTest extends JFrame {
                         e.printStackTrace();
                     }
 
-                    int yData1Last = yData1.get(yData1.size() - 1);
-                    int yData2Last = yData2.get(yData2.size() - 1);
-                    int yData3Last = yData3.get(yData2.size() - 1);
+                    int yData1Last = list1.get(list1.size() - 1);
+                    int yData2Last = list2.get(list2.size() - 1);
+
                     for (int i = 1; i <= 171; i++) {
-                        yData1.add(10);
-                        //yData1.add(i + yData1Last);
-                        yData2.add(i + yData2Last);
-                        yData3.add(i + yData3Last);
+                        list1.add(10);
+                        //list1.add(i + yData1Last);
+                        list2.add(i + yData2Last);
                     }
-                    int xDataLast = xData.get(xData.size() - 1);
-                    for (int i = 1; i <= 171; i++) {
-                        xData.add(i + xDataLast);
-                    }
+
                     chart.appendData();
                     chartPanel.repaint();
                 }

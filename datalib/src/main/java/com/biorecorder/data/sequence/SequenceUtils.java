@@ -43,7 +43,7 @@ public class SequenceUtils {
         IntComparator comparator = new IntComparator() {
             @Override
             public int compare(int index1, int index2) {
-                return PrimitiveUtils.compareInt(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
+                return Integer.compare(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
             }
         };
 
@@ -66,9 +66,9 @@ public class SequenceUtils {
         int high = fromIndex + length;
         while (low < high) {
             int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (PrimitiveUtils.compareInt(value, data.get(mid)) > 0) {
+            if (Integer.compare(value, data.get(mid)) > 0) {
                 low = mid + 1;
-            } else if (PrimitiveUtils.compareInt(value, data.get(mid)) < 0) {
+            } else if (Integer.compare(value, data.get(mid)) < 0) {
                 high = mid;
             } else { //  Values are equal but for float and double additional checks is needed
                 return mid; // Key found
@@ -91,7 +91,7 @@ public class SequenceUtils {
         int high = from + length;
         while (low < high) {
             final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (PrimitiveUtils.compareInt(value, data.get(mid)) <= 0) {
+            if (Integer.compare(value, data.get(mid)) <= 0) {
                 high = mid;
             } else {
                 low = mid + 1;
@@ -111,7 +111,7 @@ public class SequenceUtils {
         int high = from + length;
         while (low < high) {
             final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (PrimitiveUtils.compareInt(value, data.get(mid)) >= 0) {
+            if (Integer.compare(value, data.get(mid)) >= 0) {
                 low = mid + 1;
             } else {
                 high = mid;
