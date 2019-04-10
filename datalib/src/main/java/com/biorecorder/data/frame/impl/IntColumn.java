@@ -421,11 +421,11 @@ public class IntColumn implements Column {
             this.isDecreasing = isDecreasing;
         }
 
-        public int getMin() {
+        int getMin() {
             return min;
         }
 
-        public int getMax() {
+        int getMax() {
             return max;
         }
 

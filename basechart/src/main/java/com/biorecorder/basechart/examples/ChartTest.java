@@ -65,9 +65,6 @@ public class ChartTest extends JFrame {
         unsortedData.addColumn(yUnsort);
 
 
-
-
-
         chart = new Chart(new DarkTheme(true).getChartConfig(), new TimeScale(), new LinearScale());
         chart.setXScale(0, new LinearScale());
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
