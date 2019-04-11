@@ -31,17 +31,6 @@ public class IntCachingSequence implements IntSequence {
 
     }
 
-    private void cacheData() {
-        long dataSize = innerData.size();
-        dataSize -= nLastExcluded;
-
-        if (cachedData.size()  < dataSize) {
-            for (int i = cachedData.size(); i < dataSize; i++) {
-                cachedData.add(innerData.get(i));
-            }
-        }
-    }
-
     @Override
     public int get(int index) {
         // cache data

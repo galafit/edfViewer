@@ -45,11 +45,9 @@ public class TraceDataManager {
             case EQUAL_POINTS_NUMBER:
                 isEqualFrequencyGrouping = true;
                 break;
-
             case EQUAL_INTERVALS:
                 isEqualFrequencyGrouping = false;
                 break;
-
             case AUTO:
                 if (traceData.isColumnRegular(0)) {
                     isEqualFrequencyGrouping = true;
@@ -57,7 +55,6 @@ public class TraceDataManager {
                     isEqualFrequencyGrouping = false;
                 }
                 break;
-
             default:
                 isEqualFrequencyGrouping = true;
                 break;
@@ -216,7 +213,7 @@ public class TraceDataManager {
 
         boolean isGroupingEnabled = false;
         if (processingConfig.isGroupingEnabled()) {
-            // calculate best grouping interval
+            // calculateStats best grouping interval
             groupInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;;
             pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
             pointsInGroupRound = roundPointsNumber(pointsInGroup);
@@ -325,6 +322,7 @@ public class TraceDataManager {
             if(isNextStepGrouping) {
                 if(isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
+                    groupedData.appendData();
                     groupedDataNew = groupedData.resampleByEqualFrequency(groupedPointsInGroupRound);
                     groupedDataNew.cache();
                     // force "lazy" grouping

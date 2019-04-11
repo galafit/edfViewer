@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class DataFrame {
     private IntWrapper length = new IntWrapper(0);
-    private boolean isLastRowChangeable = false;
+    private boolean isLastRowChangeable = true;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<Aggregation[]> columnAggFunctions = new ArrayList<>();
@@ -296,7 +296,7 @@ public class DataFrame {
      * On the chart  every bin is represented by one value (point).
      * It may be the number of element in the bin (for histogram)
      * or the midpoint of the bin interval (avg) and so on.
-     * How we will calculate the "value" of each bin is specified by the aggregating function
+     * How we will calculateStats the "value" of each bin is specified by the aggregating function
      * (sum, average, count, min, first, last...)
      * <p>
      * The most common "default" methods to divide data into bins:
@@ -387,7 +387,7 @@ public class DataFrame {
                     if(groupIndexes != null) {
                         resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
                     } else {
-                        resultantFrame.columns.add(column.aggregate(aggregation, points));
+                        resultantFrame.columns.add(column.aggregate(aggregation, points, length));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     Aggregation[] resultantAgg = {aggregation};

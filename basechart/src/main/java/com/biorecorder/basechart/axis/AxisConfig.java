@@ -42,7 +42,7 @@ public class AxisConfig {
     private double tickInterval = -1; // in axis domain units
     private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 
-    // Used to calculate number of ticks. If <= 0 will not be taken into account
+    // Used to calculateStats number of ticks. If <= 0 will not be taken into account
     //Specify maximum distance between axis start and minTick in relation to axis length (percents)
     private int tickAccuracy = 20; // percent (minTick - min) * 100 / length
 

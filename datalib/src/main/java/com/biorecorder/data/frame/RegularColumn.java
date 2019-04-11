@@ -128,7 +128,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points) throws IllegalArgumentException {
+    public Column aggregate(Aggregation aggregation, int points, IntWrapper length) throws IllegalArgumentException {
         switch (aggregation) {
             case MIN:
             case FIRST: {

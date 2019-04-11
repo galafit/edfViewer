@@ -42,6 +42,6 @@ public interface Column {
     IntSequence group(double interval, IntWrapper length);
 
     Column aggregate(Aggregation aggregation, IntSequence groupIndexes);
-    Column aggregate(Aggregation aggregation, int points);
+    Column aggregate(Aggregation aggregation, int points, IntWrapper length);
 
 }

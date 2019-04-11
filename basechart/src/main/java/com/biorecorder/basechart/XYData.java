@@ -17,7 +17,7 @@ public class XYData implements ChartData {
    private XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
         for (int i = 0; i < dataFrame.columnCount(); i++) {
-            onColumnAdded(i);
+          //  onColumnAdded(i);
         }
     }
 

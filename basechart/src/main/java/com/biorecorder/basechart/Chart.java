@@ -5,7 +5,6 @@ import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
-import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.sun.istack.internal.Nullable;
@@ -555,7 +554,6 @@ public class Chart {
         for (AxisWrapper axis : yAxisList) {
             axis.drawAxis(canvas, graphArea);
         }
-
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 

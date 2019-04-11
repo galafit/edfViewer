@@ -4,6 +4,7 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -53,11 +54,13 @@ public class ChartTest extends JFrame {
 
         XYData regularData = new XYData(0, 1);
         regularData.addColumn(list1);
+        //regularData.setColumnAggFunctions(1, Aggregation.FIRST);
        // regularData.addColumn(list2);
 
         XYData noRegularData = new XYData();
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
+       // noRegularData.setColumnAggFunctions(1, Aggregation.FIRST);
 
 
         XYData unsortedData = new XYData();
@@ -81,12 +84,17 @@ public class ChartTest extends JFrame {
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         Thread t = new Thread(new Runnable() {
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 10; count++) {
+                for (int count = 0; count < 4; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -97,17 +105,18 @@ public class ChartTest extends JFrame {
                     int yData2Last = list2.get(list2.size() - 1);
 
                     for (int i = 1; i <= 171; i++) {
-                        list1.add(10);
+                        list1.add(list1.size());
                         //list1.add(i + yData1Last);
-                        list2.add(i + yData2Last);
+                       // list2.add(i + yData2Last);
                     }
 
                     chart.appendData();
                     chartPanel.repaint();
                 }
+                System.out.println(list1.size());
             }
         });
-       // t.start();
+        t.start();
 
     }
 

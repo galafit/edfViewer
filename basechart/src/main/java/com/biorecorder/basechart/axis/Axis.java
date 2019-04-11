@@ -53,7 +53,7 @@ public abstract class Axis {
         if(isTooShort()) {
             return config.getAxisLineStroke().getWidth() / 2;
         }
-        if (width < 0) { // calculate width
+        if (width < 0) { // calculateStats width
             width = calculateWidth(canvas);
         }
         return width;
