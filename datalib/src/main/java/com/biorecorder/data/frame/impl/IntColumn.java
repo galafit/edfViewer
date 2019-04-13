@@ -308,13 +308,7 @@ public class IntColumn implements Column {
 
             @Override
             public int size() {
-                int l = length.getValue();
-                if (l % points == 0) {
-                    size = l / points + 1;
-                } else {
-                    size = l / points + 2;
-                }
-                return size;
+                return length.getValue() / points + 2;
             }
 
             @Override
