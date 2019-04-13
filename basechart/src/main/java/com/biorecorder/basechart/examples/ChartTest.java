@@ -52,18 +52,18 @@ public class ChartTest extends JFrame {
         yUnsort.add(300);
 
 
-        XYData regularData = new XYData(0, 1);
+        XYData regularData = new XYData(0, 1, true);
         regularData.addColumn(list1);
         //regularData.setColumnAggFunctions(1, Aggregation.FIRST);
        // regularData.addColumn(list2);
 
-        XYData noRegularData = new XYData();
+        XYData noRegularData = new XYData(true);
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
        // noRegularData.setColumnAggFunctions(1, Aggregation.FIRST);
 
 
-        XYData unsortedData = new XYData();
+        XYData unsortedData = new XYData(false);
         unsortedData.addColumn(xUnsort);
         unsortedData.addColumn(yUnsort);
 
@@ -94,7 +94,7 @@ public class ChartTest extends JFrame {
             int interval = 600;
             @Override
             public void run() {
-                for (int count = 0; count < 18; count++) {
+                for (int count = 0; count < 10; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {

@@ -16,17 +16,14 @@ public class XYData implements ChartData {
 
    private XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
-        for (int i = 0; i < dataFrame.columnCount(); i++) {
-          //  onColumnAdded(i);
-        }
     }
 
-    public XYData() {
-        dataFrame = new DataFrame();
+    public XYData(boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
     }
 
-    public XYData(double start, double step) {
-        dataFrame = new DataFrame();
+    public XYData(double start, double step, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
         addColumn(start, step);
     }
 

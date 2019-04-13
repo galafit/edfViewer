@@ -28,9 +28,9 @@ public interface Column {
 
     int bisect(double value, int from, int length);
 
-    Stats stats(int length, boolean isLastChangeable);
+    Stats stats(int length);
 
-    void cache(boolean isLastChangeable);
+    void cache();
     void disableCaching();
 
     /**
@@ -39,9 +39,9 @@ public interface Column {
      * interval-bin-group and returns a sequence of that start indexes.
      * The column data must be sorted!!!
      */
-    IntSequence group(double interval, IntWrapper length, boolean isLastChangeable);
+    IntSequence group(double interval, IntWrapper length);
 
-    Column aggregate(Aggregation aggregation, IntSequence groupIndexes);
-    Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable);
+    Column aggregate(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
+    Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);
 
 }

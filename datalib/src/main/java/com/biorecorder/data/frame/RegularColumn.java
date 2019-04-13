@@ -84,7 +84,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Stats stats(int length, boolean isLastChangeable) {
+    public Stats stats(int length) {
         return new Stats() {
             @Override
             public double min() {
@@ -128,7 +128,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable) throws IllegalArgumentException {
+    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) throws IllegalArgumentException {
         int sizeNew = size/points;
         switch (aggregation) {
             case MIN:
@@ -165,14 +165,14 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregateFunction, IntSequence groupIndexes) throws IllegalArgumentException {
+    public Column aggregate(Aggregation aggregateFunction, IntSequence groupIndexes, boolean isDataAppendMode) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
                 IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
-                        return groupIndexes.size() - 1;
+                       return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
@@ -187,7 +187,7 @@ public class RegularColumn extends IntColumn {
                 IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
-                        return groupIndexes.size() - 1;
+                        return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
@@ -201,7 +201,7 @@ public class RegularColumn extends IntColumn {
                 IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
-                        return groupIndexes.size() - 1;
+                        return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
@@ -215,7 +215,7 @@ public class RegularColumn extends IntColumn {
                 IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
-                        return groupIndexes.size() - 1;
+                        return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
@@ -229,7 +229,7 @@ public class RegularColumn extends IntColumn {
                 IntSequence resultantSequence = new IntSequence() {
                     @Override
                     public int size() {
-                        return groupIndexes.size() - 1;
+                        return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override

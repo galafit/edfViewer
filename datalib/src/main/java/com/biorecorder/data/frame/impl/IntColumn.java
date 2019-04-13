@@ -12,10 +12,10 @@ import java.util.List;
  * Created by galafit on 15/1/19.
  */
 public class IntColumn implements Column {
-    protected final static int NAN = Integer.MAX_VALUE;
-    protected final static DataType dataType = DataType.INT;
-    protected IntSequence dataSequence;
-    StatsInt stats;
+    private final static int NAN = Integer.MAX_VALUE;
+    private final static DataType dataType = DataType.INT;
+    private IntSequence dataSequence;
+    private StatsInt stats;
 
     public IntColumn(IntSequence data) {
         this.dataSequence = data;
@@ -48,6 +48,7 @@ public class IntColumn implements Column {
             }
         });
     }
+
 
     @Override
     public int size() {
@@ -93,6 +94,7 @@ public class IntColumn implements Column {
                 return dataSequence.get(index + from);
             }
         };
+
         return new IntColumn(subSequence);
     }
 
@@ -123,13 +125,9 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public void cache(boolean isLastChangeable) {
-        int nLastExcluded = 0;
-        if (isLastChangeable) {
-            nLastExcluded = 1;
-        }
+    public void cache() {
         if (!(dataSequence instanceof IntCachingSequence)) {
-            dataSequence = new IntCachingSequence(dataSequence, nLastExcluded);
+            dataSequence = new IntCachingSequence(dataSequence);
         }
     }
 
@@ -151,8 +149,8 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public IntSequence group(double interval, IntWrapper length, boolean isLastChangeable) {
-        System.out.println("interval "+interval);
+    public IntSequence group(double interval, IntWrapper length) {
+        System.out.println(length.getValue() +" interval "+interval);
 
         IntSequence groupIndexes = new IntSequence() {
 
@@ -172,10 +170,6 @@ public class IntColumn implements Column {
             private void update() {
                 int groupListSize = groupIndexesList.size();
                 int l = length.getValue();
-                if(isLastChangeable && l > 0) {
-                    l--;
-                }
-
                 if ( l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
                     return;
                 }
@@ -269,15 +263,23 @@ public class IntColumn implements Column {
         }
     }
 
+    protected int groupsCount(IntSequence groupIndexes, boolean isDataAppendMode) {
+        int groupsCount = groupIndexes.size() - 1;
+        if(isDataAppendMode && groupsCount > 0) {
+            groupsCount--;
+        }
+        return groupsCount;
+    }
+
     @Override
-    public Column aggregate(Aggregation aggregation, IntSequence groupIndexes) {
+    public Column aggregate(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = getAggFunction(aggregation);
             private int lastIndex = -1;
 
             @Override
             public int size() {
-                return groupIndexes.size() - 1;
+                return groupsCount(groupIndexes, isDataAppendMode);
             }
 
             @Override
@@ -300,42 +302,31 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable) {
+    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) {
         IntSequence groupIndexes = new IntSequence() {
             int size;
 
             @Override
             public int size() {
                 int l = length.getValue();
-                if(isLastChangeable && l > 0) {
-                    l--;
-                }
-
                 if (l % points == 0) {
                     size = l / points + 1;
                 } else {
                     size = l / points + 2;
                 }
-
-
                 return size;
             }
 
             @Override
             public int get(int index) {
                 if (index == size - 1) {
-                    int l = length.getValue();
-                    if(isLastChangeable && l > 0) {
-                        l--;
-                    }
-
-                    return l;
+                    return length.getValue();
                 } else {
                     return index * points;
                 }
             }
         };
-        return aggregate(aggregation, groupIndexes);
+        return aggregate(aggregation, groupIndexes, isDataAppendMode);
     }
 
     private StatsInt calculateStats(int from, int length) {
@@ -363,7 +354,7 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public Stats stats(int length, boolean isLastChangeable) {
+    public Stats stats(int length) {
         if (length <= 0) {
             String errMsg = "Statistic can not be calculated if length <= 0: " + length;
             throw new IllegalStateException(errMsg);
@@ -372,37 +363,23 @@ public class IntColumn implements Column {
             return calculateStats(0, length);
         }
 
-        int dataSize = dataSequence.size();
-        int length1 = length;
-        if (isLastChangeable && length == dataSize) {
-            length1--;
-        }
-
-        if (stats != null && length1 < stats.count()) {
+        if (stats != null && length < stats.count()) {
             stats = null;
         }
         if (stats == null) {
-            stats = calculateStats(0, length1);
+            stats = calculateStats(0, length);
         }
 
-        if (length1 > stats.count()) {
-            StatsInt statsAdditional = calculateStats(stats.count(), length1 - stats.count());
+        if (length > stats.count()) {
+            StatsInt statsAdditional = calculateStats(stats.count(), length - stats.count());
             int min = Math.min(stats.getMin(), statsAdditional.getMin());
             int max = Math.max(stats.getMax(), statsAdditional.getMax());
             int diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
             boolean isIncreasing = stats.isIncreasing() && statsAdditional.isIncreasing() && diff >= 0;
             boolean isDecreasing = stats.isDecreasing() && statsAdditional.isDecreasing() && diff <= 0;
-            stats = new StatsInt(length1, min, max, isIncreasing, isDecreasing);
+            stats = new StatsInt(length, min, max, isIncreasing, isDecreasing);
         }
-
-        if (length1 < length) { // length1 = length - 1
-            int lastData = dataSequence.get(length - 1);
-            int diff = lastData - dataSequence.get(length - 2);
-            return new StatsInt(length, Math.min(stats.getMin(), lastData), Math.max(stats.getMax(), lastData), stats.isIncreasing() && diff >= 0, stats.isDecreasing() && diff <= 0);
-        } else {
-            return stats;
-        }
-
+        return stats;
     }
 
     class StatsInt implements Stats {

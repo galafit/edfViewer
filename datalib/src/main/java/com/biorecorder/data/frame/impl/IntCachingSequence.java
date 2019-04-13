@@ -14,44 +14,32 @@ public class IntCachingSequence implements IntSequence {
     static final int REASONABLE_SIZE = 3000;
     private IntSequence innerData;
     private IntArrayList cachedData;
-    private int nLastExcluded;
-    private int size;
 
 
-    public IntCachingSequence(IntSequence data, int nLastExcluded) {
+    public IntCachingSequence(IntSequence data) {
         this.innerData = data;
-        this.nLastExcluded = nLastExcluded;
-        size = innerData.size();
+        int size = innerData.size();
         if(size < REASONABLE_SIZE) {
-            cachedData = new IntArrayList(size - nLastExcluded);
+            cachedData = new IntArrayList(size);
         } else {
             cachedData = new IntArrayList();
         }
-
-
     }
 
     @Override
     public int get(int index) {
-        // cache data
-        if(index < size - nLastExcluded) {
+        if(index >= cachedData.size()) {
             for (int i = cachedData.size(); i <= index; i++) {
                 cachedData.add(innerData.get(i));
             }
         }
-
-        if(index < cachedData.size()) {
-            return cachedData.get(index);
-        } else {
-            return innerData.get(index);
-        }
+        return cachedData.get(index);
     }
 
 
     @Override
     public int size() {
-        size = innerData.size();
-        return size;
+        return innerData.size();
     }
 
     public IntSequence getInnerData() {

@@ -12,21 +12,19 @@ import java.util.*;
  */
 public class DataFrame {
     private IntWrapper length = new IntWrapper(0);
-    private boolean isLastRowChangeable = true;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<Aggregation[]> columnAggFunctions = new ArrayList<>();
+    boolean isDataAppendMode = true;
 
-    public DataFrame() {
+    public DataFrame(boolean isDataAppendMode) {
+        this.isDataAppendMode = isDataAppendMode;
     }
 
-    public DataFrame(boolean isLastRowChangeable) {
-        this.isLastRowChangeable = isLastRowChangeable;
-    }
 
     public DataFrame(DataFrame dataFrame, int[] columnOrder) throws IllegalArgumentException {
-        isLastRowChangeable = dataFrame.isLastRowChangeable;
         length = dataFrame.length;
+        isDataAppendMode = dataFrame.isDataAppendMode;
         for (int i : columnOrder) {
             Column columnToAdd = dataFrame.columns.get(i);
             if(columnToAdd instanceof FunctionColumn) {
@@ -85,6 +83,10 @@ public class DataFrame {
 
     public void addColumn(double start, double step) {
         addColumn(new RegularColumn(start, step));
+    }
+
+    public void addColumn(double start, double step, int size) {
+        addColumn(new RegularColumn(start, step, size));
     }
 
     public void addColumn(List<Integer> columnData) {
@@ -153,7 +155,7 @@ public class DataFrame {
         if (length.getValue() < 1) {
             return null;
         }
-        return columns.get(columnNumber).stats(length.getValue(), isLastRowChangeable);
+        return columns.get(columnNumber).stats(length.getValue());
     }
 
     public boolean isColumnRegular(int columnNumber) {
@@ -213,7 +215,7 @@ public class DataFrame {
     }
 
     public DataFrame slice(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame();
+        DataFrame resultantFrame = new DataFrame(false);
         for (int i = 0; i < columns.size(); i++) {
             resultantFrame.columns.add(columns.get(i).slice(fromRowNumber, length));
             resultantFrame.columnNames.add(columnNames.get(i));
@@ -224,7 +226,7 @@ public class DataFrame {
     }
 
     public DataFrame view(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
+        DataFrame resultantFrame = new DataFrame(false);
         List<Integer> functionColumns = new ArrayList<>();
         // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
@@ -255,7 +257,7 @@ public class DataFrame {
     }
 
     public DataFrame view(int[] rowOrder) {
-        DataFrame resultantFrame = new DataFrame(isLastRowChangeable);
+        DataFrame resultantFrame = new DataFrame(false);
         List<Integer> functionColumns = new ArrayList<>();
         // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
@@ -337,7 +339,7 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length, isLastRowChangeable);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
         return resample(groupIndexes, 1);
     }
 
@@ -369,7 +371,7 @@ public class DataFrame {
         }
 
         // aggregate all columns except function columns
-        DataFrame resultantFrame = new DataFrame(true) {
+        DataFrame resultantFrame = new DataFrame(isDataAppendMode) {
             @Override
             public void appendData() {
                 DataFrame.this.appendData();
@@ -391,9 +393,9 @@ public class DataFrame {
                 Aggregation[] aggregations = columnAggFunctions.get(i);
                 for (Aggregation aggregation : aggregations) {
                     if(groupIndexes != null) {
-                        resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
+                        resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes, isDataAppendMode));
                     } else {
-                        resultantFrame.columns.add(column.aggregate(aggregation, points, length, isLastRowChangeable));
+                        resultantFrame.columns.add(column.aggregate(aggregation, points, length, isDataAppendMode));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     Aggregation[] resultantAgg = {aggregation};
@@ -416,7 +418,7 @@ public class DataFrame {
     }
 
     public void cacheColumn(int columnNumber) {
-        columns.get(columnNumber).cache(isLastRowChangeable);
+        columns.get(columnNumber).cache();
     }
 
     public void disableCaching(int columnNumber) {
@@ -445,7 +447,7 @@ public class DataFrame {
 
 
     public static void main(String[] args) {
-        DataFrame df = new DataFrame();
+        DataFrame df = new DataFrame(true);
         Integer[] xData = {2, 4, 5, 9, 12, 33, 34, 35, 40};
         Integer[] yData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         List<Integer> xList = new ArrayList<Integer>(Arrays.asList(xData));
@@ -531,7 +533,5 @@ public class DataFrame {
             }
         }
         System.out.println("ResampleByEqualInterval UPDATE is OK");
-
     }
-
 }

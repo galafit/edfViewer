@@ -40,7 +40,7 @@ public class NavigableChartTest extends JFrame{
             xData.add(i);
         }
 
-        xyData = new XYData(0, 1);
+        xyData = new XYData(0, 1, true);
         //xyData.addColumn(xData);
         xyData.addColumn(yData);
         xyData.addColumn(new SquareFunction(), 0);
