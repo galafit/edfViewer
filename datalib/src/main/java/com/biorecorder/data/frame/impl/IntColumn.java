@@ -151,13 +151,12 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public IntSequence group(double interval, IntWrapper length) {
+    public IntSequence group(double interval, IntWrapper length, boolean isLastChangeable) {
         System.out.println("interval "+interval);
 
         IntSequence groupIndexes = new IntSequence() {
-            Group currentGroup = new Group(interval);
 
-            IntArrayList groupIndexesList = new IntArrayList(length.getValue());
+            IntArrayList groupIndexesList = new IntArrayList();
 
             @Override
             public int size() {
@@ -172,7 +171,12 @@ public class IntColumn implements Column {
 
             private void update() {
                 int groupListSize = groupIndexesList.size();
-                if (length.getValue() == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
+                int l = length.getValue();
+                if(isLastChangeable && l > 0) {
+                    l--;
+                }
+
+                if ( l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
                     return;
                 }
 
@@ -185,9 +189,9 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                     from = groupIndexesList.get(groupListSize - 2);
                 }
-                currentGroup = currentGroup.groupByValue(dataSequence.get(from));
+                Group currentGroup = new Group(interval, dataSequence.get(from));
 
-                for (int i = from + 1; i < length.getValue(); i++) {
+                for (int i = from + 1; i < l; i++) {
                     int data = dataSequence.get(i);
                     if (!currentGroup.contains(data)) {
                         groupIndexesList.add(i);
@@ -199,7 +203,7 @@ public class IntColumn implements Column {
                     }
                 }
                 // add last "closing" groupByEqualIntervals
-                groupIndexesList.add(length.getValue());
+                groupIndexesList.add(l - 1);
             }
         };
         return groupIndexes;
@@ -285,6 +289,7 @@ public class IntColumn implements Column {
                 int n = aggFunction.getN();
                 int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
                 int from = groupIndexes.get(index) + n;
+
                 if (length > 0) {
                     aggFunction.add(dataSequence, from, length);
                 }
@@ -295,25 +300,36 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points, IntWrapper length) {
+    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable) {
         IntSequence groupIndexes = new IntSequence() {
             int size;
 
             @Override
             public int size() {
                 int l = length.getValue();
+                if(isLastChangeable && l > 0) {
+                    l--;
+                }
+
                 if (l % points == 0) {
                     size = l / points + 1;
                 } else {
                     size = l / points + 2;
                 }
+
+
                 return size;
             }
 
             @Override
             public int get(int index) {
                 if (index == size - 1) {
-                    return length.getValue();
+                    int l = length.getValue();
+                    if(isLastChangeable && l > 0) {
+                        l--;
+                    }
+
+                    return l;
                 } else {
                     return index * points;
                 }

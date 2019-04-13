@@ -337,7 +337,7 @@ public class DataFrame {
      * If columns has no aggregate functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length, isLastRowChangeable);
         return resample(groupIndexes, 1);
     }
 
@@ -369,7 +369,13 @@ public class DataFrame {
         }
 
         // aggregate all columns except function columns
-        DataFrame resultantFrame = new DataFrame(true);
+        DataFrame resultantFrame = new DataFrame(true) {
+            @Override
+            public void appendData() {
+                DataFrame.this.appendData();
+                super.appendData();
+            }
+        };
 
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
@@ -387,7 +393,7 @@ public class DataFrame {
                     if(groupIndexes != null) {
                         resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes));
                     } else {
-                        resultantFrame.columns.add(column.aggregate(aggregation, points, length));
+                        resultantFrame.columns.add(column.aggregate(aggregation, points, length, isLastRowChangeable));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     Aggregation[] resultantAgg = {aggregation};
@@ -436,6 +442,7 @@ public class DataFrame {
     private String outOfBoundsMsg(long index) {
         return "Index: " + index + ", Size: " + length;
     }
+
 
     public static void main(String[] args) {
         DataFrame df = new DataFrame();

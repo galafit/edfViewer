@@ -124,38 +124,39 @@ public class RegularColumn extends IntColumn {
 
     @Override
     public Column view(int from, int length) {
-        return slice(from, length);
+        return new RegularColumn(value(from), step, length);
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points, IntWrapper length) throws IllegalArgumentException {
+    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable) throws IllegalArgumentException {
+        int sizeNew = size/points;
         switch (aggregation) {
             case MIN:
             case FIRST: {
                 double startNew = startValue;
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case MAX:
             case LAST: {
                 double startNew = startValue + step * points;
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case COUNT: {
                 double startNew = points;
                 double stepNew = 0;
-                return new RegularColumn(startNew, stepNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case SUM:{
                 double startNew = sum(0, points);
                 double stepNew = step * points * points;
-                return new RegularColumn(startNew, stepNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case AVERAGE:{
                 double startNew = avg(0, points);
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             default:
                 String errMsg = "Unsupported Aggregate function: "+ aggregation;

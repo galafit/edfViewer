@@ -39,9 +39,9 @@ public interface Column {
      * interval-bin-group and returns a sequence of that start indexes.
      * The column data must be sorted!!!
      */
-    IntSequence group(double interval, IntWrapper length);
+    IntSequence group(double interval, IntWrapper length, boolean isLastChangeable);
 
     Column aggregate(Aggregation aggregation, IntSequence groupIndexes);
-    Column aggregate(Aggregation aggregation, int points, IntWrapper length);
+    Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isLastChangeable);
 
 }

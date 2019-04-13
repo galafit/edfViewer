@@ -72,8 +72,8 @@ public class ChartTest extends JFrame {
         chart.setXScale(0, new LinearScale());
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addStack();
-        chart.addTrace(new LineTrace(regularData), true);
         chart.addTrace(new LineTrace(noRegularData), true);
+        chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -91,10 +91,10 @@ public class ChartTest extends JFrame {
         }
 
         Thread t = new Thread(new Runnable() {
-            int interval = 1000;
+            int interval = 600;
             @Override
             public void run() {
-                for (int count = 0; count < 4; count++) {
+                for (int count = 0; count < 18; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
