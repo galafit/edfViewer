@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.data.utils.PrimitiveUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +76,10 @@ public class TraceDataManager {
         if (processedData != null) {
             data = processedData;
         }
+        if(data.rowCount() == 0) {
+            return -1;
+        }
+
         if (sorter == null) {
             if (!data.isColumnIncreasing(0)) {
                 sorter = data.sortedIndices(0);
@@ -253,7 +258,8 @@ public class TraceDataManager {
         }
 
         boolean isAlreadyGrouped;
-        int cropShoulder;
+        // we do all arithmetic in long to avoid int overflow !!!
+        long cropShoulder;
         if(isGroupingEnabled && processingConfig.isGroupAll()) {
             processedData = groupAll(groupInterval, groupIntervalIndex);
             cropShoulder = processingConfig.getCropShoulder();
@@ -266,23 +272,24 @@ public class TraceDataManager {
 
         // if crop enabled
         if (processingConfig.isCropEnabled() && (traceDataMinMax.getMin() < xMin || traceDataMinMax.getMax() > xMax)) {
-            int minIndex = 0;
+            long minIndex = 0;
             if (traceDataMinMax.getMin() < xMin) {
                 minIndex = processedData.bisect(0, minMax.getMin(), null) - cropShoulder;
             }
 
-            int maxIndex = processedData.rowCount() - 1;
+            long maxIndex = processedData.rowCount() - 1;
             if (traceDataMinMax.getMax() > xMax) {
                 maxIndex = processedData.bisect(0, minMax.getMax(), null) + cropShoulder;
             }
             if (minIndex < 0) {
                 minIndex = 0;
             }
+
             if (maxIndex >= processedData.rowCount()) {
                 maxIndex = processedData.rowCount() - 1;
             }
 
-            processedData = processedData.view(minIndex, maxIndex - minIndex);
+            processedData = processedData.view(PrimitiveUtils.longToInt(minIndex), PrimitiveUtils.longToInt(maxIndex - minIndex));
             // if data was not grouped before we group only visible data
             if (isGroupingEnabled  && !isAlreadyGrouped) {
                 processedData = group(processedData, groupInterval);

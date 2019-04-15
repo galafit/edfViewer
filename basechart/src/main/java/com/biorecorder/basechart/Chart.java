@@ -1104,6 +1104,10 @@ public class Chart {
 
         if (hoverPoint != null) {
             NearestPoint nearestPoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurveNumber());
+            if(nearestPoint == null) {
+                hoverPoint = null;
+                return true;
+            }
             if (hoverPoint.getPointIndex() == nearestPoint.getPointIndex()) {
                 return false;
             } else {
@@ -1114,7 +1118,7 @@ public class Chart {
             NearestPoint nearestPoint = null;
             for (Trace trace : traces) {
                 NearestPoint np = trace.nearest(x, y, -1);
-                if (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq()) {
+                if ( np!= null && (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq())) {
                     nearestPoint = np;
                 }
             }

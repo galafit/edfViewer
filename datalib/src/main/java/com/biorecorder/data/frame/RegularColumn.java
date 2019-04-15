@@ -8,13 +8,14 @@ import com.biorecorder.data.sequence.IntSequence;
  * Created by galafit on 20/1/19.
  */
 public class RegularColumn extends IntColumn {
+    private static final int MAX_SIZE = Integer.MAX_VALUE - 100;
     private double startValue;
     private double step;
     private int size;
     private boolean isInt;
 
     public RegularColumn(double startValue, double step) {
-        this(startValue, step, Integer.MAX_VALUE);
+        this(startValue, step, MAX_SIZE);
     }
 
     public RegularColumn(double startValue, double step, int size) {

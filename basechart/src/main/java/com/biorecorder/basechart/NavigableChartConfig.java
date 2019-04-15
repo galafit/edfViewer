@@ -17,7 +17,7 @@ public class NavigableChartConfig {
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 30; // px
     private boolean autoScrollEnabled = true;
-    private boolean autoScaleEnabled = false; // chart Y auto scale during scrolling
+    private boolean autoScaleEnabled = true; // chart Y auto scale during scrolling
 
     public NavigableChartConfig() {
         BColor navigatorBgColor = BColor.BEIGE_WHITE;

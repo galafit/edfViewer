@@ -115,6 +115,9 @@ public abstract class Trace {
     public NearestPoint nearest(int x, int y, int curveNumber1) {
         double xValue =  xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
+        if(pointIndex < 0) {
+            return null;
+        }
         int dx = xPosition(pointIndex) - x;
         int dx2 = dx * dx;
         int distanceMin = 0;

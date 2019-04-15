@@ -105,6 +105,10 @@ public class XYData implements ChartData {
 
     @Override
     public boolean isColumnIncreasing(int columnNumber) {
+        Stats stats = dataFrame.stats(columnNumber);
+        if(stats == null) {
+            return false;
+        }
         return dataFrame.stats(columnNumber).isIncreasing();
     }
 

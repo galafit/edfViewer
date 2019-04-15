@@ -93,7 +93,7 @@ public class NavigableChartTest extends JFrame{
                 chartPanel.repaint();
             }
         });
-        t1.start();
+        //t1.start();
 
         Thread t = new Thread(new Runnable() {
             int interval = 1000;
@@ -121,7 +121,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-     //  t.start();
+       t.start();
     }
 
 

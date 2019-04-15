@@ -442,7 +442,7 @@ public class DataFrame {
     }
 
     private String outOfBoundsMsg(long index) {
-        return "Index: " + index + ", Size: " + length;
+        return "Index: " + index + ", Size: " + length.getValue();
     }
 
 

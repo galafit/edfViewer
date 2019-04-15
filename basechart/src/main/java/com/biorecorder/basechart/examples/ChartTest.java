@@ -5,6 +5,7 @@ import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.data.frame.Aggregation;
+import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -53,14 +54,15 @@ public class ChartTest extends JFrame {
 
 
         XYData regularData = new XYData(0, 1, true);
-        regularData.addColumn(list1);
-        //regularData.setColumnAggFunctions(1, Aggregation.FIRST);
+        regularData.addColumn(new SquareFunction(), 0);
+        //regularData.addColumn(list1);
+        //regularData.setColumnAggFunctions(1, Aggregation.SUM);
        // regularData.addColumn(list2);
 
         XYData noRegularData = new XYData(true);
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
-       // noRegularData.setColumnAggFunctions(1, Aggregation.FIRST);
+    //    noRegularData.setColumnAggFunctions(1, Aggregation.SUM);
 
 
         XYData unsortedData = new XYData(false);
@@ -72,7 +74,7 @@ public class ChartTest extends JFrame {
         chart.setXScale(0, new LinearScale());
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addStack();
-        chart.addTrace(new LineTrace(noRegularData), true);
+       // chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
@@ -116,7 +118,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        t.start();
+       // t.start();
 
     }
 

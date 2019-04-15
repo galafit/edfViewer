@@ -189,15 +189,11 @@ public class IntColumn implements Column {
                     int data = dataSequence.get(i);
                     if (!currentGroup.contains(data)) {
                         groupIndexesList.add(i);
-                        currentGroup = currentGroup.nextGroup(); // often situation
-
-                        if (!currentGroup.contains(data)) { // rare situation
-                            currentGroup = currentGroup.groupByValue(data);
-                        }
+                        currentGroup = currentGroup.groupByValue(data);
                     }
                 }
                 // add last "closing" groupByEqualIntervals
-                groupIndexesList.add(l - 1);
+                groupIndexesList.add(l);
             }
         };
         return groupIndexes;
