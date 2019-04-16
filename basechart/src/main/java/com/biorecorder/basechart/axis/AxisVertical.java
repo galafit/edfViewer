@@ -23,13 +23,14 @@ abstract class AxisVertical extends Axis {
             if (isTicksDirty()) {
                 createTicks(canvas);
             }
-            if (tickLabels.size() > 0) {
+            String longestLabel = "";
+            for (BText tickLabel : tickLabels) {
+                if(tickLabel.getText().length() > longestLabel.length())  {
+                    longestLabel = tickLabel.getText();
+                }
+            }
+            if(longestLabel.length() > 0) {
                 TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-                String minTickLabel = tickLabels.get(0).getText();
-                String maxTickLabel = tickLabels.get(tickLabels.size() - 1).getText();
-
-                String longestLabel = minTickLabel.length() > maxTickLabel.length() ? minTickLabel : maxTickLabel;
-
                 width += config.getTickPadding() + tm.stringWidth(longestLabel);
             }
         }

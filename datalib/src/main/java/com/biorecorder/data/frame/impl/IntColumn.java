@@ -12,7 +12,6 @@ import java.util.List;
  * Created by galafit on 15/1/19.
  */
 public class IntColumn implements Column {
-    private final static int NAN = Integer.MAX_VALUE;
     private final static DataType dataType = DataType.INT;
     private IntSequence dataSequence;
     private StatsInt stats;
@@ -57,20 +56,12 @@ public class IntColumn implements Column {
 
     @Override
     public double value(int index) {
-        int value = dataSequence.get(index);
-        if (value == NAN) {
-            return Double.NaN;
-        }
-        return value;
+        return dataSequence.get(index);
     }
 
     @Override
     public String label(int index) {
-        int value = dataSequence.get(index);
-        if (value == NAN) {
-            return null;
-        }
-        return Integer.toString(value);
+        return Integer.toString(dataSequence.get(index));
     }
 
     @Override

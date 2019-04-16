@@ -328,6 +328,7 @@ public class TraceDataManager {
                 processedData = groupAll(groupInterval, groupIntervalIndex);
             }
         }
+
         return processedData;
     }
 
@@ -377,7 +378,9 @@ public class TraceDataManager {
             if(isNextStepGrouping) {
                 if(isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
-                    groupedData.appendData();
+                    if(traceData.rowCount() > prevTraceDataSize) {
+                        groupedData.appendData();
+                    }
                     groupedDataNew = groupedData.resampleByEqualFrequency(groupedPointsInGroupRound);
                     groupedDataNew.cache();
                     // force "lazy" grouping

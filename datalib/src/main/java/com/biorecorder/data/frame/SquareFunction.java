@@ -8,7 +8,7 @@ import com.biorecorder.data.utils.PrimitiveUtils;
 public class SquareFunction implements Function {
     @Override
     public int apply(double value) {
-        return PrimitiveUtils.doubleToInt(value);
+        return PrimitiveUtils.doubleToInt(value * value);
 
     }
 }

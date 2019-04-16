@@ -93,10 +93,10 @@ public class ChartTest extends JFrame {
         }
 
         Thread t = new Thread(new Runnable() {
-            int interval = 1000;
+            int interval = 5;
             @Override
             public void run() {
-                for (int count = 0; count < 1; count++) {
+                for (int count = 0; count < 15; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
