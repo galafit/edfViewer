@@ -230,7 +230,7 @@ public class TraceDataManager {
 
         boolean isGroupingEnabled = false;
         if (processingConfig.isGroupingEnabled()) {
-            // calculateStats best grouping interval
+            // calculate best grouping interval
             groupInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;;
             pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
             pointsInGroupRound = roundPointsNumber(pointsInGroup);
@@ -451,7 +451,6 @@ public class TraceDataManager {
         } else {
             groupedData = data.resampleByEqualInterval(0, groupInterval);
             groupedData.cache();
-            System.out.println(groupInterval +" group  "+groupedData.rowCount());
         }
         return groupedData;
 
