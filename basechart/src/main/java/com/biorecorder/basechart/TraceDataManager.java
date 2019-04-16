@@ -32,6 +32,13 @@ public class TraceDataManager {
 
     public void appendData() {
         traceData.appendData();
+        if(isGroupIntervalsSpecified()) {
+            for (ChartData data : groupedDataList) {
+                if(data != null) {
+                    data.appendData();
+                }
+            }
+        }
     }
 
 
@@ -234,7 +241,6 @@ public class TraceDataManager {
             groupInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;;
             pointsInGroup = groupIntervalToPointsNumber(traceData, groupInterval);
             pointsInGroupRound = roundPointsNumber(pointsInGroup);
-
             if(pointsInGroupRound > 1) {
                 // if available intervals are specified we choose the interval among the available ones
                 if (isGroupIntervalsSpecified()) {
@@ -336,7 +342,10 @@ public class TraceDataManager {
                 boolean isPrevStepGrouping = (1 - groupedPointsInGroup) > roundPrecision && groupedPointsInGroup < 1.0 / processingConfig.getReGroupingStep();
 
                 if(!isNextStepGrouping && !isPrevStepGrouping) {
-                    return groupedDataList.get(0);
+                    if(traceData.rowCount() > prevTraceDataSize) {
+                        groupedData.appendData();
+                    }
+                    return groupedData;
                 }
             }
         } else {
@@ -430,11 +439,6 @@ public class TraceDataManager {
             groupedDataList.set(groupIntervalIndex, groupedData);
         }
 
-        if(traceData.rowCount() > prevTraceDataSize) {
-            for (ChartData data : groupedDataList) {
-                data.appendData();
-            }
-        }
         return groupedDataList.get(groupIntervalIndex);
     }
 

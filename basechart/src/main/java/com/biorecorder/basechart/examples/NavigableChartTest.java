@@ -96,10 +96,10 @@ public class NavigableChartTest extends JFrame{
         //t1.start();
 
         Thread t = new Thread(new Runnable() {
-            int interval = 1000;
+            int interval = 10;
             @Override
             public void run() {
-                for (int count = 0; count < 10; count++) {
+                for (int count = 0; count < 20; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {

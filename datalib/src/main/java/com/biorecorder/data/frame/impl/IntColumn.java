@@ -150,8 +150,6 @@ public class IntColumn implements Column {
 
     @Override
     public IntSequence group(double interval, IntWrapper length) {
-        System.out.println(length.getValue() +" interval "+interval);
-
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
 

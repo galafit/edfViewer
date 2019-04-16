@@ -44,6 +44,9 @@ public class Chart {
     private DataProcessingConfig dataProcessingConfig;
     private Scale yScale;
 
+    private boolean isDirty = true;
+    private boolean isDataAppended;
+
     public Chart() {
        this(new WhiteTheme().getChartConfig());
     }
@@ -100,17 +103,6 @@ public class Chart {
         return false;
     }
 
-    private void setDirty() {
-        margin = null;
-        graphArea = null;
-    }
-
-    private boolean isDirty() {
-        if (margin == null || graphArea == null) {
-            return true;
-        }
-        return false;
-    }
 
     private Insets calculateSpacing() {
         if(config.getSpacing() != null) {
@@ -281,6 +273,7 @@ public class Chart {
         if (isLegendEnabled() && legend.isAttachedToStacks()) {
             legend.setArea(graphArea);
         }
+        isDirty = false;
     }
 
     private void setXStartEnd(int areaX, int areaWidth) {
@@ -427,7 +420,7 @@ public class Chart {
     }
 
     Range getYMinMax(int yIndex, BCanvas canvas) {
-        if (isDirty()) {
+        if (isDirty) {
             doCalculations(canvas);
         }
         AxisWrapper yAxis = yAxisList.get(yIndex);
@@ -458,14 +451,14 @@ public class Chart {
 
 
     Insets getMargin(BCanvas canvas) {
-        if (isDirty()) {
+        if (isDirty) {
             doCalculations(canvas);
         }
         return margin;
     }
 
     BRectangle getGraphArea(BCanvas canvas) {
-        if (isDirty()) {
+        if (isDirty) {
             doCalculations(canvas);
         }
         return graphArea;
@@ -492,7 +485,14 @@ public class Chart {
             return;
         }
 
-        if (isDirty()) {
+        if(isDataAppended) {
+            for (Trace trace : traces) {
+                trace.appendData();
+            }
+            isDataAppended = false;
+        }
+
+        if (isDirty) {
             doCalculations(canvas);
         }
 
@@ -576,10 +576,8 @@ public class Chart {
 
 
     public void appendData() {
-        for (Trace trace : traces) {
-            trace.appendData();
-        }
-        setDirty();
+        isDirty = true;
+        isDataAppended = true;
     }
 
     public String[] getCurveNames() {
@@ -654,12 +652,12 @@ public class Chart {
                 }
             }
         }
-        setDirty();
+        isDirty = true;
     }
 
     public void setTitle(String title) {
         this.title.setTitle(title);
-        setDirty();
+        isDirty = true;
     }
 
     public void setCurveColor(int traceNumber, int curveNumber, BColor color) {
@@ -674,7 +672,7 @@ public class Chart {
     public void setStackWeight(int stack, int weight) {
         checkStackNumber(stack);
         stackWeights.set(stack, weight);
-        setDirty();
+        isDirty = true;
     }
 
     public void addStack() {
@@ -688,7 +686,7 @@ public class Chart {
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
 
-        setDirty();
+        isDirty = true;
     }
 
     /**
@@ -713,7 +711,7 @@ public class Chart {
         stackWeights.remove(stackNumber);
         yAxisList.remove(stackNumber * 2 + 1);
         yAxisList.remove(stackNumber * 2);
-        setDirty();
+        isDirty = true;
     }
 
     /**
@@ -839,7 +837,7 @@ public class Chart {
                 legend.add(trace, curveNumber, traceSelectionListener);
             }
         }
-        setDirty();
+        isDirty = true;
     }
 
     public void removeTrace(int traceNumber) {
@@ -864,13 +862,13 @@ public class Chart {
                 // do nothing;
             }
         }
-        setDirty();
+        isDirty = true;
     }
 
     public void setArea(BRectangle area) {
         fullArea = area;
         title.setArea(area);
-        setDirty();
+        isDirty = true;
     }
 
     public int traceCount() {
@@ -887,12 +885,12 @@ public class Chart {
 
     public void setXConfig(int xIndex, AxisConfig axisConfig) {
         xAxisList.get(xIndex).setConfig(axisConfig);
-        setDirty();
+        isDirty = true;
     }
 
     public void setYConfig(int yIndex, AxisConfig axisConfig) {
         yAxisList.get(yIndex).setConfig(axisConfig);
-        setDirty();
+        isDirty = true;
     }
 
     /**
@@ -911,34 +909,34 @@ public class Chart {
 
     public void setXTitle(int xIndex, @Nullable String title) {
         xAxisList.get(xIndex).setTitle(title);
-        setDirty();
+        isDirty = true;
     }
 
     public void setYTitle(int yIndex, @Nullable String title) {
         yAxisList.get(yIndex).setTitle(title);
-        setDirty();
+        isDirty = true;
     }
 
 
     public void setXMinMax(int xIndex, double min, double max) {
         xAxisToMinMax.put(xIndex, new Range(min, max));
-        setDirty();
+        isDirty = true;
     }
 
     public void setYMinMax(int yIndex, double min, double max) {
         yAxisToMinMax.put(yIndex, new Range(min, max));
-        setDirty();
+        isDirty = true;
     }
 
 
     public void autoScaleX(int xIndex) {
         xAxisToMinMax.remove(xIndex);
-        setDirty();
+        isDirty = true;
     }
 
     public void autoScaleY(int yIndex) {
         yAxisToMinMax.remove(yIndex);
-        setDirty();
+        isDirty = true;
     }
 
     public void setXScale(int xIndex, Scale scale) {
@@ -949,7 +947,7 @@ public class Chart {
             }
         }
         axis.setScale(scale);
-        setDirty();
+        isDirty = true;
     }
 
     public void setYScale(int yIndex, Scale scale) {
@@ -963,7 +961,7 @@ public class Chart {
             }
         }
         axis.setScale(scale);
-        setDirty();
+        isDirty = true;
     }
 
 

@@ -54,8 +54,8 @@ public class ChartTest extends JFrame {
 
 
         XYData regularData = new XYData(0, 1, true);
-        regularData.addColumn(new SquareFunction(), 0);
-        //regularData.addColumn(list1);
+        //regularData.addColumn(new SquareFunction(), 0);
+        regularData.addColumn(list1);
         //regularData.setColumnAggFunctions(1, Aggregation.SUM);
        // regularData.addColumn(list2);
 
@@ -93,10 +93,10 @@ public class ChartTest extends JFrame {
         }
 
         Thread t = new Thread(new Runnable() {
-            int interval = 600;
+            int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 10; count++) {
+                for (int count = 0; count < 1; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -106,7 +106,7 @@ public class ChartTest extends JFrame {
                     int yData1Last = list1.get(list1.size() - 1);
                     int yData2Last = list2.get(list2.size() - 1);
 
-                    for (int i = 1; i <= 171; i++) {
+                    for (int i = 1; i < 171; i++) {
                         list1.add(list1.size());
                         //list1.add(i + yData1Last);
                        // list2.add(i + yData2Last);
@@ -118,7 +118,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-       // t.start();
+        t.start();
 
     }
 
