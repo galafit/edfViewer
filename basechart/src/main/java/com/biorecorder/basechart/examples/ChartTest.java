@@ -74,8 +74,8 @@ public class ChartTest extends JFrame {
         chart.setXScale(0, new LinearScale());
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addStack();
-       // chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
+        chart.addTrace(new LineTrace(noRegularData), true);
 
         chartPanel = new ChartPanel(chart);
 

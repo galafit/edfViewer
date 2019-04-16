@@ -132,6 +132,7 @@ public class TraceDataManager {
         if (markSize > 0) {
             pixelsPerDataPoint = markSize;
         }
+
         if (!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
             processedData = processData(xScale, pixelsPerDataPoint);
             prevXScale = xScale.copy();
@@ -206,7 +207,7 @@ public class TraceDataManager {
         Range minMax = Range.intersect(traceDataMinMax, new Range(xMin, xMax));
 
         if (drawingAreaWidth < 1) {
-            return traceData.view(0, 0);
+           // return traceData.view(0, 0);
         }
 
         double[] availableIntervals = processingConfig.getGroupingIntervals();
@@ -257,17 +258,24 @@ public class TraceDataManager {
             }
         }
 
-        boolean isAlreadyGrouped;
+
         // we do all arithmetic in long to avoid int overflow !!!
-        long cropShoulder;
-        if(isGroupingEnabled && processingConfig.isGroupAll()) {
-            processedData = groupAll(groupInterval, groupIntervalIndex);
-            cropShoulder = processingConfig.getCropShoulder();
-            isAlreadyGrouped = true;
-        } else {
-            processedData = traceData;
-            cropShoulder = processingConfig.getCropShoulder() * pointsInGroupRound;
-            isAlreadyGrouped = false;
+        long cropShoulder = processingConfig.getCropShoulder() * pointsInGroupRound;
+        processedData = traceData;
+        boolean isAlreadyGrouped = false;
+
+
+        if(isGroupingEnabled) {
+            ChartData groupedData = findIfAlreadyGrouped(groupInterval, groupIntervalIndex);
+            if(groupedData != null) {
+                processedData = groupedData;
+                cropShoulder = processingConfig.getCropShoulder();
+                isAlreadyGrouped = true;
+            } else if(processingConfig.isGroupAll()) {
+                processedData = groupAll(groupInterval, groupIntervalIndex);
+                cropShoulder = processingConfig.getCropShoulder();
+                isAlreadyGrouped = true;
+            }
         }
 
         // if crop enabled
@@ -304,6 +312,28 @@ public class TraceDataManager {
             }
         }
         return processedData;
+    }
+
+    private ChartData findIfAlreadyGrouped(double groupInterval, int groupIntervalIndex) {
+        if(groupIntervalIndex < 0) {
+            if(groupedDataList.size() > 0) {
+                ChartData groupedData = groupedDataList.get(0);
+                double groupedPointsInGroup = groupIntervalToPointsNumber(groupedData, groupInterval);
+                int groupedPointsInGroupRound = roundPointsNumber(groupedPointsInGroup);
+
+                boolean isNextStepGrouping = groupedPointsInGroupRound > 1 && groupedPointsInGroupRound >= processingConfig.getReGroupingStep();
+                boolean isPrevStepGrouping = (1 - groupedPointsInGroup) > roundPrecision && groupedPointsInGroup < 1.0 / processingConfig.getReGroupingStep();
+
+                if(!isNextStepGrouping && !isPrevStepGrouping) {
+                    return groupedDataList.get(0);
+                }
+            }
+        } else {
+            if(groupIntervalIndex >= groupedDataList.size() - 1) {
+                return groupedDataList.get(groupIntervalIndex);
+            }
+        }
+        return null;
     }
 
 
