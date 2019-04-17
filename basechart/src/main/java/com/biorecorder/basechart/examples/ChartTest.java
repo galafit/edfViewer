@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
@@ -11,6 +12,8 @@ import com.biorecorder.basechart.swing.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by galafit on 21/9/18.
@@ -23,6 +26,8 @@ public class ChartTest extends JFrame {
     IntArrayList list1 = new IntArrayList();
     IntArrayList list2 = new IntArrayList();
 
+    List<String> labels = new ArrayList();
+
     Chart chart;
     ChartPanel chartPanel;
 
@@ -32,9 +37,10 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 10; i++) {
             list1.add(i);
             list2.add(i + 50);
+            labels.add("lab_"+i);
         }
 
 
@@ -70,10 +76,10 @@ public class ChartTest extends JFrame {
         unsortedData.addColumn(yUnsort);
 
 
-        chart = new Chart(new DarkTheme(true).getChartConfig(), new TimeScale(), new LinearScale());
-        chart.setXScale(0, new LinearScale());
-        chart.addTrace(new LineTrace(unsortedData), false, true, false);
-        chart.addStack();
+        chart = new Chart(new DarkTheme(true).getChartConfig());
+        chart.setXScale(0, new CategoryScale(labels));
+       // chart.addTrace(new LineTrace(unsortedData), false, true, false);
+       // chart.addStack();
         chart.addTrace(new LineTrace(regularData), true);
         chart.addTrace(new LineTrace(noRegularData), true);
 
@@ -118,7 +124,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        t.start();
+       // t.start();
 
     }
 

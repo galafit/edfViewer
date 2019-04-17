@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.data.utils.NormalizedNumber;
+import com.biorecorder.basechart.utils.NormalizedNumber;
 
 /**
  * Created by galafit on 5/9/17.

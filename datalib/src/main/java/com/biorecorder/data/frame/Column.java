@@ -41,7 +41,7 @@ public interface Column {
      */
     IntSequence group(double interval, IntWrapper length);
 
-    Column aggregate(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
-    Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);
+    Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
+    Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);
 
 }

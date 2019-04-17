@@ -325,7 +325,7 @@ public class DataFrame {
      * <p>
      * Resampling will be done only with columns for which at least
      * one aggregating function is specified!!!
-     * If columns has no aggregate functions resultant dataframe will be empty
+     * If columns has no resample functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualFrequency(int points) {
         return resample(null, points);
@@ -336,7 +336,7 @@ public class DataFrame {
      * <p>
      * Resampling will be done only with columns for which at least
      * one aggregating function is specified!!!
-     * If columns has no aggregate functions resultant dataframe will be empty
+     * If columns has no resample functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
         IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
@@ -370,7 +370,7 @@ public class DataFrame {
             count += aggregations;
         }
 
-        // aggregate all columns except function columns
+        // resample all columns except function columns
         DataFrame resultantFrame = new DataFrame(isDataAppendMode) {
             @Override
             public void appendData() {
@@ -393,9 +393,9 @@ public class DataFrame {
                 Aggregation[] aggregations = columnAggFunctions.get(i);
                 for (Aggregation aggregation : aggregations) {
                     if(groupIndexes != null) {
-                        resultantFrame.columns.add(column.aggregate(aggregation, groupIndexes, isDataAppendMode));
+                        resultantFrame.columns.add(column.resample(aggregation, groupIndexes, isDataAppendMode));
                     } else {
-                        resultantFrame.columns.add(column.aggregate(aggregation, points, length, isDataAppendMode));
+                        resultantFrame.columns.add(column.resample(aggregation, points, length, isDataAppendMode));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     Aggregation[] resultantAgg = {aggregation};

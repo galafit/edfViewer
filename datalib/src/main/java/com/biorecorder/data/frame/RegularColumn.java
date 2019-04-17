@@ -129,7 +129,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) throws IllegalArgumentException {
+    public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) throws IllegalArgumentException {
         int sizeNew = size/points;
         switch (aggregation) {
             case MIN:
@@ -166,7 +166,7 @@ public class RegularColumn extends IntColumn {
     }
 
     @Override
-    public Column aggregate(Aggregation aggregateFunction, IntSequence groupIndexes, boolean isDataAppendMode) throws IllegalArgumentException {
+    public Column resample(Aggregation aggregateFunction, IntSequence groupIndexes, boolean isDataAppendMode) throws IllegalArgumentException {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {

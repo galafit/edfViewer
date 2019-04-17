@@ -1,12 +1,11 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
-import com.biorecorder.data.utils.NormalizedNumber;
+import com.biorecorder.basechart.utils.NormalizedNumber;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 
 /**

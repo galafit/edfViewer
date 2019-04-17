@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
-import com.biorecorder.data.utils.NormalizedNumber;
+import com.biorecorder.basechart.utils.NormalizedNumber;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
