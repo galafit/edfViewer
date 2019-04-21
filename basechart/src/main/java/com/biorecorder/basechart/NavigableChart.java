@@ -25,6 +25,8 @@ public class NavigableChart {
     private BRectangle chartArea;
     private BRectangle navigatorArea;
     private Map<Integer, Scroll> scrolls = new Hashtable<Integer, Scroll>(2);
+    private List<Integer> scrollsToAutoscale = new ArrayList<>(2);
+
     private boolean isScrollsAtTheEnd = true;
     private NavigableChartConfig config;
     private boolean isChartAutoscaleNeedDisable;
@@ -63,10 +65,10 @@ public class NavigableChart {
         return chartArea == null || navigatorArea == null;
     }
 
-    private void createScrolls(double scrollMin, double scrollMax) {
+    private void createScrolls(double scrollMin, double scrollMax, BCanvas canvas) {
         for (int xIndex = 0; xIndex < chart.xAxesCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
-                double extent = chart.getBestExtent(xIndex);
+                double extent = chart.getBestExtent(xIndex, canvas);
                 Scroll scroll = new Scroll(scrollMin, scrollMax, extent);
                 chart.setXMinMax(xIndex, scrollMin, scrollMin + extent);
                 for (int i = 0; i < chart.yAxesCount(); i++) {
@@ -109,12 +111,12 @@ public class NavigableChart {
     private void updateScrollsAndPreview(BCanvas canvas) {
         Range chartDataMinMax = chart.getAllTracesFullMinMax();
         if(chartDataMinMax != null) {
-            Range navigatorBestRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin() + navigator.getBestExtent(0));
+            Range navigatorBestRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin() + navigator.getBestExtent(0, canvas));
             Range minMax = Range.join(chartDataMinMax, navigatorBestRange);
             for (int i = 0; i < navigator.xAxesCount(); i++) {
                 navigator.setXMinMax(i, minMax.getMin(), minMax.getMax());
             }
-            createScrolls(chartDataMinMax.getMin(), chartDataMinMax.getMax());
+            createScrolls(chartDataMinMax.getMin(), chartDataMinMax.getMax(), canvas);
             for (Integer xAxis : scrolls.keySet()) {
                 scrolls.get(xAxis).setMinMax(chartDataMinMax.getMin(), chartDataMinMax.getMax());
             }
@@ -272,6 +274,17 @@ public class NavigableChart {
                 scrollToEnd();
             }
             isDirty = false;
+        }
+
+        if(scrollsToAutoscale.size() > 0) {
+            for (int i = 0; i < scrollsToAutoscale.size(); i++) {
+                int xIndex = scrollsToAutoscale.get(i);
+                Scroll scroll = scrolls.get(xIndex);
+                if(scroll != null) {
+                    scroll.setExtent(chart.getBestExtent(xIndex, canvas));
+                }
+            }
+            scrollsToAutoscale.clear();
         }
 
         canvas.setColor(config.getBackgroundColor());
@@ -433,10 +446,7 @@ public class NavigableChart {
     }
 
     public void autoScaleScrollExtent(int xIndex) {
-        Scroll scroll = scrolls.get(xIndex);
-        if(scroll != null) {
-            scroll.setExtent(chart.getBestExtent(xIndex));
-        }
+        scrollsToAutoscale.add(xIndex);
     }
 
     public boolean selectTrace(int x, int y) {

@@ -12,11 +12,11 @@ import java.util.List;
  * Created by galafit on 15/1/19.
  */
 public class IntColumn implements Column {
-    private IntSequence numberSequence;
+    private IntSequence dataSequence;
     private StatsInt stats;
 
     public IntColumn(IntSequence data) {
-        this.numberSequence = data;
+        this.dataSequence = data;
     }
 
     public IntColumn(int[] data) {
@@ -50,17 +50,17 @@ public class IntColumn implements Column {
 
     @Override
     public int size() {
-        return numberSequence.size();
+        return dataSequence.size();
     }
 
     @Override
     public double value(int index) {
-        return numberSequence.get(index);
+        return dataSequence.get(index);
     }
 
     @Override
     public String label(int index) {
-        return Integer.toString(numberSequence.get(index));
+        return Integer.toString(dataSequence.get(index));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class IntColumn implements Column {
 
             @Override
             public int get(int index) {
-                return numberSequence.get(index + from);
+                return dataSequence.get(index + from);
             }
         };
 
@@ -95,7 +95,7 @@ public class IntColumn implements Column {
 
             @Override
             public int get(int index) {
-                return numberSequence.get(order[index]);
+                return dataSequence.get(order[index]);
             }
         };
         return new IntColumn(subSequence);
@@ -106,33 +106,33 @@ public class IntColumn implements Column {
     public Column slice(int from, int length) {
         int[] slicedData = new int[length];
         for (int i = 0; i < length; i++) {
-            slicedData[i] = numberSequence.get(from + i);
+            slicedData[i] = dataSequence.get(from + i);
         }
         return new IntColumn(slicedData);
     }
 
     @Override
     public void cache() {
-        if (!(numberSequence instanceof IntCachingSequence)) {
-            numberSequence = new IntCachingSequence(numberSequence);
+        if (!(dataSequence instanceof IntCachingSequence)) {
+            dataSequence = new IntCachingSequence(dataSequence);
         }
     }
 
     @Override
     public void disableCaching() {
-        if (numberSequence instanceof IntCachingSequence) {
-            numberSequence = ((IntCachingSequence) numberSequence).getInnerData();
+        if (dataSequence instanceof IntCachingSequence) {
+            dataSequence = ((IntCachingSequence) dataSequence).getInnerData();
         }
     }
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(numberSequence, PrimitiveUtils.roundDoubleToInt(value), from, length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDoubleToInt(value), from, length);
     }
 
     @Override
     public int[] sort(int from, int length, boolean isParallel) {
-        return SequenceUtils.sort(numberSequence, from, length, isParallel);
+        return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
 
     @Override
@@ -167,10 +167,10 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                     from = groupIndexesList.get(groupListSize - 2);
                 }
-                Group currentGroup = new Group(interval, numberSequence.get(from));
+                Group currentGroup = new Group(interval, dataSequence.get(from));
 
                 for (int i = from + 1; i < l; i++) {
-                    int data = numberSequence.get(i);
+                    int data = dataSequence.get(i);
                     if (!currentGroup.contains(data)) {
                         groupIndexesList.add(i);
                         currentGroup = currentGroup.groupByValue(data);
@@ -273,7 +273,7 @@ public class IntColumn implements Column {
                 int from = groupIndexes.get(index) + n;
 
                 if (length > 0) {
-                    aggFunction.add(numberSequence, from, length);
+                    aggFunction.add(dataSequence, from, length);
                 }
                 return aggFunction.getValue();
             }
@@ -308,17 +308,17 @@ public class IntColumn implements Column {
 
 
     private StatsInt calculateStats(int from, int length) {
-        int min1 = numberSequence.get(from);
+        int min1 = dataSequence.get(from);
         int max1 = min1;
         boolean isIncreasing1 = true;
         boolean isDecreasing1 = true;
 
         for (int i = 1; i < length; i++) {
-            int data_i = numberSequence.get(i + from);
+            int data_i = dataSequence.get(i + from);
             min1 = Math.min(min1, data_i);
             max1 = Math.max(max1, data_i);
             if (isIncreasing1 || isDecreasing1) {
-                int diff = data_i - numberSequence.get(i + from - 1);
+                int diff = data_i - dataSequence.get(i + from - 1);
                 if (isDecreasing1 && diff > 0) {
                     isDecreasing1 = false;
                 }
@@ -352,7 +352,7 @@ public class IntColumn implements Column {
             StatsInt statsAdditional = calculateStats(stats.count(), length - stats.count());
             int min = Math.min(stats.getMin(), statsAdditional.getMin());
             int max = Math.max(stats.getMax(), statsAdditional.getMax());
-            int diff = numberSequence.get(stats.count) - numberSequence.get(stats.count() - 1);
+            int diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
             boolean isIncreasing = stats.isIncreasing() && statsAdditional.isIncreasing() && diff >= 0;
             boolean isDecreasing = stats.isDecreasing() && statsAdditional.isDecreasing() && diff <= 0;
             stats = new StatsInt(length, min, max, isIncreasing, isDecreasing);

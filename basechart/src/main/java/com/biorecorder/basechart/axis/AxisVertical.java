@@ -20,8 +20,8 @@ abstract class AxisVertical extends Axis {
         width += config.getTickMarkOutsideSize();
 
         if (config.isTickLabelOutside()) {
-            if (isTicksDirty()) {
-                createTicks(canvas);
+            if (isDirty()) {
+                createTicksElements(canvas);
             }
             String longestLabel = "";
             for (BText tickLabel : tickLabels) {

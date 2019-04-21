@@ -20,7 +20,7 @@ import java.util.List;
  * and some advanced functionality such as Zooming and Translating. See
  * {@link #setConfig(AxisConfig)}
  */
-public abstract class Axis {
+public abstract class Axis_Old {
     // private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 5, 8, 10, 16,  32, 50, 64, 100, 128}; // used to skip ticks if they overlap
     private final int[] TICKS_AVAILABLE_SKIP_STEPS = {2, 4, 8, 16, 32, 64, 128}; // used to skip ticks if they overlap
 
@@ -34,16 +34,17 @@ public abstract class Axis {
 
     private Scale scale;
 
-    private List<Tick> ticks;
+    private TickProvider tickProvider;
+    private int ticksSkipStep = 1;
     protected List<BText> tickLabels = new ArrayList<>();
     private IntArrayList tickPositions = new IntArrayList();
     private IntArrayList minorTickPositions = new IntArrayList();
     private BText titleText;
 
-    private boolean isDirty = true;
+    private boolean isTicksDirty = true;
     private int width = -1;
 
-    public Axis(Scale scale, AxisConfig axisConfig) {
+    public Axis_Old(Scale scale, AxisConfig axisConfig) {
         this.scale = scale.copy();
         this.config = axisConfig;
     }
@@ -58,14 +59,14 @@ public abstract class Axis {
         return width;
     }
 
-    private void setDirty() {
-        ticks = null;
-        isDirty = true;
+    private void setTicksDirty() {
+        tickProvider = null;
+        isTicksDirty = true;
         width = -1;
     }
 
-    protected boolean isDirty() {
-        return isDirty;
+    protected boolean isTicksDirty() {
+        return isTicksDirty;
     }
 
     private boolean isTooShort() {
@@ -92,7 +93,7 @@ public abstract class Axis {
      */
     public void setScale(Scale scale) {
         this.scale = scale;
-        setDirty();
+        setTicksDirty();
     }
 
     /**
@@ -124,7 +125,7 @@ public abstract class Axis {
         // set a copy to safely change
         this.config = new AxisConfig(config);
         titleText = null;
-        setDirty();
+        setTicksDirty();
     }
 
     public boolean isTickLabelOutside() {
@@ -220,7 +221,7 @@ public abstract class Axis {
             return false;
         }
         scale.setDomain(min, max);
-        setDirty();
+        setTicksDirty();
         return true;
     }
 
@@ -249,7 +250,7 @@ public abstract class Axis {
             return false;
         }
         scale.setRange(start, end);
-        setDirty();
+        setTicksDirty();
         return true;
     }
 
@@ -286,12 +287,46 @@ public abstract class Axis {
             return;
         }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-        if (ticks == null) {
-            createTicks(tm);
+        if (tickProvider == null) {
+            configTickProvider(tm);
         }
-        Tick tickMin = ticks.get(1);
-        Tick tickMax = ticks.get(ticks.size() - 2);
 
+        double min = getMin();
+        double max = getMax();
+
+        Tick tickMin = tickProvider.getLowerTick(min);
+        Tick tickMinNext = tickProvider.getNextTick();
+        Tick tickMax = tickProvider.getUpperTick(max);
+
+        // Calculate required space to avoid labels overlapping.
+        // Simplified algorithm assumes that the biggest tick rowCount are on the axis edges
+        // (it is reasonable for all axis except the category one that at the moment not used)
+        String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
+        int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
+
+        if (ticksSkipStep > 1) {
+            double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().value()) - scale(tickMin.getTickValue().value()));
+            int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().value()) - scale(tickMin.getTickValue().value())) / tickPixelInterval);
+            if (tickIntervalCount / ticksSkipStep < 3) {
+                if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+                    if (tickIntervalCount % 2 != 0) {
+                        tickIntervalCount++;
+                        tickMax = tickProvider.getNextTick();
+                    }
+                    ticksSkipStep = tickIntervalCount / 2;
+                } else { // 2 ticks
+                    ticksSkipStep = tickIntervalCount;
+                }
+            } else {
+                int roundExtraTicksCount = ticksSkipStep - tickIntervalCount % ticksSkipStep;
+                if (roundExtraTicksCount < ticksSkipStep) {
+                    for (int i = 0; i < roundExtraTicksCount; i++) {
+                        tickMax = tickProvider.getNextTick();
+                        tickIntervalCount++;
+                    }
+                }
+            }
+        }
         scale.setDomain(tickMin.getTickValue().value(), tickMax.getTickValue().value());
     }
 
@@ -301,8 +336,8 @@ public abstract class Axis {
             return;
         }
         canvas.save();
-        if (isDirty()) {
-            createTicksElements(canvas);
+        if (isTicksDirty()) {
+            createTicks(canvas);
         }
 
         translateCanvas(canvas, area);
@@ -325,8 +360,8 @@ public abstract class Axis {
     public void drawAxis(BCanvas canvas, BRectangle area) {
         canvas.save();
 
-        if (isDirty()) {
-            createTicksElements(canvas);
+        if (isTicksDirty()) {
+            createTicks(canvas);
         }
         translateCanvas(canvas, area);
 
@@ -384,12 +419,12 @@ public abstract class Axis {
         int requiredSpace = labelSize + labelsGap;
 
         // first and last labels are usually shifted to avoid its cutting on the edge
-        // so we need additional extra distance
+        // so we need additional extra space
         // requiredSpace += labelSize / 2;
         return requiredSpace;
     }
 
-    private void createTicks(TextMetric tm) {
+    private void configTickProvider(TextMetric tm) {
         if(length() < 1) {
             return;
         }
@@ -397,7 +432,6 @@ public abstract class Axis {
         if (config.getTickAccuracy() > 0) {
             tickIntervalCountByRoundingUncertainty = (int) Math.round(100.0 / config.getTickAccuracy());
         }
-        TickProvider tickProvider;
         if (isTickIntervalSpecified()) {
             tickProvider = scale.getTickProviderByInterval(config.getTickInterval(), config.getTickLabelPrefixAndSuffix());
         } else {
@@ -418,54 +452,26 @@ public abstract class Axis {
         double min = getMin();
         double max = getMax();
 
-        Tick tickMax;
-        Tick tickMin;
-        if(config.isRoundingEnabled()) {
-            tickMax = tickProvider.getUpperTick(max);
-            tickMin = tickProvider.getLowerTick(min);
-        } else {
-            tickMax = tickProvider.getLowerTick(max);
-            tickMin = tickProvider.getUpperTick(min);
-        }
+        Tick tickMin = tickProvider.getUpperTick(min);
+        Tick tickMinNext = tickProvider.getNextTick();
+        Tick tickMax = tickProvider.getLowerTick(max);
 
-        Tick tickNext = tickProvider.getNextTick();
-        double tickPixelInterval = Math.abs(scale(tickNext.getTickValue().value()) - scale(tickMin.getTickValue().value()));
+        // Calculate required space to avoid labels overlapping.
+        // Simplified algorithm assumes that the biggest tick rowCount are on the axis edges
+        // (it is reasonable for all axis except the category one that at the moment not used)
+        String longestLabel = (tickMin.getLabel().length() > tickMax.getLabel().length()) ? tickMin.getLabel() : tickMax.getLabel();
+        int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
+
+        double tickPixelInterval = Math.abs(scale(tickMinNext.getTickValue().value()) - scale(tickMin.getTickValue().value()));
 
         // real resultant number of tick intervals
         int tickIntervalCount = (int) Math.round(Math.abs(scale(tickMax.getTickValue().value()) - scale(tickMin.getTickValue().value())) / tickPixelInterval);
-        int tickCount = tickIntervalCount + 1;
-
-        if (tickCount > MAX_TICKS_COUNT) {
-            String errMsg = MessageFormat.format(TOO_MANY_TICKS_MSG, tickPositions.size(), MAX_TICKS_COUNT);
-            throw new RuntimeException(errMsg);
-        }
-
-        ticks = new ArrayList<>();
-
-        ticks.add(tickMin);
-        ticks.add(tickNext);
-
-        String longestLabel = tickMin.getLabel();
-        if(tickNext.getLabel().length() > longestLabel.length()) {
-            longestLabel = tickNext.getLabel();
-        }
-        for (int i = 2; i < tickCount; i++) {
-            tickNext = tickProvider.getNextTick();
-            ticks.add(tickNext);
-            if(tickNext.getLabel().length() > longestLabel.length()) {
-                longestLabel = tickNext.getLabel();
-            }
-        }
-
-        // required distance to avoid labels overlapping.
-        int requiredSpace = requiredSpaceForTickLabel(tm, 0, longestLabel);
-
         // Calculate how many ticks need to be skipped to avoid labels overlapping.
         // When ticksSkipStep = n, only every n'th label on the axis will be shown.
         // For example if ticksSkipStep = 2 every other label will be shown.
-        int ticksSkipStep = 1;
+        ticksSkipStep = 1;
         if (tickPixelInterval < requiredSpace) {
-            ticksSkipStep = (int)(requiredSpace / tickPixelInterval);
+            ticksSkipStep = (int) (requiredSpace / tickPixelInterval);
             if (ticksSkipStep * tickPixelInterval < requiredSpace) {
                 ticksSkipStep++;
             }
@@ -483,82 +489,33 @@ public abstract class Axis {
             }
         }
 
-     /*   if (ticksSkipStep > 1) {
+        if (ticksSkipStep > 1) {
             if (isTickIntervalSpecified() || config.getTickAccuracy() <= 0) {
                 tickProvider.increaseTickInterval(ticksSkipStep);
                 ticksSkipStep = 1;
             }
-        }*/
-
-        boolean isLastExtraTickAdded = false;
-        if (ticksSkipStep > 1) {
-            if (tickIntervalCount / ticksSkipStep < 3) {
-                if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
-                    ticksSkipStep = tickIntervalCount / 2;
-                    if (config.isRoundingEnabled() && tickIntervalCount % 2 != 0) {
-                        ticksSkipStep = (tickIntervalCount + 1)/ 2;
-                    }
-                } else { // 2 ticks
-                    ticksSkipStep = tickIntervalCount;
-                }
-            }
-
-            // create extra ticks to get tickIntervalCount multiple to ticksSkipStep
-            int roundExtraTicksCount = ticksSkipStep - tickIntervalCount % ticksSkipStep;
-            if (roundExtraTicksCount < ticksSkipStep) {
-                for (int i = 0; i < roundExtraTicksCount; i++) {
-                    tickIntervalCount++;
-                    tickCount++;
-                    ticks.add(tickProvider.getNextTick());
-                }
-                if(!config.isRoundingEnabled()) {
-                   isLastExtraTickAdded = true;
-                }
-            }
-
-
-            List<Tick> skippedTicks = new ArrayList<>();
-
-            for (int i = 0; i < ticks.size(); i++) {
-                if(i % ticksSkipStep == 0) {
-                    skippedTicks.add(ticks.get(i));
-                }
-            }
-            ticks = skippedTicks;
         }
 
-        // add 2 extra ticks: one at the beginning and one at the end to ba able create minor grid
-
-        // add extra tick at the end
-        if(!isLastExtraTickAdded) {
-            Tick extraTick = tickProvider.getNextTick();
-            for (int i = 1; i <= ticksSkipStep; i++) {
-                extraTick =  tickProvider.getNextTick();
+        if (tickIntervalCount / ticksSkipStep < 3) {
+            if (length() / requiredSpace >= REQUIRED_SPACE_FOR_3_TICKS_RATIO) { // 3 ticks
+                ticksSkipStep = tickIntervalCount / 2;
+            } else { // 2 ticks
+                ticksSkipStep = tickIntervalCount;
             }
-            ticks.add(extraTick);
         }
 
-        // add extra tick at the beginning
-        if(config.isRoundingEnabled()) {
-            tickMin = tickProvider.getLowerTick(min);
-        } else {
-            tickMin = tickProvider.getUpperTick(min);
+        if (ticksSkipStep < 1) {
+            ticksSkipStep = 1;
         }
-        Tick extraTick =  tickProvider.getPreviousTick();
-        for (int i = 1; i <= ticksSkipStep; i++) {
-            extraTick =  tickProvider.getPreviousTick();
-        }
-        ticks.add(0, extraTick);
     }
 
-
-    protected void createTicksElements(BCanvas canvas) {
+    protected void createTicks(BCanvas canvas) {
         if(isTooShort()) {
             return;
         }
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-        if (ticks == null) {
-            createTicks(tm);
+        if (tickProvider == null) {
+            configTickProvider(tm);
         }
 
         tickPositions.clear();
@@ -569,34 +526,72 @@ public abstract class Axis {
         double max = getMax();
         int minorTickIntervalCount = config.getMinorTickIntervalCount();
 
-        Tick currentTick = ticks.get(0);
-        Tick nextTick = ticks.get(1);
-        int tickPixelInterval = (int)Math.abs(scale(currentTick.getTickValue().value() - scale(nextTick.getTickValue().value())));
+        Tick currentTick = tickProvider.getUpperTick(min);
+        Tick nextTick = tickProvider.getNextTick();
+        tickProvider.getPreviousTick();
 
-        for (int tickNumber = 2; tickNumber < ticks.size(); tickNumber++) {
+        int tickPixelInterval = ticksSkipStep * ((int)Math.abs(scale(currentTick.getTickValue().value()) - scale(nextTick.getTickValue().value())));
+
+        while (currentTick.getTickValue().compare(max) <= 0) {
+            int position = (int) Math.round(scale(currentTick.getTickValue().value()));
+            // tick position
+            tickPositions.add(position);
+            // tick label
+            tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), tickPixelInterval));
+            for (int i = 0; i < ticksSkipStep; i++) {
+                nextTick = tickProvider.getNextTick();
+            }
+
             if (minorTickIntervalCount > 0) {
                 // minor tick positions
                 double minorTickInterval = (nextTick.getTickValue().value() - currentTick.getTickValue().value()) / minorTickIntervalCount;
                 double minorTickValue = currentTick.getTickValue().value();
                 for (int i = 1; i < minorTickIntervalCount; i++) {
                     minorTickValue += minorTickInterval;
-                    if (minorTickValue < max && minorTickValue > min) {
+                    if (minorTickValue <= max) {
                         minorTickPositions.add((int) Math.round(scale(minorTickValue)));
                     } else {
                         break;
                     }
                 }
             }
+
+            if (tickPositions.size() > MAX_TICKS_COUNT) {
+                String errMsg = MessageFormat.format(TOO_MANY_TICKS_MSG, tickPositions.size(), MAX_TICKS_COUNT);
+                throw new RuntimeException(errMsg);
+            }
             currentTick = nextTick;
-            nextTick = ticks.get(tickNumber);
-            int position = (int) Math.round(scale(currentTick.getTickValue().value()));
-            // tick position
-            tickPositions.add(position);
-            // tick label
-            tickLabels.add(tickToLabel(tm, position, currentTick.getLabel(), tickPixelInterval));
         }
 
-        isDirty = false;
+        if (minorTickIntervalCount > 0) {
+            // add minor ticks that are located between minorTick and min
+            currentTick = tickProvider.getUpperTick(min);
+            Tick previousTick = null;
+            for (int i = 0; i < ticksSkipStep; i++) {
+                previousTick = tickProvider.getPreviousTick();
+            }
+            double minorTickInterval = (currentTick.getTickValue().value() - previousTick.getTickValue().value()) / minorTickIntervalCount;
+            double minorTickValue = currentTick.getTickValue().value();
+            IntArrayList positions = new IntArrayList();
+            for (int i = 1; i < minorTickIntervalCount; i++) {
+                minorTickValue -= minorTickInterval;
+                if (minorTickValue >= min) {
+                    positions.add((int) Math.round(scale(minorTickValue)));
+                } else {
+                    break;
+                }
+            }
+            if (positions.size() > 0) {
+                // additionalPositions need to be reversed
+                int[] minorTickAdditionalPositions = new int[positions.size()];
+                for (int i = 0; i < positions.size(); i++) {
+                    minorTickAdditionalPositions[i] = positions.get(positions.size() - 1 - i);
+                }
+                minorTickPositions.add(0, minorTickAdditionalPositions);
+            }
+        }
+
+        isTicksDirty = false;
     }
 
     protected abstract int calculateWidth(BCanvas canvas);

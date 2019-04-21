@@ -37,7 +37,7 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 150; i++) {
             list1.add(i);
             list2.add(i + 50);
             labels.add("lab_"+i);
@@ -77,11 +77,11 @@ public class ChartTest extends JFrame {
 
 
         chart = new Chart(new DarkTheme(true).getChartConfig());
-        chart.setXScale(0, new CategoryScale(labels));
-       // chart.addTrace(new LineTrace(unsortedData), false, true, false);
-       // chart.addStack();
+       // chart.setXScale(0, new CategoryScale(labels));
+        chart.addTrace(new LineTrace(unsortedData), false, true, false);
+       /* chart.addStack();
         chart.addTrace(new LineTrace(regularData), true);
-        chart.addTrace(new LineTrace(noRegularData), true);
+        chart.addTrace(new LineTrace(noRegularData), true);*/
 
         chartPanel = new ChartPanel(chart);
 
