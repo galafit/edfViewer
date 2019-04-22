@@ -566,9 +566,10 @@ public abstract class Axis {
 
         Tick currentTick = ticks.get(0);
         Tick nextTick = ticks.get(1);
-        int tickPixelInterval = (int) Math.abs(scale(currentTick.getValue() - scale(nextTick.getValue())));
+        int tickPixelInterval = (int) Math.abs(scale(currentTick.getValue()) - scale(nextTick.getValue()));
 
         for (int tickNumber = 2; tickNumber <= ticks.size(); tickNumber++) {
+
             if (minorTickIntervalCount > 0) {
                 // minor tick positions
                 double minorTickInterval = (nextTick.getValue() - currentTick.getValue()) / minorTickIntervalCount;

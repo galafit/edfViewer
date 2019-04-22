@@ -64,10 +64,12 @@ public class ChartTest extends JFrame {
         regularData.addColumn(list1);
         //regularData.setColumnAggFunctions(1, Aggregation.SUM);
        // regularData.addColumn(list2);
+        regularData.setColumnName(1, "rg");
 
         XYData noRegularData = new XYData(true);
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
+        noRegularData.setColumnName(1, "nr");
     //    noRegularData.setColumnAggFunctions(1, Aggregation.SUM);
 
 
@@ -77,9 +79,10 @@ public class ChartTest extends JFrame {
 
 
         chart = new Chart(new DarkTheme(true).getChartConfig());
-       // chart.setXScale(0, new CategoryScale(labels));
-        chart.addTrace(new LineTrace(unsortedData), false, true, false);
-        chart.addStack();
+        //chart.setXScale(0, new CategoryScale(labels));
+        chart.setXScale(0, new TimeScale());
+        //chart.addTrace(new LineTrace(unsortedData), false, true, false);
+        //chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
 
@@ -124,7 +127,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        t.start();
+       // t.start();
 
     }
 

@@ -4,6 +4,7 @@ import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 import com.biorecorder.basechart.utils.NormalizedNumber;
 import com.biorecorder.data.sequence.StringSequence;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -13,8 +14,9 @@ public class CategoryScale extends LinearScale {
     private StringSequence labels;
     private long startValue = 0;
 
-    public CategoryScale() {
 
+
+    public CategoryScale() {
     }
 
     public CategoryScale(StringSequence labels) {
@@ -44,6 +46,15 @@ public class CategoryScale extends LinearScale {
     }
 
     @Override
+    public Scale copy() {
+        CategoryScale copyScale = new CategoryScale(labels);
+        copyScale.setDomain(getDomain());
+        copyScale.setRange(getRange());
+        return copyScale;
+    }
+
+
+    @Override
     public String formatDomainValue(double value) {
         long longValue = Math.round(value);
         int labelIndex = (int)(longValue - startValue);
@@ -68,9 +79,6 @@ public class CategoryScale extends LinearScale {
         long currentValue;
         int  step = 1;
 
-        private Tick createTick(long value) {
-            return new Tick(new NormalizedNumber(value, 0), formatDomainValue(value));
-        }
 
         @Override
         public Tick getUpperTick(double value) {
@@ -79,26 +87,26 @@ public class CategoryScale extends LinearScale {
             if(currentValue < value) {
                 currentValue += step;
             }
-            return createTick(currentValue);
+            return new Tick(currentValue, formatDomainValue(currentValue));
         }
 
         @Override
         public Tick getLowerTick(double value) {
             currentValue = (long) value;
             currentValue = (currentValue / step) * step;
-            return createTick(currentValue);
+            return new Tick(currentValue, formatDomainValue(currentValue));
         }
 
         @Override
         public Tick getNextTick() {
             currentValue += step;
-            return createTick(currentValue);
+            return new Tick(currentValue, formatDomainValue(currentValue));
         }
 
         @Override
         public Tick getPreviousTick() {
             currentValue -= step;
-            return createTick(currentValue);
+            return new Tick(currentValue, formatDomainValue(currentValue));
         }
 
         @Override

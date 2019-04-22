@@ -991,6 +991,7 @@ public class Chart {
         Scale translatedScale = xAxisList.get(xIndex).translate(translation);
         double translatedMin = translatedScale.getDomain()[0];
         double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
+        AxisWrapper axis = xAxisList.get(xIndex);
         setXMinMax(xIndex, translatedMin, translatedMax);
     }
 

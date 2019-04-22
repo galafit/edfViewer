@@ -52,9 +52,9 @@ abstract class AxisHorizontal extends Axis {
         }
 
         if(x + labelSize > getEnd()) {
-            int x1 = x - (tickPixelInterval - 2 * labelSize - 2 * charSize);
+            int x1 = x + 2 * labelSize + 2 * charSize - tickPixelInterval;
             int x2 = (int)getEnd();
-            x = Math.max(x1, x2);
+            x = Math.min(x + labelSize - charHalfWidth, Math.max(x1, x2));
             return new BText(tickLabel, x , y, TextAnchor.END, labelVAnchor, tm);
         }
         return new BText(tickLabel, x, y, TextAnchor.START, labelVAnchor, tm);
