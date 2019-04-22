@@ -55,6 +55,7 @@ public class DarkTheme implements Theme {
             tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED;
         }
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled, tick_accuracy);
+        yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);

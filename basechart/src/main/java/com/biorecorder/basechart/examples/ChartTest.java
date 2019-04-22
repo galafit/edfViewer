@@ -79,9 +79,9 @@ public class ChartTest extends JFrame {
         chart = new Chart(new DarkTheme(true).getChartConfig());
        // chart.setXScale(0, new CategoryScale(labels));
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
-       /* chart.addStack();
+        chart.addStack();
+        chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
-        chart.addTrace(new LineTrace(noRegularData), true);*/
 
         chartPanel = new ChartPanel(chart);
 
@@ -124,7 +124,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-       // t.start();
+        t.start();
 
     }
 

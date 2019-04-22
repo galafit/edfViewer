@@ -180,53 +180,8 @@ public class IntColumn implements Column {
                 groupIndexesList.add(l);
             }
         };
-        return groupIndexes;
+         return groupIndexes;
     }
-
-    class Group {
-        double interval;
-        long currentIntervalNumber;
-        int castedNextGroupStart;
-
-        public Group(double interval) {
-            this(interval, 0);
-        }
-
-        public Group(double interval, double value) {
-            this.interval = interval;
-            currentIntervalNumber = (long) (value / interval);
-            if (currentIntervalNumber * interval > value) {
-                currentIntervalNumber--;
-            }
-
-            double nextGroupStart = interval * (currentIntervalNumber + 1);
-            castedNextGroupStart = PrimitiveUtils.doubleToInt(nextGroupStart);
-            if (castedNextGroupStart > nextGroupStart) {
-                castedNextGroupStart--;
-            }
-        }
-
-        public Group nextGroup() {
-            Group ng = new Group(interval);
-            ng.currentIntervalNumber = currentIntervalNumber + 1;
-            return ng;
-        }
-
-        public Group groupByValue(double value) {
-            return new Group(interval, value);
-        }
-
-        public boolean contains(int value) {
-            // group function valid only for sorted (increased data)
-            // we do not need to check that value >= interval * currentIntervalNumber
-            if (value < castedNextGroupStart) {
-                return true;
-            }
-            return false;
-        }
-
-    }
-
 
     /**
      * @return grouping function Object corresponding
@@ -292,7 +247,12 @@ public class IntColumn implements Column {
 
             @Override
             public int size() {
-                return length.getValue() / points + 2;
+                if(length.getValue() % points == 0) {
+                    size = length.getValue() / points + 1;
+                } else {
+                    size = length.getValue() / points + 2;
+                }
+                return size;
             }
 
             @Override
@@ -407,4 +367,49 @@ public class IntColumn implements Column {
             return isDecreasing;
         }
     }
+
+    class Group {
+        double interval;
+        long currentIntervalNumber;
+        int castedNextGroupStart;
+
+        public Group(double interval) {
+            this(interval, 0);
+        }
+
+        public Group(double interval, double value) {
+            this.interval = interval;
+            currentIntervalNumber = (long) (value / interval);
+            if (currentIntervalNumber * interval > value) {
+                currentIntervalNumber--;
+            }
+
+            double nextGroupStart = interval * (currentIntervalNumber + 1);
+            castedNextGroupStart = PrimitiveUtils.doubleToInt(nextGroupStart);
+            if (castedNextGroupStart > nextGroupStart) {
+                castedNextGroupStart--;
+            }
+        }
+
+        public Group nextGroup() {
+            Group ng = new Group(interval);
+            ng.currentIntervalNumber = currentIntervalNumber + 1;
+            return ng;
+        }
+
+        public Group groupByValue(double value) {
+            return new Group(interval, value);
+        }
+
+        public boolean contains(int value) {
+            // group function valid only for sorted (increased data)
+            // we do not need to check that value >= interval * currentIntervalNumber
+            if (value < castedNextGroupStart) {
+                return true;
+            }
+            return false;
+        }
+
+    }
+
 }

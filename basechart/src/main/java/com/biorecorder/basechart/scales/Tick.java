@@ -14,8 +14,8 @@ public class Tick {
         this.label = tickLabel;
     }
 
-    public NormalizedNumber getTickValue() {
-        return value;
+    public double getValue() {
+        return value.value();
     }
 
     public String getLabel() {
