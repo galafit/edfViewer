@@ -5,7 +5,10 @@ import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.utils.StringUtils;
+
+import java.util.List;
 
 
 /**
@@ -82,7 +85,7 @@ abstract class AxisVertical extends Axis {
     }
 
     @Override
-    protected int labelSizeForOverlap(TextMetric tm, int angle, String label) {
+    protected int labelSizeForOverlap(TextMetric tm, List<Tick> ticks) {
         return tm.height();
     }
 

@@ -65,12 +65,12 @@ public class TimeScale extends LinearScale {
     @Override
     public String formatDomainValue(double value) {
         if (timeFormat == null) {
-            float rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
+            int rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
             double domainLength = domain[domain.length - 1] - domain[0];
             long pointInterval = (long)(domainLength / rangePointsCount);
             timeFormat = getDateFormat(pointInterval);
         }
-        return timeFormat.format(value);
+        return timeFormat.format((long)value);
     }
 
     private DateFormat getDateFormat(long Interval) {

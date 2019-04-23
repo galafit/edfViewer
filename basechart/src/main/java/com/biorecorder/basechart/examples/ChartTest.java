@@ -80,7 +80,7 @@ public class ChartTest extends JFrame {
 
         chart = new Chart(new DarkTheme(true).getChartConfig());
         //chart.setXScale(0, new CategoryScale(labels));
-        chart.setXScale(0, new TimeScale());
+        //chart.setXScale(0, new TimeScale());
         //chart.addTrace(new LineTrace(unsortedData), false, true, false);
         //chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);

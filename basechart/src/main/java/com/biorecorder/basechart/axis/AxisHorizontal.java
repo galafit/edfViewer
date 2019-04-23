@@ -5,7 +5,10 @@ import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.utils.StringUtils;
+
+import java.util.List;
 
 /**
  * Created by galafit on 29/8/18.
@@ -66,8 +69,14 @@ abstract class AxisHorizontal extends Axis {
     protected abstract TextAnchor getLabelVTextAnchor();
 
     @Override
-    protected int labelSizeForOverlap(TextMetric tm, int angle, String label) {
-        return tm.stringWidth(label);
+    protected int labelSizeForOverlap(TextMetric tm, List<Tick> ticks) {
+        String maxLabel = "";
+        for (Tick tick : ticks) {
+           if(tick.getLabel().length() > maxLabel.length()) {
+               maxLabel = tick.getLabel();
+           }
+        }
+        return tm.stringWidth(maxLabel);
     }
 
     @Override
