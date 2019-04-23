@@ -9,20 +9,8 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 5/9/17.
  */
 public class AxisConfig {
-    /**
-     * At the moment not used
-     tera 	T 	1,000,000,000,000 	10x12
-     giga 	G 	1,000,000,000 	10x9
-     mega 	M 	1,000,000 	10x6
-     kilo 	k 	1,000 	10x3
-
-     milli 	m 	0.001 	10x¯3
-     micro 	µ 	0.000001 	10x¯6
-     nano 	n 	0.000000001 	10x¯9
-     */
-    public static int TICK_ACCURACY_IF_ROUNDING_ENABLED = 10;
-    public static int TICK_ACCURACY_IF_ROUNDING_DISABLED = 20;
-
+    public static int TICK_COUNT_IF_ROUNDING_ENABLED = 100;
+    public static int TICK_COUNT_IF_ROUNDING_DISABLED = 5;
 
     private BColor axisLineColor =  BColor.GRAY;
     private BStroke axisLineStroke = new BStroke(1); // if width = 0 line will not be drawn
@@ -33,18 +21,17 @@ public class AxisConfig {
     private int titlePadding; // px
     private TextStyle titleTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
     private BColor titleColor = BColor.GRAY;
-    
+
+    private double tickInterval = -1; // in axis domain units (If <= 0 will not be taken into account)
+    private int tickCount = -1; // (If <= 0 will not be taken into account)
+
     private int tickMarkInsideSize = 0; // px
     private int tickMarkOutsideSize = 3; // px
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
-    private double tickInterval = -1; // in axis domain units
-    private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 
-    // Used to calculateStats number of ticks. If <= 0 will not be taken into account
-    //Specify maximum distance between axis start and minTick in relation to axis length (percents)
-    private int tickAccuracy = 20; // percent (minTick - min) * 100 / length
+    private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
@@ -83,7 +70,7 @@ public class AxisConfig {
         tickLabelTextStyle = axisConfig.tickLabelTextStyle;
         tickInterval = axisConfig.tickInterval;
         tickLabelPrefixAndSuffix = axisConfig.tickLabelPrefixAndSuffix;
-        tickAccuracy = axisConfig.tickAccuracy;
+        tickCount = axisConfig.tickCount;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -99,30 +86,30 @@ public class AxisConfig {
         isTickLabelOutside = axisConfig.isTickLabelOutside;
     }
 
+    public int getTickCount() {
+        return tickCount;
+    }
 
-    public int getTickAccuracy() {
-        return tickAccuracy;
+    public void setTickCount(int tickCount) {
+        this.tickCount = tickCount;
     }
 
     public boolean isRoundingEnabled() {
         return isRoundingEnabled;
     }
 
-    /**
-     * Tick accuracy specify maximum distance between axis start and minTick
-     * in relation to axis length (percents)
-     * Ticks count is calculated on the base of the given rounding accuracy.
-     * If rounding accuracy <= 0 it will not be taken into account!!!
-     *
-     * If rounding disables default value is 20%.
-     * If axis rounding is enabled for smooth translation
-     * and zooming good values are: 5 - 10%
-     *
-     * @param tickAccuracy - rounding accuracy percents
-     */
-    public void setRoundingEnabled(boolean roundingEnabled, int tickAccuracy) {
+    public void setRoundingEnabled(boolean roundingEnabled) {
         isRoundingEnabled = roundingEnabled;
-        this.tickAccuracy = tickAccuracy;
+        if(roundingEnabled) {
+            tickCount = TICK_COUNT_IF_ROUNDING_ENABLED;
+        } else {
+            tickCount = TICK_COUNT_IF_ROUNDING_DISABLED;
+        }
+    }
+
+    public void setRoundingEnabled(boolean roundingEnabled, int tickCount) {
+        isRoundingEnabled = roundingEnabled;
+        this.tickCount = tickCount;
     }
 
     public void setTickInterval(double tickInterval) {

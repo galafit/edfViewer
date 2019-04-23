@@ -50,11 +50,7 @@ public class DarkTheme implements Theme {
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
-        int tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_DISABLED;
-        if(isYRoundingEnabled) {
-            tick_accuracy = AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED;
-        }
-        yAxisConfig.setRoundingEnabled(isYRoundingEnabled, tick_accuracy);
+        yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
         yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
@@ -88,7 +84,7 @@ public class DarkTheme implements Theme {
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);
         navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.getYAxisConfig().setRoundingEnabled(true, AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
+        navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);

@@ -121,7 +121,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-       t.start();
+       //t.start();
     }
 
 
