@@ -43,8 +43,6 @@ public class DarkTheme implements Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
-
-       // xAxisConfig.setRoundingEnabled(true, AxisConfig.TICK_ACCURACY_IF_ROUNDING_ENABLED);
         xAxisConfig.setMinorTickIntervalCount(3);
 
         AxisConfig yAxisConfig = new AxisConfig();

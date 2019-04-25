@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
 
 
@@ -35,18 +36,22 @@ public abstract class Trace {
     }
 
     protected final void checkCurveNumber(int curveNumber) {
-        if(curveNumber >= curveCount) {
+        if (curveNumber >= curveCount) {
             String errMsg = "Curve = " + curveNumber + " Number of curves: " + curveCount;
             throw new IllegalArgumentException(errMsg);
         }
     }
-    
+
     private ChartData getData() {
         return dataManager.getData(xScale, getMarkSize());
     }
 
     public Range getFullXMinMax() {
-       return dataManager.getFullXMinMax();
+        Range minMax = dataManager.getFullXMinMax();
+        if(minMax != null && xScale instanceof CategoryScale) {
+            minMax = new Range(minMax.getMin() - 0.5, minMax.getMax() + 0.5);
+        }
+        return minMax;
     }
 
     public double getBestExtent(int drawingAreaWidth) {
@@ -68,7 +73,7 @@ public abstract class Trace {
 
     public int xPosition(int dataIndex) {
         double xValue = getData().getValue(dataIndex, 0);
-        return (int)xScale.scale(xValue);
+        return (int) xScale.scale(xValue);
     }
 
     public final NamedValue[] curveValues(int curveNumber, int dataIndex) {
@@ -80,7 +85,7 @@ public abstract class Trace {
     }
 
     public final Range curveYMinMax(int curveNumber) {
-       return curveYMinMax(curveNumber, getData());
+        return curveYMinMax(curveNumber, getData());
     }
 
     public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
@@ -104,7 +109,7 @@ public abstract class Trace {
     }
 
     public final Scale getYScale(int curveNumber) {
-        if(curveNumber < yScales.length - 1) {
+        if (curveNumber < yScales.length - 1) {
             return yScales[curveNumber];
         }
         return yScales[yScales.length - 1];
@@ -113,9 +118,9 @@ public abstract class Trace {
     public abstract int getMarkSize();
 
     public NearestPoint nearest(int x, int y, int curveNumber1) {
-        double xValue =  xScale.invert(x);
+        double xValue = xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
-        if(pointIndex < 0) {
+        if (pointIndex < 0) {
             return null;
         }
         int dx = xPosition(pointIndex) - x;
@@ -125,7 +130,7 @@ public abstract class Trace {
 
         int startCurve = 0;
         int curveCount = curveCount();
-        if(curveNumber1 >= 0) {
+        if (curveNumber1 >= 0) {
             startCurve = curveNumber1;
             curveCount = 1;
         }
@@ -133,7 +138,7 @@ public abstract class Trace {
         for (int i = startCurve; i < startCurve + curveCount; i++) {
             int dy = curveYPosition(i, pointIndex) - y;
             int distance = dx2 + dy * dy;
-            if(distanceMin == 0 || distanceMin > distance) {
+            if (distanceMin == 0 || distanceMin > distance) {
                 curveNumber = i;
                 distanceMin = distance;
             }
@@ -146,10 +151,15 @@ public abstract class Trace {
     public abstract BColor getCurveColor(int curveNumber);
 
     protected abstract void initiateCurveNames(ChartData data);
+
     protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
+
     protected abstract NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data);
+
     protected abstract int curveCount(ChartData data);
+
     protected abstract Range curveYMinMax(int curveNumber, ChartData data);
+
     protected abstract void draw(BCanvas canvas, ChartData data);
 
 }

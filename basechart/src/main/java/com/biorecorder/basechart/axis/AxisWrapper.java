@@ -1,10 +1,8 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
-import com.sun.istack.internal.Nullable;
 
 /**
  * This class do axis rounding and add isVisible property.
@@ -25,6 +23,10 @@ public class AxisWrapper {
         this.axis = axis;
         rowMin = axis.getMin();
         rowMax = axis.getMax();
+    }
+
+    public double getBestLength(BCanvas canvas, int length) {
+        return axis.getBestExtent(canvas, length);
     }
 
     private void setRoundingDirty() {

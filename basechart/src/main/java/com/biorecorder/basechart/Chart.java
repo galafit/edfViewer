@@ -384,14 +384,17 @@ public class Chart {
      * ===================== Protected method for careful use (in NavigableChart)=========
      **/
     double getBestExtent(int xIndex, BCanvas canvas) {
-        double maxExtent = 0;
+        double extent = xAxisList.get(xIndex).getBestLength(canvas, fullArea.width);
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                maxExtent = Math.max(maxExtent, trace.getBestExtent(fullArea.width));
+                if(extent <= 0) {
+                    extent = trace.getBestExtent(fullArea.width);
+                } else {
+                    extent = Math.min(extent, trace.getBestExtent(fullArea.width));
+                }
             }
         }
-
-        return maxExtent;
+        return extent;
     }
 
 

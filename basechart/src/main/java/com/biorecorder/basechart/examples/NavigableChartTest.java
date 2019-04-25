@@ -2,6 +2,7 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
@@ -11,6 +12,7 @@ import com.biorecorder.basechart.swing.ChartPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 
 /**
  * Created by galafit on 27/9/18.
@@ -18,6 +20,7 @@ import java.awt.*;
 public class NavigableChartTest extends JFrame{
     IntArrayList yData;
     IntArrayList xData;
+    java.util.List<String> labels = new ArrayList();
     ChartPanel chartPanel;
     NavigableChart chart;
     XYData xyData;
@@ -31,14 +34,12 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 10; i++) {
             yData.add(i);
-        }
-
-
-        for (int i = 0; i < 200; i++) {
             xData.add(i);
+            labels.add("label "+(i+10));
         }
+
 
         xyData = new XYData(0, 1, true);
         //xyData.addColumn(xData);
@@ -46,7 +47,7 @@ public class NavigableChartTest extends JFrame{
         xyData.addColumn(new SquareFunction(), 0);
 
         chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
-
+        chart.setChartXScale(1, new CategoryScale(labels));
         DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};
         navigatorProcessing.setGroupingIntervals(groupingIntervals);

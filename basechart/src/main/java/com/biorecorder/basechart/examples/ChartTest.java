@@ -78,11 +78,12 @@ public class ChartTest extends JFrame {
         unsortedData.addColumn(yUnsort);
 
 
-        chart = new Chart(new DarkTheme(true).getChartConfig());
+        chart = new Chart(new DarkTheme(false).getChartConfig());
         //chart.setXScale(0, new CategoryScale(labels));
-        //chart.setXScale(0, new TimeScale());
-        //chart.addTrace(new LineTrace(unsortedData), false, true, false);
-        //chart.addStack();
+        chart.setXScale(0, new TimeScale());
+       // chart.setXMinMax(0, - 0.111, 2.33);
+        chart.addTrace(new LineTrace(unsortedData), false, true, false);
+        chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
 

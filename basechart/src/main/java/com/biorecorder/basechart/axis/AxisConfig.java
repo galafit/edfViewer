@@ -9,9 +9,6 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 5/9/17.
  */
 public class AxisConfig {
-    public static int TICK_COUNT_IF_ROUNDING_ENABLED = 100;
-    public static int TICK_COUNT_IF_ROUNDING_DISABLED = 5;
-
     private BColor axisLineColor =  BColor.GRAY;
     private BStroke axisLineStroke = new BStroke(1); // if width = 0 line will not be drawn
 
@@ -23,13 +20,13 @@ public class AxisConfig {
     private BColor titleColor = BColor.GRAY;
 
     private double tickInterval = -1; // in axis domain units (If <= 0 will not be taken into account)
-    private int tickCount = -1; // (If <= 0 will not be taken into account)
 
     private int tickMarkInsideSize = 0; // px
     private int tickMarkOutsideSize = 3; // px
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
+    private boolean isTickLabelCentered = false;
 
     private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 
@@ -70,7 +67,7 @@ public class AxisConfig {
         tickLabelTextStyle = axisConfig.tickLabelTextStyle;
         tickInterval = axisConfig.tickInterval;
         tickLabelPrefixAndSuffix = axisConfig.tickLabelPrefixAndSuffix;
-        tickCount = axisConfig.tickCount;
+        isTickLabelCentered = axisConfig.isTickLabelCentered;
 
         minorTickMarkWidth = axisConfig.minorTickMarkWidth;
         minorTickMarkOutsideSize = axisConfig.minorTickMarkOutsideSize;
@@ -86,13 +83,6 @@ public class AxisConfig {
         isTickLabelOutside = axisConfig.isTickLabelOutside;
     }
 
-    public int getTickCount() {
-        return tickCount;
-    }
-
-    public void setTickCount(int tickCount) {
-        this.tickCount = tickCount;
-    }
 
     public boolean isRoundingEnabled() {
         return isRoundingEnabled;
@@ -100,16 +90,6 @@ public class AxisConfig {
 
     public void setRoundingEnabled(boolean roundingEnabled) {
         isRoundingEnabled = roundingEnabled;
-        if(roundingEnabled) {
-            tickCount = TICK_COUNT_IF_ROUNDING_ENABLED;
-        } else {
-            tickCount = TICK_COUNT_IF_ROUNDING_DISABLED;
-        }
-    }
-
-    public void setRoundingEnabled(boolean roundingEnabled, int tickCount) {
-        isRoundingEnabled = roundingEnabled;
-        this.tickCount = tickCount;
     }
 
     public void setTickInterval(double tickInterval) {
@@ -118,6 +98,14 @@ public class AxisConfig {
 
     public void setLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
         tickLabelPrefixAndSuffix = new LabelPrefixAndSuffix(prefix, suffix);
+    }
+
+    public boolean isTickLabelCentered() {
+        return isTickLabelCentered;
+    }
+
+    public void setTickLabelCentered(boolean tickLabelCentered) {
+        isTickLabelCentered = tickLabelCentered;
     }
 
     public double getTickInterval() {

@@ -4,9 +4,11 @@ import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.utils.StringUtils;
+import com.biorecorder.data.sequence.StringSequence;
 
 import java.util.List;
 
@@ -17,31 +19,17 @@ import java.util.List;
 abstract class AxisVertical extends Axis {
 
     @Override
-    public int calculateWidth(BCanvas canvas) {
-        int width = 0;
-        width += config.getAxisLineStroke().getWidth() / 2;
-        width += config.getTickMarkOutsideSize();
-
-        if (config.isTickLabelOutside()) {
-            if (isDirty()) {
-                createTicksElements(canvas);
-            }
-            String longestLabel = "";
-            for (BText tickLabel : tickLabels) {
-                if(tickLabel.getText().length() > longestLabel.length())  {
-                    longestLabel = tickLabel.getText();
-                }
-            }
-            if(longestLabel.length() > 0) {
-                TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-                width += config.getTickPadding() + tm.stringWidth(longestLabel);
+    protected int labelSizeForWidth(TextMetric tm) {
+        if(ticks == null) {
+            createTicks(tm);
+        }
+        String longestLabel = "";
+        for (Tick tick : ticks) {
+            if(tick.getLabel().length() > longestLabel.length()) {
+                longestLabel = tick.getLabel();
             }
         }
-        if (! StringUtils.isNullOrBlank(title)) {
-            TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
-            width += config.getTitlePadding() + tm.height();
-        }
-        return width;
+        return tm.stringWidth(longestLabel);
     }
 
 
@@ -92,5 +80,27 @@ abstract class AxisVertical extends Axis {
     @Override
     protected void drawAxisLine(BCanvas canvas) {
         canvas.drawLine(0, (int)getStart(), 0, (int)getEnd());
+    }
+
+    @Override
+    protected boolean contains(int point) {
+        return point >= Math.round(getEnd()) && point <= Math.round(getStart());
+    }
+
+    @Override
+    public double getBestExtent(BCanvas canvas, int length) {
+        if (scale instanceof CategoryScale) {
+            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+            StringSequence labels = ((CategoryScale) scale).getLabels();
+
+            if(labels.size() > 0) {
+                int bestLength = labels.size() * tm.height() + getInterLabelGap() * (labels.size() - 1);
+                Scale s = new CategoryScale(labels);
+                s.setDomain(0, labels.size() - 1);
+                s.setRange(0, bestLength);
+                return s.invert(length);
+            }
+        }
+        return 0;
     }
 }
