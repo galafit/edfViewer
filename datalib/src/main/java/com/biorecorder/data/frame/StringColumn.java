@@ -1,59 +1,48 @@
 package com.biorecorder.data.frame;
 
+import com.biorecorder.data.frame.impl.IntColumn;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.SequenceUtils;
 import com.biorecorder.data.sequence.StringSequence;
 
-
 /**
- * Created by galafit on 17/4/19.
+ * Created by galafit on 26/4/19.
  */
-public class StringColumn extends RegularColumn {
+public class StringColumn implements Column {
+    IntColumn intColumn;
+    private StringSequence labelSequence;
 
-    private StringSequence stringSequence;
-
-
-    public StringColumn(StringSequence data, int start) {
-        super(start, 1);
-        this.stringSequence = data;
+    public StringColumn(IntColumn intColumn, StringSequence labelSequence) {
+        this.intColumn = intColumn;
+        this.labelSequence = labelSequence;
     }
 
-    public StringColumn(StringSequence data) {
-        this(data, 0);
+    public StringColumn(StringSequence labelSequence) {
+        this.labelSequence = labelSequence;
+        intColumn = new RegularColumn(0, 1);
     }
 
-    public StringColumn(String[] data, int start) {
-        this(new StringSequence() {
-            @Override
-            public int size() {
-                return data.length;
-            }
-
-            @Override
-            public String get(int index) {
-                return data[index];
-            }
-        }, start);
+    public StringSequence getLabels() {
+        return labelSequence;
     }
-
-    public StringColumn(String[] data) {
-        this(data, 0);
-    }
-
 
     @Override
     public int size() {
-        return stringSequence.size();
+        return Math.min(intColumn.size(), labelSequence.size());
     }
 
     @Override
     public double value(int index) {
-        return Double.NaN;
+        return intColumn.value(index);
     }
 
     @Override
     public String label(int index) {
-        return stringSequence.get(index);
+        int labelIndex = intColumn.intValue(index);
+        if(labelIndex >= 0 && labelIndex < labelSequence.size()) {
+            return labelSequence.get(labelIndex);
+        }
+        return intColumn.label(index);
     }
 
     @Override
@@ -63,33 +52,17 @@ public class StringColumn extends RegularColumn {
 
     @Override
     public int[] sort(int from, int length, boolean isParallel) {
-        return SequenceUtils.sort(stringSequence, from, length, isParallel);
+        return SequenceUtils.sort(labelSequence, from, length, isParallel);
     }
 
     @Override
     public Column slice(int from, int length) {
-        String[] slicedData = new String[length];
-        for (int i = 0; i < length; i++) {
-            slicedData[i] = stringSequence.get(from + i);
-        }
-        return new StringColumn(slicedData, from);
+        return new StringColumn((IntColumn) intColumn.slice(from, length), labelSequence);
     }
 
     @Override
     public Column view(int from, int length) {
-        StringSequence subSequence = new StringSequence() {
-            @Override
-            public int size() {
-                return length;
-            }
-
-            @Override
-            public String get(int index) {
-                return stringSequence.get(index + from);
-            }
-        };
-
-        return new StringColumn(subSequence, from);
+        return new StringColumn((IntColumn) intColumn.view(from, length), labelSequence);
     }
 
     @Override
@@ -102,7 +75,7 @@ public class StringColumn extends RegularColumn {
 
             @Override
             public String get(int index) {
-                return stringSequence.get(order[index]);
+                return labelSequence.get(order[index]);
             }
         };
         return new StringColumn(subSequence);
@@ -110,37 +83,37 @@ public class StringColumn extends RegularColumn {
 
 
     @Override
+    public int bisect(double value, int from, int length) {
+        return intColumn.bisect(value, from, length);
+    }
+
+    @Override
+    public Stats stats(int length) {
+        return intColumn.stats(length);
+    }
+
+    @Override
     public void cache() {
-        if (!(stringSequence instanceof StringCachingSequence)) {
-            stringSequence = new StringCachingSequence(stringSequence);
-        }
+        intColumn.cache();
     }
 
     @Override
     public void disableCaching() {
-        if (stringSequence instanceof StringCachingSequence) {
-            stringSequence = ((StringCachingSequence) stringSequence).getInnerData();
-        }
+       intColumn.disableCaching();
+    }
+
+    @Override
+    public IntSequence group(double interval, IntWrapper length) {
+        return intColumn.group(interval, length);
     }
 
     @Override
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
-        StringSequence resultantSequence = new StringSequence() {
-            @Override
-            public int size() {
-                return groupsCount(groupIndexes, isDataAppendMode);
-            }
-
-            @Override
-            public String get(int index) {
-                return stringSequence.get(groupIndexes.get(index));
-            }
-        };
-        return new StringColumn(resultantSequence);
+        return new StringColumn((IntColumn) intColumn.resample(aggregation, groupIndexes, isDataAppendMode), labelSequence);
     }
 
     @Override
     public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) {
-        return resample(aggregation, groupIndexes(points, length), isDataAppendMode);
+        return new StringColumn((IntColumn) intColumn.resample(aggregation, points, length, isDataAppendMode), labelSequence);
     }
 }

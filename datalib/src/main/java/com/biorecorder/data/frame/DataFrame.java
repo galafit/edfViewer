@@ -2,6 +2,7 @@ package com.biorecorder.data.frame;
 
 import com.biorecorder.data.frame.impl.IntColumn;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.StringSequence;
 
 import java.util.*;
 
@@ -77,8 +78,8 @@ public class DataFrame {
         addColumn(new FunctionColumn(function, columns.get(argColumnNumber)));
     }
 
-    public void addColumn(IntSequence columnData) {
-        addColumn(new IntColumn(columnData));
+    public void addColumn(IntSequence data) {
+        addColumn(new IntColumn(data));
     }
 
     public void addColumn(double start, double step) {
@@ -89,30 +90,48 @@ public class DataFrame {
         addColumn(new RegularColumn(start, step, size));
     }
 
-    public void addColumn(List<Integer> columnData) {
+    public void addColumn(List<Integer> data) {
         addColumn(new IntSequence() {
             @Override
             public int size() {
-                return columnData.size();
+                return data.size();
             }
 
             @Override
             public int get(int index) {
-                return columnData.get(index);
+                return data.get(index);
             }
         });
     }
 
-    public void addColumn(int[] columnData) {
+    public void addColumn(int[] data) {
         addColumn(new IntSequence() {
             @Override
             public int size() {
-                return columnData.length;
+                return data.length;
             }
 
             @Override
             public int get(int index) {
-                return columnData[index];
+                return data[index];
+            }
+        });
+    }
+
+    public void addColumn(StringSequence data) {
+        addColumn(new StringColumn(data));
+    }
+
+    public void addColumn(String[] data) {
+        addColumn(new StringSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public String get(int index) {
+                return data[index];
             }
         });
     }
@@ -533,5 +552,17 @@ public class DataFrame {
             }
         }
         System.out.println("ResampleByEqualInterval UPDATE is OK");
+
+        System.out.println("String sort test");
+        DataFrame sf = new DataFrame(false);
+        String[] labels = {"mama", "baba", "papa", "deda"};
+        sf.addColumn(labels);
+        int[] values = {1, 2, 3, 4, 5};
+        sf.addColumn(values);
+
+        DataFrame sf1 = sf.sort(0);
+        for (int i = 0; i < sf1.rowCount(); i++) {
+            System.out.println(sf1.getValue(i, 0) +  "  " + sf1.getLabel(i, 0)+ "  " +  sf1.getValue(i, 1));
+        }
     }
 }

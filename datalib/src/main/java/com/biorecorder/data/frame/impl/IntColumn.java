@@ -47,6 +47,10 @@ public class IntColumn implements Column {
         });
     }
 
+    public int intValue(int index) {
+        return dataSequence.get(index);
+    }
+
 
     @Override
     public int size() {
