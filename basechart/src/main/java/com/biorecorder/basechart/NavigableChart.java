@@ -111,7 +111,7 @@ public class NavigableChart {
     private void updateScrollsAndPreview(BCanvas canvas) {
         Range chartDataMinMax = chart.getAllTracesFullMinMax();
         if(chartDataMinMax != null) {
-            Range navigatorBestRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin() + navigator.getBestExtent(0, canvas));
+            Range navigatorBestRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin()  + navigator.getBestExtent(0, canvas));
             Range minMax = Range.join(chartDataMinMax, navigatorBestRange);
             for (int i = 0; i < navigator.xAxesCount(); i++) {
                 navigator.setXMinMax(i, minMax.getMin(), minMax.getMax());
@@ -143,7 +143,6 @@ public class NavigableChart {
         int max_position = (int)navigatorScale(max);
         int scrollEndPosition = (int) navigatorScale(scrollEnd);
         int distance = max_position - scrollEndPosition;
-       // System.out.println("distance "+distance);
         if (distance > gap) {
             return false;
         } else {
