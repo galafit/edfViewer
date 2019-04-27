@@ -37,7 +37,7 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 15; i++) {
             list1.add(i);
             list2.add(i + 50);
             labels.add("lab_"+i);
@@ -67,10 +67,9 @@ public class ChartTest extends JFrame {
         regularData.setColumnName(1, "rg");
 
         XYData noRegularData = new XYData(true);
-        noRegularData.addColumn(list1);
+        noRegularData.addColumn(labels);
         noRegularData.addColumn(list1);
         noRegularData.setColumnName(1, "nr");
-    //    noRegularData.setColumnAggFunctions(1, Aggregation.SUM);
 
 
         XYData unsortedData = new XYData(false);
@@ -79,8 +78,8 @@ public class ChartTest extends JFrame {
 
 
         chart = new Chart(new DarkTheme(false).getChartConfig());
-        //chart.setXScale(0, new CategoryScale(labels));
-        chart.setXScale(0, new TimeScale());
+        chart.setXScale(0, new CategoryScale());
+        //chart.setXScale(0, new TimeScale());
        // chart.setXMinMax(0, - 0.111, 2.33);
         chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addStack();

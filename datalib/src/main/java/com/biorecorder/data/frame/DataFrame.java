@@ -1,6 +1,7 @@
 package com.biorecorder.data.frame;
 
 import com.biorecorder.data.frame.impl.IntColumn;
+import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.StringSequence;
 
@@ -90,20 +91,6 @@ public class DataFrame {
         addColumn(new RegularColumn(start, step, size));
     }
 
-    public void addColumn(List<Integer> data) {
-        addColumn(new IntSequence() {
-            @Override
-            public int size() {
-                return data.size();
-            }
-
-            @Override
-            public int get(int index) {
-                return data.get(index);
-            }
-        });
-    }
-
     public void addColumn(int[] data) {
         addColumn(new IntSequence() {
             @Override
@@ -120,6 +107,20 @@ public class DataFrame {
 
     public void addColumn(StringSequence data) {
         addColumn(new StringColumn(data));
+    }
+
+    public  void addColumn(List<String> data) {
+        addColumn(new StringSequence() {
+            @Override
+            public int size() {
+                return data.size();
+            }
+
+            @Override
+            public String get(int index) {
+                return data.get(index);
+            }
+        });
     }
 
     public void addColumn(String[] data) {
@@ -467,10 +468,10 @@ public class DataFrame {
 
     public static void main(String[] args) {
         DataFrame df = new DataFrame(true);
-        Integer[] xData = {2, 4, 5, 9, 12, 33, 34, 35, 40};
-        Integer[] yData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        List<Integer> xList = new ArrayList<Integer>(Arrays.asList(xData));
-        List<Integer> yList = new ArrayList<Integer>(Arrays.asList(yData));
+        int[] xData = {2, 4, 5, 9, 12, 33, 34, 35, 40};
+        int[] yData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        IntArrayList xList = new IntArrayList(xData);
+        IntArrayList yList = new IntArrayList(yData);
 
         df.addColumn(xList);
         df.addColumn(yList);

@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.data.sequence.StringSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
 import java.util.ArrayList;
@@ -71,6 +72,24 @@ public class TraceDataManager {
                 break;
         }
         processedData = null;
+    }
+
+    public StringSequence getLabelsIfXColumnIsString() {
+        if(!traceData.isNumberColumn(0)){
+            return new StringSequence() {
+                @Override
+                public int size() {
+                    return traceData.rowCount();
+                }
+
+                @Override
+                public String get(int index) {
+                    return traceData.getLabel(index, 0);
+                }
+            };
+        }
+
+        return null;
     }
 
     public Range getFullXMinMax() {

@@ -26,7 +26,7 @@ public class AxisConfig {
     private int tickMarkWidth = 1; // px
     private BColor tickMarkColor = BColor.GRAY;
     private BColor tickLabelColor = BColor.GRAY;
-    private boolean isTickLabelCentered = false;
+    private boolean isTickLabelCentered = true;
 
     private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
 

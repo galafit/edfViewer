@@ -56,7 +56,7 @@ public class XYData implements ChartData {
         onColumnAdded();
     }
 
-    public void addColumn(List<Integer> columnData) {
+    public void addColumn(List<String> columnData) {
         dataFrame.addColumn(columnData);
         onColumnAdded();
     }

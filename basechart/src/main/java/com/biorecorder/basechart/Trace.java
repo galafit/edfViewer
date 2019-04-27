@@ -4,6 +4,7 @@ import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.data.sequence.StringSequence;
 
 
 /**
@@ -33,6 +34,10 @@ public abstract class Trace {
 
     public final void setCurveName(int curveNumber, String name) {
         curveNames[curveNumber] = name;
+    }
+
+    public StringSequence getLabelsIfXColumnIsString() {
+        return dataManager.getLabelsIfXColumnIsString();
     }
 
     protected final void checkCurveNumber(int curveNumber) {

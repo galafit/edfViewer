@@ -4,6 +4,7 @@ import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 import com.biorecorder.basechart.utils.NormalizedNumber;
 import com.biorecorder.data.sequence.StringSequence;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,18 +64,37 @@ public class CategoryScale extends LinearScale {
 
     @Override
     public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix formatInfo) {
-        return new CategoryTickProvider();
+        CategoryTickProvider tickProvider =  new CategoryTickProvider();
+        tickProvider.setTickIntervalCount(tickIntervalCount);
+        return tickProvider;
     }
 
     @Override
     public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix formatInfo) {
-        return new CategoryTickProvider();
+        CategoryTickProvider tickProvider =  new CategoryTickProvider();
+        tickProvider.setTickInterval(tickInterval);
+        return tickProvider;
     }
 
 
     class CategoryTickProvider implements TickProvider {
         long currentValue;
         int  step = 1;
+
+        public void setTickInterval(double tickInterval) {
+            step = Math.max(1, (int)tickInterval);
+        }
+
+        public void setTickIntervalCount(double tickIntervalCount) {
+            if (tickIntervalCount < 1) {
+                String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
+                throw new IllegalArgumentException(errMsg);
+            }
+            double max = domain[domain.length - 1];
+            double min = domain[0];
+            double interval = (max - min) / tickIntervalCount;
+            setTickInterval(interval);
+        }
 
 
         @Override

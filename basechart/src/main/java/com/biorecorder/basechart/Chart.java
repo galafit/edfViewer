@@ -3,10 +3,12 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.utils.StringUtils;
+import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
 
 import java.util.*;
@@ -758,9 +760,7 @@ public class Chart {
             throw new IllegalArgumentException(errMsg);
         }
 
-        if(dataProcessingConfig != null) {
-            trace.setDataProcessingConfig(dataProcessingConfig);
-        }
+        trace.setDataProcessingConfig(dataProcessingConfig);
 
         if(yAxisList.size() == 0) {
             addStack(); // add stack if there is no stack
@@ -784,8 +784,19 @@ public class Chart {
         int xIndex = isBottomXAxis ? 0 : 1;
         int yIndex = isLeftYAxis ? stack * 2 : stack * 2 + 1;
 
-        trace.setXScale(xAxisList.get(xIndex).getScale());
-        xAxisList.get(xIndex).setVisible(true);
+        AxisWrapper xAxis = xAxisList.get(xIndex);
+        StringSequence dataLabels = trace.getLabelsIfXColumnIsString();
+
+        if(dataLabels != null && xAxis.getScale() instanceof CategoryScale) {
+            CategoryScale scale = (CategoryScale)xAxis.getScale();
+            StringSequence scaleLabels = scale.getLabels();
+            if(scaleLabels == null) {
+               scale.setLabels(dataLabels);
+            }
+        }
+
+        trace.setXScale(xAxis.getScale());
+        xAxis.setVisible(true);
         if (!isSplit) {
             AxisWrapper yAxis = yAxisList.get(yIndex);
             yAxis.setVisible(true);
