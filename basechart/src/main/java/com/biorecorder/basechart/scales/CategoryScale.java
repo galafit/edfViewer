@@ -56,10 +56,10 @@ public class CategoryScale extends LinearScale {
     public String formatDomainValue(double value) {
         long longValue = Math.round(value);
         int labelIndex = (int)longValue;
-        if(labels != null &&  labelIndex >= 0 && labelIndex < labels.size()) {
+        if(labels != null &&  value == labelIndex && labelIndex >= 0 && labelIndex < labels.size()) {
             return labels.get(labelIndex);
         }
-        return String.valueOf(longValue);
+        return super.formatDomainValue(value);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.sequence.StringSequence;
@@ -50,24 +51,16 @@ public class Chart {
     private boolean isDataAppended;
 
     public Chart() {
-       this(new WhiteTheme().getChartConfig());
+        this(new LinearScale(), new LinearScale());
     }
 
-    public Chart(ChartConfig config) {
-        this(config, new LinearScale(), new LinearScale(), new DataProcessingConfig());
+    public Chart(Scale xScale) {
+        this(xScale, new LinearScale());
     }
 
     public Chart(Scale xScale, Scale yScale) {
-        this(new WhiteTheme().getChartConfig(), xScale, yScale, new DataProcessingConfig());
-    }
-
-    public Chart(ChartConfig config, Scale xScale, Scale yScale) {
-        this(config, xScale, yScale, new DataProcessingConfig());
-    }
-
-    public Chart(ChartConfig config, Scale xScale, Scale yScale, DataProcessingConfig dataProcessingConfig) {
-        this.dataProcessingConfig = new DataProcessingConfig(dataProcessingConfig);
-        this.config = new ChartConfig(config);
+        this.dataProcessingConfig = new DataProcessingConfig();
+        this.config = new DarkTheme(false).getChartConfig();
         this.yScale = yScale;
 
         AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getXAxisConfig()));
@@ -107,7 +100,7 @@ public class Chart {
 
 
     private Insets calculateSpacing() {
-        if(config.getSpacing() != null) {
+        if (config.getSpacing() != null) {
             return config.getSpacing();
         }
         int minSpacing = 0;
@@ -116,38 +109,38 @@ public class Chart {
         int spacingLeft = minSpacing;
         int spacingRight = minSpacing;
         for (int i = 0; i < yAxisList.size(); i++) {
-           AxisWrapper axis = yAxisList.get(i);
-           if(i % 2 == 0) { // left
-              if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle())) ) {
-                 spacingLeft = config.getAutoSpacing();
-              }
-           } else { // right
-               if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
-                   spacingRight = config.getAutoSpacing();
-               }
-           }
+            AxisWrapper axis = yAxisList.get(i);
+            if (i % 2 == 0) { // left
+                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                    spacingLeft = config.getAutoSpacing();
+                }
+            } else { // right
+                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                    spacingRight = config.getAutoSpacing();
+                }
+            }
         }
 
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
-            if(i % 2 == 0) { // bottom
-                if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+            if (i % 2 == 0) { // bottom
+                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingBottom = config.getAutoSpacing();
                 }
             } else { // top
-                if(axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingTop = config.getAutoSpacing();
                 }
             }
         }
-        if(isLegendEnabled() && !legend.isAttachedToStacks()) {
-            if(legend.isTop()) {
+        if (isLegendEnabled() && !legend.isAttachedToStacks()) {
+            if (legend.isTop()) {
                 spacingTop = config.getAutoSpacing();
             } else if (legend.isBottom()) {
                 spacingBottom = config.getAutoSpacing();
             }
         }
-        if(!title.isNullOrBlank()){
+        if (!title.isNullOrBlank()) {
             spacingTop = 0;
         }
 
@@ -155,7 +148,7 @@ public class Chart {
     }
 
     private boolean isLegendEnabled() {
-        if(legend == null || !legend.isEnabled()) {
+        if (legend == null || !legend.isEnabled()) {
             return false;
         }
         return true;
@@ -165,7 +158,7 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             Range minMax = xAxisToMinMax.get(i);
             AxisWrapper axis = xAxisList.get(i);
-            if(minMax != null) {
+            if (minMax != null) {
                 // NO ROUNDING !!! course the X min and max depends data processing
                 axis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale X
@@ -189,7 +182,7 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
             Range minMax = yAxisToMinMax.get(i);
             AxisWrapper axis = yAxisList.get(i);
-            if(minMax != null) {
+            if (minMax != null) {
                 axis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale Y
                 Range tracesYMinMax = null;
@@ -211,14 +204,14 @@ public class Chart {
     }
 
     private void doCalculations(BCanvas canvas) {
-        if(fullArea.width == 0 || fullArea.height == 0) {
+        if (fullArea.width == 0 || fullArea.height == 0) {
             graphArea = fullArea;
             margin = new Insets(0);
             return;
         }
 
         // all calculation with x axes must be done always first course data processing depends on it!!!
-        if(config.getMargin() != null) { // fixed margin
+        if (config.getMargin() != null) { // fixed margin
             setMargin(config.getMargin(), canvas);
             return;
         }
@@ -226,7 +219,7 @@ public class Chart {
         Insets spacing = calculateSpacing();
         int titleHeight = title.getBounds(canvas).height;
 
-        if(graphArea == null) {
+        if (graphArea == null) {
             graphArea = fullArea;
         }
         setXStartEnd(graphArea.x, graphArea.width);
@@ -290,8 +283,8 @@ public class Chart {
         int stackCount = yAxisList.size() / 2;
 
         int gap = Math.abs(config.getStackGap());
-        int height = areaHeight - (stackCount  - 1) * gap;
-        if(height <= 0) {
+        int height = areaHeight - (stackCount - 1) * gap;
+        if (height <= 0) {
             height = areaHeight;
             gap = 0;
         }
@@ -331,24 +324,24 @@ public class Chart {
         AxisWrapper leftAxis = yAxisList.get(stackNumber * 2);
         AxisWrapper rightAxis = yAxisList.get(stackNumber * 2 + 1);
         int primaryAxisIndex;
-        if(config.isBottomAxisPrimary()) {
-           primaryAxisIndex = bottomAxisIndex;
+        if (config.isBottomAxisPrimary()) {
+            primaryAxisIndex = bottomAxisIndex;
         } else {
             primaryAxisIndex = topAxisIndex;
         }
         AxisWrapper primaryAxis = xAxisList.get(primaryAxisIndex);
         for (Trace trace : traces) {
-            if(trace.getXScale() == primaryAxis.getScale()) {
+            if (trace.getXScale() == primaryAxis.getScale()) {
                 Scale[] traceYScales = trace.getYScales();
                 for (Scale yScale : traceYScales) {
-                    if(yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
+                    if (yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
                         return primaryAxisIndex;
                     }
                 }
             }
         }
 
-        if(config.isBottomAxisPrimary()) {
+        if (config.isBottomAxisPrimary()) {
             return topAxisIndex;
         } else {
             return bottomAxisIndex;
@@ -375,7 +368,7 @@ public class Chart {
 
     private void checkStackNumber(int stack) {
         int stackCount = yAxisList.size() / 2;
-        if(stack >= stackCount) {
+        if (stack >= stackCount) {
             String errMsg = "Stack = " + stack + " Number of stacks: " + stackCount;
             throw new IllegalArgumentException(errMsg);
         }
@@ -389,7 +382,7 @@ public class Chart {
         double extent = xAxisList.get(xIndex).getBestLength(canvas, fullArea.width);
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                if(extent <= 0) {
+                if (extent <= 0) {
                     extent = trace.getBestExtent(fullArea.width);
                 } else {
                     extent = Math.min(extent, trace.getBestExtent(fullArea.width));
@@ -419,7 +412,7 @@ public class Chart {
     }
 
     boolean isXAxisVisible(int xIndex) {
-        if(xAxisList.get(xIndex).isVisible()) {
+        if (xAxisList.get(xIndex).isVisible()) {
             return true;
         }
         return false;
@@ -435,13 +428,13 @@ public class Chart {
 
     void setMargin(Insets margin, BCanvas canvas) {
         this.margin = margin;
-        if(fullArea != null) {
+        if (fullArea != null) {
             int graphAreaWidth = fullArea.width - margin.left() - margin.right();
             int graphAreaHeight = fullArea.height - margin.top() - margin.bottom();
-            if(graphAreaHeight < 0) {
+            if (graphAreaHeight < 0) {
                 graphAreaHeight = 0;
             }
-            if(graphAreaWidth < 0) {
+            if (graphAreaWidth < 0) {
                 graphAreaWidth = 0;
             }
             graphArea = new BRectangle(fullArea.x + margin.left(), fullArea.y + margin.top(), graphAreaWidth, graphAreaHeight);
@@ -483,15 +476,15 @@ public class Chart {
      * =======================Base methods to interact==========================
      **/
     public void draw(BCanvas canvas) {
-        if(fullArea == null) {
+        if (fullArea == null) {
             setArea(canvas.getBounds());
         }
 
-        if(fullArea.width == 0 || fullArea.height == 0) {
+        if (fullArea.width == 0 || fullArea.height == 0) {
             return;
         }
 
-        if(isDataAppended) {
+        if (isDataAppended) {
             for (Trace trace : traces) {
                 trace.appendData();
             }
@@ -513,7 +506,7 @@ public class Chart {
         canvas.setColor(config.getBackgroundColor());
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(i * 2);
-            BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
+            BRectangle stackArea = new BRectangle(graphArea.x, (int) yAxis.getEnd(), graphArea.width, (int) yAxis.length());
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
 
@@ -524,12 +517,12 @@ public class Chart {
         // draw separately for every stack
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(2 * i);
-            BRectangle stackArea = new BRectangle(graphArea.x, (int)yAxis.getEnd(), graphArea.width, (int)yAxis.length());
-            if(bottomAxis.isVisible() && !topAxis.isVisible()) {
+            BRectangle stackArea = new BRectangle(graphArea.x, (int) yAxis.getEnd(), graphArea.width, (int) yAxis.length());
+            if (bottomAxis.isVisible() && !topAxis.isVisible()) {
                 bottomAxis.drawGrid(canvas, stackArea);
-            } else if(!bottomAxis.isVisible() && topAxis.isVisible()) {
+            } else if (!bottomAxis.isVisible() && topAxis.isVisible()) {
                 topAxis.drawGrid(canvas, stackArea);
-            } else if(bottomAxis.isVisible() && topAxis.isVisible()) {
+            } else if (bottomAxis.isVisible() && topAxis.isVisible()) {
                 xAxisList.get(chooseXAxisWithGrid(i)).drawGrid(canvas, stackArea);
             }
         }
@@ -539,12 +532,12 @@ public class Chart {
             AxisWrapper leftAxis = yAxisList.get(i * 2);
             AxisWrapper rightAxis = yAxisList.get(i * 2 + 1);
 
-            if(rightAxis.isVisible() && !leftAxis.isVisible()) {
+            if (rightAxis.isVisible() && !leftAxis.isVisible()) {
                 rightAxis.drawGrid(canvas, graphArea);
-            } else if(!rightAxis.isVisible() && leftAxis.isVisible()) {
+            } else if (!rightAxis.isVisible() && leftAxis.isVisible()) {
                 leftAxis.drawGrid(canvas, graphArea);
-            } else if(rightAxis.isVisible() && leftAxis.isVisible()) {
-                if(config.isLeftAxisPrimary()) {
+            } else if (rightAxis.isVisible() && leftAxis.isVisible()) {
+                if (config.isLeftAxisPrimary()) {
                     leftAxis.drawGrid(canvas, graphArea);
                 } else {
                     rightAxis.drawGrid(canvas, graphArea);
@@ -587,7 +580,7 @@ public class Chart {
     }
 
     public String[] getCurveNames() {
-       List<String> names = new ArrayList<>();
+        List<String> names = new ArrayList<>();
         for (Trace trace : traces) {
             for (int i = 0; i < trace.curveCount(); i++) {
                 names.add(trace.getCurveName(i));
@@ -605,18 +598,18 @@ public class Chart {
         for (int i = 0; i < traces.size(); i++) {
             Trace trace = traces.get(i);
             for (int j = 0; j < trace.curveCount(); j++) {
-               if(trace.getCurveName(i).equals(name)) {
-                   return new CurveNumber(i, j);
-               }
+                if (trace.getCurveName(i).equals(name)) {
+                    return new CurveNumber(i, j);
+                }
             }
         }
         return null;
     }
 
     public CurveNumber getSelectedCurveNumber() {
-        if(selectedCurve != null) {
+        if (selectedCurve != null) {
             for (int i = 0; i < traces.size(); i++) {
-                if(selectedCurve.getTrace() == traces.get(i)){
+                if (selectedCurve.getTrace() == traces.get(i)) {
                     return new CurveNumber(i, selectedCurve.getCurveNumber());
                 }
             }
@@ -630,6 +623,10 @@ public class Chart {
      */
     public ChartConfig getConfig() {
         return new ChartConfig(config);
+    }
+
+    public void setConfig(ChartConfig chartConfig) {
+        setConfig(chartConfig, true);
     }
 
     /**
@@ -649,7 +646,7 @@ public class Chart {
         legend.setConfig(config.getLegendConfig());
 
         BColor[] colors = this.config.getTraceColors();
-        if(isTraceColorChangeEnabled) {
+        if (isTraceColorChangeEnabled) {
             int curve = 0;
             for (Trace trace : traces) {
                 for (int i = 0; i < trace.curveCount(); i++) {
@@ -657,6 +654,14 @@ public class Chart {
                     curve++;
                 }
             }
+        }
+        isDirty = true;
+    }
+
+    public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig1) {
+        this.dataProcessingConfig = dataProcessingConfig1;
+        for (Trace trace : traces) {
+            trace.setDataProcessingConfig(dataProcessingConfig);
         }
         isDirty = true;
     }
@@ -696,11 +701,10 @@ public class Chart {
     }
 
     /**
-     *
      * @throws IllegalStateException if stack axis are used by some trace curves and
-     * therefor can not be deleted
+     *                               therefor can not be deleted
      */
-    public void removeStack(int stackNumber) throws IllegalStateException{
+    public void removeStack(int stackNumber) throws IllegalStateException {
         // check that no trace use that stack
         Scale leftScale = yAxisList.get(stackNumber * 2).getScale();
         Scale rightScale = yAxisList.get(stackNumber * 2 + 1).getScale();
@@ -708,8 +712,8 @@ public class Chart {
 
         for (int i = 0; i < traces.size(); i++) {
             for (Scale scale : traces.get(i).getYScales()) {
-                if(scale == leftScale || scale == rightScale) {
-                     String errMsg = "Stack: " + stackNumber + "can not be removed. It is used by trace number: " + i;
+                if (scale == leftScale || scale == rightScale) {
+                    String errMsg = "Stack: " + stackNumber + "can not be removed. It is used by trace number: " + i;
                     throw new IllegalStateException(errMsg);
                 }
             }
@@ -755,14 +759,14 @@ public class Chart {
      * add trace to the stack with the given number
      */
     public void addTrace(int stack, Trace trace, boolean isSplit, boolean isXAxisOpposite, boolean isYAxisOpposite) throws IllegalArgumentException {
-        if(trace.curveCount() < 1) {
+        if (trace.curveCount() < 1) {
             String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
             throw new IllegalArgumentException(errMsg);
         }
 
         trace.setDataProcessingConfig(dataProcessingConfig);
 
-        if(yAxisList.size() == 0) {
+        if (yAxisList.size() == 0) {
             addStack(); // add stack if there is no stack
         }
         checkStackNumber(stack);
@@ -787,11 +791,11 @@ public class Chart {
         AxisWrapper xAxis = xAxisList.get(xIndex);
         StringSequence dataLabels = trace.getLabelsIfXColumnIsString();
 
-        if(dataLabels != null && xAxis.getScale() instanceof CategoryScale) {
-            CategoryScale scale = (CategoryScale)xAxis.getScale();
+        if (dataLabels != null && xAxis.getScale() instanceof CategoryScale) {
+            CategoryScale scale = (CategoryScale) xAxis.getScale();
             StringSequence scaleLabels = scale.getLabels();
-            if(scaleLabels == null) {
-               scale.setLabels(dataLabels);
+            if (scaleLabels == null) {
+                scale.setLabels(dataLabels);
             }
         }
 
@@ -835,7 +839,7 @@ public class Chart {
 
         traces.add(trace);
 
-        if(isLegendEnabled()) {
+        if (isLegendEnabled()) {
             for (int i = 0; i < trace.curveCount(); i++) {
                 final int curveNumber = i;
                 StateListener traceSelectionListener = new StateListener() {
@@ -857,7 +861,7 @@ public class Chart {
 
     public void removeTrace(int traceNumber) {
         Trace trace = traces.get(traceNumber);
-        if(isLegendEnabled()) {
+        if (isLegendEnabled()) {
             legend.remove(trace);
         }
         traces.remove(traceNumber);
@@ -865,7 +869,7 @@ public class Chart {
         // are not used anymore
         int traceStack = 0;
         for (int i = 0; i < yAxisList.size(); i++) {
-            if(trace.getYScale(0) == yAxisList.get(i).getScale()) {
+            if (trace.getYScale(0) == yAxisList.get(i).getScale()) {
                 traceStack = i / 2;
             }
         }
@@ -957,7 +961,7 @@ public class Chart {
     public void setXScale(int xIndex, Scale scale) {
         AxisWrapper axis = xAxisList.get(xIndex);
         for (Trace trace : traces) {
-            if(trace.getXScale() == axis.getScale()) {
+            if (trace.getXScale() == axis.getScale()) {
                 trace.setXScale(scale);
             }
         }
@@ -970,7 +974,7 @@ public class Chart {
         for (Trace trace : traces) {
             Scale[] traceYScales = trace.getYScales();
             for (int i = 0; i < traceYScales.length; i++) {
-                if(traceYScales[i] == axis.getScale()) {
+                if (traceYScales[i] == axis.getScale()) {
                     traceYScales[i] = scale;
                 }
             }
@@ -1036,11 +1040,11 @@ public class Chart {
             AxisWrapper bottomAxis = xAxisList.get(bottomAxisIndex);
             AxisWrapper topAxis = xAxisList.get(topAxisIndex);
 
-            if(bottomAxis.isVisible() && !topAxis.isVisible()) {
+            if (bottomAxis.isVisible() && !topAxis.isVisible()) {
                 return bottomAxisIndex;
-            } else if(!bottomAxis.isVisible() && topAxis.isVisible()) {
+            } else if (!bottomAxis.isVisible() && topAxis.isVisible()) {
                 return topAxisIndex;
-            } else if(bottomAxis.isVisible() && topAxis.isVisible()) {
+            } else if (bottomAxis.isVisible() && topAxis.isVisible()) {
                 if (point != null && fullArea.contains(point.getX(), point.getY())) {
                     // find point stack
                     int stackCount = yAxisList.size() / 2;
@@ -1079,13 +1083,13 @@ public class Chart {
                 AxisWrapper axisLeft = yAxisList.get(leftYIndex);
                 AxisWrapper axisRight = yAxisList.get(rightYIndex);
                 if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
-                    if(!axisLeft.isVisible() && !axisRight.isVisible()) {
+                    if (!axisLeft.isVisible() && !axisRight.isVisible()) {
                         break;
                     }
-                    if(!axisLeft.isVisible()) {
+                    if (!axisLeft.isVisible()) {
                         return rightYIndex;
                     }
-                    if(!axisRight.isVisible()) {
+                    if (!axisRight.isVisible()) {
                         return leftYIndex;
                     }
                     if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible()) { // left half
@@ -1118,7 +1122,7 @@ public class Chart {
 
         if (hoverPoint != null) {
             NearestPoint nearestPoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurveNumber());
-            if(nearestPoint == null) {
+            if (nearestPoint == null) {
                 hoverPoint = null;
                 return true;
             }
@@ -1132,7 +1136,7 @@ public class Chart {
             NearestPoint nearestPoint = null;
             for (Trace trace : traces) {
                 NearestPoint np = trace.nearest(x, y, -1);
-                if ( np!= null && (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq())) {
+                if (np != null && (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq())) {
                     nearestPoint = np;
                 }
             }

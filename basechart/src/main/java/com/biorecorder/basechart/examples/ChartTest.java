@@ -66,8 +66,7 @@ public class ChartTest extends JFrame {
        // regularData.addColumn(list2);
         regularData.setColumnName(1, "rg");
 
-        XYData noRegularData = new XYData(true);
-        noRegularData.addColumn(labels);
+        XYData noRegularData = new XYData(labels, true);
         noRegularData.addColumn(list1);
         noRegularData.setColumnName(1, "nr");
 
@@ -77,7 +76,7 @@ public class ChartTest extends JFrame {
         unsortedData.addColumn(yUnsort);
 
 
-        chart = new Chart(new DarkTheme(false).getChartConfig());
+        chart = new Chart();
         chart.setXScale(0, new CategoryScale());
         //chart.setXScale(0, new TimeScale());
        // chart.setXMinMax(0, - 0.111, 2.33);

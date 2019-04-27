@@ -43,13 +43,13 @@ public class DarkTheme implements Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
-        xAxisConfig.setMinorTickIntervalCount(3);
+        //xAxisConfig.setMinorTickIntervalCount(3);
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
-        yAxisConfig.setMinorTickIntervalCount(3);
+        //yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);

@@ -22,9 +22,16 @@ public class XYData implements ChartData {
         dataFrame = new DataFrame(isDataAppendMode);
     }
 
-    public XYData(double start, double step, boolean isDataAppendMode) {
+    public XYData(double xStart, double xStep, boolean isDataAppendMode) {
         dataFrame = new DataFrame(isDataAppendMode);
-        addColumn(start, step);
+        dataFrame.addColumn(xStart, xStep);
+        onColumnAdded();
+    }
+
+    public XYData(List<String> xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xData);
+        onColumnAdded();
     }
 
     private void onColumnAdded() {
@@ -46,17 +53,6 @@ public class XYData implements ChartData {
     }
 
     public void addColumn(IntSequence columnData) {
-        dataFrame.addColumn(columnData);
-        onColumnAdded();
-    }
-
-
-    public void addColumn(double start, double step) {
-        dataFrame.addColumn(start, step);
-        onColumnAdded();
-    }
-
-    public void addColumn(List<String> columnData) {
         dataFrame.addColumn(columnData);
         onColumnAdded();
     }

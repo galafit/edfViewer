@@ -92,13 +92,13 @@ abstract class AxisHorizontal extends Axis {
             TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
             StringSequence labels = ((CategoryScale) scale).getLabels();
             String longestLabel = "";
-            for (int i = 0; i < labels.size(); i++) {
-                String l = labels.get(i);
-                if (l.length() > longestLabel.length()) {
-                    longestLabel = l;
+            if(labels != null && labels.size() > 0) {
+                for (int i = 0; i < labels.size(); i++) {
+                    String l = labels.get(i);
+                    if (l.length() > longestLabel.length()) {
+                        longestLabel = l;
+                    }
                 }
-            }
-            if(labels.size() > 0) {
                 int bestLength = labels.size() * tm.stringWidth(longestLabel) + getInterLabelGap() * (labels.size() - 1);
                 Scale s = new CategoryScale(labels);
                 s.setDomain(0, labels.size() - 1);

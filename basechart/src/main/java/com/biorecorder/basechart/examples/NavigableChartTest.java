@@ -34,7 +34,7 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 100; i++) {
             yData.add(i);
             xData.add(i);
             labels.add("l "+i);
@@ -46,16 +46,14 @@ public class NavigableChartTest extends JFrame{
         xyData.addColumn(yData);
         xyData.addColumn(new SquareFunction(), 0);
 
-        chart = new NavigableChart(new DarkTheme(true).getNavigableChartConfig());
-        chart.setChartXScale(1, new CategoryScale(labels));
-        chart.setNavigatorXScale(0, new CategoryScale(labels));
+        chart = new NavigableChart();
+        //chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};
         navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
-        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig(), new LinearScale(), new LinearScale(), new DataProcessingConfig(), navigatorProcessing);
-*/
+       */
         chart.addChartTrace(new LineTrace(xyData), true , false, false);
 
         chart.addNavigatorTrace( new LineTrace(xyData), true);
