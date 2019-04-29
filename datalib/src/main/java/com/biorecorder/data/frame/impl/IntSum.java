@@ -23,6 +23,6 @@ class IntSum extends IntAggFunction {
 
     @Override
     protected int getValue1() {
-        return PrimitiveUtils.longToInt(sum);
+        return PrimitiveUtils.long2int(sum);
     }
 }

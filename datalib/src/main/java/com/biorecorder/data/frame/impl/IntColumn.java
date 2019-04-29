@@ -131,7 +131,7 @@ public class IntColumn implements Column {
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDoubleToInt(value), from, length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2int(value), from, length);
     }
 
     @Override
@@ -139,11 +139,20 @@ public class IntColumn implements Column {
         return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
 
+
     @Override
     public IntSequence group(double interval, IntWrapper length) {
+        return group(new IntIntervalExt(interval, true), length);
+    }
+
+    @Override
+    public IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length) {
+        return group(new TimeIntervalExt(unit, unitMultiplier, true), length);
+    }
+
+    private IntSequence group(IntervalExt currentGroup, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
-            IntInterval currentGroup;
 
             @Override
             public int size() {
@@ -172,16 +181,16 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                     from = groupIndexesList.get(groupListSize - 2);
                 }
-                if(currentGroup == null) {
-                    currentGroup = new IntInterval(PrimitiveUtils.roundDoubleToInt(interval), dataSequence.get(from));
+                if(from == 0) {
+                    currentGroup.goContaining(dataSequence.get(from));
                 }
 
                 for (int i = from + 1; i < l; i++) {
                     int data = dataSequence.get(i);
-                    if (!currentGroup.contains(data)) {
+                    if (!currentGroup.containsInt(data)) {
                         groupIndexesList.add(i);
                         currentGroup.goNext();
-                        if(!currentGroup.contains(data)) {
+                        if(!currentGroup.containsInt(data)) {
                             currentGroup.goContaining(data);
                         }
                     }
@@ -378,20 +387,39 @@ public class IntColumn implements Column {
         }
     }
 
-    class IntInterval implements Interval {
-        int interval;
-        int intervalStart;
-        int nextIntervalStart;
+    interface IntervalExt extends Interval {
+        public boolean containsInt(int value);
+    }
 
-        public IntInterval(int interval, double value) {
-            this.interval = interval;
-            goContaining(value);
+    class TimeIntervalExt extends TimeInterval implements IntervalExt {
+        public TimeIntervalExt(TimeUnit unit,int unitMultiplier,  boolean isDataIncreasing) {
+            super(unit, unitMultiplier, isDataIncreasing);
         }
 
         @Override
+        public boolean containsInt(int value) {
+            return contains((long)value);
+        }
+    }
+
+
+    class IntIntervalExt implements IntervalExt {
+        int interval;
+        int intervalStart;
+        int nextIntervalStart;
+        boolean isDataIncreasing;
+
+        public IntIntervalExt(int interval,  boolean isDataIncreasing) {
+            this.interval = interval;
+            this.isDataIncreasing = isDataIncreasing;
+            goContaining(0);
+        }
+
+
+        @Override
         public void goContaining(double value) {
-            int intValue = PrimitiveUtils.doubleToInt(value);
-            intervalStart = (intValue / interval) * interval;
+            int intValue = PrimitiveUtils.double2int(value);
+            intervalStart = PrimitiveUtils.intRoundDown(intValue / interval) * interval;
             if (intervalStart > value) {
                 intervalStart -= interval;
             }
@@ -411,14 +439,11 @@ public class IntColumn implements Column {
 
         }
 
-        public boolean contains(int value) {
-            // group function valid only for sorted (increased data)
-            // we do not need to check that value >= interval * currentIntervalNumber
-            if (value < nextIntervalStart) {
-                return true;
+        public boolean containsInt(int value) {
+            if(isDataIncreasing) {
+                return value < nextIntervalStart;
             }
-            return false;
+            return value >= intervalStart && value < nextIntervalStart;
         }
-
     }
 }

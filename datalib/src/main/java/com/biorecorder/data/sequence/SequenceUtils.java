@@ -80,7 +80,7 @@ public class SequenceUtils {
 
     /**
      * Binary search algorithm. The sequence must be sorted!
-     * Find the index of the <b>value</b>. If data sequence contains 
+     * Find the index of the <b>value</b>. If data sequence containsInt
      * multiple elements equal to the searched <b>value</b>, there is no guarantee which
      * one will be found. If there is no element equal to the searched value function returns
      * the insertion point for <b>value</b> in the data sequence to maintain sorted order

@@ -4,8 +4,7 @@ package com.biorecorder.data.frame;
 /**
  * Created by galafit on 28/4/19.
  */
-public enum Unit {
-    NONE,
+public enum TimeUnit {
     MILLISECOND(1, 2, 5, 10, 20, 50, 100, 200, 500), // dividers of 1000
     SECOND(1, 2, 5, 10, 30), // dividers of 60
     MINUTE(1, 2, 5, 10, 30), // dividers of 60
@@ -17,7 +16,7 @@ public enum Unit {
 
     int[] allowedMultiples;
 
-    Unit(int... allowedMultiples) {
+    TimeUnit(int... allowedMultiples) {
         this.allowedMultiples = allowedMultiples;
     }
 

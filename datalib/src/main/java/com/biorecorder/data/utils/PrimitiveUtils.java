@@ -5,7 +5,7 @@ package com.biorecorder.data.utils;
  */
 public class PrimitiveUtils {
 
-    public static int longToInt(long l) {
+    public static int long2int(long l) {
         if(l > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;
         }
@@ -15,7 +15,7 @@ public class PrimitiveUtils {
         return (int) l;
     }
 
-    public static short longToShort(long l) {
+    public static short long2short(long l) {
         if(l > Short.MAX_VALUE) {
             return Short.MAX_VALUE;
         }
@@ -25,7 +25,7 @@ public class PrimitiveUtils {
         return (short) l;
     }
 
-    public static byte longToByte(long l) {
+    public static byte long2byte(long l) {
         if(l > Byte.MAX_VALUE) {
             return Byte.MAX_VALUE;
         }
@@ -35,11 +35,43 @@ public class PrimitiveUtils {
         return (byte) l;
     }
 
-    public static double roundDoubleToDouble(double d) {
+    public static long doubleRoundDown(double d) {
+        return (long)d;
+    }
+
+    public static int floatRoundDown(float d) {
+        return (int) d;
+    }
+
+    public static long longRoundDown(long d) {
         return d;
     }
 
-    public static float roundDoubleToFloat(double d) {
+    public static int intRoundDown(int d) {
+        return d;
+    }
+
+    public static short shortRoundDown(short d) {
+        return d;
+    }
+
+    public static byte byteRoundDown(byte d) {
+        return d;
+    }
+
+    public static double roundDouble2double(double d) {
+        return d;
+    }
+
+    public static float roundDouble2float(double d) {
+        double d_abs = Math.abs(d);
+        if( d_abs >= Double.MIN_VALUE && d_abs <= Float.MIN_VALUE){
+            if(d > 0) {
+                return Float.MIN_VALUE;
+            } else {
+                return -Float.MIN_VALUE;
+            }
+        }
         if(d > Float.MAX_VALUE) {
             return Float.MAX_VALUE;
         }
@@ -49,76 +81,71 @@ public class PrimitiveUtils {
         return (float) d;
     }
 
-    public static long roundDoubleToLong(double d) {
+    public static long roundDouble2long(double d) {
         return Math.round(d);
     }
 
-    public static int roundDoubleToInt(double d) {
-        return longToInt(roundDoubleToLong(d));
+    public static int roundDouble2int(double d) {
+        return long2int(roundDouble2long(d));
     }
 
-    public static short roundDoubleToShort(double d) {
-        return longToShort(roundDoubleToLong(d));
+    public static short roundDouble2short(double d) {
+        return long2short(roundDouble2long(d));
     }
 
-    public static byte roundDoubleToByte(double d) {
-        return longToByte(roundDoubleToLong(d));
+    public static byte roundDouble2byte(double d) {
+        return long2byte(roundDouble2long(d));
     }
 
 
-    public static double doubleToDouble(double d) {
+    public static double double2double(double d) {
         return d;
     }
 
-    public static float doubleToFloat(double d) {
-        if(d > Float.MAX_VALUE) {
-            return Float.MAX_VALUE;
-        }
-        if(d < -Float.MAX_VALUE) {
-            return -Float.MAX_VALUE;
-        }
-        return (float) d;
+    public static float double2float(double d) {
+        return roundDouble2float(d);
     }
 
-    public static long doubleToLong(double d) {return (long)(d);}
+    public static long double2long(double d) {return (long)(d);}
 
-    public static int doubleToInt(double d) {
-        return longToInt(doubleToLong(d));
+    public static int double2int(double d) {
+        return long2int(double2long(d));
     }
 
-    public static short doubleToShort(double d) {
-        return longToShort(doubleToLong(d));
+    public static short double2short(double d) {
+        return long2short(double2long(d));
     }
 
-    public static byte doubleToByte(double d) {
-        return longToByte(doubleToLong(d));
+    public static byte double2byte(double d) {
+        return long2byte(double2long(d));
     }
 
 
     public static void main(String[] args) {
-
+ 
         double d = 4786777867867868654674678346734763478673478654478967.77;
-        //d = Double.MIN_VALUE;
-        System.out.printf("float  %f\n", (float)d);
-        System.out.printf("long   %d\n", (long)d);
-        System.out.printf("int    %d\n", (int)d);
-        System.out.printf("short  %d\n", (short)d);
-        System.out.printf("byte   %d\n", (byte)d);
+        d = -Double.MIN_VALUE;
+        System.out.println("float " + (float)d);
+        System.out.println("long " + (long)d);
+        System.out.println("int   " + (int)d);
+        System.out.println("short " + (short)d);
+        System.out.println("byte  " + (byte)d);
 
         System.out.println();
-        System.out.printf("float  %f\n", doubleToFloat(d));
-        System.out.printf("long   %d\n", doubleToLong(d));
-        System.out.printf("int    %d\n", doubleToInt(d));
-        System.out.printf("short  %d\n", doubleToShort(d));
-        System.out.printf("byte   %d\n", doubleToByte(d));
+        System.out.println("float  " + double2float(d));
+        System.out.println("long   " + double2long(d));
+        System.out.println("int    " +  double2int(d));
+        System.out.println("short  " + double2short(d));
+        System.out.println("byte   " + double2byte(d));
 
         d = -4786777867867868654674678346734763478673478654478967.77;
         System.out.println();
-        System.out.printf("float  %f\n", doubleToFloat(d));
-        System.out.printf("long   %d\n", doubleToLong(d));
-        System.out.printf("int    %d\n", doubleToInt(d));
-        System.out.printf("short  %d\n", doubleToShort(d));
-        System.out.printf("byte   %d\n", doubleToByte(d));
+        System.out.println("float  " + double2float(d));
+        System.out.println("long   " + double2long(d));
+        System.out.println("int    " +  double2int(d));
+        System.out.println("short  " + double2short(d));
+        System.out.println("byte   " + double2byte(d));
+
     }
 
 }

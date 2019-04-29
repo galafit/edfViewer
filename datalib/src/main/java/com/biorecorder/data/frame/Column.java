@@ -36,10 +36,12 @@ public interface Column {
     /**
      * Equal Width Binning. This method divides the entire range of column data (max - min)
      * into intervals of equal size, searches the intervalStart indexes for every such
-     * interval-bin-group and returns a sequence of that intervalStart indexes.
+     * unitMultiplier-bin-group and returns a sequence of that intervalStart indexes.
      * The column data must be sorted!!!
      */
     IntSequence group(double interval, IntWrapper length);
+
+    IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length);
 
     Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
     Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);

@@ -23,6 +23,6 @@ class IntAverage extends IntAggFunction {
 
     @Override
     protected int getValue1() {
-        return PrimitiveUtils.longToInt(sum / count);
+        return PrimitiveUtils.long2int(sum / count);
     }
 }

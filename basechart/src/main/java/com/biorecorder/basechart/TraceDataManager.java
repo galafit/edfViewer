@@ -333,7 +333,7 @@ public class TraceDataManager {
                 maxIndex = processedData.rowCount() - 1;
             }
 
-            processedData = processedData.view(PrimitiveUtils.longToInt(minIndex), PrimitiveUtils.longToInt(maxIndex - minIndex));
+            processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex));
             // if data was not grouped before we group only visible data
             if (isGroupingEnabled  && !isAlreadyGrouped) {
                 processedData = group(processedData, groupInterval);

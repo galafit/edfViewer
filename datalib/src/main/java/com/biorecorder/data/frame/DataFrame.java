@@ -30,7 +30,7 @@ public class DataFrame {
         for (int i : columnOrder) {
             Column columnToAdd = dataFrame.columns.get(i);
             if(columnToAdd instanceof FunctionColumn) {
-                // check that columnOrder contains the column used by this one
+                // check that columnOrder containsInt the column used by this one
                 boolean isArgColumnPresent = false;
                 for (int j = 0; j < columnOrder.length; j++) {
                     if (((FunctionColumn)columnToAdd).getArgColumn() == dataFrame.columns.get(columnOrder[j])) {
@@ -188,7 +188,7 @@ public class DataFrame {
 
     /**
      * Binary search algorithm. The column data must be sorted!
-     * Find the index of the <b>value</b> in the given column. If the column contains
+     * Find the index of the <b>value</b> in the given column. If the column containsInt
      * multiple elements equal to the searched <b>value</b>, there is no guarantee which
      * one will be found. If there is no element equal to the searched value function returns
      * the insertion point for <b>value</b> in the column to maintain sorted order
@@ -312,14 +312,14 @@ public class DataFrame {
      * <p>
      * Binning is a way to group a number of more or less continuous values
      * into a smaller number of buckets (bins or groups).  Each group/bucket/bin defines
-     * an numerical interval and usually is characterized by a traceName and two boundaries -
+     * an numerical unitMultiplier and usually is characterized by a traceName and two boundaries -
      * the intervalStart or lower boundary and the stop or upper one.
      * <p>
      * On the chart  every bin is represented by one value (point).
      * It may be the number of element in the bin (for histogram)
-     * or the midpoint of the bin interval (avg) and so on.
+     * or the midpoint of the bin unitMultiplier (avg) and so on.
      * How we will calculateStats the "value" of each bin is specified by the aggregating function
-     * (sum, average, unitCount, min, first, last...)
+     * (sum, average, unitMultiplier, min, first, last...)
      * <p>
      * The most common "default" methods to divide data into bins:
      * <ol>
@@ -359,7 +359,7 @@ public class DataFrame {
      * If columns has no resample functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, TimeUnit.NONE, length);
         return resample(groupIndexes, 1);
     }
 
