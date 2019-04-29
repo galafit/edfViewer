@@ -143,6 +143,7 @@ public class IntColumn implements Column {
     public IntSequence group(double interval, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
+            IntInterval currentGroup;
 
             @Override
             public int size() {
@@ -171,13 +172,18 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                     from = groupIndexesList.get(groupListSize - 2);
                 }
-                Group currentGroup = new Group(interval, dataSequence.get(from));
+                if(currentGroup == null) {
+                    currentGroup = new IntInterval(PrimitiveUtils.roundDoubleToInt(interval), dataSequence.get(from));
+                }
 
                 for (int i = from + 1; i < l; i++) {
                     int data = dataSequence.get(i);
                     if (!currentGroup.contains(data)) {
                         groupIndexesList.add(i);
-                        currentGroup = currentGroup.groupByValue(data);
+                        currentGroup.goNext();
+                        if(!currentGroup.contains(data)) {
+                            currentGroup.goContaining(data);
+                        }
                     }
                 }
                 // add last "closing" groupByEqualIntervals
@@ -372,48 +378,47 @@ public class IntColumn implements Column {
         }
     }
 
-    class Group {
-        double interval;
-        long currentIntervalNumber;
-        int castedNextGroupStart;
+    class IntInterval implements Interval {
+        int interval;
+        int intervalStart;
+        int nextIntervalStart;
 
-        public Group(double interval) {
-            this(interval, 0);
-        }
-
-        public Group(double interval, double value) {
+        public IntInterval(int interval, double value) {
             this.interval = interval;
-            currentIntervalNumber = (long) (value / interval);
-            if (currentIntervalNumber * interval > value) {
-                currentIntervalNumber--;
-            }
-
-            double nextGroupStart = interval * (currentIntervalNumber + 1);
-            castedNextGroupStart = PrimitiveUtils.doubleToInt(nextGroupStart);
-            if (castedNextGroupStart > nextGroupStart) {
-                castedNextGroupStart--;
-            }
+            goContaining(value);
         }
 
-        public Group nextGroup() {
-            Group ng = new Group(interval);
-            ng.currentIntervalNumber = currentIntervalNumber + 1;
-            return ng;
+        @Override
+        public void goContaining(double value) {
+            int intValue = PrimitiveUtils.doubleToInt(value);
+            intervalStart = (intValue / interval) * interval;
+            if (intervalStart > value) {
+                intervalStart -= interval;
+            }
+            nextIntervalStart = intervalStart + interval;
         }
 
-        public Group groupByValue(double value) {
-            return new Group(interval, value);
+        @Override
+        public void goNext() {
+            intervalStart = nextIntervalStart;
+            nextIntervalStart += interval;
+        }
+
+        @Override
+        public void goPrevious() {
+            nextIntervalStart = intervalStart;
+            intervalStart -= interval;
+
         }
 
         public boolean contains(int value) {
             // group function valid only for sorted (increased data)
             // we do not need to check that value >= interval * currentIntervalNumber
-            if (value < castedNextGroupStart) {
+            if (value < nextIntervalStart) {
                 return true;
             }
             return false;
         }
 
     }
-
 }

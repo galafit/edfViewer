@@ -313,13 +313,13 @@ public class DataFrame {
      * Binning is a way to group a number of more or less continuous values
      * into a smaller number of buckets (bins or groups).  Each group/bucket/bin defines
      * an numerical interval and usually is characterized by a traceName and two boundaries -
-     * the start or lower boundary and the stop or upper one.
+     * the intervalStart or lower boundary and the stop or upper one.
      * <p>
      * On the chart  every bin is represented by one value (point).
      * It may be the number of element in the bin (for histogram)
      * or the midpoint of the bin interval (avg) and so on.
      * How we will calculateStats the "value" of each bin is specified by the aggregating function
-     * (sum, average, count, min, first, last...)
+     * (sum, average, unitCount, min, first, last...)
      * <p>
      * The most common "default" methods to divide data into bins:
      * <ol>

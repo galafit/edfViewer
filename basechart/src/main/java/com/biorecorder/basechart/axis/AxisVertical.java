@@ -93,7 +93,7 @@ abstract class AxisVertical extends Axis {
             TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
             StringSequence labels = ((CategoryScale) scale).getLabels();
 
-            if(labels.size() > 0) {
+            if(labels!= null && labels.size() > 0) {
                 int bestLength = labels.size() * tm.height() + getInterLabelGap() * (labels.size() - 1);
                 Scale s = new CategoryScale(labels);
                 s.setDomain(0, labels.size() - 1);

@@ -362,8 +362,6 @@ public class NavigableChart {
        return false;
     }
 
-
-
     public boolean isScrollContain(int x, int y) {
         if(!navigatorArea.contains(x, y)) {
             return false;

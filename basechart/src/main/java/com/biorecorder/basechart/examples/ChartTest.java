@@ -37,7 +37,7 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 150; i++) {
             list1.add(i);
             list2.add(i + 50);
             labels.add("lab_"+i);

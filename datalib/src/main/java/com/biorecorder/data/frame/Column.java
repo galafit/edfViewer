@@ -35,8 +35,8 @@ public interface Column {
 
     /**
      * Equal Width Binning. This method divides the entire range of column data (max - min)
-     * into intervals of equal size, searches the start indexes for every such
-     * interval-bin-group and returns a sequence of that start indexes.
+     * into intervals of equal size, searches the intervalStart indexes for every such
+     * interval-bin-group and returns a sequence of that intervalStart indexes.
      * The column data must be sorted!!!
      */
     IntSequence group(double interval, IntWrapper length);
