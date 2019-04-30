@@ -144,7 +144,7 @@ public class XYData implements ChartData {
 
     @Override
     public ChartData resampleByEqualFrequency(int points) {
-        return new XYData(dataFrame.resampleByEqualFrequency(points));
+        return new XYData(dataFrame.resampleByEqualPoints(points));
     }
 
     @Override

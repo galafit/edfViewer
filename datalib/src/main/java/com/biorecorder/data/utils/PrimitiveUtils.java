@@ -35,27 +35,27 @@ public class PrimitiveUtils {
         return (byte) l;
     }
 
-    public static long doubleRoundDown(double d) {
-        return (long)d;
+    public static long round(double d) {
+        return Math.round(d);
     }
 
-    public static int floatRoundDown(float d) {
-        return (int) d;
+    public static int round(float d) {
+        return Math.round(d);
     }
 
-    public static long longRoundDown(long d) {
+    public static long round(long d) {
         return d;
     }
 
-    public static int intRoundDown(int d) {
+    public static int round(int d) {
         return d;
     }
 
-    public static short shortRoundDown(short d) {
+    public static short round(short d) {
         return d;
     }
 
-    public static byte byteRoundDown(byte d) {
+    public static byte round(byte d) {
         return d;
     }
 
@@ -145,7 +145,5 @@ public class PrimitiveUtils {
         System.out.println("int    " +  double2int(d));
         System.out.println("short  " + double2short(d));
         System.out.println("byte   " + double2byte(d));
-
     }
-
 }

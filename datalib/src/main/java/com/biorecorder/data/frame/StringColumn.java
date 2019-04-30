@@ -103,9 +103,15 @@ public class StringColumn implements Column {
     }
 
     @Override
-    public IntSequence group(double interval, TimeUnit unit, IntWrapper length) {
-        return intColumn.group(interval, unit, length);
+    public IntSequence group(double interval, IntWrapper length) {
+        return intColumn.group(interval, length);
     }
+
+    @Override
+    public IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length) {
+        return intColumn.group(unit, unitMultiplier, length);
+    }
+
 
     @Override
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {

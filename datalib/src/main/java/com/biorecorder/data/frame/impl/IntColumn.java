@@ -142,7 +142,7 @@ public class IntColumn implements Column {
 
     @Override
     public IntSequence group(double interval, IntWrapper length) {
-        return group(new IntIntervalExt(interval, true), length);
+        return group(new IntIntervalExt(PrimitiveUtils.roundDouble2int(interval), true), length);
     }
 
     @Override
@@ -388,7 +388,7 @@ public class IntColumn implements Column {
     }
 
     interface IntervalExt extends Interval {
-        public boolean containsInt(int value);
+        boolean containsInt(int value);
     }
 
     class TimeIntervalExt extends TimeInterval implements IntervalExt {
@@ -412,14 +412,15 @@ public class IntColumn implements Column {
         public IntIntervalExt(int interval,  boolean isDataIncreasing) {
             this.interval = interval;
             this.isDataIncreasing = isDataIncreasing;
-            goContaining(0);
+            intervalStart = 0;
+            nextIntervalStart = intervalStart + interval;
         }
 
 
         @Override
         public void goContaining(double value) {
-            int intValue = PrimitiveUtils.double2int(value);
-            intervalStart = PrimitiveUtils.intRoundDown(intValue / interval) * interval;
+            int castedValue = PrimitiveUtils.roundDouble2int(value);
+            intervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
             if (intervalStart > value) {
                 intervalStart -= interval;
             }

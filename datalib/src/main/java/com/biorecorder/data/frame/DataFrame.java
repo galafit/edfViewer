@@ -345,9 +345,9 @@ public class DataFrame {
      * <p>
      * Resampling will be done only with columns for which at least
      * one aggregating function is specified!!!
-     * If columns has no resample functions resultant dataframe will be empty
+     * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualFrequency(int points) {
+    public DataFrame resampleByEqualPoints(int points) {
         return resample(null, points);
     }
 
@@ -356,14 +356,20 @@ public class DataFrame {
      * <p>
      * Resampling will be done only with columns for which at least
      * one aggregating function is specified!!!
-     * If columns has no resample functions resultant dataframe will be empty
+     * If columns has no aggregating functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, TimeUnit.NONE, length);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval,  length);
         return resample(groupIndexes, 1);
     }
 
-    public DataFrame resample(IntSequence groupIndexes, int points) {
+    public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier) {
+        IntSequence groupIndexes = columns.get(columnNumber).group(unit, unitMultiplier, length);
+        return resample(groupIndexes, 1);
+    }
+
+
+    private DataFrame resample(IntSequence groupIndexes, int points) {
         // create maps
         Map<Integer, Integer> functionColToArgCol = new HashMap<>();
         Map<Integer, int[]> colToResultantCols = new HashMap<>();
@@ -478,7 +484,7 @@ public class DataFrame {
         df.setColumnAggFunctions(0, Aggregation.FIRST);
         df.setColumnAggFunctions(1, Aggregation.AVERAGE);
 
-        DataFrame df1 = df.resampleByEqualFrequency(4);
+        DataFrame df1 = df.resampleByEqualPoints(4);
         DataFrame df2 = df.resampleByEqualInterval(0, 4);
 
 
