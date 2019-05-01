@@ -1,10 +1,13 @@
 package com.biorecorder.data.frame;
 
 /**
- * Created by galafit on 28/4/19.
+ * Created by galafit on 1/5/19.
  */
 public interface Interval {
-    public void goContaining(double value);
-    public void goNext();
-    public void goPrevious();
+    boolean contains(byte value);
+    boolean contains(short value);
+    boolean contains(int value);
+    boolean contains(long value);
+    boolean contains(float value);
+    boolean contains(double value);
 }

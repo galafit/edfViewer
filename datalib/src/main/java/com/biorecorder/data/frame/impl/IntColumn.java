@@ -1,10 +1,12 @@
 package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.frame.*;
+import com.biorecorder.data.frame.Interval;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
+import sun.jvm.hotspot.utilities.*;
 
 import java.util.List;
 
@@ -142,15 +144,15 @@ public class IntColumn implements Column {
 
     @Override
     public IntSequence group(double interval, IntWrapper length) {
-        return group(new IntIntervalExt(PrimitiveUtils.roundDouble2int(interval), true), length);
+        return group(new IntIntervalProvider(PrimitiveUtils.roundDouble2int(interval)), length);
     }
 
     @Override
     public IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length) {
-        return group(new TimeIntervalExt(unit, unitMultiplier, true), length);
+        return group(new TimeIntervalProvider(unit, unitMultiplier), length);
     }
 
-    private IntSequence group(IntervalExt currentGroup, IntWrapper length) {
+    private IntSequence group(IntervalProvider intervalProvider, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
 
@@ -168,7 +170,7 @@ public class IntColumn implements Column {
             private void update() {
                 int groupListSize = groupIndexesList.size();
                 int l = length.getValue();
-                if ( l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
+                if (l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
                     return;
                 }
 
@@ -181,25 +183,29 @@ public class IntColumn implements Column {
                     groupIndexesList.remove(groupListSize - 1);
                     from = groupIndexesList.get(groupListSize - 2);
                 }
-                if(from == 0) {
-                    currentGroup.goContaining(dataSequence.get(from));
-                }
 
+                Interval currentGroupInterval = intervalProvider.getContaining(dataSequence.get(from));
+                boolean isCurrentGroupEmpty = false;
                 for (int i = from + 1; i < l; i++) {
                     int data = dataSequence.get(i);
-                    if (!currentGroup.containsInt(data)) {
-                        groupIndexesList.add(i);
-                        currentGroup.goNext();
-                        if(!currentGroup.containsInt(data)) {
-                            currentGroup.goContaining(data);
+                    if (!currentGroupInterval.contains(data)) {
+                        if(!isCurrentGroupEmpty) {
+                            groupIndexesList.add(i);
+                            currentGroupInterval = intervalProvider.getNext();
+                        } else {
+                            currentGroupInterval = intervalProvider.getContaining(data);
+                            isCurrentGroupEmpty = false;
+
                         }
+                    } else {
+                        isCurrentGroupEmpty = false;
                     }
                 }
                 // add last "closing" groupByEqualIntervals
                 groupIndexesList.add(l);
             }
         };
-         return groupIndexes;
+        return groupIndexes;
     }
 
     /**
@@ -219,7 +225,7 @@ public class IntColumn implements Column {
 
     protected int groupsCount(IntSequence groupIndexes, boolean isDataAppendMode) {
         int groupsCount = groupIndexes.size() - 1;
-        if(isDataAppendMode && groupsCount > 0) {
+        if (isDataAppendMode && groupsCount > 0) {
             groupsCount--;
         }
         return groupsCount;
@@ -266,7 +272,7 @@ public class IntColumn implements Column {
 
             @Override
             public int size() {
-                if(length.getValue() % points == 0) {
+                if (length.getValue() % points == 0) {
                     size = length.getValue() / points + 1;
                 } else {
                     size = length.getValue() / points + 2;
@@ -387,64 +393,81 @@ public class IntColumn implements Column {
         }
     }
 
-    interface IntervalExt extends Interval {
-        boolean containsInt(int value);
-    }
-
-    class TimeIntervalExt extends TimeInterval implements IntervalExt {
-        public TimeIntervalExt(TimeUnit unit,int unitMultiplier,  boolean isDataIncreasing) {
-            super(unit, unitMultiplier, isDataIncreasing);
-        }
-
-        @Override
-        public boolean containsInt(int value) {
-            return contains((long)value);
-        }
-    }
-
-
-    class IntIntervalExt implements IntervalExt {
+    class IntIntervalProvider implements IntervalProvider {
         int interval;
-        int intervalStart;
-        int nextIntervalStart;
-        boolean isDataIncreasing;
+        int currentIntervalStart;
 
-        public IntIntervalExt(int interval,  boolean isDataIncreasing) {
+        public IntIntervalProvider(int interval) {
             this.interval = interval;
-            this.isDataIncreasing = isDataIncreasing;
-            intervalStart = 0;
-            nextIntervalStart = intervalStart + interval;
+            currentIntervalStart = 0;
         }
 
-
         @Override
-        public void goContaining(double value) {
+        public Interval getContaining(double value) {
             int castedValue = PrimitiveUtils.roundDouble2int(value);
-            intervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
-            if (intervalStart > value) {
-                intervalStart -= interval;
+            currentIntervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
+            if (currentIntervalStart > value) {
+                currentIntervalStart -= interval;
             }
-            nextIntervalStart = intervalStart + interval;
+            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+
         }
 
         @Override
-        public void goNext() {
-            intervalStart = nextIntervalStart;
-            nextIntervalStart += interval;
+        public Interval getNext() {
+            currentIntervalStart += interval;
+            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+
         }
 
         @Override
-        public void goPrevious() {
-            nextIntervalStart = intervalStart;
-            intervalStart -= interval;
+        public Interval getPrevious() {
+            currentIntervalStart -= interval;
+            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+        }
+    }
 
+    class IntInterval implements Interval {
+        private final int intervalStart;
+        private final int nextIntervalStart;
+
+        public IntInterval(int intervalStart, int nextIntervalStart) {
+            this.intervalStart = intervalStart;
+            this.nextIntervalStart = nextIntervalStart;
         }
 
-        public boolean containsInt(int value) {
-            if(isDataIncreasing) {
-                return value < nextIntervalStart;
-            }
-            return value >= intervalStart && value < nextIntervalStart;
+        //As we will use methods contains only on INCREASING data
+        //we do only one check (value < nextIntervalStart) instead of both
+        @Override
+        public boolean contains(byte value) {
+            // return value >= currentIntervalStart && value < nextIntervalStart;
+            return value < nextIntervalStart;
         }
+
+        @Override
+        public boolean contains(short value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(int value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(long value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(float value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(double value) {
+            return value < nextIntervalStart;
+        }
+
     }
 }

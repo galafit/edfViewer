@@ -9,17 +9,20 @@ import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
+import com.biorecorder.data.list.LongArrayList;
+import com.biorecorder.data.utils.PrimitiveUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
  * Created by galafit on 21/9/18.
  */
 public class ChartTest extends JFrame {
-
     IntArrayList yUnsort = new IntArrayList();
     IntArrayList xUnsort = new IntArrayList();
 
@@ -37,7 +40,7 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i <= 150; i++) {
             list1.add(i);
             list2.add(i + 50);
             labels.add("lab_"+i);
@@ -75,12 +78,21 @@ public class ChartTest extends JFrame {
         unsortedData.addColumn(xUnsort);
         unsortedData.addColumn(yUnsort);
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(0);
+        IntArrayList timeArray = new IntArrayList();
+        for (int i = 0; i < 15; i++) {
+            timeArray.add(PrimitiveUtils.long2int(calendar.getTimeInMillis()));
+            calendar.add(Calendar.DAY_OF_MONTH, 10);
+        }
+        XYData timeData = new XYData(false);
+        timeData.addColumn(timeArray);
+        timeData.addColumn(list1);
 
-        chart = new Chart();
-        chart.setXScale(0, new CategoryScale());
-        //chart.setXScale(0, new TimeScale());
-       // chart.setXMinMax(0, - 0.111, 2.33);
-        chart.addTrace(new LineTrace(unsortedData), false, true, false);
+        chart = new Chart(new TimeScale());
+
+        //chart.addTrace(new LineTrace(unsortedData), false, true, false);
+        chart.addTrace(new LineTrace(timeData), false, true, false);
         chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
@@ -127,9 +139,7 @@ public class ChartTest extends JFrame {
             }
         });
        // t.start();
-
     }
-
 
     public static void main(String[] args) {
        ChartTest chartTest = new ChartTest();

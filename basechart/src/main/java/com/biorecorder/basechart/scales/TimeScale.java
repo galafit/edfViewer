@@ -1,43 +1,21 @@
 package com.biorecorder.basechart.scales;
 
+import com.biorecorder.data.frame.TimeInterval;
 import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.data.frame.TimeIntervalProvider;
+import com.biorecorder.data.frame.TimeUnit;
 
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Created by galafit on 7/1/18.
  */
 public class TimeScale extends LinearScale {
-    int MSECOND = 1; //milliseconds
-    int MSECONDS_2 = 2;
-    int MSECONDS_5 = 5;
-    int MSECONDS_10 = 10;
-    int MSECONDS_20 = 20;
-    int MSECONDS_50 = 50;
-    int MSECONDS_100 = 100;
-    int MSECONDS_200 = 200;
-    int MSECONDS_500 = 500;
-    int SECOND = 1000;
-    int SECONDS_2 = 2 * SECOND;
-    int SECONDS_5 = 5 * SECOND;
-    int SECONDS_10 = 10 * SECOND;
-    int SECONDS_30 = 30 * SECOND;
-    int MINUTE = 60 * SECOND;
-    int MINUTES_2 = 2 * MINUTE;
-    int MINUTES_5 = 5 * MINUTE;
-    int MINUTES_10 = 10 * MINUTE;
-    int MINUTES_30 = 30 * MINUTE;
-    int HOUR = 60 * MINUTE;
-    int HOURS_2 = 2 * HOUR;
-    int HOURS_5 = 5 * HOUR;
-
-    int[] TIME_INTERVALS = {MSECOND, MSECONDS_2, MSECONDS_5, MSECONDS_10, MSECONDS_20, MSECONDS_50,
-            MSECONDS_100, MSECONDS_200, MSECONDS_500, SECOND, SECONDS_2, SECONDS_5, SECONDS_10,
-            SECONDS_30, MINUTE, MINUTES_2, MINUTES_5, MINUTES_10, MINUTES_30, HOUR, HOURS_2, HOURS_5};
-
-    private DateFormat timeFormat;
+    private DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS dd-MMM-yyyy ");
 
     @Override
     public Scale copy() {
@@ -56,7 +34,7 @@ public class TimeScale extends LinearScale {
     }
 
     @Override
-    public  TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix labelFormatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
         provider.setTickInterval(tickInterval);
         return provider;
@@ -64,114 +42,94 @@ public class TimeScale extends LinearScale {
 
     @Override
     public String formatDomainValue(double value) {
-        if (timeFormat == null) {
-            int rangePointsCount = (int)Math.abs(range[range.length - 1] - range[0]) + 1;
-            double domainLength = domain[domain.length - 1] - domain[0];
-            long pointInterval = (long)(domainLength / rangePointsCount);
-            timeFormat = getDateFormat(pointInterval);
-        }
-        return timeFormat.format((long)value);
+        return timeFormat.format((long) value);
     }
 
-    private DateFormat getDateFormat(long Interval) {
-        String DATE_FORMAT_MSEC = "HH:mm:ss.SSS";
-        String DATE_FORMAT_SEC = "HH:mm:ss";
-        String DATE_FORMAT_MIN = "HH:mm";
-        String DATE_FORMAT_HOUR = "HH";
-        DateFormat format = new SimpleDateFormat(DATE_FORMAT_MSEC);
-        if (Interval >= SECOND) {
-            format = new SimpleDateFormat(DATE_FORMAT_SEC);
+    public static List<TimeInterval> getAllowedTimeIntervalse() {
+        ArrayList<TimeInterval> intervals = new ArrayList<>();
+        for (TimeUnit unit : TimeUnit.values()) {
+            if(unit != TimeUnit.WEEK) {
+                int[] multiples = unit.getAllowedMultiples();
+                for (int multiple : multiples) {
+                    intervals.add(new TimeInterval(unit, multiple));
+                }
+            }
         }
-        if (Interval >= MINUTE) {
-            format = new SimpleDateFormat(DATE_FORMAT_MIN);
-        }
-        if (Interval >= HOUR) {
-            format = new SimpleDateFormat(DATE_FORMAT_HOUR);
-        }
-        return format;
+        intervals.trimToSize();
+        return intervals;
     }
-
 
     class TimeTickProvider implements TickProvider {
-        private long tickInterval = 1;
+        private TimeIntervalProvider timeIntervalProvider;
         private DateFormat labelFormat;
-        private long currentTick;
 
-        public void setTickInterval(double tickInterval) {
-            this.tickInterval = (long) tickInterval;
-            labelFormat = getDateFormat(this.tickInterval);
+        public void setTickInterval(double interval) {
+            timeIntervalProvider = new TimeIntervalProvider(TimeUnit.getClosestIntervals(false, interval).get(0));
+            labelFormat = getDateFormat(timeIntervalProvider.getTimeUnit());
         }
 
         public void setTickIntervalCount(int tickIntervalCount) {
-            tickInterval = getRoundTickInterval(tickIntervalCount);
-            labelFormat = getDateFormat(tickInterval);
+            if (tickIntervalCount < 1) {
+                tickIntervalCount = 1;
+            }
+            double max = domain[domain.length - 1];
+            double min = domain[0];
+            long interval = Math.round((max - min) / tickIntervalCount);
+            timeIntervalProvider = new TimeIntervalProvider(TimeUnit.getClosestIntervals(false, interval).get(0));
+            labelFormat = getDateFormat(timeIntervalProvider.getTimeUnit());
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
-            tickInterval *= increaseFactor;
-            labelFormat = getDateFormat(tickInterval);
+            long intervalNew = timeIntervalProvider.getTimeUnit().getMilliseconds() * timeIntervalProvider.getUnitMultiplier() * increaseFactor;
+            setTickInterval(intervalNew);
         }
 
         @Override
         public Tick getNextTick() {
-            currentTick += tickInterval;
-            return new Tick(currentTick, labelFormat.format(currentTick));
+            timeIntervalProvider.getNext();
+            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
         }
 
         @Override
         public Tick getPreviousTick() {
-            currentTick -= tickInterval;
-            return new Tick(currentTick, labelFormat.format(currentTick));        }
+            timeIntervalProvider.getPrevious();
+            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+        }
 
         @Override
         public Tick getUpperTick(double value) {
-            long valueLong = (long)(value);
-            currentTick = (valueLong / tickInterval) * tickInterval;
-            if(currentTick < valueLong) {
-                currentTick += tickInterval;
+            timeIntervalProvider.getContaining(value);
+            if (timeIntervalProvider.getCurrentIntervalStartMs() < value) {
+                timeIntervalProvider.getNext();
             }
-            return new Tick(currentTick, labelFormat.format(currentTick));
+            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            long valueLong = (long)(value);
-            currentTick = (valueLong / tickInterval) * tickInterval;
-            if(currentTick > valueLong) {
-                currentTick -= tickInterval;
-            }
-            return new Tick(currentTick, labelFormat.format(currentTick));        }
+            timeIntervalProvider.getContaining(value);
+            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+        }
 
-
-        /**
-         * Choose the closest tickInterval
-         * from TIME_INTERVALS
-         */
-        private long getRoundTickInterval(int tickIntervalCount) {
-            if (tickIntervalCount < 1) {
-                String errMsg = MessageFormat.format("Invalid tick interval count: {0}. Expected >= 2", tickIntervalCount);
-                throw new IllegalArgumentException(errMsg);
+        private DateFormat getDateFormat(TimeUnit unit) {
+            switch (unit) {
+                case MILLISECOND:
+                    return new SimpleDateFormat("HH:mm:ss.SSS");
+                case SECOND:
+                    return new SimpleDateFormat("HH:mm:ss");
+                case MINUTE:
+                    return new SimpleDateFormat("HH:mm");
+                case HOUR:
+                    return new SimpleDateFormat("dd. MMM HH:mm");
+                case DAY:
+                    return new SimpleDateFormat("dd. MMM");
+                case WEEK:
+                case MONTH:
+                    return new SimpleDateFormat("MMM'' yy");
+                default:
+                    return new SimpleDateFormat("yyyy");
             }
-            double max =  domain[domain.length - 1];
-            double min =  domain[0];
-            long interval = Math.round((max - min) / tickIntervalCount);
-            if(interval <= 0) {
-                interval = 1;
-            }
-            for (int i = 0; i < TIME_INTERVALS.length - 1; i++) {
-                if(interval >= TIME_INTERVALS[i] && interval <= TIME_INTERVALS[i + 1]) {
-                    if(interval - TIME_INTERVALS[i] <= TIME_INTERVALS[i + 1] - interval) {
-                        interval = TIME_INTERVALS[i];
-                    } else {
-                        interval = TIME_INTERVALS[i + 1];
-                    }
-                }
-            }
-            if(interval > TIME_INTERVALS[TIME_INTERVALS.length - 1]) {
-                interval = TIME_INTERVALS[TIME_INTERVALS.length - 1];
-            }
-            return interval;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.biorecorder.basechart.axis;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.scales.Scale;
@@ -475,7 +476,7 @@ public abstract class Axis {
                 }
             }
 
-            if (!config.isRoundingEnabled() && ticksSkipStep > 1 && (ticks.size() - 1) / ticksSkipStep > 1) {
+            if (!(scale instanceof TimeScale) && !config.isRoundingEnabled() && ticksSkipStep > 1 && (ticks.size() - 1) / ticksSkipStep > 1) {
                 tickProvider.increaseTickInterval(ticksSkipStep);
                 ticks = generateTicks(tickProvider);
                 ticksSkipStep = 1;
