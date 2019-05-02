@@ -41,7 +41,7 @@ public interface Column {
      */
     IntSequence group(double interval, IntWrapper length);
 
-    IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length);
+    IntSequence group(TimeInterval timeInterval, IntWrapper length);
 
     Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
     Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);

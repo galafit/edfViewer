@@ -56,7 +56,7 @@ public class Range {
     /**
      * Create a minMax so that its:
      * min = min(range1.min, range2.min)
-     * length = min(range1.length, range2.length) if both lengths > 0
+     * intervalLength = min(range1.intervalLength, range2.intervalLength) if both lengths > 0
      */
     public static Range min(Range range1, Range range2) {
         if(range1 == null && range2 == null) {

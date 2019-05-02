@@ -10,7 +10,7 @@ public class DataProcessingConfig {
     private int cropShoulder = 2; // number of additional points that we leave on every side during crop
 
     private boolean isGroupingEnabled = true;
-    // NO REGROUPING if axis length change less then groupingStability
+    // NO REGROUPING if axis intervalLength change less then groupingStability
     int groupingStability = 20; // percents
 
     // cropped data will be caching like grouped data. It make sense in the case

@@ -45,27 +45,15 @@ public class TimeScale extends LinearScale {
         return timeFormat.format((long) value);
     }
 
-    public static List<TimeInterval> getAllowedTimeIntervalse() {
-        ArrayList<TimeInterval> intervals = new ArrayList<>();
-        for (TimeUnit unit : TimeUnit.values()) {
-            if(unit != TimeUnit.WEEK) {
-                int[] multiples = unit.getAllowedMultiples();
-                for (int multiple : multiples) {
-                    intervals.add(new TimeInterval(unit, multiple));
-                }
-            }
-        }
-        intervals.trimToSize();
-        return intervals;
-    }
+
 
     class TimeTickProvider implements TickProvider {
         private TimeIntervalProvider timeIntervalProvider;
         private DateFormat labelFormat;
 
         public void setTickInterval(double interval) {
-            timeIntervalProvider = new TimeIntervalProvider(TimeUnit.getClosestIntervals(false, interval).get(0));
-            labelFormat = getDateFormat(timeIntervalProvider.getTimeUnit());
+            timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(Math.round(interval), true));
+            labelFormat = getDateFormat(timeIntervalProvider.getTimeInterval().getTimeUnit());
         }
 
         public void setTickIntervalCount(int tickIntervalCount) {
@@ -75,13 +63,13 @@ public class TimeScale extends LinearScale {
             double max = domain[domain.length - 1];
             double min = domain[0];
             long interval = Math.round((max - min) / tickIntervalCount);
-            timeIntervalProvider = new TimeIntervalProvider(TimeUnit.getClosestIntervals(false, interval).get(0));
-            labelFormat = getDateFormat(timeIntervalProvider.getTimeUnit());
+            timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(interval, true));
+            labelFormat = getDateFormat(timeIntervalProvider.getTimeInterval().getTimeUnit());
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
-            long intervalNew = timeIntervalProvider.getTimeUnit().getMilliseconds() * timeIntervalProvider.getUnitMultiplier() * increaseFactor;
+            long intervalNew = timeIntervalProvider.getTimeInterval().toMilliseconds() * increaseFactor;
             setTickInterval(intervalNew);
         }
 

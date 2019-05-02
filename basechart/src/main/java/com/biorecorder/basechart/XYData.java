@@ -150,8 +150,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public ChartData resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier) {
-        return new XYData(dataFrame.resampleByEqualTimeInterval(columnNumber, unit, unitMultiplier));
+    public ChartData resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval) {
+        return new XYData(dataFrame.resampleByEqualTimeInterval(columnNumber, timeInterval));
     }
 
     @Override

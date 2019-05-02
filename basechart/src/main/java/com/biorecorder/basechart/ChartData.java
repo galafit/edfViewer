@@ -1,6 +1,7 @@
 package com.biorecorder.basechart;
 
 
+import com.biorecorder.data.frame.TimeInterval;
 import com.biorecorder.data.frame.TimeUnit;
 
 /**
@@ -36,7 +37,7 @@ public interface ChartData {
 
     ChartData resampleByEqualInterval(int columnNumber, double interval);
 
-    ChartData resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier);
+    ChartData resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval);
 
     void cache();
     void disableCaching();

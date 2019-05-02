@@ -30,7 +30,7 @@ public class SequenceUtils {
      * This method do not modifying the order of the underlying data!
      * It simply returns an array of sorted indexes which represent sorted version (view)
      * of the data.
-     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., length - 1
+     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., intervalLength - 1
      */
     public static int[] sort(StringSequence data, int from, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
@@ -56,7 +56,7 @@ public class SequenceUtils {
      * This method do not modifying the order of the underlying data!
      * It simply returns an array of sorted indexes which represent sorted version (view)
      * of the data.
-     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., length - 1
+     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., intervalLength - 1
      */
     public static int[] sort(IntSequence data, int from, int length, boolean isParallel) {
         int[] orderedIndexes = new int[length];
@@ -173,7 +173,7 @@ public class SequenceUtils {
         int[] sorted = sort(dataSequence, from, length, false);
         int[] resultantSorted = new int[sorted.length];
 
-        System.out.println("\nResultant sorted data: " + "from = " + from + "  length = " + length);
+        System.out.println("\nResultant sorted data: " + "from = " + from + "  intervalLength = " + length);
         for (int i = 0; i < sorted.length; i++) {
             resultantSorted[i] = dataSequence.get(sorted[i]);
             System.out.println(i + "  " + resultantSorted[i]);

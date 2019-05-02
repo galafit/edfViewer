@@ -108,8 +108,8 @@ public class StringColumn implements Column {
     }
 
     @Override
-    public IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length) {
-        return intColumn.group(unit, unitMultiplier, length);
+    public IntSequence group(TimeInterval timeInterval, IntWrapper length) {
+        return intColumn.group(timeInterval, length);
     }
 
 

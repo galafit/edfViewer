@@ -8,27 +8,12 @@ public class TimeIntervalProvider implements IntervalProvider {
             Calendar.HOUR_OF_DAY,  weekField, Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
     private int calendarFieldIndex;
 
-    private TimeUnit unit;
-    private int unitMultiplier;
+    private TimeInterval timeInterval;
+    
 
-    public TimeIntervalProvider(com.biorecorder.data.frame.TimeInterval timeInterval) {
-        this(timeInterval.getTimeUnit(), timeInterval.getUnitMultiplier());
-    }
-
-    public TimeIntervalProvider(TimeUnit unit, int unitMultiplier) {
-        int[] allowedValues = unit.getAllowedMultiples();
-        if(allowedValues != null && allowedValues.length > 0) {
-            unitMultiplier = Math.min(unitMultiplier, allowedValues[allowedValues.length - 1]);
-            for (int v : allowedValues) {
-                if(unitMultiplier <= v) {
-                    unitMultiplier = v;
-                    break;
-                }
-            }
-        }
-        this.unitMultiplier = unitMultiplier;
-        this.unit = unit;
-        switch (unit) {
+    public TimeIntervalProvider(TimeInterval timeInterval) {
+        this.timeInterval = timeInterval;
+        switch (timeInterval.getTimeUnit()) {
             case MILLISECOND:
                 calendarFieldIndex = 0;
                 break;
@@ -65,20 +50,16 @@ public class TimeIntervalProvider implements IntervalProvider {
         calendar = Calendar.getInstance();
     }
 
-    private TimeInterval createInterval() {
+    private LongInterval createInterval() {
         long intervalStart = calendar.getTimeInMillis();
-        calendar.add(calendarFields[calendarFieldIndex], unitMultiplier);
+        calendar.add(calendarFields[calendarFieldIndex], timeInterval.getTimeUnitMultiplier());
         long nextIntervalStart = calendar.getTimeInMillis();
-        calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
-        return new TimeInterval(unit, unitMultiplier, intervalStart, nextIntervalStart);
+        calendar.add(calendarFields[calendarFieldIndex], -timeInterval.getTimeUnitMultiplier());
+        return new LongInterval(intervalStart, nextIntervalStart);
     }
 
-    public TimeUnit getTimeUnit() {
-        return unit;
-    }
-
-    public int getUnitMultiplier() {
-        return unitMultiplier;
+    public TimeInterval getTimeInterval() {
+        return timeInterval;
     }
 
     public long getCurrentIntervalStartMs() {
@@ -94,7 +75,7 @@ public class TimeIntervalProvider implements IntervalProvider {
             calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         } else {
             int calendarFieldValue = calendar.get(calendarField);
-            calendarFieldValue = (calendarFieldValue / unitMultiplier) * unitMultiplier;
+            calendarFieldValue = (calendarFieldValue / timeInterval.getTimeUnitMultiplier()) * timeInterval.getTimeUnitMultiplier();
             calendar.set(calendarField, calendarFieldValue);
         }
         for (int i = 0; i < calendarFieldIndex; i++) {
@@ -111,13 +92,58 @@ public class TimeIntervalProvider implements IntervalProvider {
 
     @Override
     public Interval getNext() {
-        calendar.add(calendarFields[calendarFieldIndex], unitMultiplier);
+        calendar.add(calendarFields[calendarFieldIndex], timeInterval.getTimeUnitMultiplier());
         return createInterval();
     }
 
     @Override
     public Interval getPrevious() {
-        calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
+        calendar.add(calendarFields[calendarFieldIndex], -timeInterval.getTimeUnitMultiplier());
         return createInterval();
+    }
+
+    class LongInterval implements Interval {
+        private final long start;
+        private final long nextIntervalStart;
+
+        public LongInterval(long start, long nextIntervalStart) {
+            this.start = start;
+            this.nextIntervalStart = nextIntervalStart;
+        }
+        
+        /*
+        * As we will use methods contains only on INCREASING data
+        * we do only one check (value < nextIntervalStart) instead of both
+        */
+        @Override
+        public boolean contains(byte value) {
+            // return value >= start && value < nextIntervalStart;
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(short value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(int value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(long value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(float value) {
+            return value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(double value) {
+            return value < nextIntervalStart;
+        }
     }
 }

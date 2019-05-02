@@ -363,8 +363,8 @@ public class DataFrame {
         return resample(groupIndexes, 1);
     }
 
-    public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(unit, unitMultiplier, length);
+    public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval) {
+        IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, length);
         return resample(groupIndexes, 1);
     }
 

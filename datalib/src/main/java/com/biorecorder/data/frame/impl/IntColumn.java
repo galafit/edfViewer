@@ -147,8 +147,8 @@ public class IntColumn implements Column {
     }
 
     @Override
-    public IntSequence group(TimeUnit unit, int unitMultiplier, IntWrapper length) {
-        return group(new TimeIntervalProvider(unit, unitMultiplier), length);
+    public IntSequence group(TimeInterval timeInterval, IntWrapper length) {
+        return group(new TimeIntervalProvider(timeInterval), length);
     }
 
     private IntSequence group(IntervalProvider intervalProvider, IntWrapper length) {
@@ -318,7 +318,7 @@ public class IntColumn implements Column {
     @Override
     public Stats stats(int length) {
         if (length <= 0) {
-            String errMsg = "Statistic can not be calculated if length <= 0: " + length;
+            String errMsg = "Statistic can not be calculated if intervalLength <= 0: " + length;
             throw new IllegalStateException(errMsg);
         }
         if (length <= 2) {
@@ -433,11 +433,6 @@ public class IntColumn implements Column {
         public IntInterval(int start, int nextIntervalStart) {
             this.start = start;
             this.nextIntervalStart = nextIntervalStart;
-        }
-
-        @Override
-        public double length() {
-            return nextIntervalStart - start;
         }
 
         //As we will use methods contains only on INCREASING data

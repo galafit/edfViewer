@@ -295,7 +295,7 @@ public class Chart {
             double axisHeight = 1.0 * height * yAxisWeight / weightSum;
             double start = end + axisHeight;
            /* if(stack == stackCount - 1) {
-                // for integer calculation sum yAxis length can be != areaHeight
+                // for integer calculation sum yAxis intervalLength can be != areaHeight
                 // so we fix that
                 start = areaY + areaHeight;
             }*/
