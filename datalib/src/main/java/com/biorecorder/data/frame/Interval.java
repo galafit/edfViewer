@@ -4,6 +4,7 @@ package com.biorecorder.data.frame;
  * Created by galafit on 1/5/19.
  */
 public interface Interval {
+    double length();
     boolean contains(byte value);
     boolean contains(short value);
     boolean contains(int value);

@@ -1,6 +1,8 @@
 package com.biorecorder.basechart;
 
 
+import com.biorecorder.data.frame.TimeUnit;
+
 /**
  * Simplified analogue of data table which
  * in fact is simply a collection of columns
@@ -30,9 +32,11 @@ public interface ChartData {
 
     int[] sortedIndices(int sortColumn);
 
-    ChartData resampleByEqualFrequency(int points);
+    ChartData resampleByEqualPointsNumber(int points);
 
     ChartData resampleByEqualInterval(int columnNumber, double interval);
+
+    ChartData resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier);
 
     void cache();
     void disableCaching();

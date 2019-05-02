@@ -6,7 +6,6 @@ import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
-import sun.jvm.hotspot.utilities.*;
 
 import java.util.List;
 
@@ -428,12 +427,17 @@ public class IntColumn implements Column {
     }
 
     class IntInterval implements Interval {
-        private final int intervalStart;
+        private final int start;
         private final int nextIntervalStart;
 
-        public IntInterval(int intervalStart, int nextIntervalStart) {
-            this.intervalStart = intervalStart;
+        public IntInterval(int start, int nextIntervalStart) {
+            this.start = start;
             this.nextIntervalStart = nextIntervalStart;
+        }
+
+        @Override
+        public double length() {
+            return nextIntervalStart - start;
         }
 
         //As we will use methods contains only on INCREASING data

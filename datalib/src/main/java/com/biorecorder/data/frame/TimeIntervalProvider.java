@@ -70,7 +70,7 @@ public class TimeIntervalProvider implements IntervalProvider {
         calendar.add(calendarFields[calendarFieldIndex], unitMultiplier);
         long nextIntervalStart = calendar.getTimeInMillis();
         calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
-        return new TimeInterval(intervalStart, nextIntervalStart);
+        return new TimeInterval(unit, unitMultiplier, intervalStart, nextIntervalStart);
     }
 
     public TimeUnit getTimeUnit() {
@@ -119,50 +119,5 @@ public class TimeIntervalProvider implements IntervalProvider {
     public Interval getPrevious() {
         calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
         return createInterval();
-    }
-
-    class TimeInterval implements Interval {
-        private final long intervalStart;
-        private final long nextIntervalStart;
-
-        public TimeInterval(long start, long nextIntervalStart) {
-            this.intervalStart = start;
-            this.nextIntervalStart = nextIntervalStart;
-        }
-
-        /*
-         * As we will use methods contains only on INCREASING data
-         * we do only one check (value < nextIntervalStart) instead of both
-         */
-        @Override
-        public boolean contains(byte value) {
-            // return value >= intervalStart && value < nextIntervalStart;
-            return value < nextIntervalStart;
-        }
-
-        @Override
-        public boolean contains(short value) {
-            return value < nextIntervalStart;
-        }
-
-        @Override
-        public boolean contains(int value) {
-            return value < nextIntervalStart;
-        }
-
-        @Override
-        public boolean contains(long value) {
-            return value < nextIntervalStart;
-        }
-
-        @Override
-        public boolean contains(float value) {
-            return value < nextIntervalStart;
-        }
-
-        @Override
-        public boolean contains(double value) {
-            return value < nextIntervalStart;
-        }
     }
 }

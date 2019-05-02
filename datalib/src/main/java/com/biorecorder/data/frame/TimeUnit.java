@@ -1,6 +1,5 @@
 package com.biorecorder.data.frame;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public enum TimeUnit {
     }
 
     public static List<TimeInterval> getClosestIntervals(boolean isWeekIncluded, double... intervals) {
-        List<TimeInterval> allowedIntervals = createAllowedIntervals(isWeekIncluded);
+        List<TimeInterval> allowedIntervals = getAllowedIntervals(isWeekIncluded);
         List<TimeInterval> resultantIntervals = new ArrayList<>(intervals.length);
         for (double interval : intervals) {
             TimeInterval timeInterval = getClosestInterval(allowedIntervals, (long) interval);
@@ -50,7 +49,7 @@ public enum TimeUnit {
         long diffPrev = 0;
         for (int i = 0; i < allowedIntervals.size(); i++) {
             TimeInterval allowedInterval = allowedIntervals.get(i);
-            long diff = allowedInterval.getLengthInMilliseconds() - interval;
+            long diff = (long) allowedInterval.length() - interval;
             if(diff >= 0) {
                 if(i > 0 && diffPrev < diff) {
                     TimeInterval allowedIntervalPrev = allowedIntervals.get(i - 1);
@@ -64,7 +63,7 @@ public enum TimeUnit {
         return new TimeInterval(YEAR,  Math.round(interval / YEAR.milliseconds));
     }
 
-    private static List<TimeInterval> createAllowedIntervals(boolean isWeekIncluded) {
+    public static List<TimeInterval> getAllowedIntervals(boolean isWeekIncluded) {
         ArrayList<TimeInterval> allowedIntervals = new ArrayList<>();
         for (TimeUnit unit : values()) {
             if (isWeekIncluded || unit != WEEK) {
@@ -74,6 +73,7 @@ public enum TimeUnit {
                 }
             }
         }
+        allowedIntervals.trimToSize();
         return allowedIntervals;
     }
 }

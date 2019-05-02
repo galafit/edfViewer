@@ -2,6 +2,10 @@ package com.biorecorder.basechart;
 
 
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.scales.TimeScale;
+import com.biorecorder.data.frame.Interval;
+import com.biorecorder.data.frame.TimeInterval;
+import com.biorecorder.data.frame.TimeUnit;
 import com.biorecorder.data.sequence.StringSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
@@ -22,7 +26,9 @@ public class TraceDataManager {
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
     private int prevTraceDataSize;
-    double roundPrecision = 0.2;
+    private double roundPrecision = 0.2;
+    private List<? extends Interval> groupingIntervals;
+
 
     private int[] sorter;
 
@@ -42,17 +48,44 @@ public class TraceDataManager {
         }
     }
 
+    private void createGroupingIntervals(Scale xScale) {
+        double[] specifiedIntervals = processingConfig.getGroupingIntervals();
+        if(xScale instanceof TimeScale) {
+            if(specifiedIntervals != null && specifiedIntervals.length != 0) {
+                groupingIntervals = TimeUnit.getClosestIntervals(true, specifiedIntervals);
+            } else {
+                if(!isEqualFrequencyGrouping) {
+                   groupingIntervals = TimeUnit.getAllowedIntervals(true);
+                } else {
+                    groupingIntervals = null;
+                }
+            }
+        } else {
+            if (specifiedIntervals != null && specifiedIntervals.length != 0) {
+                List<DoubleInterval> intervals = new ArrayList<>(specifiedIntervals.length);
+                for (double interval : specifiedIntervals) {
+                    intervals.add(new DoubleInterval(0, interval));
+                }
+                groupingIntervals = intervals;
 
-    public void setConfig(DataProcessingConfig processingConfig) {
-        this.processingConfig = processingConfig;
-        int capacity = 1;
-        if(isGroupIntervalsSpecified()) {
-            capacity = processingConfig.getGroupingIntervals().length;
+            } else {
+                groupingIntervals = null;
+            }
         }
+        int capacity = 1;
+        if(groupingIntervals != null) {
+            capacity = groupingIntervals.size();
+        }
+
         groupedDataList = new ArrayList<>(capacity);
         for (int i = 0; i < capacity; i++) {
             groupedDataList.add(null);
         }
+    }
+
+
+    public void setConfig(DataProcessingConfig processingConfig) {
+        this.processingConfig = processingConfig;
         switch (processingConfig.getGroupingType()) {
             case EQUAL_POINTS_NUMBER:
                 isEqualFrequencyGrouping = true;
@@ -161,6 +194,10 @@ public class TraceDataManager {
         if (markSize > 0) {
             pixelsPerDataPoint = markSize;
         }
+        if(prevXScale == null || !prevXScale.getClass().equals(xScale.getClass()) &&
+                prevXScale instanceof TimeScale || xScale instanceof TimeScale) {
+            createGroupingIntervals(xScale);
+        }
 
         if (!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
             processedData = processData(xScale, pixelsPerDataPoint);
@@ -247,8 +284,6 @@ public class TraceDataManager {
            // return traceData.view(0, 0);
         }
 
-        double[] availableIntervals = processingConfig.getGroupingIntervals();
-
         double groupInterval = 0;
         double pointsInGroup = 1;
         int pointsInGroupRound = 1;
@@ -264,17 +299,17 @@ public class TraceDataManager {
                 // if available intervals are specified we choose the interval among the available ones
                 if (isGroupIntervalsSpecified()) {
                     double precision = 0.1;
-                    for (int i = 0; i < availableIntervals.length; i++) {
-                        double interval_i = availableIntervals[i];
+                    for (int i = 0; i < groupingIntervals.size(); i++) {
+                        double interval_i = groupingIntervals.get(i).length();
                         if (Math.abs(groupInterval - interval_i) < precision * interval_i || groupInterval < interval_i) {
-                            groupInterval = availableIntervals[i];
+                            groupInterval = interval_i;
                             groupIntervalIndex = i;
                             break;
                         }
                     }
                     if (groupIntervalIndex < 0) {
-                        groupInterval = availableIntervals[availableIntervals.length - 1];
-                        groupIntervalIndex = availableIntervals.length - 1;
+                        groupInterval = groupingIntervals.get(groupingIntervals.size() - 1).length();
+                        groupIntervalIndex = groupingIntervals.size() - 1;
                     }
                     pointsInGroup = groupIntervalToPoints(traceData, groupInterval);
                     pointsInGroupRound = roundPoints(pointsInGroup);
@@ -284,8 +319,8 @@ public class TraceDataManager {
                 }
                 isGroupingEnabled = true;
             } else {
-                if(processingConfig.isGroupingForced()) {
-                    groupInterval = availableIntervals[0];
+                if(processingConfig.isGroupingForced() && isGroupIntervalsSpecified()) {
+                    groupInterval = groupingIntervals.get(0).length();
                     groupIntervalIndex = 0;
                     pointsInGroup = groupIntervalToPoints(traceData, groupInterval);
                     pointsInGroupRound = roundPoints(pointsInGroup);
@@ -336,7 +371,11 @@ public class TraceDataManager {
             processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex));
             // if data was not grouped before we group only visible data
             if (isGroupingEnabled  && !isAlreadyGrouped) {
-                processedData = group(processedData, groupInterval);
+                Interval interval = new DoubleInterval(0, groupInterval);
+                if(groupIntervalIndex >= 0) {
+                    interval = groupingIntervals.get(groupIntervalIndex);
+                }
+                processedData = group(processedData, interval);
             }
             if(processingConfig.isCroppedDataCachingEnabled()) {
                 processedData.cache();
@@ -400,7 +439,7 @@ public class TraceDataManager {
                     if(traceData.rowCount() > prevTraceDataSize) {
                         groupedData.appendData();
                     }
-                    groupedDataNew = groupedData.resampleByEqualFrequency(groupedPointsInGroupRound);
+                    groupedDataNew = groupedData.resampleByEqualPointsNumber(groupedPointsInGroupRound);
                     groupedDataNew.cache();
 
                     // force "lazy" grouping
@@ -429,7 +468,7 @@ public class TraceDataManager {
         }
 
         if(groupedDataNew == null) {
-            groupedDataNew = group(traceData, groupInterval);
+            groupedDataNew = group(traceData, new DoubleInterval(0, groupInterval));
         }
 
         groupedDataList.set(0, groupedDataNew);
@@ -438,18 +477,17 @@ public class TraceDataManager {
 
 
     private ChartData groupAllIfIntervalsSpecified(int groupIntervalIndex) {
-        double[] groupIntervals = processingConfig.getGroupingIntervals();
         if(groupedDataList.get(groupIntervalIndex) == null) {
             ChartData groupedData = null;
             if (isEqualFrequencyGrouping && groupIntervalIndex > 0 && groupedDataList.get(groupIntervalIndex - 1) != null) {
-                int pointsInGroup = roundPoints(groupIntervalToPoints(traceData, groupIntervals[groupIntervalIndex]));
+                int pointsInGroup = roundPoints(groupIntervalToPoints(traceData, groupingIntervals.get(groupIntervalIndex).length()));
                 if(pointsInGroup > 1) {
-                    int prevPointsInGroup = roundPoints(groupIntervalToPoints(traceData, groupIntervals[groupIntervalIndex - 1]));
+                    int prevPointsInGroup = roundPoints(groupIntervalToPoints(traceData, groupingIntervals.get(groupIntervalIndex - 1).length()));
                     if(pointsInGroup % prevPointsInGroup == 0) {
                         int pointsRatio = pointsInGroup / prevPointsInGroup;
                         if(pointsRatio > 1) {
                             // regroup on the base of already grouped data
-                            groupedData = groupedDataList.get(groupIntervalIndex - 1).resampleByEqualFrequency(pointsRatio);
+                            groupedData = groupedDataList.get(groupIntervalIndex - 1).resampleByEqualPointsNumber(pointsRatio);
                             groupedData.cache();
                         } else if(pointsRatio == 1) {
                             // use already grouped data as it is
@@ -459,7 +497,7 @@ public class TraceDataManager {
                 }
             }
             if(groupedData == null) {
-                groupedData = group(traceData, groupIntervals[groupIntervalIndex]);
+                groupedData = group(traceData, groupingIntervals.get(groupIntervalIndex));
             }
             groupedDataList.set(groupIntervalIndex, groupedData);
         }
@@ -467,19 +505,24 @@ public class TraceDataManager {
         return groupedDataList.get(groupIntervalIndex);
     }
 
-    private ChartData group(ChartData data, double groupInterval) {
+    private ChartData group(ChartData data, Interval groupInterval) {
         ChartData groupedData;
         if (isEqualFrequencyGrouping) { // group by equal points number
-            int points = roundPoints(groupIntervalToPoints(data, groupInterval));
+            int points = roundPoints(groupIntervalToPoints(data, groupInterval.length()));
             if(points > 1) {
-                groupedData = data.resampleByEqualFrequency(points);
+                groupedData = data.resampleByEqualPointsNumber(points);
                 groupedData.cache();
             } else {
                 groupedData = data;
             }
         } else {
-            groupedData = data.resampleByEqualInterval(0, groupInterval);
-            groupedData.cache();
+            if(groupInterval instanceof TimeInterval) {
+                TimeInterval timeInterval = (TimeInterval)  groupInterval;
+                groupedData = data.resampleByEqualTimeInterval(0, timeInterval.getTimeUnit(), timeInterval.getUnitMultiplier());
+            } else {
+                groupedData = data.resampleByEqualInterval(0, groupInterval.length());
+            }
+             groupedData.cache();
         }
         return groupedData;
 
@@ -510,10 +553,7 @@ public class TraceDataManager {
 
 
     private boolean isGroupIntervalsSpecified() {
-        if(processingConfig.getGroupingIntervals() != null && processingConfig.getGroupingIntervals().length > 0) {
-            return true;
-        }
-        return false;
+        return groupingIntervals != null;
     }
 
     private double pointsNumberToGroupInterval(ChartData data, double pointsInGroup) {
@@ -539,5 +579,53 @@ public class TraceDataManager {
     double getDataAvgStep(ChartData data) {
         int dataSize = data.rowCount();
         return (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
+    }
+
+    class DoubleInterval implements Interval {
+        private final double start;
+        private final double nextIntervalStart;
+        private final double length;
+
+        public DoubleInterval(double start, double nextIntervalStart) {
+            this.start = start;
+            this.nextIntervalStart = nextIntervalStart;
+            length = nextIntervalStart - start;
+        }
+
+        @Override
+        public double length() {
+            return length;
+        }
+
+        @Override
+        public boolean contains(byte value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(short value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(int value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(long value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(float value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
+        @Override
+        public boolean contains(double value) {
+            return value >= start && value < nextIntervalStart;
+        }
+
     }
 }

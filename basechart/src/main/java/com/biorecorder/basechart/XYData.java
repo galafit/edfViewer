@@ -1,9 +1,6 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.data.frame.Aggregation;
-import com.biorecorder.data.frame.DataFrame;
-import com.biorecorder.data.frame.Function;
-import com.biorecorder.data.frame.Stats;
+import com.biorecorder.data.frame.*;
 import com.biorecorder.data.sequence.IntSequence;
 
 import java.util.List;
@@ -143,13 +140,18 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public ChartData resampleByEqualFrequency(int points) {
-        return new XYData(dataFrame.resampleByEqualPoints(points));
+    public ChartData resampleByEqualPointsNumber(int points) {
+        return new XYData(dataFrame.resampleByEqualPointsNumber(points));
     }
 
     @Override
     public ChartData resampleByEqualInterval(int columnNumber, double interval) {
         return new XYData(dataFrame.resampleByEqualInterval(columnNumber, interval));
+    }
+
+    @Override
+    public ChartData resampleByEqualTimeInterval(int columnNumber, TimeUnit unit, int unitMultiplier) {
+        return new XYData(dataFrame.resampleByEqualTimeInterval(columnNumber, unit, unitMultiplier));
     }
 
     @Override

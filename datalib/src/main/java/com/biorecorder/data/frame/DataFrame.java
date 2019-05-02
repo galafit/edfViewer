@@ -347,7 +347,7 @@ public class DataFrame {
      * one aggregating function is specified!!!
      * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualPoints(int points) {
+    public DataFrame resampleByEqualPointsNumber(int points) {
         return resample(null, points);
     }
 
@@ -484,7 +484,7 @@ public class DataFrame {
         df.setColumnAggFunctions(0, Aggregation.FIRST);
         df.setColumnAggFunctions(1, Aggregation.AVERAGE);
 
-        DataFrame df1 = df.resampleByEqualPoints(4);
+        DataFrame df1 = df.resampleByEqualPointsNumber(4);
         DataFrame df2 = df.resampleByEqualInterval(0, 4);
 
 
