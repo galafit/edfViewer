@@ -10,8 +10,6 @@ public class DataProcessingConfig {
     private int cropShoulder = 2; // number of additional points that we leave on every side during crop
 
     private boolean isGroupingEnabled = true;
-    // NO REGROUPING if axis intervalLength change less then groupingStability
-    int groupingStability = 20; // percents
 
     // cropped data will be caching like grouped data. It make sense in the case
     // of heavy data (when data read from a file or calculated)
@@ -21,15 +19,14 @@ public class DataProcessingConfig {
     // and non-regular by equal intervals
     private GroupingType groupingType = GroupingType.AUTO;
 
-    // if all data grouped and groupingIntervals = null then regrouping will be
-    // done only if the "new best groping interval" bigger or less then the interval
-    // of already grouped data in reGroupingStep times
-    private int reGroupingStep = 2;
+    // used  when groupingIntervals are not specified (null)
+    private int groupingStep = 2;
 
     // if defined (not null) group intervals will be taken only from that array,
     // otherwise every time "the best group interval" will be calculated automatically
     private double[] groupingIntervals = null;
-    // if groupingIntervals are specified (not null) and isGroupingForced = true then grouping will be done in any case
+    // if groupingIntervals are specified (not null) and isGroupingForced = true
+    // then grouping will be done in any case
     private boolean isGroupingForced = false;
 
     // group all data or only visible ones
@@ -45,12 +42,11 @@ public class DataProcessingConfig {
 
     public DataProcessingConfig(DataProcessingConfig config) {
         cropShoulder = config.cropShoulder;
-        groupingStability = config.groupingStability;
         isCropEnabled = config.isCropEnabled;
         isGroupingEnabled = config.isGroupingEnabled;
         groupingType = config.groupingType;
         isGroupingForced = config.isGroupingForced;
-        reGroupingStep = config.reGroupingStep;
+        groupingStep = config.groupingStep;
         isGroupAll = config.isGroupAll;
         isCroppedDataCachingEnabled = config.isCroppedDataCachingEnabled;
         if(config.groupingIntervals != null) {
@@ -77,16 +73,16 @@ public class DataProcessingConfig {
         isGroupAll = groupAll;
     }
 
-    public int getReGroupingStep() {
-        return reGroupingStep;
+    public int getGroupingStep() {
+        return groupingStep;
     }
 
-    public void setReGroupingStep(int reGroupingStep) throws IllegalArgumentException {
-        if(reGroupingStep < 1) {
-            String errMsg = "Re grouping step: " + reGroupingStep + " Expected > 0";
+    public void setGroupingStep(int groupingStep) throws IllegalArgumentException {
+        if(groupingStep < 2) {
+            String errMsg = "Re grouping step: " + groupingStep + " Expected > 1";
             throw new IllegalArgumentException(errMsg);
         }
-        this.reGroupingStep = reGroupingStep;
+        this.groupingStep = groupingStep;
     }
 
     public boolean isGroupingForced() {
@@ -103,14 +99,6 @@ public class DataProcessingConfig {
 
     public void setCropShoulder(int cropShoulder) {
         this.cropShoulder = cropShoulder;
-    }
-
-    public int getGroupingStability() {
-        return groupingStability;
-    }
-
-    public void setGroupingStability(int groupingStability) {
-        this.groupingStability = groupingStability;
     }
 
     public double[] getGroupingIntervals() {

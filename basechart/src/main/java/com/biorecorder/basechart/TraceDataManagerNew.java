@@ -14,7 +14,10 @@ import java.util.List;
 /**
  * Created by galafit on 9/7/18.
  */
-public class TraceDataManager {
+public class TraceDataManagerNew {
+    // NO REGROUPING if axis length change less then GROUPING_STABILITY
+    private static final int GROUPING_STABILITY = 20; // percents
+
     private final ChartData traceData;
     private DataProcessingConfig processingConfig;
     private boolean isEqualFrequencyGrouping; // group by equal points number or equal "height"
@@ -24,13 +27,12 @@ public class TraceDataManager {
     private Scale prevXScale;
     private int prevPixelsPerDataPoint = -1;
     private int prevTraceDataSize;
-    private double roundPrecision = 0.2;
     private List<? extends GroupInterval> groupingIntervals;
 
 
     private int[] sorter;
 
-    public TraceDataManager(ChartData traceData) {
+    public TraceDataManagerNew(ChartData traceData) {
         this.traceData = traceData;
         setConfig(new DataProcessingConfig());
     }
@@ -243,7 +245,7 @@ public class TraceDataManager {
             return false;
         }
 
-        if (Math.abs(prevLength - length) * 100 / length > 20) {
+        if (Math.abs(prevLength - length) * 100 / length > GROUPING_STABILITY) {
             return false;
         }
 
@@ -263,6 +265,77 @@ public class TraceDataManager {
         return (int) Math.abs(range[range.length - 1] - range[0]);
     }
 
+    private boolean isCropEnabled(Scale xScale) {
+        double[] domain = xScale.getDomain();
+        Double xMin = domain[0];
+        Double xMax = domain[domain.length - 1];
+        Range dataMinMax = traceData.getColumnMinMax(0);
+        return  processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
+    }
+
+    class IntervalInfo {
+       private final GroupInterval interval;
+       private final int intervalIndex;
+
+        public IntervalInfo(GroupInterval interval, int intervalIndex) {
+            this.interval = interval;
+            this.intervalIndex = intervalIndex;
+        }
+
+        public double getIntervalLength() {
+            return interval.intervalLength();
+        }
+
+        public GroupInterval getInterval() {
+            return interval;
+        }
+
+        public int getIntervalIndex() {
+            return intervalIndex;
+        }
+    }
+
+    private IntervalInfo findGroupingInterval(Range minMax, int drawingAreaWidth, int pixelsPerDataPoint) {
+        if (drawingAreaWidth < 1) {
+            drawingAreaWidth = 1;
+        }
+        // calculate best grouping interval
+        double groupInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;
+        double dataStep = getDataAvgStep(traceData);
+        // if available intervals are specified we choose the interval among the available ones
+        if (isGroupIntervalsSpecified()) {
+            if (processingConfig.isGroupingForced() || groupInterval > dataStep) {
+                for (int i = 0; i < groupingIntervals.size(); i++) {
+                    GroupInterval interval_i = groupingIntervals.get(i);
+                    if (groupInterval <= interval_i.intervalLength()) {
+                        if (i > 0) {
+                            GroupInterval interval_i_prev = groupingIntervals.get(i - 1);
+                            if (groupInterval > Math.sqrt(interval_i.intervalLength() * interval_i_prev.intervalLength())) {
+                                return new IntervalInfo(interval_i, i);
+                            } else {
+                                return new IntervalInfo(interval_i_prev, i - 1);
+                            }
+                        } else {
+                            if (processingConfig.isGroupingForced() || groupInterval > Math.sqrt(interval_i.intervalLength() * getDataAvgStep(traceData))) {
+                                return new IntervalInfo(interval_i, i);
+                            }
+                        }
+                    }
+                }
+                // if interval is bigger then all specified intervals we take the last one
+                return new IntervalInfo(groupingIntervals.get(groupingIntervals.size() - 1), groupingIntervals.size() - 1);
+            }
+        } else { // if intervals are not specified
+            if(groupInterval > dataStep * Math.sqrt(processingConfig.getGroupingStep())) {
+                //round interval to integer number of points
+                int pointsInGroup = roundPoints(groupIntervalToPoints(traceData, groupInterval));
+                groupInterval = pointsNumberToGroupInterval(traceData, pointsInGroup);
+                return new IntervalInfo(new NumberGroupInterval(groupInterval), -1);
+            }
+        }
+        return null;
+    }
+
 
     public ChartData processData(Scale xScale, int pixelsPerDataPoint) {
         if (traceData.rowCount() <= 1) {
@@ -272,22 +345,25 @@ public class TraceDataManager {
         double[] domain = xScale.getDomain();
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
-        double xStart = range[0];
-        double xEnd = range[range.length - 1];
 
         Range traceDataMinMax = traceData.getColumnMinMax(0);
-        double dataStart = xScale.scale(traceDataMinMax.getMin());
-        double dataEnd = xScale.scale(traceDataMinMax.getMax());
-
-        double drawingAreaWidth = 0;
-        Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
-        if (intersection != null) {
-            drawingAreaWidth = intersection.length();
-        }
         Range minMax = Range.intersect(traceDataMinMax, new Range(xMin, xMax));
 
         if (minMax == null) {
             return traceData.view(0, 0);
+        }
+
+
+        double xStart = range[0];
+        double xEnd = range[range.length - 1];
+
+        double dataStart = xScale.scale(traceDataMinMax.getMin());
+        double dataEnd = xScale.scale(traceDataMinMax.getMax());
+
+        int drawingAreaWidth = 0;
+        Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
+        if (intersection != null) {
+            drawingAreaWidth = (int)intersection.length();
         }
 
         if (drawingAreaWidth < 1) {
@@ -295,73 +371,33 @@ public class TraceDataManager {
             // return traceData.view(0, 0);
         }
 
-        double groupInterval = 0;
-        double pointsInGroup = 1;
-        int pointsInGroupRound = 1;
-        int groupIntervalIndex = -1;
-
-        boolean isGroupingEnabled = false;
-        if (processingConfig.isGroupingEnabled()) {
-            // calculate best grouping interval
-            groupInterval = minMax.length() * pixelsPerDataPoint / drawingAreaWidth;
-            ;
-            pointsInGroup = groupIntervalToPoints(traceData, groupInterval);
-            pointsInGroupRound = roundPoints(pointsInGroup);
-            if (pointsInGroupRound > 1) {
-                // if available intervals are specified we choose the interval among the available ones
-                if (isGroupIntervalsSpecified()) {
-                    double precision = 0.1;
-                    for (int i = 0; i < groupingIntervals.size(); i++) {
-                        double interval_i = groupingIntervals.get(i).intervalLength();
-                        if (Math.abs(groupInterval - interval_i) < precision * interval_i || groupInterval < interval_i) {
-                            groupInterval = interval_i;
-                            groupIntervalIndex = i;
-                            break;
-                        }
-                    }
-                    if (groupIntervalIndex < 0) {
-                        groupInterval = groupingIntervals.get(groupingIntervals.size() - 1).intervalLength();
-                        groupIntervalIndex = groupingIntervals.size() - 1;
-                    }
-                    pointsInGroup = groupIntervalToPoints(traceData, groupInterval);
-                    pointsInGroupRound = roundPoints(pointsInGroup);
-                } else {
-                    // if intervals are not specified we adjust group interval to int number of points in group
-                    groupInterval = pointsNumberToGroupInterval(traceData, pointsInGroupRound);
-                }
-                isGroupingEnabled = true;
-            } else {
-                if (processingConfig.isGroupingForced() && isGroupIntervalsSpecified()) {
-                    groupInterval = groupingIntervals.get(0).intervalLength();
-                    groupIntervalIndex = 0;
-                    pointsInGroup = groupIntervalToPoints(traceData, groupInterval);
-                    pointsInGroupRound = roundPoints(pointsInGroup);
-                    isGroupingEnabled = true;
-                }
-            }
+        IntervalInfo groupingInterval = null;
+        if(processingConfig.isGroupingEnabled()) {
+            groupingInterval = findGroupingInterval(minMax, drawingAreaWidth, pixelsPerDataPoint);
         }
 
 
         // we do all arithmetic in long to avoid int overflow !!!
-        long cropShoulder = processingConfig.getCropShoulder() * pointsInGroupRound;
+        long cropShoulder = processingConfig.getCropShoulder();
         processedData = traceData;
         boolean isAlreadyGrouped = false;
 
-        if (isGroupingEnabled) {
-            ChartData groupedData = findIfAlreadyGrouped(groupInterval, groupIntervalIndex);
+        if (groupingInterval != null) {
+            cropShoulder *= roundPoints(groupingInterval.getIntervalLength());
+            ChartData groupedData = findIfAlreadyGrouped(groupingInterval);
             if (groupedData != null) {
                 processedData = groupedData;
                 cropShoulder = processingConfig.getCropShoulder();
                 isAlreadyGrouped = true;
             } else if (processingConfig.isGroupAll()) {
-                processedData = groupAll(groupInterval, groupIntervalIndex);
+                processedData = groupAll(groupingInterval);
                 cropShoulder = processingConfig.getCropShoulder();
                 isAlreadyGrouped = true;
             }
         }
 
-        // if crop enabled
-        if (processedData.rowCount() > 1 && processingConfig.isCropEnabled() && (traceDataMinMax.getMin() < xMin || traceDataMinMax.getMax() > xMax)) {
+
+        if (processedData.rowCount() > 1 &&  isCropEnabled(xScale)) {
             long minIndex = 0;
             if (traceDataMinMax.getMin() < xMin) {
                 minIndex = processedData.bisect(0, minMax.getMin(), null) - cropShoulder;
@@ -381,37 +417,32 @@ public class TraceDataManager {
 
             processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex));
             // if data was not grouped before we group only visible data
-            if (isGroupingEnabled && !isAlreadyGrouped) {
-                GroupInterval interval;
-                if (groupIntervalIndex >= 0) {
-                    interval = groupingIntervals.get(groupIntervalIndex);
-                } else {
-                    interval = new NumberGroupInterval(groupInterval);
-                }
-                processedData = group(processedData, interval);
+            if (!isAlreadyGrouped && groupingInterval != null) {
+                processedData = group(processedData, groupingInterval.getInterval());
             }
             if (processingConfig.isCroppedDataCachingEnabled()) {
                 processedData.cache();
             }
         } else { // if crop disabled
             // if grouping was not done before
-            if (isGroupingEnabled && !isAlreadyGrouped) {
-                processedData = groupAll(groupInterval, groupIntervalIndex);
+            if (groupingInterval != null && !isAlreadyGrouped) {
+                processedData = groupAll(groupingInterval);
             }
         }
 
         return processedData;
     }
 
-    private ChartData findIfAlreadyGrouped(double groupInterval, int groupIntervalIndex) {
-        if (groupIntervalIndex < 0) {
+    private ChartData findIfAlreadyGrouped(IntervalInfo intervalInfo) {
+        if (intervalInfo.getIntervalIndex() < 0) {
             ChartData groupedData = groupedDataList.get(0);
             if (groupedData != null && groupedData.rowCount() > 1) {
-                double groupedPointsInGroup = groupIntervalToPoints(groupedData, groupInterval);
+                double groupedPointsInGroup = groupIntervalToPoints(groupedData, intervalInfo.getIntervalLength());
                 int groupedPointsInGroupRound = roundPoints(groupedPointsInGroup);
-
-                boolean isNextStepGrouping = groupedPointsInGroupRound > 1 && groupedPointsInGroupRound >= processingConfig.getGroupingStep();
-                boolean isPrevStepGrouping = (1 - groupedPointsInGroup) > roundPrecision && groupedPointsInGroup < 1.0 / processingConfig.getGroupingStep();
+                boolean isNextStepGrouping = groupedPointsInGroupRound > 1;
+                isNextStepGrouping = groupedPointsInGroup > Math.sqrt(processingConfig.getGroupingStep());
+                boolean isPrevStepGrouping = groupedPointsInGroup * processingConfig.getGroupingStep() < 1;
+                isPrevStepGrouping = groupedPointsInGroup * processingConfig.getGroupingStep() < 1;
 
                 if (!isNextStepGrouping && !isPrevStepGrouping) {
                     if (traceData.rowCount() > prevTraceDataSize) {
@@ -421,38 +452,40 @@ public class TraceDataManager {
                 }
             }
         } else {
-            return groupedDataList.get(groupIntervalIndex);
+            return groupedDataList.get(intervalInfo.getIntervalIndex());
         }
         return null;
     }
 
 
-    private ChartData groupAll(double groupInterval, int groupIntervalIndex) {
-        if (groupIntervalIndex < 0) {
-            return groupAllIfIntervalsNotSpecified(groupInterval);
+    private ChartData groupAll(IntervalInfo intervalInfo) {
+        if (intervalInfo.getIntervalIndex() < 0) {
+            return groupAllIfIntervalsNotSpecified(intervalInfo.getInterval());
         } else {
-            return groupAllIfIntervalsSpecified(groupIntervalIndex);
+            return groupAllIfIntervalsSpecified(intervalInfo.getIntervalIndex());
         }
     }
 
-    private ChartData groupAllIfIntervalsNotSpecified(double groupInterval) {
+    private ChartData groupAllIfIntervalsNotSpecified(GroupInterval groupInterval) {
         ChartData groupedDataNew = null;
         ChartData groupedData = groupedDataList.get(0);
         if (groupedData != null && groupedData.rowCount() > 1) {
-            // we try to use already grouped data
-            double groupedPointsInGroup = groupIntervalToPoints(groupedData, groupInterval);
+            // calculate new grouping interval on the base of already grouped data
+            double groupedPointsInGroup = groupIntervalToPoints(groupedData, groupInterval.intervalLength());
             int groupedPointsInGroupRound = roundPoints(groupedPointsInGroup);
-
-            boolean isNextStepGrouping = groupedPointsInGroupRound > 1 && groupedPointsInGroupRound >= processingConfig.getGroupingStep();
-            boolean isPrevStepGrouping = (1 - groupedPointsInGroup) > roundPrecision && groupedPointsInGroup < 1.0 / processingConfig.getGroupingStep();
-
+            boolean isNextStepGrouping = groupedPointsInGroupRound > 1;
+            isNextStepGrouping = groupedPointsInGroup > Math.sqrt(processingConfig.getGroupingStep());
+            boolean isPrevStepGrouping = groupedPointsInGroup * processingConfig.getGroupingStep() < 1;
+            isPrevStepGrouping = groupedPointsInGroup * processingConfig.getGroupingStep() < 1;
+            int nextPointsInGroup = Math.max(groupedPointsInGroupRound, processingConfig.getGroupingStep());
             if (isNextStepGrouping) {
                 if (isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
                     if (traceData.rowCount() > prevTraceDataSize) {
                         groupedData.appendData();
                     }
-                    groupedDataNew = groupedData.resampleByEqualPointsNumber(groupedPointsInGroupRound);
+
+                    groupedDataNew = groupedData.resampleByEqualPointsNumber(nextPointsInGroup);
                     groupedDataNew.cache();
 
                     // force "lazy" grouping
@@ -465,7 +498,9 @@ public class TraceDataManager {
                     // Very important to clean memory!!!
                     groupedData.disableCaching();
                 } else {
-                    double nextStepInterval = pointsNumberToGroupInterval(groupedData, groupedPointsInGroupRound);
+                    double nextStepInterval = pointsNumberToGroupInterval(groupedData, nextPointsInGroup);
+                    System.out.println(groupInterval.intervalLength() +" next interval "+nextStepInterval);
+
                     groupedDataNew = traceData.resampleByEqualInterval(0, nextStepInterval);
                     groupedDataNew.cache();
                 }
@@ -479,11 +514,9 @@ public class TraceDataManager {
                 }
             }
         }
-
         if (groupedDataNew == null) {
-            groupedDataNew = group(traceData, new NumberGroupInterval(groupInterval));
+            groupedDataNew = group(traceData, groupInterval);
         }
-
         groupedDataList.set(0, groupedDataNew);
         return groupedDataNew;
     }
@@ -537,6 +570,8 @@ public class TraceDataManager {
                 System.out.println("Time interval "+timeGroupInterval.intervalLength());
             } else {
                 groupedData = data.resampleByEqualInterval(0, groupInterval.intervalLength());
+                System.out.println("Number interval "+groupInterval.intervalLength());
+
             }
             groupedData.cache();
         }
@@ -581,15 +616,15 @@ public class TraceDataManager {
     }
 
     private int roundPoints(double points) {
-        if (points < 1 + roundPrecision) {
-            return 1;
+        double roundPrecision = 0.2;
+        if (points < 1 - roundPrecision) {
+            return 0;
         }
-
-        int points_ceil = (int) Math.ceil(points);
-        if (points_ceil - points > 1 - roundPrecision) {
-            points_ceil--;
+        int intPoints = (int) points;
+        if((points - intPoints) > roundPrecision) {
+            intPoints++;
         }
-        return points_ceil;
+        return intPoints;
     }
 
     double getDataAvgStep(ChartData data) {

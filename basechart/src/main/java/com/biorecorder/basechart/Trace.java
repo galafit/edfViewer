@@ -13,12 +13,12 @@ import com.biorecorder.data.sequence.StringSequence;
 public abstract class Trace {
     protected Scale xScale;
     protected Scale[] yScales;
-    protected TraceDataManager dataManager;
+    protected TraceDataManagerNew dataManager;
     protected final int curveCount;
     protected final String[] curveNames;
 
     public Trace(ChartData data) {
-        dataManager = new TraceDataManager(data);
+        dataManager = new TraceDataManagerNew(data);
         curveCount = curveCount(data);
         curveNames = new String[curveCount];
         initiateCurveNames(data);

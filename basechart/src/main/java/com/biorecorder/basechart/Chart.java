@@ -222,6 +222,8 @@ public class Chart {
         if (graphArea == null) {
             graphArea = fullArea;
         }
+
+
         setXStartEnd(graphArea.x, graphArea.width);
         setXMinMax(canvas);
 
@@ -243,6 +245,8 @@ public class Chart {
 
         setYStartEnd(fullArea.y + top, fullArea.height - top - bottom);
         setYMinMax(canvas);
+
+        // recalculate with precise y axis width
         int left = 0;
         int right = 0;
         for (int i = 0; i < yAxisList.size(); i++) {

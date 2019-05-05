@@ -40,9 +40,9 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i <= 250; i++) {
+        for (int i = 0; i <= 2500; i++) {
             list1.add(i);
-            list2.add(i + 50);
+            list2.add(50);
             labels.add("lab_"+i);
         }
 
@@ -70,7 +70,7 @@ public class ChartTest extends JFrame {
         regularData.setColumnName(1, "rg");
 
         XYData noRegularData = new XYData(labels, true);
-        noRegularData.addColumn(list1);
+        noRegularData.addColumn(list2);
         noRegularData.setColumnName(1, "nr");
 
 
@@ -89,7 +89,8 @@ public class ChartTest extends JFrame {
         timeData.addColumn(timeArray);
         timeData.addColumn(list1);
 
-        chart = new Chart(new TimeScale());
+        //chart = new Chart(new TimeScale());
+        chart = new Chart();
 
         //chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addTrace(new LineTrace(timeData), false, true, false);
