@@ -39,14 +39,14 @@ public class #E#ArrayList implements #E#Sequence {
     }
 
     @Override
-    public long size() {
+    public int size() {
         return size;
     }
 
     @Override
-    public #e# get(long index) {
+    public #e# get(int index) {
         rangeCheck(index);
-        return data[(int)index];
+        return data[index];
     }
 
     /**

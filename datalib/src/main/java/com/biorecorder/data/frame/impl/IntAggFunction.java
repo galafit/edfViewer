@@ -2,6 +2,11 @@ package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.sequence.IntSequence;
 
+ /**************************************
+  * This file is automatically created.
+  * DO NOT MODIFY IT!
+  * Edit template file _E_AggFunction.tmpl
+  *************************************/
 
 abstract class  IntAggFunction {
     protected int count;

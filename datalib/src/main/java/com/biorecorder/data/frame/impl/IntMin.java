@@ -2,9 +2,6 @@ package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.sequence.IntSequence;
 
-/**
- * Created by galafit on 6/4/19.
- */
 class IntMin extends IntAggFunction {
     private int min;
 
@@ -14,7 +11,7 @@ class IntMin extends IntAggFunction {
             min = sequence.get(from);
         }
         for (int i = 0; i < length; i++) {
-            min = Math.min(min, sequence.get(from + i));
+            min = (int)Math.min(min, sequence.get(from + i));
         }
         count +=length;
         return count;

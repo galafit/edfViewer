@@ -1,6 +1,6 @@
 package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.#E#Sequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
 /**

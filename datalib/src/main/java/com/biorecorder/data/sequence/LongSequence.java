@@ -5,6 +5,6 @@ package com.biorecorder.data.sequence;
  * that can be accessed but can not be modified
  */
 public interface LongSequence {
-    public long size();
-    public long get(long index);
+    public int size();
+    public long get(int index);
 }

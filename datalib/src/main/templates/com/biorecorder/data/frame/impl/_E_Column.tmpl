@@ -4,6 +4,7 @@ import com.biorecorder.data.frame.*;
 import com.biorecorder.data.frame.Interval;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.#E#Sequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
@@ -38,7 +39,7 @@ public class #E#Column implements Column {
 
     @Override
     public String label(int index) {
-        return Integer.toString(dataSequence.get(index));
+        return #ET#.toString(dataSequence.get(index));
     }
 
     @Override
@@ -85,7 +86,7 @@ public class #E#Column implements Column {
         for (int i = 0; i < length; i++) {
             slicedData[i] = dataSequence.get(from + i);
         }
-        return new #E#Column(new IntSequence() {
+        return new #E#Column(new #E#Sequence() {
             @Override
             public int size() {
                 return slicedData.length;
@@ -168,7 +169,7 @@ public class #E#Column implements Column {
                 Interval currentGroupInterval = intervalProvider.getContaining(dataSequence.get(from));
                 boolean isCurrentGroupEmpty = false;
                 for (int i = from + 1; i < l; i++) {
-                    int data = dataSequence.get(i);
+                    #e# data = dataSequence.get(i);
                     if (!currentGroupInterval.contains(data)) {
                         if(!isCurrentGroupEmpty) {
                             groupIndexesList.add(i);
@@ -282,10 +283,10 @@ public class #E#Column implements Column {
 
         for (int i = 1; i < length; i++) {
             #e# data_i = dataSequence.get(i + from);
-            min1 = Math.min(min1, data_i);
-            max1 = Math.max(max1, data_i);
+            min1 = (#e#)Math.min(min1, data_i);
+            max1 = (#e#)Math.max(max1, data_i);
             if (isIncreasing1 || isDecreasing1) {
-                #e# diff = data_i - dataSequence.get(i + from - 1);
+                #e# diff = (#e#)(data_i - dataSequence.get(i + from - 1));
                 if (isDecreasing1 && diff > 0) {
                     isDecreasing1 = false;
                 }
@@ -295,7 +296,7 @@ public class #E#Column implements Column {
             }
         }
 
-        return new StatsInt(length, min1, max1, isIncreasing1, isDecreasing1);
+        return new Stats#E#(length, min1, max1, isIncreasing1, isDecreasing1);
     }
 
     @Override
@@ -317,9 +318,9 @@ public class #E#Column implements Column {
 
         if (length > stats.count()) {
             Stats#E# statsAdditional = calculateStats(stats.count(), length - stats.count());
-            #e# min = Math.min(stats.getMin(), statsAdditional.getMin());
-            #e# max = Math.max(stats.getMax(), statsAdditional.getMax());
-            #e# diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
+            #e# min = (#e#)Math.min(stats.getMin(), statsAdditional.getMin());
+            #e# max = (#e#)Math.max(stats.getMax(), statsAdditional.getMax());
+            #e# diff = (#e#)(dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1));
             boolean isIncreasing = stats.isIncreasing() && statsAdditional.isIncreasing() && diff >= 0;
             boolean isDecreasing = stats.isDecreasing() && statsAdditional.isDecreasing() && diff <= 0;
             stats = new Stats#E#(length, min, max, isIncreasing, isDecreasing);
@@ -387,25 +388,25 @@ public class #E#Column implements Column {
         @Override
         public Interval getContaining(double value) {
             #e# castedValue = PrimitiveUtils.roundDouble2#e#(value);
-            currentIntervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
+            currentIntervalStart = (#e#) (PrimitiveUtils.round(castedValue / interval) * interval);
             if (currentIntervalStart > value) {
                 currentIntervalStart -= interval;
             }
-            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, (#e#)(currentIntervalStart + interval));
 
         }
 
         @Override
         public Interval getNext() {
             currentIntervalStart += interval;
-            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, (#e#)(currentIntervalStart + interval));
 
         }
 
         @Override
         public Interval getPrevious() {
             currentIntervalStart -= interval;
-            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, (#e#)(currentIntervalStart + interval));
         }
     }
 

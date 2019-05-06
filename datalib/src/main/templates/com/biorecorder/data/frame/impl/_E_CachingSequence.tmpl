@@ -1,7 +1,7 @@
 package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.list.IntArrayList;
-import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.list.#E#ArrayList;
+import com.biorecorder.data.sequence.#E#Sequence;
 
 /**
  * Class is designed to store/cache a computed input data and to give quick access to them.
@@ -23,9 +23,9 @@ public class #E#CachingSequence implements #E#Sequence {
         this.innerData = data;
         int size = innerData.size();
         if(size < REASONABLE_SIZE) {
-            cachedData = new IntArrayList(size);
+            cachedData = new #E#ArrayList(size);
         } else {
-            cachedData = new IntArrayList();
+            cachedData = new #E#ArrayList();
         }
     }
 

@@ -14,10 +14,10 @@ public class FloatArrayList implements FloatSequence {
     private float[] data;
     private int size;
     /**
-     * The maximum rowCount of array to allocate.
+     * The maximum size of array to allocate.
      * Some VMs reserve some header words in an array.
      * Attempts to allocate larger arrays may result in
-     * OutOfMemoryError: Requested array rowCount exceeds VM limit
+     * OutOfMemoryError: Requested array size exceeds VM limit
      */
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -39,14 +39,14 @@ public class FloatArrayList implements FloatSequence {
     }
 
     @Override
-    public long size() {
+    public int size() {
         return size;
     }
 
     @Override
-    public float get(long index) {
+    public float get(int index) {
         rangeCheck(index);
-        return data[(int)index];
+        return data[index];
     }
 
     /**
@@ -134,7 +134,7 @@ public class FloatArrayList implements FloatSequence {
 
     /**
      * Trims the capacity of this array list instance to be the
-     * list's current rowCount.
+     * list's current size.
      */
     public void trimToSize() {
         if ( data.length > size ) {
@@ -156,7 +156,7 @@ public class FloatArrayList implements FloatSequence {
 
                 newCapacity = hugeCapacity(minCapacity);
 
-            // minCapacity is usually close to rowCount, so this is a win:
+            // minCapacity is usually close to size, so this is a win:
             float[] tmp = new float[newCapacity];
             System.arraycopy( data, 0, tmp, 0, data.length );
             data = tmp;

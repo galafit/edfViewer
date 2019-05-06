@@ -3,9 +3,7 @@ package com.biorecorder.data.frame.impl;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
-/**
- * Created by galafit on 9/3/19.
- */
+
 class IntAverage extends IntAggFunction {
     private long sum;
 

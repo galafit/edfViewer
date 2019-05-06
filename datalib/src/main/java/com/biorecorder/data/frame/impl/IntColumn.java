@@ -4,13 +4,17 @@ import com.biorecorder.data.frame.*;
 import com.biorecorder.data.frame.Interval;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
 
-/**
- * Created by galafit on 15/1/19.
- */
+/**************************************
+ * This file is automatically created.
+ * DO NOT MODIFY IT!
+ * Edit template file _E_Column.tmpl
+ *************************************/
+
 public class IntColumn implements Column {
     private IntSequence dataSequence;
     private StatsInt stats;
@@ -22,7 +26,6 @@ public class IntColumn implements Column {
     public int intValue(int index) {
         return dataSequence.get(index);
     }
-
 
     @Override
     public int size() {
@@ -57,7 +60,6 @@ public class IntColumn implements Column {
                 return dataSequence.get(index + from);
             }
         };
-
         return new IntColumn(subSequence);
     }
 
@@ -78,7 +80,7 @@ public class IntColumn implements Column {
     }
 
 
-    @Override
+  @Override
     public Column slice(int from, int length) {
         int[] slicedData = new int[length];
         for (int i = 0; i < length; i++) {
@@ -96,6 +98,7 @@ public class IntColumn implements Column {
             }
         });
     }
+
 
     @Override
     public void cache() {
@@ -135,7 +138,6 @@ public class IntColumn implements Column {
     private IntSequence group(IntervalProvider intervalProvider, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
-
             @Override
             public int size() {
                 update();
@@ -172,6 +174,7 @@ public class IntColumn implements Column {
                         if(!isCurrentGroupEmpty) {
                             groupIndexesList.add(i);
                             currentGroupInterval = intervalProvider.getNext();
+                            isCurrentGroupEmpty = true;
                         } else {
                             currentGroupInterval = intervalProvider.getContaining(data);
                             isCurrentGroupEmpty = false;
@@ -280,10 +283,10 @@ public class IntColumn implements Column {
 
         for (int i = 1; i < length; i++) {
             int data_i = dataSequence.get(i + from);
-            min1 = Math.min(min1, data_i);
-            max1 = Math.max(max1, data_i);
+            min1 = (int)Math.min(min1, data_i);
+            max1 = (int)Math.max(max1, data_i);
             if (isIncreasing1 || isDecreasing1) {
-                int diff = data_i - dataSequence.get(i + from - 1);
+                int diff = (int)(data_i - dataSequence.get(i + from - 1));
                 if (isDecreasing1 && diff > 0) {
                     isDecreasing1 = false;
                 }
@@ -315,9 +318,9 @@ public class IntColumn implements Column {
 
         if (length > stats.count()) {
             StatsInt statsAdditional = calculateStats(stats.count(), length - stats.count());
-            int min = Math.min(stats.getMin(), statsAdditional.getMin());
-            int max = Math.max(stats.getMax(), statsAdditional.getMax());
-            int diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
+            int min = (int)Math.min(stats.getMin(), statsAdditional.getMin());
+            int max = (int)Math.max(stats.getMax(), statsAdditional.getMax());
+            int diff = (int)(dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1));
             boolean isIncreasing = stats.isIncreasing() && statsAdditional.isIncreasing() && diff >= 0;
             boolean isDecreasing = stats.isDecreasing() && statsAdditional.isDecreasing() && diff <= 0;
             stats = new StatsInt(length, min, max, isIncreasing, isDecreasing);
@@ -385,25 +388,25 @@ public class IntColumn implements Column {
         @Override
         public Interval getContaining(double value) {
             int castedValue = PrimitiveUtils.roundDouble2int(value);
-            currentIntervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
+            currentIntervalStart = (int) (PrimitiveUtils.round(castedValue / interval) * interval);
             if (currentIntervalStart > value) {
                 currentIntervalStart -= interval;
             }
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new IntInterval(currentIntervalStart, (int)(currentIntervalStart + interval));
 
         }
 
         @Override
         public Interval getNext() {
             currentIntervalStart += interval;
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new IntInterval(currentIntervalStart, (int)(currentIntervalStart + interval));
 
         }
 
         @Override
         public Interval getPrevious() {
             currentIntervalStart -= interval;
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new IntInterval(currentIntervalStart, (int)(currentIntervalStart + interval));
         }
     }
 

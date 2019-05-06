@@ -11,7 +11,7 @@ class IntMax extends IntAggFunction {
             max = sequence.get(from);
         }
         for (int i = 0; i < length; i++) {
-            max = Math.max(max, sequence.get(from + i));
+            max = (int)Math.max(max, sequence.get(from + i));
         }
         count +=length;
         return count;

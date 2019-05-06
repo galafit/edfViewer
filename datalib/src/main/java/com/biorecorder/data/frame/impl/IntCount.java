@@ -11,6 +11,6 @@ class IntCount extends IntAggFunction {
 
     @Override
     protected int getValue1() {
-        return count;
+        return (int)count;
     }
 }

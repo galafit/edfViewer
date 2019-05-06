@@ -1,3 +1,5 @@
+package com.biorecorder.data.sequence;
+
 import com.biorecorder.data.utils.IntComparator;
 import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.utils.SortAlgorithm;
@@ -62,6 +64,7 @@ public class SequenceUtils {
 #REPLICATED2#
 
 #REPLICATED3#
+}
 
 ====START_REPLICATED_CONTENT #0====
 
@@ -81,7 +84,7 @@ public class SequenceUtils {
         IntComparator comparator = new IntComparator() {
             @Override
             public int compare(int index1, int index2) {
-                return Integer.compare(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
+                return #ET#.compare(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
             }
         };
 
@@ -165,5 +168,4 @@ public class SequenceUtils {
     }
 =====END_REPLICATED_CONTENT #3=====
 
-}
 
