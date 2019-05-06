@@ -28,6 +28,31 @@ public class SequenceUtils {
 /******************************************************************
 *                             SORT
 ******************************************************************/
+   /**
+     * This method do not modifying the order of the underlying data!
+     * It simply returns an array of sorted indexes which represent sorted version (view)
+     * of the data.
+     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., intervalLength - 1
+     */
+    public static int[] sort(StringSequence data, int from, int length, boolean isParallel) {
+        int[] orderedIndexes = new int[length];
+
+        for (int i = 0; i < length; i++) {
+            orderedIndexes[i]  = i + from;
+        }
+
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int index1, int index2) {
+                return data.get(orderedIndexes[index1]).compareTo(data.get(orderedIndexes[index2]));
+            }
+        };
+
+        SortAlgorithm.getDefault(isParallel).sort(0, length, comparator, new ArrSwapper(orderedIndexes));
+
+        return orderedIndexes;
+    }
+
 #REPLICATED0#
 /******************************************************************
 *                         BINARY SEARCH

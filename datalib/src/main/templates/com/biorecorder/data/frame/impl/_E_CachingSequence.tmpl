@@ -8,13 +8,18 @@ import com.biorecorder.data.sequence.IntSequence;
  * Input data could be a filter, function and so on
  */
 
-public class IntCachingSequence implements IntSequence {
+ /**************************************
+  * This file is automatically created.
+  * DO NOT MODIFY IT!
+  * Edit template file _E_CachingSequence.tmpl
+  *************************************/
+public class #E#CachingSequence implements #E#Sequence {
     static final int REASONABLE_SIZE = 3000;
-    private IntSequence innerData;
-    private IntArrayList cachedData;
+    private #E#Sequence innerData;
+    private #E#ArrayList cachedData;
 
 
-    public IntCachingSequence(IntSequence data) {
+    public #E#CachingSequence(#E#Sequence data) {
         this.innerData = data;
         int size = innerData.size();
         if(size < REASONABLE_SIZE) {
@@ -25,7 +30,7 @@ public class IntCachingSequence implements IntSequence {
     }
 
     @Override
-    public int get(int index) {
+    public #e# get(int index) {
         if(index >= cachedData.size()) {
             for (int i = cachedData.size(); i <= index; i++) {
                 cachedData.add(innerData.get(i));
@@ -40,7 +45,7 @@ public class IntCachingSequence implements IntSequence {
         return innerData.size();
     }
 
-    public IntSequence getInnerData() {
+    public #E#Sequence getInnerData() {
         return innerData;
     }
 }

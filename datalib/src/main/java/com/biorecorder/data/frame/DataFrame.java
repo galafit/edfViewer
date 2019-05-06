@@ -23,7 +23,6 @@ public class DataFrame {
         this.isDataAppendMode = isDataAppendMode;
     }
 
-
     public DataFrame(DataFrame dataFrame, int[] columnOrder) throws IllegalArgumentException {
         length = dataFrame.length;
         isDataAppendMode = dataFrame.isDataAppendMode;

@@ -2,18 +2,23 @@ package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.sequence.IntSequence;
 
+ /**************************************
+  * This file is automatically created.
+  * DO NOT MODIFY IT!
+  * Edit template file _E_AggFunction.tmpl
+  *************************************/
 
-abstract class  IntAggFunction {
+abstract class  #E#AggFunction {
     protected int count;
 
-    public abstract int add(IntSequence sequence, int from, int length);
+    public abstract int add(#E#Sequence sequence, int from, int length);
 
     /**
      * get value without checkIfEmpty
      */
-    protected abstract int getValue1();
+    protected abstract #e# getValue1();
 
-    public final int getValue() {
+    public final #e# getValue() {
         checkIfEmpty();
         return getValue1();
     }

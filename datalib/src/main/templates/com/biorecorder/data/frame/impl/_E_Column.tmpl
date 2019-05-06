@@ -8,21 +8,23 @@ import com.biorecorder.data.utils.PrimitiveUtils;
 import com.biorecorder.data.sequence.SequenceUtils;
 
 
-/**
- * Created by galafit on 15/1/19.
- */
-public class IntColumn implements Column {
-    private IntSequence dataSequence;
-    private StatsInt stats;
+/**************************************
+ * This file is automatically created.
+ * DO NOT MODIFY IT!
+ * Edit template file _E_Column.tmpl
+ *************************************/
 
-    public IntColumn(IntSequence data) {
+public class #E#Column implements Column {
+    private #E#Sequence dataSequence;
+    private Stats#E# stats;
+
+    public #E#Column(#E#Sequence data) {
         this.dataSequence = data;
     }
 
-    public int intValue(int index) {
+    public #e# #e#Value(int index) {
         return dataSequence.get(index);
     }
-
 
     @Override
     public int size() {
@@ -46,74 +48,74 @@ public class IntColumn implements Column {
 
     @Override
     public Column view(int from, int length) {
-        IntSequence subSequence = new IntSequence() {
+        #E#Sequence subSequence = new #E#Sequence() {
             @Override
             public int size() {
                 return length;
             }
 
             @Override
-            public int get(int index) {
+            public #e# get(int index) {
                 return dataSequence.get(index + from);
             }
         };
-
-        return new IntColumn(subSequence);
+        return new #E#Column(subSequence);
     }
 
     @Override
     public Column view(int[] order) {
-        IntSequence subSequence = new IntSequence() {
+        #E#Sequence subSequence = new #E#Sequence() {
             @Override
             public int size() {
                 return order.length;
             }
 
             @Override
-            public int get(int index) {
+            public #e# get(int index) {
                 return dataSequence.get(order[index]);
             }
         };
-        return new IntColumn(subSequence);
+        return new #E#Column(subSequence);
     }
 
 
-    @Override
+  @Override
     public Column slice(int from, int length) {
-        int[] slicedData = new int[length];
+        #e#[] slicedData = new #e#[length];
         for (int i = 0; i < length; i++) {
             slicedData[i] = dataSequence.get(from + i);
         }
-        return new IntColumn(new IntSequence() {
+        return new #E#Column(new IntSequence() {
             @Override
             public int size() {
                 return slicedData.length;
             }
 
             @Override
-            public int get(int index) {
+            public #e# get(int index) {
                 return slicedData[index];
             }
         });
     }
 
+
     @Override
     public void cache() {
-        if (!(dataSequence instanceof IntCachingSequence)) {
-            dataSequence = new IntCachingSequence(dataSequence);
+        if (!(dataSequence instanceof #E#CachingSequence)) {
+            dataSequence = new #E#CachingSequence(dataSequence);
         }
     }
 
     @Override
     public void disableCaching() {
-        if (dataSequence instanceof IntCachingSequence) {
-            dataSequence = ((IntCachingSequence) dataSequence).getInnerData();
+        if (dataSequence instanceof #E#CachingSequence) {
+            dataSequence = ((#E#CachingSequence) dataSequence).getInnerData();
         }
     }
 
     @Override
     public int bisect(double value, int from, int length) {
-        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2int(value), from, length);
+        return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2#e#(value), from, length);
     }
 
     @Override
@@ -124,7 +126,7 @@ public class IntColumn implements Column {
 
     @Override
     public IntSequence group(double interval, IntWrapper length) {
-        return group(new IntIntervalProvider(PrimitiveUtils.roundDouble2int(interval)), length);
+        return group(new #E#IntervalProvider(PrimitiveUtils.roundDouble2#e#(interval)), length);
     }
 
     @Override
@@ -135,7 +137,6 @@ public class IntColumn implements Column {
     private IntSequence group(IntervalProvider intervalProvider, IntWrapper length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
-
             @Override
             public int size() {
                 update();
@@ -172,6 +173,7 @@ public class IntColumn implements Column {
                         if(!isCurrentGroupEmpty) {
                             groupIndexesList.add(i);
                             currentGroupInterval = intervalProvider.getNext();
+                            isCurrentGroupEmpty = true;
                         } else {
                             currentGroupInterval = intervalProvider.getContaining(data);
                             isCurrentGroupEmpty = false;
@@ -192,12 +194,12 @@ public class IntColumn implements Column {
      * @return grouping function Object corresponding
      * to the given type of data (IntGroupingAvg, FloatGroupingMin and so on)
      */
-    private IntAggFunction getAggFunction(Aggregation aggregation) {
+    private #E#AggFunction getAggFunction(Aggregation aggregation) {
         // Capitalize the first letter of dataType string
         String type = dataType().toString().substring(0, 1).toUpperCase() + dataType().toString().substring(1);
         String functionClassName = "com.biorecorder.data.frame.impl." + type + aggregation.toString();
         try {
-            return (IntAggFunction) (Class.forName(functionClassName)).newInstance();
+            return (#E#AggFunction) (Class.forName(functionClassName)).newInstance();
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -213,8 +215,8 @@ public class IntColumn implements Column {
 
     @Override
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
-        IntSequence resultantSequence = new IntSequence() {
-            private IntAggFunction aggFunction = getAggFunction(aggregation);
+        #E#Sequence resultantSequence = new #E#Sequence() {
+            private #E#AggFunction aggFunction = getAggFunction(aggregation);
             private int lastIndex = -1;
 
             @Override
@@ -223,7 +225,7 @@ public class IntColumn implements Column {
             }
 
             @Override
-            public int get(int index) {
+            public #e# get(int index) {
                 if (index != lastIndex) {
                     aggFunction = getAggFunction(aggregation);
                     lastIndex = index;
@@ -238,7 +240,7 @@ public class IntColumn implements Column {
                 return aggFunction.getValue();
             }
         };
-        return new IntColumn(resultantSequence);
+        return new #E#Column(resultantSequence);
     }
 
     @Override
@@ -272,18 +274,18 @@ public class IntColumn implements Column {
     }
 
 
-    private StatsInt calculateStats(int from, int length) {
-        int min1 = dataSequence.get(from);
-        int max1 = min1;
+    private Stats#E# calculateStats(int from, int length) {
+        #e# min1 = dataSequence.get(from);
+        #e# max1 = min1;
         boolean isIncreasing1 = true;
         boolean isDecreasing1 = true;
 
         for (int i = 1; i < length; i++) {
-            int data_i = dataSequence.get(i + from);
+            #e# data_i = dataSequence.get(i + from);
             min1 = Math.min(min1, data_i);
             max1 = Math.max(max1, data_i);
             if (isIncreasing1 || isDecreasing1) {
-                int diff = data_i - dataSequence.get(i + from - 1);
+                #e# diff = data_i - dataSequence.get(i + from - 1);
                 if (isDecreasing1 && diff > 0) {
                     isDecreasing1 = false;
                 }
@@ -314,25 +316,25 @@ public class IntColumn implements Column {
         }
 
         if (length > stats.count()) {
-            StatsInt statsAdditional = calculateStats(stats.count(), length - stats.count());
-            int min = Math.min(stats.getMin(), statsAdditional.getMin());
-            int max = Math.max(stats.getMax(), statsAdditional.getMax());
-            int diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
+            Stats#E# statsAdditional = calculateStats(stats.count(), length - stats.count());
+            #e# min = Math.min(stats.getMin(), statsAdditional.getMin());
+            #e# max = Math.max(stats.getMax(), statsAdditional.getMax());
+            #e# diff = dataSequence.get(stats.count) - dataSequence.get(stats.count() - 1);
             boolean isIncreasing = stats.isIncreasing() && statsAdditional.isIncreasing() && diff >= 0;
             boolean isDecreasing = stats.isDecreasing() && statsAdditional.isDecreasing() && diff <= 0;
-            stats = new StatsInt(length, min, max, isIncreasing, isDecreasing);
+            stats = new Stats#E#(length, min, max, isIncreasing, isDecreasing);
         }
         return stats;
     }
 
-    class StatsInt implements Stats {
+    class Stats#E# implements Stats {
         private int count;
-        private final int min;
-        private final int max;
+        private final #e# min;
+        private final #e# max;
         private final boolean isIncreasing;
         private final boolean isDecreasing;
 
-        public StatsInt(int count, int min, int max, boolean isIncreasing, boolean isDecreasing) {
+        public Stats#E#(int count, #e# min, #e# max, boolean isIncreasing, boolean isDecreasing) {
             this.count = count;
             this.min = min;
             this.max = max;
@@ -340,11 +342,11 @@ public class IntColumn implements Column {
             this.isDecreasing = isDecreasing;
         }
 
-        int getMin() {
+        #e# getMin() {
             return min;
         }
 
-        int getMax() {
+        #e# getMax() {
             return max;
         }
 
@@ -373,45 +375,45 @@ public class IntColumn implements Column {
         }
     }
 
-    class IntIntervalProvider implements IntervalProvider {
-        int interval;
-        int currentIntervalStart;
+    class #E#IntervalProvider implements IntervalProvider {
+        #e# interval;
+        #e# currentIntervalStart;
 
-        public IntIntervalProvider(int interval) {
+        public #E#IntervalProvider(#e# interval) {
             this.interval = interval;
             currentIntervalStart = 0;
         }
 
         @Override
         public Interval getContaining(double value) {
-            int castedValue = PrimitiveUtils.roundDouble2int(value);
+            #e# castedValue = PrimitiveUtils.roundDouble2#e#(value);
             currentIntervalStart = PrimitiveUtils.round(castedValue / interval) * interval;
             if (currentIntervalStart > value) {
                 currentIntervalStart -= interval;
             }
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
 
         }
 
         @Override
         public Interval getNext() {
             currentIntervalStart += interval;
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
 
         }
 
         @Override
         public Interval getPrevious() {
             currentIntervalStart -= interval;
-            return new IntInterval(currentIntervalStart, currentIntervalStart + interval);
+            return new #E#Interval(currentIntervalStart, currentIntervalStart + interval);
         }
     }
 
-    class IntInterval implements Interval {
-        private final int start;
-        private final int nextIntervalStart;
+    class #E#Interval implements Interval {
+        private final #e# start;
+        private final #e# nextIntervalStart;
 
-        public IntInterval(int start, int nextIntervalStart) {
+        public #E#Interval(#e# start, #e# nextIntervalStart) {
             this.start = start;
             this.nextIntervalStart = nextIntervalStart;
         }

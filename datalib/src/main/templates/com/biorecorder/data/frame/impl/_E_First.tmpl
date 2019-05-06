@@ -2,11 +2,11 @@ package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.sequence.IntSequence;
 
-class IntFirst extends IntAggFunction {
-    private int first;
+class #E#First extends #E#AggFunction {
+    private #e# first;
 
     @Override
-    public int add(IntSequence sequence, int from, int length) {
+    public int add(#E#Sequence sequence, int from, int length) {
         if(count == 0) {
             first = sequence.get(from);
         }
@@ -15,7 +15,7 @@ class IntFirst extends IntAggFunction {
     }
 
     @Override
-    protected int getValue1() {
+    protected #e# getValue1() {
         return first;
     }
 }
