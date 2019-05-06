@@ -66,6 +66,10 @@ public class TimeIntervalProvider implements IntervalProvider {
         return calendar.getTimeInMillis();
     }
 
+    public int getCurrentIntervalStartHours() {
+        return calendar.get(Calendar.HOUR);
+    }
+
     @Override
     public Interval getContaining(double value) {
         long longValue = (long) value;

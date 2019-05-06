@@ -49,11 +49,11 @@ public class TimeScale extends LinearScale {
 
     class TimeTickProvider implements TickProvider {
         private TimeIntervalProvider timeIntervalProvider;
-        private DateFormat labelFormat;
+        private DateFormatter labelFormat;
 
         public void setTickInterval(double interval) {
             timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(Math.round(interval), true));
-            labelFormat = getDateFormat(timeIntervalProvider.getTimeInterval().getTimeUnit());
+            labelFormat = new DateFormatter(timeIntervalProvider.getTimeInterval().getTimeUnit());
         }
 
         public void setTickIntervalCount(int tickIntervalCount) {
@@ -64,7 +64,7 @@ public class TimeScale extends LinearScale {
             double min = domain[0];
             long interval = Math.round((max - min) / tickIntervalCount);
             timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(interval, true));
-            labelFormat = getDateFormat(timeIntervalProvider.getTimeInterval().getTimeUnit());
+            labelFormat = new DateFormatter(timeIntervalProvider.getTimeInterval().getTimeUnit());
         }
 
         @Override
@@ -76,13 +76,13 @@ public class TimeScale extends LinearScale {
         @Override
         public Tick getNextTick() {
             timeIntervalProvider.getNext();
-            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+            return currentTick();
         }
 
         @Override
         public Tick getPreviousTick() {
             timeIntervalProvider.getPrevious();
-            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+            return currentTick();
         }
 
         @Override
@@ -91,32 +91,63 @@ public class TimeScale extends LinearScale {
             if (timeIntervalProvider.getCurrentIntervalStartMs() < value) {
                 timeIntervalProvider.getNext();
             }
-            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+            return currentTick();
         }
 
         @Override
         public Tick getLowerTick(double value) {
             timeIntervalProvider.getContaining(value);
-            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs()));
+            return currentTick();
         }
 
-        private DateFormat getDateFormat(TimeUnit unit) {
-            switch (unit) {
-                case MILLISECOND:
-                    return new SimpleDateFormat("HH:mm:ss.SSS");
-                case SECOND:
-                    return new SimpleDateFormat("HH:mm:ss");
-                case MINUTE:
-                    return new SimpleDateFormat("HH:mm");
-                case HOUR:
-                    return new SimpleDateFormat("dd. MMM HH:mm");
-                case DAY:
-                    return new SimpleDateFormat("dd. MMM");
-                case WEEK:
-                case MONTH:
-                    return new SimpleDateFormat("MMM'' yy");
-                default:
-                    return new SimpleDateFormat("yyyy");
+        private Tick currentTick() {
+            return new Tick(timeIntervalProvider.getCurrentIntervalStartMs(), labelFormat.format(timeIntervalProvider.getCurrentIntervalStartMs(), timeIntervalProvider.getCurrentIntervalStartHours()));
+        }
+
+        class DateFormatter {
+            private final SimpleDateFormat primaryFormat;
+            private final SimpleDateFormat secondaryFormat;
+
+            public DateFormatter(TimeUnit timeUnit) {
+                switch (timeUnit) {
+                    case MILLISECOND:
+                        primaryFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+                        secondaryFormat = primaryFormat;
+                        break;
+                    case SECOND:
+                        primaryFormat = new SimpleDateFormat("HH:mm:ss");
+                        secondaryFormat = primaryFormat;
+                        break;
+                    case MINUTE:
+                        primaryFormat = new SimpleDateFormat("HH:mm");
+                        secondaryFormat = primaryFormat;
+                        break;
+                    case HOUR:
+                        primaryFormat = new SimpleDateFormat("HH:mm");
+                        secondaryFormat = new SimpleDateFormat("dd. MMM");
+                        break;
+                    case DAY:
+                        primaryFormat =  new SimpleDateFormat("dd. MMM");
+                        secondaryFormat = primaryFormat;
+                        break;
+                    case WEEK:
+                    case MONTH:
+                        primaryFormat =  new SimpleDateFormat("MMM'' yy");
+                        secondaryFormat = primaryFormat;
+                        break;
+                    default:
+                        primaryFormat =  new SimpleDateFormat("yyyy");
+                        secondaryFormat = primaryFormat;
+                }
+
+            }
+
+            public String format(long ms, long hour) {
+                if(hour == 0) {
+                    return secondaryFormat.format(ms);
+                } else {
+                    return primaryFormat.format(ms);
+                }
             }
         }
     }
