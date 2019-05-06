@@ -22,15 +22,21 @@ public class DataProcessingConfig {
     // used  when groupingIntervals are not specified (null)
     private int groupingStep = 2;
 
-    // if defined (not null) group intervals will be taken only from that array,
+    // if group intervals are defined (not null)
+    // then intervals for grouping will be taken only from that array,
     // otherwise every time "the best group interval" will be calculated automatically
     private double[] groupingIntervals = null;
+
     // if groupingIntervals are specified (not null) and isGroupingForced = true
     // then grouping will be done in any case
     private boolean isGroupingForced = false;
 
     // group all data or only visible ones
     private boolean isGroupAll = false;
+
+    // if true then fully grouped (groupAll) data will be saved
+    // for all specified intervals
+    private boolean isSavingGroupedDataEnabled = false;
 
     public DataProcessingConfig() {
     }
@@ -48,6 +54,7 @@ public class DataProcessingConfig {
         isGroupingForced = config.isGroupingForced;
         groupingStep = config.groupingStep;
         isGroupAll = config.isGroupAll;
+        isSavingGroupedDataEnabled = config.isSavingGroupedDataEnabled;
         isCroppedDataCachingEnabled = config.isCroppedDataCachingEnabled;
         if(config.groupingIntervals != null) {
             groupingIntervals = new double[config.groupingIntervals.length];
@@ -55,6 +62,14 @@ public class DataProcessingConfig {
                 groupingIntervals[i] = config.groupingIntervals[i];
             }
         }
+    }
+
+    public boolean isSavingGroupedDataEnabled() {
+        return isSavingGroupedDataEnabled;
+    }
+
+    public void setSavingGroupedDataEnabled(boolean savingGroupedDataEnabled) {
+        isSavingGroupedDataEnabled = savingGroupedDataEnabled;
     }
 
     public boolean isCroppedDataCachingEnabled() {
