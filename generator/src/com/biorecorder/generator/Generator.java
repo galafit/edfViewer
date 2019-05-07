@@ -205,9 +205,27 @@ public class Generator {
         }
     }
 
+    private static String getFileExtension(File file) {
+        String extension = "";
+
+        try {
+            if (file != null && file.exists()) {
+                String name = file.getName();
+                extension = name.substring(name.lastIndexOf("."));
+            }
+        } catch (Exception e) {
+            extension = "";
+        }
+
+        return extension;
+    }
+
 
     private static void processFile(File input_file, File output_directory)
             throws IOException {
+        if(!getFileExtension(input_file).equals(FILE_EXTENTION)) {
+            return;
+        }
 
         System.out.println("Process file: " + input_file);
 
