@@ -13,7 +13,7 @@ import com.biorecorder.data.sequence.IntSequence;
   * DO NOT MODIFY IT!
   * Edit template file _E_CachingSequence.tmpl
   *************************************/
-public class IntCachingSequence implements IntSequence {
+class IntCachingSequence implements IntSequence {
     static final int REASONABLE_SIZE = 3000;
     private IntSequence innerData;
     private IntArrayList cachedData;

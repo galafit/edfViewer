@@ -13,7 +13,7 @@ import com.biorecorder.data.sequence.DoubleSequence;
   * DO NOT MODIFY IT!
   * Edit template file _E_CachingSequence.tmpl
   *************************************/
-public class DoubleCachingSequence implements DoubleSequence {
+class DoubleCachingSequence implements DoubleSequence {
     static final int REASONABLE_SIZE = 3000;
     private DoubleSequence innerData;
     private DoubleArrayList cachedData;

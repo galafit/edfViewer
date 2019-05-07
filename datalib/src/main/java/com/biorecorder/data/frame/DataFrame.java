@@ -1,6 +1,6 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.data.frame.impl.IntColumn;
+import com.biorecorder.data.frame.impl.ColumnFactory;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.StringSequence;
@@ -79,7 +79,7 @@ public class DataFrame {
     }
 
     public void addColumn(IntSequence data) {
-        addColumn(new IntColumn(data));
+        addColumn(ColumnFactory.createColumn(data));
     }
 
     public void addColumn(double start, double step) {

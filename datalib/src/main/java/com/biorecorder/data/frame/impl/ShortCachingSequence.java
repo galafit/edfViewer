@@ -13,7 +13,7 @@ import com.biorecorder.data.sequence.ShortSequence;
   * DO NOT MODIFY IT!
   * Edit template file _E_CachingSequence.tmpl
   *************************************/
-public class ShortCachingSequence implements ShortSequence {
+class ShortCachingSequence implements ShortSequence {
     static final int REASONABLE_SIZE = 3000;
     private ShortSequence innerData;
     private ShortArrayList cachedData;

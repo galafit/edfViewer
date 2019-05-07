@@ -13,7 +13,7 @@ import com.biorecorder.data.sequence.LongSequence;
   * DO NOT MODIFY IT!
   * Edit template file _E_CachingSequence.tmpl
   *************************************/
-public class LongCachingSequence implements LongSequence {
+class LongCachingSequence implements LongSequence {
     static final int REASONABLE_SIZE = 3000;
     private LongSequence innerData;
     private LongArrayList cachedData;

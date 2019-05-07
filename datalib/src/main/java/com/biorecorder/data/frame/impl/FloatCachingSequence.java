@@ -13,7 +13,7 @@ import com.biorecorder.data.sequence.FloatSequence;
   * DO NOT MODIFY IT!
   * Edit template file _E_CachingSequence.tmpl
   *************************************/
-public class FloatCachingSequence implements FloatSequence {
+class FloatCachingSequence implements FloatSequence {
     static final int REASONABLE_SIZE = 3000;
     private FloatSequence innerData;
     private FloatArrayList cachedData;
