@@ -1,73 +1,48 @@
 package com.biorecorder.data.frame;
 
-
-import com.biorecorder.data.frame.impl.IntColumn;
+import com.biorecorder.data.frame.impl.LongColumn;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.LongSequence;
 
 /**
- * Created by galafit on 20/1/19.
+ * Created by galafit on 7/5/19.
  */
-public class RegularColumn extends IntColumn {
-    private static final int MAX_SIZE = Integer.MAX_VALUE - 100;
-    private double startValue;
-    private double step;
+public class LongRegularColumn extends LongColumn {
+    private static final int MAX_SIZE = Integer.MAX_VALUE - 10;
+    private long startValue;
+    private long step;
     private int size;
-    private boolean isInt;
 
-    public RegularColumn(double startValue, double step) {
+    public LongRegularColumn(long startValue, long step) {
         this(startValue, step, MAX_SIZE);
     }
 
-    public RegularColumn(double startValue, double step, int size) {
-        super(new IntSequence() {
+    public LongRegularColumn(long startValue, long step, int size) {
+        super(new LongSequence() {
             @Override
             public int size() {
                 return size;
             }
 
             @Override
-            public int get(int index) {
-                return (int)(startValue + step * index);
+            public long get(int index) {
+                return startValue + step * index;
             }
         });
         this.startValue = startValue;
         this.step = step;
         this.size = size;
-        if((long) startValue == startValue && (long) step == step) {
-            isInt = true;
-        }
     }
 
-    public double getStartValue() {
-        return startValue;
-    }
-
-    public double getStep() {
-        return step;
-    }
-
-    @Override
-    public int size() {
-        return size;
-    }
-
-    @Override
-    public double value(int index) {
-        return startValue + step * index;
-    }
 
     @Override
     public String label(int index) {
-        if(isInt) {
-            return Long.toString((long)value(index));
-        } else {
-           return Double.toString(value(index));
-        }
+        return Long.toString(longValue(index));
     }
 
     @Override
     public DataType dataType() {
-        return DataType.DOUBLE;
+        return DataType.Long;
     }
 
     @Override
@@ -120,12 +95,12 @@ public class RegularColumn extends IntColumn {
 
     @Override
     public Column slice(int from, int length) {
-        return new RegularColumn(value(from), step, length);
+        return new LongRegularColumn(longValue(from), step, length);
     }
 
     @Override
     public Column view(int from, int length) {
-        return new RegularColumn(value(from), step, length);
+        return new LongRegularColumn(longValue(from), step, length);
     }
 
     @Override
@@ -134,30 +109,30 @@ public class RegularColumn extends IntColumn {
         switch (aggregation) {
             case MIN:
             case FIRST: {
-                double startNew = startValue;
-                double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                long startNew = startValue;
+                long stepNew = step * points;
+                return new LongRegularColumn(startNew, stepNew, sizeNew);
             }
             case MAX:
             case LAST: {
-                double startNew = startValue + step * points;
-                double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                long startNew = startValue + step * points;
+                long stepNew = step * points;
+                return new LongRegularColumn(startNew, stepNew, sizeNew);
             }
             case COUNT: {
-                double startNew = points;
-                double stepNew = 0;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                long startNew = points;
+                long stepNew = 0;
+                return new LongRegularColumn(startNew, stepNew, sizeNew);
             }
             case SUM:{
-                double startNew = sum(0, points);
-                double stepNew = step * points * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                long startNew = sum(0, points);
+                long stepNew = step * points * points;
+                return new LongRegularColumn(startNew, stepNew, sizeNew);
             }
             case AVERAGE:{
-                double startNew = avg(0, points);
-                double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                long startNew = avg(0, points);
+                long stepNew = step * points;
+                return new LongRegularColumn(startNew, stepNew, sizeNew);
             }
             default:
                 String errMsg = "Unsupported Aggregate function: "+ aggregation;
@@ -170,75 +145,75 @@ public class RegularColumn extends IntColumn {
         switch (aggregateFunction) {
             case MIN:
             case FIRST: {
-                IntSequence resultantSequence = new IntSequence() {
+                LongSequence resultantSequence = new LongSequence() {
                     @Override
                     public int size() {
-                       return groupsCount(groupIndexes, isDataAppendMode);
+                        return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
-                    public int get(int index) {
-                        return (int)value(groupIndexes.get(index));
+                    public long get(int index) {
+                        return longValue(groupIndexes.get(index));
                     }
                 };
-                return new IntColumn(resultantSequence);
+                return new LongColumn(resultantSequence);
             }
             case MAX:
             case LAST: {
-                IntSequence resultantSequence = new IntSequence() {
+                LongSequence resultantSequence = new LongSequence() {
                     @Override
                     public int size() {
                         return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
-                    public int get(int index) {
-                        return (int)value(groupIndexes.get(index + 1) - 1);
+                    public long get(int index) {
+                        return longValue(groupIndexes.get(index + 1) - 1);
                     }
                 };
-                return new IntColumn(resultantSequence);
+                return new LongColumn(resultantSequence);
             }
             case COUNT: {
-                IntSequence resultantSequence = new IntSequence() {
+                LongSequence resultantSequence = new LongSequence() {
                     @Override
                     public int size() {
                         return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
-                    public int get(int index) {
+                    public long get(int index) {
                         return groupIndexes.get(index + 1) - groupIndexes.get(index);
                     }
                 };
-                return new IntColumn(resultantSequence);
+                return new LongColumn(resultantSequence);
             }
             case SUM: {
-                IntSequence resultantSequence = new IntSequence() {
+                LongSequence resultantSequence = new LongSequence() {
                     @Override
                     public int size() {
                         return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
-                    public int get(int index) {
-                        return (int)sum(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    public long get(int index) {
+                        return sum(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
                     }
                 };
-                return new IntColumn(resultantSequence);
+                return new LongColumn(resultantSequence);
             }
             case AVERAGE: {
-                IntSequence resultantSequence = new IntSequence() {
+                LongSequence resultantSequence = new LongSequence() {
                     @Override
                     public int size() {
                         return groupsCount(groupIndexes, isDataAppendMode);
                     }
 
                     @Override
-                    public int get(int index) {
-                        return (int)avg(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
+                    public long get(int index) {
+                        return avg(groupIndexes.get(index), groupIndexes.get(index + 1) - groupIndexes.get(index));
                     }
                 };
-                return new IntColumn(resultantSequence);
+                return new LongColumn(resultantSequence);
             }
             default:
                 String errMsg = "Unsupported Aggregate function: "+aggregateFunction;
@@ -246,11 +221,11 @@ public class RegularColumn extends IntColumn {
         }
     }
 
-    private double sum(int from, int length) {
-        return (value(from) + value(from + length - 1)) * length / 2;
+    private long sum(int from, int length) {
+        return (longValue(from) + longValue(from + length - 1)) * length / 2;
     }
 
-    private double avg(int from, int length) {
+    private long avg(int from, int length) {
         return sum(from, length) / length;
     }
 

@@ -160,31 +160,6 @@ public class SequenceUtils {
     }
 
 
-    /**
-     * This method do not modifying the order of the underlying data!
-     * It simply returns an array of sorted indexes which represent sorted version (view)
-     * of the data.
-     * @return array of sorted indexes. So that data.get(sorted[i]) will be sorted for i = 0, 1,..., length - 1
-     */
-    public static int[] sort(ByteSequence data, int from, int length, boolean isParallel) {
-        int[] orderedIndexes = new int[length];
-
-        for (int i = 0; i < length; i++) {
-            orderedIndexes[i]  = i + from;
-        }
-
-        IntComparator comparator = new IntComparator() {
-            @Override
-            public int compare(int index1, int index2) {
-                return Byte.compare(data.get(orderedIndexes[index1]), data.get(orderedIndexes[index2]));
-            }
-        };
-
-        SortAlgorithm.getDefault(isParallel).sort(0, length, comparator, new ArrSwapper(orderedIndexes));
-
-        return orderedIndexes;
-    }
-
 
     /**
      * This method do not modifying the order of the underlying data!
@@ -313,30 +288,6 @@ public class SequenceUtils {
         return low;  // key not found.
     }
 
-    /**
-     * Binary search algorithm. The sequence must be sorted!
-     * Find the index of the <b>value</b>. If data sequence contains
-     * multiple elements equal to the searched <b>value</b>, there is no guarantee which
-     * one will be found. If there is no element equal to the searched value function returns
-     * the insertion point for <b>value</b> in the data sequence to maintain sorted order
-     * (i.e. index of any element that is equal the searched value or
-     * index of the first element which is bigger than the searched value.
-     */
-    public static int bisect(ByteSequence data, byte value, int fromIndex, int length) {
-        int low = fromIndex;
-        int high = fromIndex + length;
-        while (low < high) {
-            int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (Byte.compare(value, data.get(mid)) > 0) {
-                low = mid + 1;
-            } else if (Byte.compare(value, data.get(mid)) < 0) {
-                high = mid;
-            } else { //  Values are equal but for float and double additional checks is needed
-                return mid; // Key found
-            }
-        }
-        return low;  // key not found.
-    }
 
     /**
      * Binary search algorithm. The sequence must be sorted!
@@ -447,26 +398,6 @@ public class SequenceUtils {
         return low;
     }
 
-    /**
-     * Binary search algorithm. The sequence must be sorted!
-     * Finds the insertion point for <b>value</b> in the data sequence to maintain sorted order.
-     * If <b>value</b> is already present in data sequence, the insertion point
-     * will be BEFORE (to the left of) any existing entries.
-     * Returns index such that: data.get(index - 1) < value <= data.get(index)
-     */
-    public static int bisectLeft(ByteSequence data, byte value, int from, int length) {
-        int low = from;
-        int high = from + length;
-        while (low < high) {
-            final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (Byte.compare(value, data.get(mid)) <= 0) {
-                high = mid;
-            } else {
-                low = mid + 1;
-            }
-        }
-        return low;
-    }
 
     /**
      * Binary search algorithm. The sequence must be sorted!
@@ -577,27 +508,6 @@ public class SequenceUtils {
         return low;
     }
 
-    /**
-     * Binary search algorithm. The sequence must be sorted!
-     * Finds the insertion point for <b>value</b> in the data sequence to maintain sorted order.
-     * If <b>value</b> is already present in data sequence, the insertion point
-     * will be AFTER (to the right of) any existing entries.
-     * Returns index such that: data.get(index - 1) <= value < data.get(index)
-     */
-    public static int bisectRight(ByteSequence data, byte value, int from, int length) {
-        int low = from;
-        int high = from + length;
-        while (low < high) {
-            final int mid = (low + high) >>> 1; // the same as (low + high) / 2
-            if (Byte.compare(value, data.get(mid)) >= 0) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
-        }
-
-        return low;
-    }
 
     /**
      * Binary search algorithm. The sequence must be sorted!

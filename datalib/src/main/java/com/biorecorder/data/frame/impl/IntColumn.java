@@ -44,7 +44,7 @@ public class IntColumn implements Column {
 
     @Override
     public DataType dataType() {
-        return DataType.INT;
+        return DataType.Integer;
     }
 
     @Override

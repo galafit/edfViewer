@@ -83,11 +83,11 @@ public class DataFrame {
     }
 
     public void addColumn(double start, double step) {
-        addColumn(new RegularColumn(start, step));
+        addColumn(new DoubleRegularColumn(start, step));
     }
 
     public void addColumn(double start, double step, int size) {
-        addColumn(new RegularColumn(start, step, size));
+        addColumn(new DoubleRegularColumn(start, step, size));
     }
 
     public void addColumn(int[] data) {
@@ -178,7 +178,7 @@ public class DataFrame {
     }
 
     public boolean isColumnRegular(int columnNumber) {
-        return columns.get(columnNumber) instanceof RegularColumn;
+        return columns.get(columnNumber) instanceof DoubleRegularColumn;
     }
 
     public boolean isColumnFunction(int columnNumber) {

@@ -1,25 +1,26 @@
 package com.biorecorder.data.frame;
 
-import com.biorecorder.data.frame.impl.IntColumn;
+import com.biorecorder.data.frame.impl.LongColumn;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.SequenceUtils;
 import com.biorecorder.data.sequence.StringSequence;
+import com.biorecorder.data.utils.PrimitiveUtils;
 
 /**
  * Created by galafit on 26/4/19.
  */
 public class StringColumn implements Column {
-    IntColumn intColumn;
+    LongColumn intColumn;
     private StringSequence labelSequence;
 
-    public StringColumn(IntColumn intColumn, StringSequence labelSequence) {
+    public StringColumn(LongColumn intColumn, StringSequence labelSequence) {
         this.intColumn = intColumn;
         this.labelSequence = labelSequence;
     }
 
     public StringColumn(StringSequence labelSequence) {
         this.labelSequence = labelSequence;
-        intColumn = new RegularColumn(0, 1);
+        intColumn = new LongRegularColumn(0, 1);
     }
 
     public StringSequence getLabels() {
@@ -38,7 +39,7 @@ public class StringColumn implements Column {
 
     @Override
     public String label(int index) {
-        int labelIndex = intColumn.intValue(index);
+        int labelIndex = PrimitiveUtils.long2int(intColumn.longValue(index));
         if(labelIndex >= 0 && labelIndex < labelSequence.size()) {
             return labelSequence.get(labelIndex);
         }
@@ -47,7 +48,7 @@ public class StringColumn implements Column {
 
     @Override
     public DataType dataType() {
-        return DataType.STRING;
+        return DataType.String;
     }
 
     @Override
@@ -57,12 +58,12 @@ public class StringColumn implements Column {
 
     @Override
     public Column slice(int from, int length) {
-        return new StringColumn((IntColumn) intColumn.slice(from, length), labelSequence);
+        return new StringColumn((LongColumn) intColumn.slice(from, length), labelSequence);
     }
 
     @Override
     public Column view(int from, int length) {
-        return new StringColumn((IntColumn) intColumn.view(from, length), labelSequence);
+        return new StringColumn((LongColumn) intColumn.view(from, length), labelSequence);
     }
 
     @Override
@@ -115,11 +116,11 @@ public class StringColumn implements Column {
 
     @Override
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
-        return new StringColumn((IntColumn) intColumn.resample(aggregation, groupIndexes, isDataAppendMode), labelSequence);
+        return new StringColumn((LongColumn) intColumn.resample(aggregation, groupIndexes, isDataAppendMode), labelSequence);
     }
 
     @Override
     public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) {
-        return new StringColumn((IntColumn) intColumn.resample(aggregation, points, length, isDataAppendMode), labelSequence);
+        return new StringColumn((LongColumn) intColumn.resample(aggregation, points, length, isDataAppendMode), labelSequence);
     }
 }
