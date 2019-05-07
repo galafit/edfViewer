@@ -211,7 +211,7 @@ public class Generator {
         try {
             if (file != null && file.exists()) {
                 String name = file.getName();
-                extension = name.substring(name.lastIndexOf("."));
+                extension = name.substring(name.lastIndexOf(".") + 1);
             }
         } catch (Exception e) {
             extension = "";
@@ -442,8 +442,8 @@ public class Generator {
 
 
         // Now determine if it should be moved to the final location
-        final boolean need_to_move;
-        if (output_file.exists()) {
+        final boolean need_to_move = true;
+        /*if (output_file.exists()) {
             boolean matches;
             try {
                 MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -460,7 +460,7 @@ public class Generator {
             }
 
             need_to_move = !matches;
-        } else need_to_move = true;
+        } else need_to_move = true;*/
 
 
         // Now move it if we need to move it
