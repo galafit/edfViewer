@@ -34,15 +34,9 @@ public class LongRegularColumn extends LongColumn {
         this.size = size;
     }
 
-
     @Override
-    public String label(int index) {
-        return Long.toString(longValue(index));
-    }
-
-    @Override
-    public DataType dataType() {
-        return DataType.Long;
+    public boolean isRegular() {
+        return true;
     }
 
     @Override

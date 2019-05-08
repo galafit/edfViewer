@@ -36,13 +36,8 @@ class DoubleRegularColumn extends DoubleColumn {
     }
 
     @Override
-    public String label(int index) {
-        return Double.toString(value(index));
-    }
-
-    @Override
-    public DataType dataType() {
-        return DataType.Double;
+    public boolean isRegular() {
+        return true;
     }
 
     @Override

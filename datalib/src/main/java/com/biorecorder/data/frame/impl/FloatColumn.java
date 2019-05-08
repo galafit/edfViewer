@@ -48,6 +48,11 @@ class FloatColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         FloatSequence subSequence = new FloatSequence() {
             @Override

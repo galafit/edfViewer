@@ -48,6 +48,11 @@ class ShortColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         ShortSequence subSequence = new ShortSequence() {
             @Override

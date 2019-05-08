@@ -219,7 +219,7 @@ public class DataFrame {
     }
 
     public boolean isColumnRegular(int columnNumber) {
-        return false; //columns.get(columnNumber) instanceof DoubleRegularColumn;
+        return columns.get(columnNumber).isRegular();
     }
 
     public boolean isColumnFunction(int columnNumber) {

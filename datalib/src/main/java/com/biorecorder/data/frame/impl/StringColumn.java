@@ -28,6 +28,11 @@ public class StringColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public int size() {
         return Math.min(intColumn.size(), labelSequence.size());
     }

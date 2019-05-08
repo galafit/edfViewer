@@ -48,6 +48,11 @@ class DoubleColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         DoubleSequence subSequence = new DoubleSequence() {
             @Override

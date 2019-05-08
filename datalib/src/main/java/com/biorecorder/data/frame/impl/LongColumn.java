@@ -48,6 +48,11 @@ class LongColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         LongSequence subSequence = new LongSequence() {
             @Override

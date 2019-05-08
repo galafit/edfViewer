@@ -14,6 +14,8 @@ public interface Column {
 
     DataType dataType();
 
+    boolean isRegular();
+
     /**
      * Returns a sorted version of the column without modifying the order
      * of the underlying data.

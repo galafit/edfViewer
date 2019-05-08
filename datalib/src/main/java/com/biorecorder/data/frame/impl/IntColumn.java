@@ -48,6 +48,11 @@ class IntColumn implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         IntSequence subSequence = new IntSequence() {
             @Override
