@@ -15,7 +15,7 @@ import com.biorecorder.data.sequence.SequenceUtils;
  * Edit template file _E_Column.tmpl
  *************************************/
 
-public class IntColumn implements Column {
+class IntColumn implements Column {
     private IntSequence dataSequence;
     private StatsInt stats;
 

@@ -1,6 +1,7 @@
 package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.frame.Column;
+import com.biorecorder.data.frame.Function;
 import com.biorecorder.data.sequence.*;
 
 /**
@@ -22,4 +23,20 @@ public class ColumnFactory {
     public static Column createColumn(DoubleSequence data) {
         return new DoubleColumn(data);
     }
+    public static Column createColumn(StringSequence data) {
+        return new StringColumn(data);
+    }
+
+    public static Column createColumn(double start, double step) {
+        return new DoubleRegularColumn(start, step);
+    }
+
+    public static Column createColumn(double start, double step, int size) {
+        return new DoubleRegularColumn(start, step, size);
+    }
+
+    public static Column createColumn(Function function, Column argColumn) {
+        return new FunctionColumn(function, argColumn);
+    }
+
 }

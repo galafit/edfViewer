@@ -3,6 +3,7 @@ package com.biorecorder.data.frame;
 import com.biorecorder.data.frame.impl.ColumnFactory;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.LongSequence;
 import com.biorecorder.data.sequence.StringSequence;
 
 import java.util.*;
@@ -17,6 +18,8 @@ public class DataFrame {
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<Aggregation[]> columnAggFunctions = new ArrayList<>();
+    private Map<Integer, FunctionColumnInfo> functionColumnToInfo = new HashMap<>();
+
     boolean isDataAppendMode = true;
 
     public DataFrame(boolean isDataAppendMode) {
@@ -26,44 +29,57 @@ public class DataFrame {
     public DataFrame(DataFrame dataFrame, int[] columnOrder) throws IllegalArgumentException {
         length = dataFrame.length;
         isDataAppendMode = dataFrame.isDataAppendMode;
-        for (int i : columnOrder) {
-            Column columnToAdd = dataFrame.columns.get(i);
-            if(columnToAdd instanceof FunctionColumn) {
-                // check that columnOrder containsInt the column used by this one
-                boolean isArgColumnPresent = false;
+        for (int i = 0; i < columnOrder.length; i++) {
+            int originalColumnNumber = columnOrder[i];
+            Column columnToAdd = dataFrame.columns.get(originalColumnNumber);
+            FunctionColumnInfo functionColumnInfo = dataFrame.functionColumnToInfo.get(originalColumnNumber);
+            if(functionColumnInfo != null) {
+                // check that columnOrder contains the column used by this one
+                int argColumnNumber = -1;
                 for (int j = 0; j < columnOrder.length; j++) {
-                    if (((FunctionColumn)columnToAdd).getArgColumn() == dataFrame.columns.get(columnOrder[j])) {
-                        isArgColumnPresent = true;
+                    if (functionColumnInfo.argColumnNumber == columnOrder[j]) {
+                        argColumnNumber = j;
                         break;
                     }
                 }
-                if(!isArgColumnPresent) {
-                    String errMsg = "Column: " + i + " can not be added because it depends upon column that is not presented in the given columnOrder";
+                if(argColumnNumber < 0) {
+                    String errMsg = "Column: " + originalColumnNumber +
+                            " can not be added because it depends upon column that is not presented in the given columnOrder";
                     throw new IllegalArgumentException(errMsg);
                 }
+                functionColumnToInfo.put(i, new FunctionColumnInfo(functionColumnInfo.function, argColumnNumber));
             }
-
             columns.add(columnToAdd);
-            columnNames.add(dataFrame.columnNames.get(i));
-            columnAggFunctions.add(dataFrame.columnAggFunctions.get(i));
+            columnNames.add(dataFrame.columnNames.get(originalColumnNumber));
+            columnAggFunctions.add(dataFrame.columnAggFunctions.get(originalColumnNumber));
         }
     }
 
     public void removeColumn(int columnNumber) throws IllegalArgumentException {
-        Column columnToRemove = columns.get(columnNumber);
-        for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            if(column instanceof FunctionColumn) {
-                if(((FunctionColumn) column).getArgColumn() == columnToRemove) {
-                    String errMsg = "Column: " + columnNumber + " is used by function column: " + i + " and can not be removed";
-                    throw new IllegalArgumentException(errMsg);
-                }
+        for (Integer key : functionColumnToInfo.keySet()) {
+            FunctionColumnInfo functionColumnInfo = functionColumnToInfo.get(key);
+            if(functionColumnInfo.argColumnNumber == columnNumber) {
+                String errMsg = "Column: " + columnNumber + " is used by function column: " + key + " and can not be removed";
+                throw new IllegalArgumentException(errMsg);
             }
+        }
+        if(functionColumnToInfo.get(columnNumber) != null) {
+           functionColumnToInfo.remove(columnNumber);
         }
         columns.remove(columnNumber);
         columnNames.remove(columnNumber);
         columnAggFunctions.remove(columnNumber);
         appendData();
+    }
+
+    class FunctionColumnInfo {
+        private final Function function;
+        private final int argColumnNumber;
+
+        public FunctionColumnInfo(Function function, int argColumnNumber) {
+            this.function = function;
+            this.argColumnNumber = argColumnNumber;
+        }
     }
 
     private void addColumn(Column column) {
@@ -75,19 +91,26 @@ public class DataFrame {
     }
 
     public void addColumn(Function function, int argColumnNumber) {
-        addColumn(new FunctionColumn(function, columns.get(argColumnNumber)));
+        for (Integer key : functionColumnToInfo.keySet()) {
+            if(key == argColumnNumber) {
+                String errMsg = "Column: " +  argColumnNumber + " is a function column and can not be used as argument for another function column";
+                throw new IllegalArgumentException(errMsg);
+            }
+        }
+        functionColumnToInfo.put(columns.size(), new FunctionColumnInfo(function, argColumnNumber));
+        addColumn(ColumnFactory.createColumn(function, columns.get(argColumnNumber)));
+    }
+
+    public void addColumn(double start, double step) {
+        addColumn(ColumnFactory.createColumn(start, step));
+    }
+
+    public void addColumn(double start, double step, int size) {
+        addColumn(ColumnFactory.createColumn(start, step, size));
     }
 
     public void addColumn(IntSequence data) {
         addColumn(ColumnFactory.createColumn(data));
-    }
-
-    public void addColumn(double start, double step) {
-        addColumn(new DoubleRegularColumn(start, step));
-    }
-
-    public void addColumn(double start, double step, int size) {
-        addColumn(new DoubleRegularColumn(start, step, size));
     }
 
     public void addColumn(int[] data) {
@@ -104,8 +127,26 @@ public class DataFrame {
         });
     }
 
+    public void addColumn(LongSequence data) {
+        addColumn(ColumnFactory.createColumn(data));
+    }
+
+    public void addColumn(long[] data) {
+        addColumn(new LongSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public long get(int index) {
+                return data[index];
+            }
+        });
+    }
+
     public void addColumn(StringSequence data) {
-        addColumn(new StringColumn(data));
+        addColumn(ColumnFactory.createColumn(data));
     }
 
     public  void addColumn(List<String> data) {
@@ -178,11 +219,11 @@ public class DataFrame {
     }
 
     public boolean isColumnRegular(int columnNumber) {
-        return columns.get(columnNumber) instanceof DoubleRegularColumn;
+        return false; //columns.get(columnNumber) instanceof DoubleRegularColumn;
     }
 
     public boolean isColumnFunction(int columnNumber) {
-        return columns.get(columnNumber) instanceof FunctionColumn;
+        return functionColumnToInfo.get(columnNumber) != null;
     }
 
     /**
@@ -240,66 +281,38 @@ public class DataFrame {
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
+        for (Integer key : functionColumnToInfo.keySet()) {
+            resultantFrame.functionColumnToInfo.put(key, functionColumnToInfo.get(key));
+        }
         resultantFrame.appendData();
         return resultantFrame;
     }
 
     public DataFrame view(int fromRowNumber, int length) {
         DataFrame resultantFrame = new DataFrame(false);
-        List<Integer> functionColumns = new ArrayList<>();
-        // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            if(column instanceof FunctionColumn) {
-                functionColumns.add(i);
-                resultantFrame.columns.add(null);
-            } else {
-                resultantFrame.columns.add(column.view(fromRowNumber, length));
-            }
+            resultantFrame.columns.add(column.view(fromRowNumber, length));
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
-        // put new function columns
-        for (Integer i : functionColumns) {
-          FunctionColumn fc = (FunctionColumn) columns.get(i);
-            for (int j = 0; j < columns.size(); j++) {
-                Column column = columns.get(j);
-                if(fc.getArgColumn() == column) {
-                    resultantFrame.columns.set(i, new FunctionColumn(fc.getFunction(), resultantFrame.columns.get(j)));
-                    break;
-                }
-            }
+        for (Integer key : functionColumnToInfo.keySet()) {
+            resultantFrame.functionColumnToInfo.put(key, functionColumnToInfo.get(key));
         }
-
         resultantFrame.appendData();
         return resultantFrame;
     }
 
     public DataFrame view(int[] rowOrder) {
         DataFrame resultantFrame = new DataFrame(false);
-        List<Integer> functionColumns = new ArrayList<>();
-        // create view on all columns except the function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            if(column instanceof FunctionColumn) {
-                resultantFrame.columns.add(null);
-            } else {
-                resultantFrame.columns.add(column.view(rowOrder));
-            }
+            resultantFrame.columns.add(column.view(rowOrder));
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
         }
-
-        // put new function columns
-        for (Integer i : functionColumns) {
-            FunctionColumn fc = (FunctionColumn) columns.get(i);
-            for (int j = 0; j < columns.size(); j++) {
-                Column column = columns.get(j);
-                if(fc.getArgColumn() == column) {
-                    resultantFrame.columns.set(i, new FunctionColumn(fc.getFunction(), resultantFrame.columns.get(j)));
-                    break;
-                }
-            }
+        for (Integer key : functionColumnToInfo.keySet()) {
+            resultantFrame.functionColumnToInfo.put(key, functionColumnToInfo.get(key));
         }
         resultantFrame.appendData();
         return resultantFrame;
@@ -369,22 +382,15 @@ public class DataFrame {
 
 
     private DataFrame resample(IntSequence groupIndexes, int points) {
-        // create maps
-        Map<Integer, Integer> functionColToArgCol = new HashMap<>();
         Map<Integer, int[]> colToResultantCols = new HashMap<>();
         int count = 0;
         for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            int aggregations = columnAggFunctions.get(i).length;
-            if(column instanceof FunctionColumn) {
-                Column argColumn = ((FunctionColumn) column).getArgColumn();
-                for (int j = 0; j < columns.size(); j++) {
-                    if(argColumn == columns.get(j)) {
-                        aggregations = columnAggFunctions.get(j).length;
-                        functionColToArgCol.put(i, j);
-                        break;
-                    }
-                }
+            int aggregations;
+            FunctionColumnInfo functionColumnInfo = functionColumnToInfo.get(i);
+            if(functionColumnInfo != null) {
+                aggregations = columnAggFunctions.get(functionColumnInfo.argColumnNumber).length;
+            } else {
+                aggregations = columnAggFunctions.get(i).length;
             }
 
             int[] resultantColumns = new int[aggregations];
@@ -406,8 +412,9 @@ public class DataFrame {
 
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            if(column instanceof FunctionColumn) {
-                Aggregation[] aggregations = columnAggFunctions.get(functionColToArgCol.get(i));
+            FunctionColumnInfo functionColumnInfo = functionColumnToInfo.get(i);
+            if(functionColumnInfo != null) {
+                Aggregation[] aggregations = columnAggFunctions.get(functionColumnInfo.argColumnNumber);
                 for (Aggregation aggregation : aggregations) {
                     resultantFrame.columns.add(null);
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
@@ -428,14 +435,16 @@ public class DataFrame {
                 }
             }
         }
+
+
         // put new function columns (as functions on aggregated data)
-        for (Integer fCol : functionColToArgCol.keySet()) {
-            Function function = ((FunctionColumn) columns.get(fCol)).getFunction();
-            int argCol = functionColToArgCol.get(fCol);
-            int[] resultantArgCols = colToResultantCols.get(argCol);
-            int[] resultantFCols = colToResultantCols.get(fCol);
+        for (Integer key : functionColumnToInfo.keySet()) {
+            FunctionColumnInfo functionColumnInfo = functionColumnToInfo.get(key);
+            int[] resultantArgCols = colToResultantCols.get(functionColumnInfo.argColumnNumber);
+            int[] resultantFCols = colToResultantCols.get(key);
             for (int i = 0; i < resultantFCols.length; i++) {
-                resultantFrame.columns.set(resultantFCols[i], new FunctionColumn(function, resultantFrame.columns.get(resultantArgCols[i])));
+                resultantFrame.columns.set(resultantFCols[i], ColumnFactory.createColumn(functionColumnInfo.function, resultantFrame.columns.get(resultantArgCols[i])));
+                resultantFrame.functionColumnToInfo.put(resultantFCols[i], new FunctionColumnInfo(functionColumnInfo.function, resultantArgCols[i]));
             }
         }
         resultantFrame.appendData();

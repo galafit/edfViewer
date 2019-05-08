@@ -1,6 +1,6 @@
-package com.biorecorder.data.frame;
+package com.biorecorder.data.frame.impl;
 
-import com.biorecorder.data.frame.impl.LongColumn;
+import com.biorecorder.data.frame.*;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.SequenceUtils;
 import com.biorecorder.data.sequence.StringSequence;

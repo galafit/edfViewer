@@ -48,6 +48,11 @@ class #E#Column implements Column {
     }
 
     @Override
+    public boolean isRegular() {
+        return false;
+    }
+
+    @Override
     public Column view(int from, int length) {
         #E#Sequence subSequence = new #E#Sequence() {
             @Override

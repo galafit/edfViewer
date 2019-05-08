@@ -80,9 +80,9 @@ public class ChartTest extends JFrame {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(0);
-        IntArrayList timeArray = new IntArrayList();
+        LongArrayList timeArray = new LongArrayList();
         for (int i = 0; i < 15; i++) {
-            timeArray.add(PrimitiveUtils.long2int(calendar.getTimeInMillis()));
+            timeArray.add(calendar.getTimeInMillis());
             calendar.add(Calendar.DAY_OF_MONTH, 10);
         }
         XYData timeData = new XYData(false);

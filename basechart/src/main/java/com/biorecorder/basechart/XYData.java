@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.data.frame.*;
 import com.biorecorder.data.sequence.IntSequence;
+import com.biorecorder.data.sequence.LongSequence;
 
 import java.util.List;
 
@@ -55,6 +56,16 @@ public class XYData implements ChartData {
     }
 
     public void addColumn(int[] columnData) {
+        dataFrame.addColumn(columnData);
+        onColumnAdded();
+    }
+
+    public void addColumn(LongSequence columnData) {
+        dataFrame.addColumn(columnData);
+        onColumnAdded();
+    }
+
+    public void addColumn(long[] columnData) {
         dataFrame.addColumn(columnData);
         onColumnAdded();
     }

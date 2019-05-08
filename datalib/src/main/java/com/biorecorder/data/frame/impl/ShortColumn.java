@@ -15,7 +15,7 @@ import com.biorecorder.data.sequence.SequenceUtils;
  * Edit template file _E_Column.tmpl
  *************************************/
 
-public class ShortColumn implements Column {
+class ShortColumn implements Column {
     private ShortSequence dataSequence;
     private StatsShort stats;
 
