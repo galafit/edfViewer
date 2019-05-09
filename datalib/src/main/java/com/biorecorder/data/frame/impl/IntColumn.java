@@ -104,21 +104,6 @@ class IntColumn implements Column {
         });
     }
 
-
-    @Override
-    public void cache() {
-        if (!(dataSequence instanceof IntCachingSequence)) {
-            dataSequence = new IntCachingSequence(dataSequence);
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        if (dataSequence instanceof IntCachingSequence) {
-            dataSequence = ((IntCachingSequence) dataSequence).getInnerData();
-        }
-    }
-
     @Override
     public int bisect(double value, int from, int length) {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2int(value), from, length);
@@ -216,7 +201,8 @@ class IntColumn implements Column {
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = getAggFunction(aggregation);
-            private int lastIndex = -1;
+            private IntArrayList aggData = new IntArrayList();
+            private int startIndex = -1;
 
             @Override
             public int size() {
@@ -225,18 +211,39 @@ class IntColumn implements Column {
 
             @Override
             public int get(int index) {
-                if (index != lastIndex) {
-                    aggFunction = getAggFunction(aggregation);
-                    lastIndex = index;
+                if(startIndex < 0) {
+                    startIndex = index;
                 }
-                int n = aggFunction.getN();
-                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
-                int from = groupIndexes.get(index) + n;
+                if(index < startIndex) {
+                    aggFunction.reset();
+                    int[] additionalData = new int[startIndex - index];
+                    for (int i = index; i < startIndex; i++) {
+                        int n = aggFunction.getN();
+                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
+                        int from = groupIndexes.get(i) + n;
+                        if (length > 0) {
+                            aggFunction.add(dataSequence, from, length);
+                        }
+                        additionalData[i - index] = aggFunction.getValue();
+                        aggFunction.reset();
+                    }
+                    aggData.add(0, additionalData);
+                    startIndex = index;
+                }
 
-                if (length > 0) {
-                    aggFunction.add(dataSequence, from, length);
+                if(index >= aggData.size() + startIndex) {
+                    for (int i = aggData.size() + startIndex; i <= index; i++) {
+                        int n = aggFunction.getN();
+                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
+                        int from = groupIndexes.get(i) + n;
+                        if (length > 0) {
+                            aggFunction.add(dataSequence, from, length);
+                        }
+                        aggData.add(aggFunction.getValue());
+                        aggFunction.reset();
+                    }
                 }
-                return aggFunction.getValue();
+                return aggData.get(index - startIndex);
             }
         };
         return new IntColumn(resultantSequence);

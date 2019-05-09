@@ -69,8 +69,9 @@ public class ChartTest extends JFrame {
        // regularData.addColumn(list2);
         regularData.setColumnName(1, "rg");
 
-        XYData noRegularData = new XYData(labels, true);
-        noRegularData.addColumn(list2);
+        XYData noRegularData = new XYData(true);
+        noRegularData.addColumn(list1);
+        noRegularData.addColumn(list1);
         noRegularData.setColumnName(1, "nr");
 
 
@@ -89,11 +90,10 @@ public class ChartTest extends JFrame {
         timeData.addColumn(timeArray);
         timeData.addColumn(list1);
 
-        chart = new Chart(new TimeScale());
-        //chart = new Chart();
+        chart = new Chart();
 
-        //chart.addTrace(new LineTrace(unsortedData), false, true, false);
-        chart.addTrace(new LineTrace(timeData), false, true, false);
+        chart.addTrace(new LineTrace(unsortedData), false, true, false);
+        //chart.addTrace(new LineTrace(timeData), false, true, false);
         chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);

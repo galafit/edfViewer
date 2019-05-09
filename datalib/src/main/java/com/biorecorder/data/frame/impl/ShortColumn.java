@@ -104,21 +104,6 @@ class ShortColumn implements Column {
         });
     }
 
-
-    @Override
-    public void cache() {
-        if (!(dataSequence instanceof ShortCachingSequence)) {
-            dataSequence = new ShortCachingSequence(dataSequence);
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        if (dataSequence instanceof ShortCachingSequence) {
-            dataSequence = ((ShortCachingSequence) dataSequence).getInnerData();
-        }
-    }
-
     @Override
     public int bisect(double value, int from, int length) {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2short(value), from, length);

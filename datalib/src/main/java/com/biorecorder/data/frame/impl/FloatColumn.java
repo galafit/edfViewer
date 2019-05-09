@@ -104,21 +104,6 @@ class FloatColumn implements Column {
         });
     }
 
-
-    @Override
-    public void cache() {
-        if (!(dataSequence instanceof FloatCachingSequence)) {
-            dataSequence = new FloatCachingSequence(dataSequence);
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        if (dataSequence instanceof FloatCachingSequence) {
-            dataSequence = ((FloatCachingSequence) dataSequence).getInnerData();
-        }
-    }
-
     @Override
     public int bisect(double value, int from, int length) {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2float(value), from, length);

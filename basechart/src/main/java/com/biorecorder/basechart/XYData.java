@@ -166,23 +166,6 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public void cache() {
-        for (int i = 0; i < dataFrame.columnCount(); i++) {
-            if(!dataFrame.isColumnRegular(i) && !dataFrame.isColumnFunction(i)) {
-                dataFrame.cacheColumn(i);
-            }
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        for (int i = 0; i < dataFrame.columnCount(); i++) {
-            dataFrame.disableCaching(i);
-        }
-
-    }
-
-    @Override
     public void appendData() {
         dataFrame.appendData();
     }

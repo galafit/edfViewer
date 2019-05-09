@@ -402,7 +402,7 @@ public class TraceDataManager {
                 processedData = group(processedData, groupingInterval.getInterval());
             }
             if (processingConfig.isCroppedDataCachingEnabled()) {
-                processedData.cache();
+
             }
         } else { // if crop disabled
             // if grouping was not done before
@@ -465,19 +465,7 @@ public class TraceDataManager {
                     if (traceData.rowCount() > prevTraceDataSize) {
                         groupedData.appendData();
                     }
-
                     groupedDataNew = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
-                    groupedDataNew.cache();
-
-                    // force "lazy" grouping
-                    int rowCount = groupedDataNew.rowCount();
-                    if (rowCount > 0) {
-                        for (int i = 0; i < groupedDataNew.columnCount(); i++) {
-                            groupedDataNew.getValue(rowCount - 1, i);
-                        }
-                    }
-                    // Very important to clean memory!!!
-                    groupedData.disableCaching();
                 } else {
                     double groupIntervalRound = pointsNumberToGroupInterval(groupedData, pointsInGroupOnGroupedData);
                     groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
@@ -519,7 +507,6 @@ public class TraceDataManager {
                         if (pointsRatio > 1) {
                             // regroup on the base of already grouped data
                             groupedData =  groupedData_i.resampleByEqualPointsNumber(pointsRatio);
-                            groupedData.cache();
                             break;
                         } else if (pointsRatio == 1) {
                             // use already grouped data as it is
@@ -554,7 +541,6 @@ public class TraceDataManager {
             int points = roundPoints(groupIntervalToPoints(data, groupInterval.intervalLength()));
             if (points > 1) {
                 groupedData = data.resampleByEqualPointsNumber(points);
-                groupedData.cache();
                 System.out.println("group by points "+ points);
 
             } else {
@@ -570,8 +556,13 @@ public class TraceDataManager {
                 System.out.println("Number interval "+groupInterval.intervalLength());
 
             }
-            groupedData.cache();
         }
+
+        for (int i = groupedData.rowCount()/4; i < groupedData.rowCount()/2; i++) {
+            groupedData.getValue(i, 1);
+        }
+
+
         return groupedData;
     }
 

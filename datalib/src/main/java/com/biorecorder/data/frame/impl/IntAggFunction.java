@@ -27,6 +27,10 @@ abstract class  IntAggFunction {
         return count;
     }
 
+    public void reset() {
+            count = 0;
+    }
+
     private void checkIfEmpty() {
         if(count == 0) {
             String errMsg = "No elements was added to group. Grouping function can not be calculated.";

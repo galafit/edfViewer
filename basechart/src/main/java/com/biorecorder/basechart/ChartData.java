@@ -39,9 +39,6 @@ public interface ChartData {
 
     ChartData resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval);
 
-    void cache();
-    void disableCaching();
-
     void appendData();
 }
 

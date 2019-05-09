@@ -32,9 +32,6 @@ public interface Column {
 
     Stats stats(int length);
 
-    void cache();
-    void disableCaching();
-
     /**
      * Equal Width Binning. This method divides the entire range of column data (max - min)
      * into intervals of equal size, searches the intervalStart indexes for every such

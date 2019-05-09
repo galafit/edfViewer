@@ -104,21 +104,6 @@ class LongColumn implements Column {
         });
     }
 
-
-    @Override
-    public void cache() {
-        if (!(dataSequence instanceof LongCachingSequence)) {
-            dataSequence = new LongCachingSequence(dataSequence);
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        if (dataSequence instanceof LongCachingSequence) {
-            dataSequence = ((LongCachingSequence) dataSequence).getInnerData();
-        }
-    }
-
     @Override
     public int bisect(double value, int from, int length) {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2long(value), from, length);

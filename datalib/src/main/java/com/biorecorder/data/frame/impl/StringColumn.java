@@ -99,16 +99,6 @@ public class StringColumn implements Column {
     }
 
     @Override
-    public void cache() {
-        intColumn.cache();
-    }
-
-    @Override
-    public void disableCaching() {
-       intColumn.disableCaching();
-    }
-
-    @Override
     public IntSequence group(double interval, IntWrapper length) {
         return intColumn.group(interval, length);
     }

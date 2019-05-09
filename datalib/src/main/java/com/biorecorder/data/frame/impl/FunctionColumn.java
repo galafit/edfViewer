@@ -10,8 +10,6 @@ import com.biorecorder.data.sequence.DoubleSequence;
  * Created by galafit on 11/3/19.
  */
 public class FunctionColumn extends DoubleColumn {
-    private Column argColumn;
-    private Function function;
     public FunctionColumn(Function function, Column argColumn) {
         super(new DoubleSequence() {
             @Override
@@ -24,17 +22,5 @@ public class FunctionColumn extends DoubleColumn {
                 return function.apply(argColumn.value(index));
             }
         });
-        this.function = function;
-        this.argColumn = argColumn;
-    }
-
-    @Override
-    public Column view(int from, int length) {
-        return new FunctionColumn(function, argColumn.view(from, length));
-    }
-
-    @Override
-    public Column view(int[] order) {
-        return new FunctionColumn(function, argColumn.view(order));
     }
 }

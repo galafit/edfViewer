@@ -104,21 +104,6 @@ class DoubleColumn implements Column {
         });
     }
 
-
-    @Override
-    public void cache() {
-        if (!(dataSequence instanceof DoubleCachingSequence)) {
-            dataSequence = new DoubleCachingSequence(dataSequence);
-        }
-    }
-
-    @Override
-    public void disableCaching() {
-        if (dataSequence instanceof DoubleCachingSequence) {
-            dataSequence = ((DoubleCachingSequence) dataSequence).getInnerData();
-        }
-    }
-
     @Override
     public int bisect(double value, int from, int length) {
         return SequenceUtils.bisect(dataSequence, PrimitiveUtils.roundDouble2double(value), from, length);
