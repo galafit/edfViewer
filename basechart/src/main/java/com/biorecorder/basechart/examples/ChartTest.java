@@ -81,9 +81,9 @@ public class ChartTest extends JFrame {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(0);
         LongArrayList timeArray = new LongArrayList();
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 150; i++) {
             timeArray.add(calendar.getTimeInMillis());
-            calendar.add(Calendar.DAY_OF_MONTH, 10);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
         XYData timeData = new XYData(false);
         timeData.addColumn(timeArray);
@@ -94,9 +94,9 @@ public class ChartTest extends JFrame {
 
         //chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addTrace(new LineTrace(timeData), false, true, false);
-        chart.addStack();
+       /* chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
-        chart.addTrace(new LineTrace(regularData), true);
+        chart.addTrace(new LineTrace(regularData), true);*/
 
         chartPanel = new ChartPanel(chart);
 

@@ -1,5 +1,6 @@
 package com.biorecorder.data.frame;
 import java.util.Calendar;
+import java.util.Date;
 
 public class TimeIntervalProvider implements IntervalProvider {
     private Calendar calendar;
@@ -8,12 +9,17 @@ public class TimeIntervalProvider implements IntervalProvider {
             Calendar.HOUR_OF_DAY,  weekField, Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
     private int calendarFieldIndex;
 
-    private TimeInterval timeInterval;
-    
+    private TimeUnit timeUnit;
+    private int unitMultiplier;
 
     public TimeIntervalProvider(TimeInterval timeInterval) {
-        this.timeInterval = timeInterval;
-        switch (timeInterval.getTimeUnit()) {
+        this(timeInterval.timeUnit(), timeInterval.unitMultiplier());
+    }
+
+    public TimeIntervalProvider(TimeUnit timeUnit, int unitMultiplier) {
+        this.timeUnit = timeUnit;
+        this.unitMultiplier = unitMultiplier;
+        switch (timeUnit) {
             case MILLISECOND:
                 calendarFieldIndex = 0;
                 break;
@@ -52,14 +58,18 @@ public class TimeIntervalProvider implements IntervalProvider {
 
     private LongInterval createInterval() {
         long intervalStart = calendar.getTimeInMillis();
-        calendar.add(calendarFields[calendarFieldIndex], timeInterval.getTimeUnitMultiplier());
+        calendar.add(calendarFields[calendarFieldIndex], unitMultiplier);
         long nextIntervalStart = calendar.getTimeInMillis();
-        calendar.add(calendarFields[calendarFieldIndex], -timeInterval.getTimeUnitMultiplier());
+        calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
         return new LongInterval(intervalStart, nextIntervalStart);
     }
 
-    public TimeInterval getTimeInterval() {
-        return timeInterval;
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
+
+    public int getUnitMultiplier() {
+        return unitMultiplier;
     }
 
     public long getCurrentIntervalStartMs() {
@@ -67,7 +77,7 @@ public class TimeIntervalProvider implements IntervalProvider {
     }
 
     public int getCurrentIntervalStartHours() {
-        return calendar.get(Calendar.HOUR);
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
     @Override
@@ -79,7 +89,7 @@ public class TimeIntervalProvider implements IntervalProvider {
             calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         } else {
             int calendarFieldValue = calendar.get(calendarField);
-            calendarFieldValue = (calendarFieldValue / timeInterval.getTimeUnitMultiplier()) * timeInterval.getTimeUnitMultiplier();
+            calendarFieldValue = (calendarFieldValue / unitMultiplier) * unitMultiplier;
             calendar.set(calendarField, calendarFieldValue);
         }
         for (int i = 0; i < calendarFieldIndex; i++) {
@@ -96,13 +106,13 @@ public class TimeIntervalProvider implements IntervalProvider {
 
     @Override
     public Interval getNext() {
-        calendar.add(calendarFields[calendarFieldIndex], timeInterval.getTimeUnitMultiplier());
+         calendar.add(calendarFields[calendarFieldIndex], unitMultiplier);
         return createInterval();
     }
 
     @Override
     public Interval getPrevious() {
-        calendar.add(calendarFields[calendarFieldIndex], -timeInterval.getTimeUnitMultiplier());
+        calendar.add(calendarFields[calendarFieldIndex], -unitMultiplier);
         return createInterval();
     }
 

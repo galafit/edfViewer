@@ -476,7 +476,7 @@ public abstract class Axis {
                 }
             }
 
-            if (!(scale instanceof TimeScale) && !config.isRoundingEnabled() && ticksSkipStep > 1 && (ticks.size() - 1) / ticksSkipStep > 1) {
+            if (!config.isRoundingEnabled() && ticksSkipStep > 1 && (ticks.size() - 1) / ticksSkipStep > 1) {
                 tickProvider.increaseTickInterval(ticksSkipStep);
                 ticks = generateTicks(tickProvider);
                 ticksSkipStep = 1;

@@ -7,8 +7,6 @@ import com.biorecorder.data.frame.TimeUnit;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -24,7 +22,6 @@ public class TimeScale extends LinearScale {
         copyScale.setRange(getRange());
         return copyScale;
     }
-
 
     @Override
     public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix labelFormatInfo) {
@@ -51,9 +48,34 @@ public class TimeScale extends LinearScale {
         private TimeIntervalProvider timeIntervalProvider;
         private DateFormatter labelFormat;
 
+        private void setTickInterval(double interval, boolean isUpper) {
+            TimeInterval timeInterval;
+            if(isUpper) {
+                timeInterval = TimeInterval.getUpper(Math.round(interval), false);
+            } else {
+                timeInterval = TimeInterval.getClosest(Math.round(interval), false);
+            }
+            TimeUnit timeUnit = timeInterval.timeUnit();
+            int multiplier = timeInterval.unitMultiplier();
+            if(timeUnit == TimeUnit.DAY || timeUnit == TimeUnit.MONTH) {
+                int dayMultiplier = (int)(interval / TimeUnit.DAY.toMilliseconds());
+                if(dayMultiplier <= 20) {
+                    multiplier = Math.max(1, dayMultiplier);
+                    timeUnit = TimeUnit.DAY;
+                }
+            }
+            if(timeUnit == TimeUnit.YEAR) {
+                multiplier = (int)(interval / TimeUnit.YEAR.toMilliseconds());
+                multiplier = Math.max(1, multiplier);
+            }
+            timeIntervalProvider = new TimeIntervalProvider(timeUnit, multiplier);
+            System.out.println("time tick provider "+ timeUnit + " "+multiplier);
+            labelFormat = new DateFormatter(timeUnit);
+        }
+
+
         public void setTickInterval(double interval) {
-            timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(Math.round(interval), true));
-            labelFormat = new DateFormatter(timeIntervalProvider.getTimeInterval().getTimeUnit());
+            setTickInterval(interval, false);
         }
 
         public void setTickIntervalCount(int tickIntervalCount) {
@@ -63,14 +85,13 @@ public class TimeScale extends LinearScale {
             double max = domain[domain.length - 1];
             double min = domain[0];
             long interval = Math.round((max - min) / tickIntervalCount);
-            timeIntervalProvider = new TimeIntervalProvider(TimeInterval.getClosest(interval, true));
-            labelFormat = new DateFormatter(timeIntervalProvider.getTimeInterval().getTimeUnit());
+            setTickInterval(interval, false);
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
-            long intervalNew = timeIntervalProvider.getTimeInterval().toMilliseconds() * increaseFactor;
-            setTickInterval(intervalNew);
+            long intervalNew = timeIntervalProvider.getUnitMultiplier() * timeIntervalProvider.getTimeUnit().toMilliseconds() * increaseFactor;
+            setTickInterval(intervalNew, true);
         }
 
         @Override
@@ -107,8 +128,10 @@ public class TimeScale extends LinearScale {
         class DateFormatter {
             private final SimpleDateFormat primaryFormat;
             private final SimpleDateFormat secondaryFormat;
+            private final TimeUnit timeUnit;
 
             public DateFormatter(TimeUnit timeUnit) {
+                this.timeUnit = timeUnit;
                 switch (timeUnit) {
                     case MILLISECOND:
                         primaryFormat = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -132,7 +155,7 @@ public class TimeScale extends LinearScale {
                         break;
                     case WEEK:
                     case MONTH:
-                        primaryFormat =  new SimpleDateFormat("MMM'' yy");
+                        primaryFormat =  new SimpleDateFormat("MMM ''yy");
                         secondaryFormat = primaryFormat;
                         break;
                     default:
@@ -143,7 +166,7 @@ public class TimeScale extends LinearScale {
             }
 
             public String format(long ms, long hour) {
-                if(hour == 0) {
+                if( timeUnit == TimeUnit.HOUR && hour == 0) {
                     return secondaryFormat.format(ms);
                 } else {
                     return primaryFormat.format(ms);

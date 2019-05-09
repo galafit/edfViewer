@@ -480,9 +480,7 @@ public class TraceDataManager {
                     groupedData.disableCaching();
                 } else {
                     double groupIntervalRound = pointsNumberToGroupInterval(groupedData, pointsInGroupOnGroupedData);
-                    groupedDataNew = traceData.resampleByEqualInterval(0, groupIntervalRound);
-                    groupedDataNew.cache();
-                    System.out.println(groupInterval.intervalLength() +" next interval "+groupIntervalRound);
+                    groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
                 }
             }
 
@@ -557,7 +555,7 @@ public class TraceDataManager {
             if (points > 1) {
                 groupedData = data.resampleByEqualPointsNumber(points);
                 groupedData.cache();
-                System.out.println("group by points "+groupInterval.intervalLength());
+                System.out.println("group by points "+ points);
 
             } else {
                 groupedData = data;
@@ -566,7 +564,7 @@ public class TraceDataManager {
             if (groupInterval instanceof TimeGroupInterval) {
                 TimeGroupInterval timeGroupInterval = (TimeGroupInterval) groupInterval;
                 groupedData = data.resampleByEqualTimeInterval(0, timeGroupInterval.getTimeInterval());
-                System.out.println("Time interval "+timeGroupInterval.intervalLength());
+                System.out.println("Time interval grouping: "+timeGroupInterval.getTimeInterval());
             } else {
                 groupedData = data.resampleByEqualInterval(0, groupInterval.intervalLength());
                 System.out.println("Number interval "+groupInterval.intervalLength());
