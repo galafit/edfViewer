@@ -94,9 +94,9 @@ public class ChartTest extends JFrame {
 
         //chart.addTrace(new LineTrace(unsortedData), false, true, false);
         chart.addTrace(new LineTrace(timeData), false, true, false);
-       /* chart.addStack();
+        chart.addStack();
         chart.addTrace(new LineTrace(noRegularData), true);
-        chart.addTrace(new LineTrace(regularData), true);*/
+        chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
 

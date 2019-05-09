@@ -568,7 +568,7 @@ public class DataFrame {
         }
         System.out.println("ResampleByEqualInterval UPDATE is OK");
 
-        System.out.println("String sort test");
+        System.out.println("\nString sort test");
         DataFrame sf = new DataFrame(false);
         String[] labels = {"mama", "baba", "papa", "deda"};
         sf.addColumn(labels);
@@ -579,5 +579,71 @@ public class DataFrame {
         for (int i = 0; i < sf1.rowCount(); i++) {
             System.out.println(sf1.getValue(i, 0) +  "  " + sf1.getLabel(i, 0)+ "  " +  sf1.getValue(i, 1));
         }
+
+        System.out.println("\nFunction column tests:");
+        df = new DataFrame(false);
+        int[] col0 = {1, 3, 5, 7, 9};
+        int[] col1 = {8, 6, 4, 2, 0};
+        df.addColumn(col0);
+        df.addColumn(col1);
+        df.addColumn(new Function() {
+            @Override
+            public double apply(double value) {
+                return (int)(value + 1);
+            }
+        }, 1);
+
+        int[] order = {0, 2};
+        try{
+            df1 = new DataFrame(df, order);
+            throw new RuntimeException("Column order exception test Failed");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("1) Column order exception test OK");
+        }
+        int[] order1 = {2, 1};
+        df1 = new DataFrame(df, order1);
+        df1 = df1.view(1, 3);
+
+        int[] expectedCol0 = {7, 5, 3};
+        int[] expectedCol1 = {6, 4, 2};
+        for (int i = 0; i < df1.rowCount(); i++) {
+            if(df1.getValue(i, 0) != expectedCol0[i] || df1.getValue(i, 1) != expectedCol1[i]) {
+                throw new RuntimeException(i+ " Column Order and view test failed ");
+            }
+        }
+        System.out.println("2) Column Order and view test OK");
+
+        DataFrame sortFr1 = df1.sort(0);
+        DataFrame sortFr2 = df1.sort(1);
+
+        for (int i = 0; i < df1.rowCount(); i++) {
+            if(sortFr1.getValue(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr1.getValue(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+                throw new RuntimeException(i+ " Sort test failed ");
+            }
+        }
+
+        for (int i = 0; i < df1.rowCount(); i++) {
+            if(sortFr2.getValue(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr2.getValue(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+                throw new RuntimeException(i+ " Sort test failed ");
+            }
+        }
+        System.out.println("3) Sort test OK");
+
+        df.setColumnAggFunctions(0, Aggregation.FIRST);
+        df.setColumnAggFunctions(1, Aggregation.FIRST);
+        df.setColumnAggFunctions(2, Aggregation.FIRST);
+        DataFrame resampleFr = df.resampleByEqualPointsNumber(2);
+        int[] expectedCol0_ = {1,  5,  9};
+        int[] expectedCol1_ = {8,  4,  0};
+
+        for (int i = 0; i < resampleFr.rowCount(); i++) {
+            if(resampleFr.getValue(i, 0) != expectedCol0_[i]
+                    || resampleFr.getValue(i, 1) != expectedCol1_[i]
+                    || resampleFr.getValue(i, 2) != expectedCol1_[i] + 1) {
+                throw new RuntimeException(i+ " Resample test failed ");
+            }
+        }
+
+        System.out.println("4) Resample test OK");
     }
 }
