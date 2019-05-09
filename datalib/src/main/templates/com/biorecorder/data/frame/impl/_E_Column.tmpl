@@ -172,21 +172,14 @@ class #E#Column implements Column {
                 }
 
                 Interval currentGroupInterval = intervalProvider.getContaining(dataSequence.get(from));
-                boolean isCurrentGroupEmpty = false;
                 for (int i = from + 1; i < l; i++) {
                     #e# data = dataSequence.get(i);
                     if (!currentGroupInterval.contains(data)) {
-                        if(!isCurrentGroupEmpty) {
-                            groupIndexesList.add(i);
-                            currentGroupInterval = intervalProvider.getNext();
-                            isCurrentGroupEmpty = true;
-                        } else {
+                        groupIndexesList.add(i);
+                        currentGroupInterval = intervalProvider.getNext(); // main scenario
+                        if(!currentGroupInterval.contains(data)) { // rare situation
                             currentGroupInterval = intervalProvider.getContaining(data);
-                            isCurrentGroupEmpty = false;
-
                         }
-                    } else {
-                        isCurrentGroupEmpty = false;
                     }
                 }
                 // add last "closing" groupByEqualIntervals
