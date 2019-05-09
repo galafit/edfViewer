@@ -91,9 +91,14 @@ public class DataFrame {
     }
 
     public void addColumn(Function function, int argColumnNumber) {
+        if(columns.get(argColumnNumber).dataType() == DataType.String) {
+            String errMsg = "Function column may not depend upon String column";
+            throw new IllegalArgumentException(errMsg);
+
+        }
         for (Integer key : functionColumnToInfo.keySet()) {
             if(key == argColumnNumber) {
-                String errMsg = "Column: " +  argColumnNumber + " is a function column and can not be used as argument for another function column";
+                String errMsg = "Column: " +  argColumnNumber + " is a function column and may not be used as argument for another function column";
                 throw new IllegalArgumentException(errMsg);
             }
         }
@@ -401,7 +406,7 @@ public class DataFrame {
             count += aggregations;
         }
 
-        // resample all columns except function columns
+
         DataFrame resultantFrame = new DataFrame(isDataAppendMode) {
             @Override
             public void appendData() {
@@ -409,7 +414,7 @@ public class DataFrame {
                 super.appendData();
             }
         };
-
+        // resample all columns except function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             FunctionColumnInfo functionColumnInfo = functionColumnToInfo.get(i);
@@ -630,16 +635,35 @@ public class DataFrame {
         System.out.println("3) Sort test OK");
 
         df.setColumnAggFunctions(0, Aggregation.FIRST);
-        df.setColumnAggFunctions(1, Aggregation.FIRST);
-        df.setColumnAggFunctions(2, Aggregation.FIRST);
+        df.setColumnAggFunctions(1, Aggregation.MIN, Aggregation.MAX);
+
         DataFrame resampleFr = df.resampleByEqualPointsNumber(2);
         int[] expectedCol0_ = {1,  5,  9};
-        int[] expectedCol1_ = {8,  4,  0};
+        int[] expectedCol1_ = {6,  2,  0};
+        int[] expectedCol2_ = {8,  4,  0};
 
         for (int i = 0; i < resampleFr.rowCount(); i++) {
             if(resampleFr.getValue(i, 0) != expectedCol0_[i]
                     || resampleFr.getValue(i, 1) != expectedCol1_[i]
-                    || resampleFr.getValue(i, 2) != expectedCol1_[i] + 1) {
+                    || resampleFr.getValue(i, 2) != expectedCol2_[i]
+                    || resampleFr.getValue(i, 3) != expectedCol1_[i] + 1
+                    || resampleFr.getValue(i, 4) != expectedCol2_[i] + 1) {
+                throw new RuntimeException(i+ " Resample test failed ");
+            }
+        }
+
+        // re-sample on already re-sampled frame
+        resampleFr = resampleFr.resampleByEqualPointsNumber(2);
+        int[] expectedCol0_1 = {1,  9};
+        int[] expectedCol1_1 = {2,  0};
+        int[] expectedCol2_1 = {8,  0};
+
+        for (int i = 0; i < resampleFr.rowCount(); i++) {
+            if(resampleFr.getValue(i, 0) != expectedCol0_1[i]
+                    || resampleFr.getValue(i, 1) != expectedCol1_1[i]
+                    || resampleFr.getValue(i, 2) != expectedCol2_1[i]
+                    || resampleFr.getValue(i, 3) != expectedCol1_1[i] + 1
+                    || resampleFr.getValue(i, 4) != expectedCol2_1[i] + 1) {
                 throw new RuntimeException(i+ " Resample test failed ");
             }
         }
