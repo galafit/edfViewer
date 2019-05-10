@@ -41,7 +41,36 @@ public class ColumnFactory {
         return new FunctionColumn(function, argColumn);
     }
 
-   public Column concat(Column column1, int column1Length, Column column2) {
+   public static Column concat(Column column1, int column1Length, Column column2) {
+        if (column1.isRegular() && column2.isRegular()) {
+            RegularColumn regColumn1 = (RegularColumn) column1;
+            RegularColumn regColumn2 = (RegularColumn) column2;
+            if (regColumn1.getStep() == regColumn2.getStep() && regColumn2.getStartValue() == regColumn1.value(column1Length)) {
+                long size1 = column1Length;
+                long size2 = column2.size();
+                return new RegularColumn(regColumn1.getStartValue(), regColumn1.getStep(), PrimitiveUtils.long2int(size1 + size2));
+            }
+        }
+
+        if (column1.dataType() == DataType.String || column1.dataType() == DataType.String) {
+            StringSequence resultantSequence = new StringSequence() {
+                @Override
+                public int size() {
+                    return column1Length + column2.size();
+                }
+
+                @Override
+                public String get(int index) {
+                    if (index < column1Length) {
+                        return column1.label(index);
+                    } else {
+                        return column2.label(index - column1Length);
+                    }
+                }
+            };
+            return new StringColumn(resultantSequence);
+        }
+
         if(column1.dataType() == column2.dataType()) {
             switch (column1.dataType()) {
                 case Short:
@@ -53,24 +82,6 @@ public class ColumnFactory {
                 case Float:
                     return concat((FloatColumn) column1, column1Length, (FloatColumn) column1);
             }
-        }
-        if(column1.dataType() == DataType.String || column1.dataType() == DataType.String) {
-            StringSequence resultantSequence = new StringSequence() {
-                @Override
-                public int size() {
-                    return column1Length + column2.size();
-                }
-
-                @Override
-                public String get(int index) {
-                    if(index < column1Length) {
-                        return column1.label(index);
-                    } else {
-                        return column2.label(index - column1Length);
-                    }
-                }
-            };
-            return new StringColumn(resultantSequence);
         }
 
         DoubleSequence resultantSequence = new DoubleSequence() {
@@ -89,13 +100,13 @@ public class ColumnFactory {
             }
         };
         return new DoubleColumn(resultantSequence);
-    }
+   }
 
 #REPLICATED0#
 }
 
 ====START_REPLICATED_CONTENT #0====
-    private Column concat(#E#Column column1, int column1Length, #E#Column column2) {
+   private static Column concat(#E#Column column1, int column1Length, #E#Column column2) {
         #E#Sequence resultantSequence = new #E#Sequence() {
             @Override
             public int size() {
@@ -112,5 +123,5 @@ public class ColumnFactory {
             }
         };
         return new #E#Column(resultantSequence);
-    }
+   }
 =====END_REPLICATED_CONTENT #0=====

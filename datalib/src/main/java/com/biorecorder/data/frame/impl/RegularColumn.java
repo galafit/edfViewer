@@ -8,17 +8,18 @@ import com.biorecorder.data.sequence.IntSequence;
 /**
  * Created by galafit on 20/1/19.
  */
-class DoubleRegularColumn extends DoubleColumn {
+class RegularColumn extends DoubleColumn {
     private static final int MAX_SIZE = Integer.MAX_VALUE - 10;
-    private double startValue;
-    private double step;
+    private final boolean isLong;
+    private final double startValue;
+    private final double step;
     private int size;
 
-    public DoubleRegularColumn(double startValue, double step) {
+    public RegularColumn(double startValue, double step) {
         this(startValue, step, MAX_SIZE);
     }
 
-    public DoubleRegularColumn(double startValue, double step, int size) {
+    public RegularColumn(double startValue, double step, int size) {
         super(new DoubleSequence() {
             @Override
             public int size() {
@@ -33,6 +34,27 @@ class DoubleRegularColumn extends DoubleColumn {
         this.startValue = startValue;
         this.step = step;
         this.size = size;
+        if(startValue == (long)startValue && step == (long) step) {
+            isLong = true;
+        } else {
+            isLong = false;
+        }
+    }
+
+    public double getStartValue() {
+        return startValue;
+    }
+
+    public double getStep() {
+        return step;
+    }
+
+    @Override
+    public String label(int index) {
+        if(isLong) {
+            return Long.toString((long) value(index));
+        }
+        return super.label(index);
     }
 
     @Override
@@ -90,12 +112,12 @@ class DoubleRegularColumn extends DoubleColumn {
 
     @Override
     public Column slice(int from, int length) {
-        return new DoubleRegularColumn(value(from), step, length);
+        return new RegularColumn(value(from), step, length);
     }
 
     @Override
     public Column view(int from, int length) {
-        return new DoubleRegularColumn(value(from), step, length);
+        return new RegularColumn(value(from), step, length);
     }
 
     @Override
@@ -106,28 +128,28 @@ class DoubleRegularColumn extends DoubleColumn {
             case FIRST: {
                 double startNew = startValue;
                 double stepNew = step * points;
-                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case MAX:
             case LAST: {
                 double startNew = startValue + step * points;
                 double stepNew = step * points;
-                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case COUNT: {
                 double startNew = points;
                 double stepNew = 0;
-                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case SUM:{
                 double startNew = sum(0, points);
                 double stepNew = step * points * points;
-                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             case AVERAGE:{
                 double startNew = avg(0, points);
                 double stepNew = step * points;
-                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
+                return new RegularColumn(startNew, stepNew, sizeNew);
             }
             default:
                 String errMsg = "Unsupported Aggregate function: "+ aggregation;

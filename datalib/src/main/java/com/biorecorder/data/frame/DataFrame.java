@@ -72,16 +72,6 @@ public class DataFrame {
         appendData();
     }
 
-    class FunctionColumnInfo {
-        private final Function function;
-        private final int argColumnNumber;
-
-        public FunctionColumnInfo(Function function, int argColumnNumber) {
-            this.function = function;
-            this.argColumnNumber = argColumnNumber;
-        }
-    }
-
     private void addColumn(Column column) {
         columns.add(column);
         columnNames.add("Column " + (columns.size() - 1));
@@ -206,12 +196,12 @@ public class DataFrame {
         return columns.get(columnNumber).dataType();
     }
 
-    public double getValue(int rowNumber, int columnNumber) {
+    public double value(int rowNumber, int columnNumber) {
         rangeCheck(rowNumber);
         return columns.get(columnNumber).value(rowNumber);
     }
 
-    public String getLabel(int rowNumber, int columnNumber) {
+    public String label(int rowNumber, int columnNumber) {
         rangeCheck(rowNumber);
         return columns.get(columnNumber).label(rowNumber);
     }
@@ -255,6 +245,32 @@ public class DataFrame {
             length1 = Math.min(length.getValue(), sorter.length);
         }
         return column.bisect(value, 0, length1);
+    }
+
+    public DataFrame concat(DataFrame dataFrame) {
+        int cols = Math.min(columns.size(), dataFrame.columns.size());
+        DataFrame resultantFrame = new DataFrame(dataFrame.isDataAppendMode);
+        for (int i = 0; i < cols; i++) {
+            FunctionColumnInfo functionColumnInfo1 = columnNumberToFunctionInfo.get(i);
+            FunctionColumnInfo functionColumnInfo2 = dataFrame.columnNumberToFunctionInfo.get(i);
+            if(functionColumnInfo1 != null && functionColumnInfo1.equals(functionColumnInfo2)) {
+                resultantFrame.columnNumberToFunctionInfo.put(i, functionColumnInfo1);
+                resultantFrame.columns.add(null);
+            } else {
+                resultantFrame.columns.add(ColumnFactory.concat(columns.get(i), length.getValue(), dataFrame.columns.get(i)));
+            }
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        for (Integer key : resultantFrame.columnNumberToFunctionInfo.keySet()) {
+            // create and put new Function columns
+            FunctionColumnInfo functionColumnInfo = resultantFrame.columnNumberToFunctionInfo.get(key);
+            Column functionColumn = ColumnFactory.createColumn(functionColumnInfo.function, resultantFrame.columns.get(functionColumnInfo.argColumnNumber));
+            resultantFrame.columns.set(key, functionColumn);
+        }
+        resultantFrame.appendData();
+
+        return resultantFrame;
     }
 
 
@@ -502,6 +518,28 @@ public class DataFrame {
         return "Index: " + index + ", Size: " + length.getValue();
     }
 
+    class FunctionColumnInfo {
+        private final Function function;
+        private final int argColumnNumber;
+
+        public FunctionColumnInfo(Function function, int argColumnNumber) {
+            this.function = function;
+            this.argColumnNumber = argColumnNumber;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) return true;
+            if (!(o instanceof FunctionColumnInfo)) {
+                return false;
+            }
+
+            FunctionColumnInfo functionColumnInfo = (FunctionColumnInfo) o;
+
+            return argColumnNumber == functionColumnInfo.argColumnNumber
+                    && function.getClass() == functionColumnInfo.function.getClass();
+        }
+    }
 
     public static void main(String[] args) {
         DataFrame df = new DataFrame(true);
@@ -526,12 +564,12 @@ public class DataFrame {
         int[] expectedY2 = {1, 2, 4, 5,  7,   9};
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if (df1.getValue(i, 0) != expectedX1[i]) {
-                String errMsg = "ResampleByEqualFrequency error: " + i + " expected x =  " + expectedX1[i] + "  resultant x = " + df1.getValue(i, 0);
+            if (df1.value(i, 0) != expectedX1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: " + i + " expected x =  " + expectedX1[i] + "  resultant x = " + df1.value(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if (df1.getValue(i, 1) != expectedY1[i]) {
-                String errMsg = "ResampleByEqualFrequency error: " + i + " expected y =  " + expectedY1[i] + "  resultant y = " + df1.getValue(i, 1);
+            if (df1.value(i, 1) != expectedY1[i]) {
+                String errMsg = "ResampleByEqualFrequency error: " + i + " expected y =  " + expectedY1[i] + "  resultant y = " + df1.value(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
@@ -539,12 +577,12 @@ public class DataFrame {
         System.out.println("ResampleByEqualFrequency is OK " );
 
         for (int i = 0; i < df2.rowCount(); i++) {
-            if (df2.getValue(i, 0) != expectedX2[i]) {
-                String errMsg = "ResampleByEqualInterval error: " + i + " expected x =  " + expectedX2[i] + "  resultant x = " + df2.getValue(i, 0);
+            if (df2.value(i, 0) != expectedX2[i]) {
+                String errMsg = "ResampleByEqualInterval error: " + i + " expected x =  " + expectedX2[i] + "  resultant x = " + df2.value(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if (df2.getValue(i, 1) != expectedY2[i]) {
-                String errMsg = "ResampleByEqualInterval error: " + i + " expected y =  " + expectedY2[i] + "  resultant y = " + df2.getValue(i, 1);
+            if (df2.value(i, 1) != expectedY2[i]) {
+                String errMsg = "ResampleByEqualInterval error: " + i + " expected y =  " + expectedY2[i] + "  resultant y = " + df2.value(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
@@ -568,24 +606,24 @@ public class DataFrame {
         int[] expectedY2_ = {1, 2, 4, 5,  7,  5, 2};
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if (df1.getValue(i, 0) != expectedX1_[i]) {
-                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected x =  " + expectedX1_[i] + "  resultant x = " + df1.getValue(i, 0);
+            if (df1.value(i, 0) != expectedX1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected x =  " + expectedX1_[i] + "  resultant x = " + df1.value(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if (df1.getValue(i, 1) != expectedY1_[i]) {
-                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected y =  " + expectedY1_[i] + "  resultant y = " + df1.getValue(i, 1);
+            if (df1.value(i, 1) != expectedY1_[i]) {
+                String errMsg = "ResampleByEqualFrequency UPDATE error: " + i + " expected y =  " + expectedY1_[i] + "  resultant y = " + df1.value(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
         System.out.println("ResampleByEqualFrequency UPDATE is OK");
 
         for (int i = 0; i < df2.rowCount(); i++) {
-            if (df2.getValue(i, 0) != expectedX2_[i]) {
-                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected x =  " + expectedX2_[i] + "  resultant x = " + df2.getValue(i, 0);
+            if (df2.value(i, 0) != expectedX2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected x =  " + expectedX2_[i] + "  resultant x = " + df2.value(i, 0);
                 throw new RuntimeException(errMsg);
             }
-            if (df2.getValue(i, 1) != expectedY2_[i]) {
-                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected y =  " + expectedY2_[i] + "  resultant y = " + df2.getValue(i, 1);
+            if (df2.value(i, 1) != expectedY2_[i]) {
+                String errMsg = "ResampleByEqualInterval UPDATE error: " + i + " expected y =  " + expectedY2_[i] + "  resultant y = " + df2.value(i, 1);
                 throw new RuntimeException(errMsg);
             }
         }
@@ -600,7 +638,7 @@ public class DataFrame {
 
         DataFrame sf1 = sf.sort(0);
         for (int i = 0; i < sf1.rowCount(); i++) {
-            System.out.println(sf1.getValue(i, 0) +  "  " + sf1.getLabel(i, 0)+ "  " +  sf1.getValue(i, 1));
+            System.out.println(sf1.value(i, 0) +  "  " + sf1.label(i, 0)+ "  " +  sf1.value(i, 1));
         }
 
         System.out.println("\nFunction column tests:");
@@ -630,7 +668,7 @@ public class DataFrame {
         int[] expectedCol0 = {7, 5, 3};
         int[] expectedCol1 = {6, 4, 2};
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(df1.getValue(i, 0) != expectedCol0[i] || df1.getValue(i, 1) != expectedCol1[i]) {
+            if(df1.value(i, 0) != expectedCol0[i] || df1.value(i, 1) != expectedCol1[i]) {
                 throw new RuntimeException(i+ " Column Order and view test failed ");
             }
         }
@@ -640,13 +678,13 @@ public class DataFrame {
         DataFrame sortFr2 = df1.sort(1);
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(sortFr1.getValue(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr1.getValue(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+            if(sortFr1.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr1.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
                 throw new RuntimeException(i+ " Sort test failed ");
             }
         }
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(sortFr2.getValue(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr2.getValue(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+            if(sortFr2.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr2.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
                 throw new RuntimeException(i+ " Sort test failed ");
             }
         }
@@ -661,11 +699,11 @@ public class DataFrame {
         int[] expectedCol2_ = {8,  4,  0};
 
         for (int i = 0; i < resampleFr.rowCount(); i++) {
-            if(resampleFr.getValue(i, 0) != expectedCol0_[i]
-                    || resampleFr.getValue(i, 1) != expectedCol1_[i]
-                    || resampleFr.getValue(i, 2) != expectedCol2_[i]
-                    || resampleFr.getValue(i, 3) != expectedCol1_[i] + 1
-                    || resampleFr.getValue(i, 4) != expectedCol2_[i] + 1) {
+            if(resampleFr.value(i, 0) != expectedCol0_[i]
+                    || resampleFr.value(i, 1) != expectedCol1_[i]
+                    || resampleFr.value(i, 2) != expectedCol2_[i]
+                    || resampleFr.value(i, 3) != expectedCol1_[i] + 1
+                    || resampleFr.value(i, 4) != expectedCol2_[i] + 1) {
                 throw new RuntimeException(i+ " Resample test failed ");
             }
         }
@@ -677,11 +715,11 @@ public class DataFrame {
         int[] expectedCol2_1 = {8,  0};
 
         for (int i = 0; i < resampleFr.rowCount(); i++) {
-            if(resampleFr.getValue(i, 0) != expectedCol0_1[i]
-                    || resampleFr.getValue(i, 1) != expectedCol1_1[i]
-                    || resampleFr.getValue(i, 2) != expectedCol2_1[i]
-                    || resampleFr.getValue(i, 3) != expectedCol1_1[i] + 1
-                    || resampleFr.getValue(i, 4) != expectedCol2_1[i] + 1) {
+            if(resampleFr.value(i, 0) != expectedCol0_1[i]
+                    || resampleFr.value(i, 1) != expectedCol1_1[i]
+                    || resampleFr.value(i, 2) != expectedCol2_1[i]
+                    || resampleFr.value(i, 3) != expectedCol1_1[i] + 1
+                    || resampleFr.value(i, 4) != expectedCol2_1[i] + 1) {
                 throw new RuntimeException(i+ " Resample test failed ");
             }
         }

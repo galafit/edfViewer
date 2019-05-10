@@ -123,12 +123,12 @@ public class XYData implements ChartData {
 
     @Override
     public double getValue(int rowNumber, int columnNumber) {
-        return dataFrame.getValue(rowNumber, columnNumber);
+        return dataFrame.value(rowNumber, columnNumber);
     }
 
     @Override
     public String getLabel(int rowNumber, int columnNumber) {
-        return dataFrame.getLabel(rowNumber, columnNumber);
+        return dataFrame.label(rowNumber, columnNumber);
     }
 
     @Override
