@@ -3,6 +3,7 @@ package com.biorecorder.data.frame.impl;
 import com.biorecorder.data.frame.*;
 import com.biorecorder.data.frame.Interval;
 import com.biorecorder.data.list.IntArrayList;
+import com.biorecorder.data.list.FloatArrayList;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.FloatSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
@@ -201,7 +202,8 @@ class FloatColumn implements Column {
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         FloatSequence resultantSequence = new FloatSequence() {
             private FloatAggFunction aggFunction = getAggFunction(aggregation);
-            private int lastIndex = -1;
+            private FloatArrayList aggData = new FloatArrayList();
+            private int startIndex = -1;
 
             @Override
             public int size() {
@@ -210,18 +212,39 @@ class FloatColumn implements Column {
 
             @Override
             public float get(int index) {
-                if (index != lastIndex) {
-                    aggFunction = getAggFunction(aggregation);
-                    lastIndex = index;
+                if(startIndex < 0) {
+                    startIndex = index;
                 }
-                int n = aggFunction.getN();
-                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
-                int from = groupIndexes.get(index) + n;
+                if(index < startIndex) {
+                    aggFunction.reset();
+                    float[] additionalData = new float[startIndex - index];
+                    for (int i = index; i < startIndex; i++) {
+                        int n = aggFunction.getN();
+                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
+                        int from = groupIndexes.get(i) + n;
+                        if (length > 0) {
+                            aggFunction.add(dataSequence, from, length);
+                        }
+                        additionalData[i - index] = aggFunction.getValue();
+                        aggFunction.reset();
+                    }
+                    aggData.add(0, additionalData);
+                    startIndex = index;
+                }
 
-                if (length > 0) {
-                    aggFunction.add(dataSequence, from, length);
+                if(index >= aggData.size() + startIndex) {
+                    for (int i = aggData.size() + startIndex; i <= index; i++) {
+                        int n = aggFunction.getN();
+                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
+                        int from = groupIndexes.get(i) + n;
+                        if (length > 0) {
+                            aggFunction.add(dataSequence, from, length);
+                        }
+                        aggData.add(aggFunction.getValue());
+                        aggFunction.reset();
+                    }
                 }
-                return aggFunction.getValue();
+                return aggData.get(index - startIndex);
             }
         };
         return new FloatColumn(resultantSequence);
