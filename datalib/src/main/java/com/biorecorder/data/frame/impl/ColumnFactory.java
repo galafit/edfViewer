@@ -1,12 +1,11 @@
 package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.frame.Column;
+import com.biorecorder.data.frame.DataType;
 import com.biorecorder.data.frame.Function;
 import com.biorecorder.data.sequence.*;
 
-/**
- * Created by galafit on 7/5/19.
- */
+
 public class ColumnFactory {
     public static Column createColumn(ShortSequence data) {
         return new ShortColumn(data);
@@ -45,10 +44,35 @@ public class ColumnFactory {
     public Column concat(Column column1, int column1Length, Column column2) {
         if(column1.dataType() == column2.dataType()) {
             switch (column1.dataType()) {
+                case Short:
+                    return concat((ShortColumn) column1, column1Length, (ShortColumn) column1);
                 case Integer:
                     return concat((IntColumn) column1, column1Length, (IntColumn) column1);
+                case Long:
+                    return concat((LongColumn) column1, column1Length, (LongColumn) column1);
+                case Float:
+                    return concat((FloatColumn) column1, column1Length, (FloatColumn) column1);
             }
         }
+        if(column1.dataType() == DataType.String || column1.dataType() == DataType.String) {
+            StringSequence resultantSequence = new StringSequence() {
+                @Override
+                public int size() {
+                    return column1Length + column2.size();
+                }
+
+                @Override
+                public String get(int index) {
+                    if(index < column1Length) {
+                        return column1.label(index);
+                    } else {
+                        return column2.label(index - column1Length);
+                    }
+                }
+            };
+            return new StringColumn(resultantSequence);
+        }
+
         DoubleSequence resultantSequence = new DoubleSequence() {
             @Override
             public int size() {
@@ -65,6 +89,46 @@ public class ColumnFactory {
             }
         };
         return new DoubleColumn(resultantSequence);
+    }
+
+
+
+        private Column concat(DoubleColumn column1, int column1Length, DoubleColumn column2) {
+        DoubleSequence resultantSequence = new DoubleSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public double get(int index) {
+                if(index < column1Length) {
+                    return column1.doubleValue(index);
+                } else {
+                    return column2.doubleValue(index - column1Length);
+                }
+            }
+        };
+        return new DoubleColumn(resultantSequence);
+    }
+
+    private Column concat(FloatColumn column1, int column1Length, FloatColumn column2) {
+        FloatSequence resultantSequence = new FloatSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public float get(int index) {
+                if(index < column1Length) {
+                    return column1.floatValue(index);
+                } else {
+                    return column2.floatValue(index - column1Length);
+                }
+            }
+        };
+        return new FloatColumn(resultantSequence);
     }
 
     private Column concat(IntColumn column1, int column1Length, IntColumn column2) {
@@ -86,4 +150,41 @@ public class ColumnFactory {
         return new IntColumn(resultantSequence);
     }
 
+    private Column concat(LongColumn column1, int column1Length, LongColumn column2) {
+        LongSequence resultantSequence = new LongSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public long get(int index) {
+                if(index < column1Length) {
+                    return column1.longValue(index);
+                } else {
+                    return column2.longValue(index - column1Length);
+                }
+            }
+        };
+        return new LongColumn(resultantSequence);
+    }
+
+    private Column concat(ShortColumn column1, int column1Length, ShortColumn column2) {
+        ShortSequence resultantSequence = new ShortSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public short get(int index) {
+                if(index < column1Length) {
+                    return column1.shortValue(index);
+                } else {
+                    return column2.shortValue(index - column1Length);
+                }
+            }
+        };
+        return new ShortColumn(resultantSequence);
+    }
 }

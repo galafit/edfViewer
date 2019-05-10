@@ -1,6 +1,7 @@
 package com.biorecorder.data.frame.impl;
 
 import com.biorecorder.data.frame.Column;
+import com.biorecorder.data.frame.DataType;
 import com.biorecorder.data.frame.Function;
 import com.biorecorder.data.sequence.*;
 
@@ -40,13 +41,38 @@ public class ColumnFactory {
         return new FunctionColumn(function, argColumn);
     }
 
-    public Column concat(Column column1, int column1Length, Column column2) {
+   public Column concat(Column column1, int column1Length, Column column2) {
         if(column1.dataType() == column2.dataType()) {
             switch (column1.dataType()) {
+                case Short:
+                    return concat((ShortColumn) column1, column1Length, (ShortColumn) column1);
                 case Integer:
                     return concat((IntColumn) column1, column1Length, (IntColumn) column1);
+                case Long:
+                    return concat((LongColumn) column1, column1Length, (LongColumn) column1);
+                case Float:
+                    return concat((FloatColumn) column1, column1Length, (FloatColumn) column1);
             }
         }
+        if(column1.dataType() == DataType.String || column1.dataType() == DataType.String) {
+            StringSequence resultantSequence = new StringSequence() {
+                @Override
+                public int size() {
+                    return column1Length + column2.size();
+                }
+
+                @Override
+                public String get(int index) {
+                    if(index < column1Length) {
+                        return column1.label(index);
+                    } else {
+                        return column2.label(index - column1Length);
+                    }
+                }
+            };
+            return new StringColumn(resultantSequence);
+        }
+
         DoubleSequence resultantSequence = new DoubleSequence() {
             @Override
             public int size() {
@@ -65,7 +91,7 @@ public class ColumnFactory {
         return new DoubleColumn(resultantSequence);
     }
 
-    #REPLICATED0#
+#REPLICATED0#
 }
 
 ====START_REPLICATED_CONTENT #0====

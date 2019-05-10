@@ -243,10 +243,10 @@ public class Generator {
         } else if (file_name.contains("_E_")) {
             processEMarkers(content, output_directory, file_name);
         } else {
-            if (input_file.lastModified() < output_file.lastModified()) {
+            /*if (input_file.lastModified() < output_file.lastModified()) {
                 System.out.println("File " + output_file + " up to date, not processing input");
                 return;
-            }
+            }*/
 
             // Replication only
             StringBuilder processed_replication_output = new StringBuilder();

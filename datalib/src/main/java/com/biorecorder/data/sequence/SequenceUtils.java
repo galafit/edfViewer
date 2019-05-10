@@ -6,6 +6,7 @@ import com.biorecorder.data.utils.SortAlgorithm;
 import com.biorecorder.data.utils.Swapper;
 
 /**
+* Test
  * Based on:
  * <br><a href="https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/search/UpperBound.java">github UpperBound.java</a>
  * <br><a href="https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/search/LowerBound.java">github LowerBound.java</a>
@@ -160,7 +161,6 @@ public class SequenceUtils {
     }
 
 
-
     /**
      * This method do not modifying the order of the underlying data!
      * It simply returns an array of sorted indexes which represent sorted version (view)
@@ -288,7 +288,6 @@ public class SequenceUtils {
         return low;  // key not found.
     }
 
-
     /**
      * Binary search algorithm. The sequence must be sorted!
      * Find the index of the <b>value</b>. If data sequence contains
@@ -398,7 +397,6 @@ public class SequenceUtils {
         return low;
     }
 
-
     /**
      * Binary search algorithm. The sequence must be sorted!
      * Finds the insertion point for <b>value</b> in the data sequence to maintain sorted order.
@@ -507,7 +505,6 @@ public class SequenceUtils {
 
         return low;
     }
-
 
     /**
      * Binary search algorithm. The sequence must be sorted!
