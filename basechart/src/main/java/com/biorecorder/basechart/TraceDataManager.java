@@ -464,9 +464,10 @@ public class TraceDataManager {
                 if (isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
                     if (traceData.rowCount() > prevTraceDataSize) {
-                        groupedData.appendData();
+                       // groupedData.appendData();
                     }
-                    ChartData slicedGroupedData = groupedData.slice(0, groupedData.rowCount());
+                    ChartData reGroupedData = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
+                    ChartData slicedGroupedData = reGroupedData.slice(0, reGroupedData.rowCount());
                     groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
                     groupedDataNew = slicedGroupedData.concat(groupedDataNew.view(slicedGroupedData.rowCount(), -1));
                     //groupedDataNew = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);

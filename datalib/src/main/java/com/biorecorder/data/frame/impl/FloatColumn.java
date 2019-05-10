@@ -58,7 +58,13 @@ class FloatColumn implements Column {
         FloatSequence subSequence = new FloatSequence() {
             @Override
             public int size() {
-                return length;
+                if(length >= 0) {
+                    return length;
+                }
+                if(dataSequence.size() - from <= 0) {
+                    return 0;
+                }
+                return dataSequence.size() - from;
             }
 
             @Override

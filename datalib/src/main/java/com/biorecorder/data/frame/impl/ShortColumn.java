@@ -58,7 +58,13 @@ class ShortColumn implements Column {
         ShortSequence subSequence = new ShortSequence() {
             @Override
             public int size() {
-                return length;
+                if(length >= 0) {
+                    return length;
+                }
+                if(dataSequence.size() - from <= 0) {
+                    return 0;
+                }
+                return dataSequence.size() - from;
             }
 
             @Override

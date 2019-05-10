@@ -121,6 +121,7 @@ class IntColumn implements Column {
         return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
 
+
     @Override
     public IntSequence group(double interval, IntWrapper length) {
         return group(new IntIntervalProvider(PrimitiveUtils.roundDouble2int(interval)), length);
