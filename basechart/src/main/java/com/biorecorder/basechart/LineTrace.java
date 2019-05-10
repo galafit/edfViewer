@@ -53,7 +53,7 @@ public class LineTrace extends Trace {
 
     @Override
     protected int curveYPosition(int curveNumber, int dataIndex, ChartData data) {
-        return (int) getYScale(curveNumber).scale(data.getValue(dataIndex, curveNumber + 1));
+        return (int) getYScale(curveNumber).scale(data.value(dataIndex, curveNumber + 1));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class LineTrace extends Trace {
 
     @Override
     protected Range curveYMinMax(int curveNumber, ChartData data) {
-        return data.getColumnMinMax(curveNumber + 1);
+        return data.columnMinMax(curveNumber + 1);
     }
 
     private BColor getLineColor(int curveNumber) {

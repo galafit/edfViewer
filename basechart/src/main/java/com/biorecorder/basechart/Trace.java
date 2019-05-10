@@ -72,12 +72,12 @@ public abstract class Trace {
     }
 
     public NamedValue xValue(int dataIndex) {
-        double xValue = getData().getValue(dataIndex, 0);
+        double xValue = getData().value(dataIndex, 0);
         return new NamedValue("x: ", xValue, xScale.formatDomainValue(xValue));
     }
 
     public int xPosition(int dataIndex) {
-        double xValue = getData().getValue(dataIndex, 0);
+        double xValue = getData().value(dataIndex, 0);
         return (int) xScale.scale(xValue);
     }
 

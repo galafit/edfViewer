@@ -21,15 +21,19 @@ public interface ChartData {
 
     boolean isColumnIncreasing(int columnNumber);
 
-    double getValue(int rowNumber, int columnNumber);
+    double value(int rowNumber, int columnNumber);
 
-    String getLabel(int rowNumber, int columnNumber);
+    String label(int rowNumber, int columnNumber);
 
-    Range getColumnMinMax(int columnNumber);
+    Range columnMinMax(int columnNumber);
 
     int bisect(int columnNumber, double value, int[] sorter);
 
     ChartData view(int fromRowNumber, int length);
+
+    ChartData slice(int fromRowNumber, int length);
+
+    ChartData concat(ChartData data);
 
     int[] sortedIndices(int sortColumn);
 

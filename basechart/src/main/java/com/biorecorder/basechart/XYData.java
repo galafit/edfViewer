@@ -12,7 +12,7 @@ import java.util.List;
 public class XYData implements ChartData {
     private DataFrame dataFrame;
 
-   private XYData(DataFrame dataFrame) {
+    private XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
     }
 
@@ -38,7 +38,7 @@ public class XYData implements ChartData {
 
     private void onColumnAdded(int columnNumber) {
         Aggregation agg = Aggregation.AVERAGE;
-        if(columnNumber == 0) {
+        if (columnNumber == 0) {
             agg = Aggregation.FIRST;
         }
         dataFrame.setColumnName(columnNumber, "");
@@ -72,10 +72,10 @@ public class XYData implements ChartData {
 
     public void setColumnName(int columnNumber, String columnName) {
         dataFrame.setColumnName(columnNumber, columnName);
-   }
+    }
 
     public void setColumnAggFunctions(int columnNumber, Aggregation aggFunction) throws IllegalArgumentException {
-        if(aggFunction == null) {
+        if (aggFunction == null) {
             String errMsg = "Aggregate function must be not null";
             throw new IllegalArgumentException(errMsg);
         }
@@ -110,7 +110,7 @@ public class XYData implements ChartData {
     @Override
     public boolean isColumnIncreasing(int columnNumber) {
         Stats stats = dataFrame.stats(columnNumber);
-        if(stats == null) {
+        if (stats == null) {
             return false;
         }
         return dataFrame.stats(columnNumber).isIncreasing();
@@ -122,19 +122,19 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public double getValue(int rowNumber, int columnNumber) {
+    public double value(int rowNumber, int columnNumber) {
         return dataFrame.value(rowNumber, columnNumber);
     }
 
     @Override
-    public String getLabel(int rowNumber, int columnNumber) {
+    public String label(int rowNumber, int columnNumber) {
         return dataFrame.label(rowNumber, columnNumber);
     }
 
     @Override
-    public Range getColumnMinMax(int columnNumber) {
+    public Range columnMinMax(int columnNumber) {
         Stats stats = dataFrame.stats(columnNumber);
-        if(stats == null) {
+        if (stats == null) {
             return null;
         }
         return new Range(stats.min(), stats.max());
@@ -143,6 +143,19 @@ public class XYData implements ChartData {
     @Override
     public int bisect(int columnNumber, double value, int[] sorter) {
         return dataFrame.bisect(columnNumber, value, sorter);
+    }
+
+    @Override
+    public ChartData slice(int fromRowNumber, int length) {
+        return new XYData(dataFrame.slice(fromRowNumber, length));
+    }
+
+    @Override
+    public ChartData concat(ChartData data) {
+        if(data instanceof XYData) {
+            return new XYData(dataFrame.concat(((XYData)data).dataFrame));
+        }
+        throw new IllegalArgumentException("XYData can be concatenated only with XYData");
     }
 
     @Override

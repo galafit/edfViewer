@@ -80,7 +80,7 @@ public class TraceDataManager {
 
                 @Override
                 public String get(int index) {
-                    return traceData.getLabel(index, 0);
+                    return traceData.label(index, 0);
                 }
             };
         }
@@ -92,7 +92,7 @@ public class TraceDataManager {
         if (traceData.columnCount() == 0) {
             return null;
         }
-        return traceData.getColumnMinMax(0);
+        return traceData.columnMinMax(0);
     }
 
     public int nearest(double xValue) {
@@ -127,7 +127,7 @@ public class TraceDataManager {
             nearest_prev = sorter[nearest_prev];
         }
         if (nearest != nearest_prev) {
-            if (Math.abs(data.getValue(nearest_prev, 0) - xValue) < Math.abs(data.getValue(nearest, 0) - xValue)) {
+            if (Math.abs(data.value(nearest_prev, 0) - xValue) < Math.abs(data.value(nearest, 0) - xValue)) {
                 nearest = nearest_prev;
             }
         }
@@ -202,7 +202,7 @@ public class TraceDataManager {
         if (traceData.rowCount() != prevTraceDataSize) {
             double[] domain = xScale.getDomain();
             Double xMax = domain[domain.length - 1];
-            if (traceData.getValue(prevTraceDataSize - 1, 0) < xMax) {
+            if (traceData.value(prevTraceDataSize - 1, 0) < xMax) {
                 return false;
             }
         }
@@ -219,7 +219,7 @@ public class TraceDataManager {
         double[] domain = xScale.getDomain();
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
-        Range dataMinMax = traceData.getColumnMinMax(0);
+        Range dataMinMax = traceData.columnMinMax(0);
         return  processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
     }
 
@@ -327,7 +327,7 @@ public class TraceDataManager {
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
 
-        Range traceDataMinMax = traceData.getColumnMinMax(0);
+        Range traceDataMinMax = traceData.columnMinMax(0);
         Range minMax = Range.intersect(traceDataMinMax, new Range(xMin, xMax));
 
         if (minMax == null) {
@@ -460,14 +460,17 @@ public class TraceDataManager {
             if (isNextStepGrouping) {
                 int pointsInGroupOnGroupedData = roundPoints(groupIntervalToPoints(groupedData, groupInterval.intervalLength()));
                 pointsInGroupOnGroupedData = Math.max(pointsInGroupOnGroupedData, processingConfig.getGroupingStep());
+                double groupIntervalRound = pointsNumberToGroupInterval(groupedData, pointsInGroupOnGroupedData);
                 if (isEqualFrequencyGrouping) {
                     // we use already grouped data for further grouping
                     if (traceData.rowCount() > prevTraceDataSize) {
                         groupedData.appendData();
                     }
-                    groupedDataNew = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
+                    ChartData slicedGroupedData = groupedData.slice(0, groupedData.rowCount());
+                    groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
+                    groupedDataNew = slicedGroupedData.concat(groupedDataNew.view(slicedGroupedData.rowCount(), -1));
+                    //groupedDataNew = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
                 } else {
-                    double groupIntervalRound = pointsNumberToGroupInterval(groupedData, pointsInGroupOnGroupedData);
                     groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
                 }
             }
@@ -559,7 +562,7 @@ public class TraceDataManager {
         }
 
         for (int i = groupedData.rowCount()/4; i < groupedData.rowCount()/2; i++) {
-            groupedData.getValue(i, 1);
+            groupedData.value(i, 1);
         }
 
 
@@ -568,7 +571,7 @@ public class TraceDataManager {
 
     public double getBestExtent(double drawingAreaWidth, int markSize) {
         if (traceData.rowCount() > 1) {
-            Range dataMinMax = traceData.getColumnMinMax(0);
+            Range dataMinMax = traceData.columnMinMax(0);
             if (markSize <= 0) {
                 markSize = 1;
             }
@@ -612,7 +615,7 @@ public class TraceDataManager {
 
     double getDataAvgStep(ChartData data) {
         int dataSize = data.rowCount();
-        return (data.getValue(dataSize - 1, 0) - data.getValue(0, 0)) / (dataSize - 1);
+        return (data.value(dataSize - 1, 0) - data.value(0, 0)) / (dataSize - 1);
     }
 
     class IntervalInfo {

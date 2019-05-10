@@ -58,7 +58,13 @@ class IntColumn implements Column {
         IntSequence subSequence = new IntSequence() {
             @Override
             public int size() {
-                return length;
+                if(length >= 0) {
+                    return length;
+                }
+                if(dataSequence.size() - from <= 0) {
+                    return 0;
+                }
+                return dataSequence.size() - from;
             }
 
             @Override
@@ -114,7 +120,6 @@ class IntColumn implements Column {
     public int[] sort(int from, int length, boolean isParallel) {
         return SequenceUtils.sort(dataSequence, from, length, isParallel);
     }
-
 
     @Override
     public IntSequence group(double interval, IntWrapper length) {

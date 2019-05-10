@@ -17,14 +17,14 @@ public class XYViewer {
     }
 
     public double getX(int index) {
-        return data.getValue(index, 0);
+        return data.value(index, 0);
     }
 
     public double getY(int index) {
-        return data.getValue(index, yColumnNumber);
+        return data.value(index, yColumnNumber);
     }
 
     public Range getYMinMax() {
-        return data.getColumnMinMax(yColumnNumber);
+        return data.columnMinMax(yColumnNumber);
     }
 }
