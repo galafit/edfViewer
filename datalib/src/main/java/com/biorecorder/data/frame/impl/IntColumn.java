@@ -3,6 +3,7 @@ package com.biorecorder.data.frame.impl;
 import com.biorecorder.data.frame.*;
 import com.biorecorder.data.frame.Interval;
 import com.biorecorder.data.list.IntArrayList;
+import com.biorecorder.data.sequence.DoubleSequence;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.sequence.IntSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;

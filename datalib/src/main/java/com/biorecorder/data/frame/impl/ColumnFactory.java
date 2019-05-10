@@ -41,4 +41,49 @@ public class ColumnFactory {
     public static Column createColumn(Function function, Column argColumn) {
         return new FunctionColumn(function, argColumn);
     }
+
+    public Column concat(Column column1, int column1Length, Column column2) {
+        if(column1.dataType() == column2.dataType()) {
+            switch (column1.dataType()) {
+                case Integer:
+                    return concat((IntColumn) column1, column1Length, (IntColumn) column1);
+            }
+        }
+        DoubleSequence resultantSequence = new DoubleSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public double get(int index) {
+                if(index < column1Length) {
+                    return column1.value(index);
+                } else {
+                    return column2.value(index - column1Length);
+                }
+            }
+        };
+        return new DoubleColumn(resultantSequence);
+    }
+
+    private Column concat(IntColumn column1, int column1Length, IntColumn column2) {
+        IntSequence resultantSequence = new IntSequence() {
+            @Override
+            public int size() {
+                return column1Length + column2.size();
+            }
+
+            @Override
+            public int get(int index) {
+                if(index < column1Length) {
+                    return column1.intValue(index);
+                } else {
+                    return column2.intValue(index - column1Length);
+                }
+            }
+        };
+        return new IntColumn(resultantSequence);
+    }
+
 }

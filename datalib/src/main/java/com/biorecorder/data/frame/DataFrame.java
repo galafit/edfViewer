@@ -231,6 +231,7 @@ public class DataFrame {
         return columnNumberToFunctionInfo.get(columnNumber) != null;
     }
 
+
     /**
      * Binary search algorithm. The column data must be sorted!
      * Find the index of the <b>value</b> in the given column. If the column containsInt
