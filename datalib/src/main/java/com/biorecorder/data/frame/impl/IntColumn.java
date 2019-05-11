@@ -62,7 +62,7 @@ class IntColumn implements Column {
         return new IntColumn(slicedData);
     }
 
-
+    @Override
     public Column slice(int from) {
         IntSequence slicedSequence = new IntSequence() {
             IntArrayList slicedData = new IntArrayList();
@@ -84,6 +84,7 @@ class IntColumn implements Column {
         return new IntColumn(slicedSequence);
     }
 
+    @Override
     public Column view(int from) {
         IntSequence subSequence = new IntSequence() {
             @Override
@@ -98,6 +99,7 @@ class IntColumn implements Column {
         };
         return new IntColumn(subSequence);
     }
+
 
     @Override
     public Column view(int from, int length) {
@@ -115,7 +117,6 @@ class IntColumn implements Column {
         return new IntColumn(subSequence);
     }
 
-
     @Override
     public Column view(int[] order) {
         IntSequence subSequence = new IntSequence() {
@@ -131,7 +132,6 @@ class IntColumn implements Column {
         };
         return new IntColumn(subSequence);
     }
-
 
     @Override
     public int bisect(double value, int from, int length) {

@@ -54,17 +54,59 @@ class ShortColumn implements Column {
     }
 
     @Override
+    public Column slice(int from, int length) {
+        ShortArrayList slicedData = new ShortArrayList(length);
+        for (int i = 0; i < length; i++) {
+            slicedData.add(dataSequence.get(from + i));
+        }
+        return new ShortColumn(slicedData);
+    }
+
+    @Override
+    public Column slice(int from) {
+        ShortSequence slicedSequence = new ShortSequence() {
+            ShortArrayList slicedData = new ShortArrayList();
+            @Override
+            public int size() {
+                return dataSequence.size() - from;
+            }
+
+            @Override
+            public short get(int index) {
+                if(index >= slicedData.size()) {
+                    for (int i = slicedData.size(); i <= index; i++) {
+                        slicedData.add(dataSequence.get(from + i));
+                    }
+                }
+                return slicedData.get(index);
+            }
+        };
+        return new ShortColumn(slicedSequence);
+    }
+
+    @Override
+    public Column view(int from) {
+        ShortSequence subSequence = new ShortSequence() {
+            @Override
+            public int size() {
+                return dataSequence.size() - from;
+            }
+
+            @Override
+            public short get(int index) {
+                return dataSequence.get(index + from);
+            }
+        };
+        return new ShortColumn(subSequence);
+    }
+
+
+    @Override
     public Column view(int from, int length) {
         ShortSequence subSequence = new ShortSequence() {
             @Override
             public int size() {
-                if(length >= 0) {
-                    return length;
-                }
-                if(dataSequence.size() - from <= 0) {
-                    return 0;
-                }
-                return dataSequence.size() - from;
+                return length;
             }
 
             @Override
@@ -89,26 +131,6 @@ class ShortColumn implements Column {
             }
         };
         return new ShortColumn(subSequence);
-    }
-
-
-  @Override
-    public Column slice(int from, int length) {
-        short[] slicedData = new short[length];
-        for (int i = 0; i < length; i++) {
-            slicedData[i] = dataSequence.get(from + i);
-        }
-        return new ShortColumn(new ShortSequence() {
-            @Override
-            public int size() {
-                return slicedData.length;
-            }
-
-            @Override
-            public short get(int index) {
-                return slicedData[index];
-            }
-        });
     }
 
     @Override
@@ -208,8 +230,6 @@ class ShortColumn implements Column {
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         ShortSequence resultantSequence = new ShortSequence() {
             private ShortAggFunction aggFunction = getAggFunction(aggregation);
-            private ShortArrayList aggData = new ShortArrayList();
-            private int startIndex = -1;
 
             @Override
             public int size() {
@@ -218,39 +238,14 @@ class ShortColumn implements Column {
 
             @Override
             public short get(int index) {
-                if(startIndex < 0) {
-                    startIndex = index;
+                aggFunction.reset();
+                int n = aggFunction.getN();
+                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
+                int from = groupIndexes.get(index) + n;
+                if (length > 0) {
+                    aggFunction.add(dataSequence, from, length);
                 }
-                if(index < startIndex) {
-                    aggFunction.reset();
-                    short[] additionalData = new short[startIndex - index];
-                    for (int i = index; i < startIndex; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        additionalData[i - index] = aggFunction.getValue();
-                        aggFunction.reset();
-                    }
-                    aggData.add(0, additionalData);
-                    startIndex = index;
-                }
-
-                if(index >= aggData.size() + startIndex) {
-                    for (int i = aggData.size() + startIndex; i <= index; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        aggData.add(aggFunction.getValue());
-                        aggFunction.reset();
-                    }
-                }
-                return aggData.get(index - startIndex);
+                return aggFunction.getValue();
             }
         };
         return new ShortColumn(resultantSequence);

@@ -38,13 +38,6 @@ public class TraceDataManager {
 
     public void appendData() {
         traceData.appendData();
-        if (groupingIntervals != null) {
-            for (ChartData data : groupedDataList) {
-                if (data != null) {
-                    data.appendData();
-                }
-            }
-        }
     }
 
     public void setConfig(DataProcessingConfig processingConfig) {
@@ -467,10 +460,17 @@ public class TraceDataManager {
                        // groupedData.appendData();
                     }
                     ChartData reGroupedData = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
-                    ChartData slicedGroupedData = reGroupedData.slice(0, reGroupedData.rowCount());
-                    groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
-                    groupedDataNew = slicedGroupedData.concat(groupedDataNew.view(slicedGroupedData.rowCount(), -1));
+                    ChartData slicedGroupedData = reGroupedData.slice(0, reGroupedData.rowCount() - 1);
+                    int pointsInGroupInOriginalData = roundPoints(groupIntervalToPoints(traceData, groupIntervalRound));
+                    int startIndex = (reGroupedData.rowCount() - 1) * pointsInGroupInOriginalData;
+                    if(startIndex < 0) {
+                        startIndex = 0;
+                    }
+                    ChartData data = group(traceData.view(startIndex), new NumberGroupInterval(groupIntervalRound));
+                    groupedDataNew = slicedGroupedData.concat(data);
+                    System.out.println(groupedDataNew.rowCount() +" isRegular "+groupedDataNew.isColumnRegular(0));
                     //groupedDataNew = groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
+
                 } else {
                     groupedDataNew = group(traceData, new NumberGroupInterval(groupIntervalRound));
                 }

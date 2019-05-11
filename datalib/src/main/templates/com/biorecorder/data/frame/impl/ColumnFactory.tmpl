@@ -69,13 +69,13 @@ public class ColumnFactory {
         if(column1.dataType() == column2.dataType()) {
             switch (column1.dataType()) {
                 case Short:
-                    return concat((ShortColumn) column1, column1Length, (ShortColumn) column1);
+                    return concat((ShortColumn) column1, column1Length, (ShortColumn) column2);
                 case Integer:
-                    return concat((IntColumn) column1, column1Length, (IntColumn) column1);
+                    return concat((IntColumn) column1, column1Length, (IntColumn) column2);
                 case Long:
-                    return concat((LongColumn) column1, column1Length, (LongColumn) column1);
+                    return concat((LongColumn) column1, column1Length, (LongColumn) column2);
                 case Float:
-                    return concat((FloatColumn) column1, column1Length, (FloatColumn) column1);
+                    return concat((FloatColumn) column1, column1Length, (FloatColumn) column2);
             }
         }
 

@@ -116,6 +116,17 @@ class RegularColumn extends DoubleColumn {
     }
 
     @Override
+    public Column slice(int from) {
+        return new RegularColumn(value(from), step, size - from);
+    }
+
+
+    @Override
+    public Column view(int from) {
+        return new RegularColumn(value(from), step, size - from);
+    }
+
+    @Override
     public Column view(int from, int length) {
         return new RegularColumn(value(from), step, length);
     }

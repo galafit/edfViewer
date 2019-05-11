@@ -24,7 +24,9 @@ public interface Column {
      */
     int[] sort(int from, int length, boolean isParallel);
 
+    Column slice(int from);
     Column slice(int from, int length);
+    Column view(int from);
     Column view(int from, int length);
     Column view(int[] order);
 

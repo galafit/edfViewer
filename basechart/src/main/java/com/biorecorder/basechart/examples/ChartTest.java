@@ -114,18 +114,16 @@ public class ChartTest extends JFrame {
         }
 
         Thread t = new Thread(new Runnable() {
-            int interval = 5;
+            int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 15; count++) {
+                for (int count = 0; count < 5; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    int yData1Last = list1.get(list1.size() - 1);
-                    int yData2Last = list2.get(list2.size() - 1);
 
                     for (int i = 1; i < 171; i++) {
                         list1.add(list1.size());
@@ -139,7 +137,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-       // t.start();
+        t.start();
     }
 
     public static void main(String[] args) {

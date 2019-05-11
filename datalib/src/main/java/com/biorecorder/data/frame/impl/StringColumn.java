@@ -67,6 +67,16 @@ public class StringColumn implements Column {
     }
 
     @Override
+    public Column slice(int from) {
+        return new StringColumn((LongColumn) intColumn.slice(from), labelSequence);
+    }
+
+    @Override
+    public Column view(int from) {
+        return new StringColumn((LongColumn) intColumn.view(from), labelSequence);
+    }
+
+    @Override
     public Column view(int from, int length) {
         return new StringColumn((LongColumn) intColumn.view(from, length), labelSequence);
     }

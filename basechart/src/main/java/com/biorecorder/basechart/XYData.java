@@ -159,23 +159,29 @@ public class XYData implements ChartData {
     }
 
     @Override
+    public ChartData view(int fromRowNumber) {
+        return new XYData(dataFrame.view(fromRowNumber));
+    }
+
+
+    @Override
     public ChartData view(int fromRowNumber, int length) {
         return new XYData(dataFrame.view(fromRowNumber, length));
     }
 
     @Override
     public ChartData resampleByEqualPointsNumber(int points) {
-        return new XYData(dataFrame.resampleByEqualPointsNumber(points));
+        return new XYData(dataFrame.resampleByEqualPointsNumber(points, true));
     }
 
     @Override
     public ChartData resampleByEqualInterval(int columnNumber, double interval) {
-        return new XYData(dataFrame.resampleByEqualInterval(columnNumber, interval));
+        return new XYData(dataFrame.resampleByEqualInterval(columnNumber, interval, true));
     }
 
     @Override
     public ChartData resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval) {
-        return new XYData(dataFrame.resampleByEqualTimeInterval(columnNumber, timeInterval));
+        return new XYData(dataFrame.resampleByEqualTimeInterval(columnNumber, timeInterval, true));
     }
 
     @Override

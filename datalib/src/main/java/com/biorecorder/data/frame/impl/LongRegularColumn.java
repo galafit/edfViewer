@@ -92,6 +92,15 @@ public class LongRegularColumn extends LongColumn {
         return new LongRegularColumn(longValue(from), step, length);
     }
 
+    @Override
+    public Column slice(int from) {
+        return new LongRegularColumn(longValue(from), step, size - from);
+    }
+
+    @Override
+    public Column view(int from) {
+        return new LongRegularColumn(longValue(from), step, size - from);
+    }
 
     @Override
     public Column view(int from, int length) {

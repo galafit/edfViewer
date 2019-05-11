@@ -54,17 +54,59 @@ class FloatColumn implements Column {
     }
 
     @Override
+    public Column slice(int from, int length) {
+        FloatArrayList slicedData = new FloatArrayList(length);
+        for (int i = 0; i < length; i++) {
+            slicedData.add(dataSequence.get(from + i));
+        }
+        return new FloatColumn(slicedData);
+    }
+
+    @Override
+    public Column slice(int from) {
+        FloatSequence slicedSequence = new FloatSequence() {
+            FloatArrayList slicedData = new FloatArrayList();
+            @Override
+            public int size() {
+                return dataSequence.size() - from;
+            }
+
+            @Override
+            public float get(int index) {
+                if(index >= slicedData.size()) {
+                    for (int i = slicedData.size(); i <= index; i++) {
+                        slicedData.add(dataSequence.get(from + i));
+                    }
+                }
+                return slicedData.get(index);
+            }
+        };
+        return new FloatColumn(slicedSequence);
+    }
+
+    @Override
+    public Column view(int from) {
+        FloatSequence subSequence = new FloatSequence() {
+            @Override
+            public int size() {
+                return dataSequence.size() - from;
+            }
+
+            @Override
+            public float get(int index) {
+                return dataSequence.get(index + from);
+            }
+        };
+        return new FloatColumn(subSequence);
+    }
+
+
+    @Override
     public Column view(int from, int length) {
         FloatSequence subSequence = new FloatSequence() {
             @Override
             public int size() {
-                if(length >= 0) {
-                    return length;
-                }
-                if(dataSequence.size() - from <= 0) {
-                    return 0;
-                }
-                return dataSequence.size() - from;
+                return length;
             }
 
             @Override
@@ -89,26 +131,6 @@ class FloatColumn implements Column {
             }
         };
         return new FloatColumn(subSequence);
-    }
-
-
-  @Override
-    public Column slice(int from, int length) {
-        float[] slicedData = new float[length];
-        for (int i = 0; i < length; i++) {
-            slicedData[i] = dataSequence.get(from + i);
-        }
-        return new FloatColumn(new FloatSequence() {
-            @Override
-            public int size() {
-                return slicedData.length;
-            }
-
-            @Override
-            public float get(int index) {
-                return slicedData[index];
-            }
-        });
     }
 
     @Override
@@ -208,8 +230,6 @@ class FloatColumn implements Column {
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         FloatSequence resultantSequence = new FloatSequence() {
             private FloatAggFunction aggFunction = getAggFunction(aggregation);
-            private FloatArrayList aggData = new FloatArrayList();
-            private int startIndex = -1;
 
             @Override
             public int size() {
@@ -218,39 +238,14 @@ class FloatColumn implements Column {
 
             @Override
             public float get(int index) {
-                if(startIndex < 0) {
-                    startIndex = index;
+                aggFunction.reset();
+                int n = aggFunction.getN();
+                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
+                int from = groupIndexes.get(index) + n;
+                if (length > 0) {
+                    aggFunction.add(dataSequence, from, length);
                 }
-                if(index < startIndex) {
-                    aggFunction.reset();
-                    float[] additionalData = new float[startIndex - index];
-                    for (int i = index; i < startIndex; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        additionalData[i - index] = aggFunction.getValue();
-                        aggFunction.reset();
-                    }
-                    aggData.add(0, additionalData);
-                    startIndex = index;
-                }
-
-                if(index >= aggData.size() + startIndex) {
-                    for (int i = aggData.size() + startIndex; i <= index; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        aggData.add(aggFunction.getValue());
-                        aggFunction.reset();
-                    }
-                }
-                return aggData.get(index - startIndex);
+                return aggFunction.getValue();
             }
         };
         return new FloatColumn(resultantSequence);

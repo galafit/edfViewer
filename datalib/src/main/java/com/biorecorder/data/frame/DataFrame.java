@@ -33,7 +33,7 @@ public class DataFrame {
             int originalColumnNumber = columnOrder[i];
             Column columnToAdd = dataFrame.columns.get(originalColumnNumber);
             FunctionColumnInfo functionColumnInfo = dataFrame.columnNumberToFunctionInfo.get(originalColumnNumber);
-            if(functionColumnInfo != null) {
+            if (functionColumnInfo != null) {
                 // check that columnOrder contains the column used by this one
                 int argColumnNumber = -1;
                 for (int j = 0; j < columnOrder.length; j++) {
@@ -42,7 +42,7 @@ public class DataFrame {
                         break;
                     }
                 }
-                if(argColumnNumber < 0) {
+                if (argColumnNumber < 0) {
                     String errMsg = "Column: " + originalColumnNumber +
                             " can not be added because it depends upon column that is not presented in the given columnOrder";
                     throw new IllegalArgumentException(errMsg);
@@ -58,13 +58,13 @@ public class DataFrame {
     public void removeColumn(int columnNumber) throws IllegalArgumentException {
         for (Integer key : columnNumberToFunctionInfo.keySet()) {
             FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(key);
-            if(functionColumnInfo.argColumnNumber == columnNumber) {
+            if (functionColumnInfo.argColumnNumber == columnNumber) {
                 String errMsg = "Column: " + columnNumber + " is used by function column: " + key + " and can not be removed";
                 throw new IllegalArgumentException(errMsg);
             }
         }
-        if(columnNumberToFunctionInfo.get(columnNumber) != null) {
-           columnNumberToFunctionInfo.remove(columnNumber);
+        if (columnNumberToFunctionInfo.get(columnNumber) != null) {
+            columnNumberToFunctionInfo.remove(columnNumber);
         }
         columns.remove(columnNumber);
         columnNames.remove(columnNumber);
@@ -81,14 +81,14 @@ public class DataFrame {
     }
 
     public void addColumn(Function function, int argColumnNumber) {
-        if(columns.get(argColumnNumber).dataType() == DataType.String) {
+        if (columns.get(argColumnNumber).dataType() == DataType.String) {
             String errMsg = "Function column may not depend upon String column";
             throw new IllegalArgumentException(errMsg);
 
         }
         for (Integer key : columnNumberToFunctionInfo.keySet()) {
-            if(key == argColumnNumber) {
-                String errMsg = "Column: " +  argColumnNumber + " is a function column and may not be used as argument for another function column";
+            if (key == argColumnNumber) {
+                String errMsg = "Column: " + argColumnNumber + " is a function column and may not be used as argument for another function column";
                 throw new IllegalArgumentException(errMsg);
             }
         }
@@ -144,7 +144,7 @@ public class DataFrame {
         addColumn(ColumnFactory.createColumn(data));
     }
 
-    public  void addColumn(List<String> data) {
+    public void addColumn(List<String> data) {
         addColumn(new StringSequence() {
             @Override
             public int size() {
@@ -253,7 +253,7 @@ public class DataFrame {
         for (int i = 0; i < cols; i++) {
             FunctionColumnInfo functionColumnInfo1 = columnNumberToFunctionInfo.get(i);
             FunctionColumnInfo functionColumnInfo2 = dataFrame.columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo1 != null && functionColumnInfo1.equals(functionColumnInfo2)) {
+            if (functionColumnInfo1 != null && functionColumnInfo1.equals(functionColumnInfo2)) {
                 resultantFrame.columnNumberToFunctionInfo.put(i, functionColumnInfo1);
                 resultantFrame.columns.add(null);
             } else {
@@ -297,13 +297,60 @@ public class DataFrame {
     }
 
     public DataFrame slice(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame(false);
+        return slice1(fromRowNumber, length);
+    }
+
+    public DataFrame slice(int fromRowNumber) {
+        return slice1(fromRowNumber, -1);
+    }
+
+    private DataFrame slice1(int fromRowNumber, int length) {
+        boolean appendMode = isDataAppendMode;
+        if(length >= 0) {
+            appendMode = false;
+        }
+        DataFrame resultantFrame = new DataFrame(appendMode);
         for (int i = 0; i < columns.size(); i++) {
             FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo != null) { // if function column we temporary add null
+            if (functionColumnInfo != null) { // if function column we temporary add null
                 resultantFrame.columns.add(null);
             } else {
-                resultantFrame.columns.add(columns.get(i).slice(fromRowNumber, length));
+                if(length >= 0) {
+                    resultantFrame.columns.add(columns.get(i).slice(fromRowNumber, length));
+                } else {
+                    resultantFrame.columns.add(columns.get(i).slice(fromRowNumber));
+                }
+             }
+            resultantFrame.columnNames.add(columnNames.get(i));
+            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
+        }
+        for (Integer key : columnNumberToFunctionInfo.keySet()) {
+            // create and put new Function columns
+            FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(key);
+            Column functionColumn = ColumnFactory.createColumn(functionColumnInfo.function, resultantFrame.columns.get(functionColumnInfo.argColumnNumber));
+            resultantFrame.columns.set(key, functionColumn);
+            resultantFrame.columnNumberToFunctionInfo.put(key, columnNumberToFunctionInfo.get(key));
+        }
+        resultantFrame.appendData();
+        return resultantFrame;
+    }
+
+    private DataFrame view1(int fromRowNumber, int length) {
+        boolean appendMode = isDataAppendMode;
+        if(length >= 0) {
+            appendMode = false;
+        }
+        DataFrame resultantFrame = new DataFrame(appendMode);
+        for (int i = 0; i < columns.size(); i++) {
+            FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
+            if (functionColumnInfo != null) { // if function column we temporary add null
+                resultantFrame.columns.add(null);
+            } else {
+                if(length >= 0) {
+                    resultantFrame.columns.add(columns.get(i).view(fromRowNumber, length));
+                } else{
+                    resultantFrame.columns.add(columns.get(i).view(fromRowNumber));
+                }
             }
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
@@ -320,33 +367,18 @@ public class DataFrame {
     }
 
     public DataFrame view(int fromRowNumber, int length) {
-        DataFrame resultantFrame = new DataFrame(false);
-        for (int i = 0; i < columns.size(); i++) {
-            FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo != null) { // if function column we temporary add null
-                resultantFrame.columns.add(null);
-            } else {
-                resultantFrame.columns.add(columns.get(i).view(fromRowNumber, length));
-            }
-            resultantFrame.columnNames.add(columnNames.get(i));
-            resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
-        }
-        for (Integer key : columnNumberToFunctionInfo.keySet()) {
-            // create and put new Function columns
-            FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(key);
-            Column functionColumn = ColumnFactory.createColumn(functionColumnInfo.function, resultantFrame.columns.get(functionColumnInfo.argColumnNumber));
-            resultantFrame.columns.set(key, functionColumn);
-            resultantFrame.columnNumberToFunctionInfo.put(key, columnNumberToFunctionInfo.get(key));
-        }
-        resultantFrame.appendData();
-        return resultantFrame;
+        return view1(fromRowNumber, length);
+    }
+
+    public DataFrame view(int fromRowNumber) {
+        return view1(fromRowNumber, -1);
     }
 
     public DataFrame view(int[] rowOrder) {
         DataFrame resultantFrame = new DataFrame(false);
         for (int i = 0; i < columns.size(); i++) {
             FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo != null) { // if function column we temporary add null
+            if (functionColumnInfo != null) { // if function column we temporary add null
                 resultantFrame.columns.add(null);
             } else {
                 resultantFrame.columns.add(columns.get(i).view(rowOrder));
@@ -406,8 +438,8 @@ public class DataFrame {
      * one aggregating function is specified!!!
      * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualPointsNumber(int points) {
-        return resample(null, points);
+    public DataFrame resampleByEqualPointsNumber(int points, boolean isResultCachingEnabled) {
+        return resample(null, points, isResultCachingEnabled);
     }
 
     /**
@@ -417,24 +449,24 @@ public class DataFrame {
      * one aggregating function is specified!!!
      * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualInterval(int columnNumber, double interval) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval,  length);
-        return resample(groupIndexes, 1);
+    public DataFrame resampleByEqualInterval(int columnNumber, double interval, boolean isResultCachingEnabled) {
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+        return resample(groupIndexes, 1, isResultCachingEnabled);
     }
 
-    public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval) {
+    public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval, boolean isResultCachingEnabled) {
         IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, length);
-        return resample(groupIndexes, 1);
+        return resample(groupIndexes, 1, isResultCachingEnabled);
     }
 
 
-    private DataFrame resample(IntSequence groupIndexes, int points) {
+    private DataFrame resample(IntSequence groupIndexes, int points, boolean isResultCachingEnabled) {
         Map<Integer, int[]> colToResultantCols = new HashMap<>();
         int count = 0;
         for (int i = 0; i < columns.size(); i++) {
             int aggregations;
             FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo != null) {
+            if (functionColumnInfo != null) {
                 aggregations = columnAggFunctions.get(functionColumnInfo.argColumnNumber).length;
             } else {
                 aggregations = columnAggFunctions.get(i).length;
@@ -449,18 +481,12 @@ public class DataFrame {
         }
 
 
-        DataFrame resultantFrame = new DataFrame(isDataAppendMode) {
-            @Override
-            public void appendData() {
-                DataFrame.this.appendData();
-                super.appendData();
-            }
-        };
+        DataFrame resultantFrame = new DataFrame(isDataAppendMode);
         // resample all columns except function columns
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             FunctionColumnInfo functionColumnInfo = columnNumberToFunctionInfo.get(i);
-            if(functionColumnInfo != null) {
+            if (functionColumnInfo != null) {
                 Aggregation[] aggregations = columnAggFunctions.get(functionColumnInfo.argColumnNumber);
                 for (Aggregation aggregation : aggregations) {
                     resultantFrame.columns.add(null);
@@ -471,7 +497,7 @@ public class DataFrame {
             } else {
                 Aggregation[] aggregations = columnAggFunctions.get(i);
                 for (Aggregation aggregation : aggregations) {
-                    if(groupIndexes != null) {
+                    if (groupIndexes != null) {
                         resultantFrame.columns.add(column.resample(aggregation, groupIndexes, isDataAppendMode));
                     } else {
                         resultantFrame.columns.add(column.resample(aggregation, points, length, isDataAppendMode));
@@ -495,7 +521,11 @@ public class DataFrame {
             }
         }
         resultantFrame.appendData();
-        return resultantFrame;
+        if(isResultCachingEnabled) {
+            return resultantFrame.slice(0);
+        } else {
+            return resultantFrame;
+        }
     }
 
     public void appendData() {
@@ -553,15 +583,15 @@ public class DataFrame {
         df.setColumnAggFunctions(0, Aggregation.FIRST);
         df.setColumnAggFunctions(1, Aggregation.AVERAGE);
 
-        DataFrame df1 = df.resampleByEqualPointsNumber(4);
-        DataFrame df2 = df.resampleByEqualInterval(0, 4);
+        DataFrame df1 = df.resampleByEqualPointsNumber(4, true);
+        DataFrame df2 = df.resampleByEqualInterval(0, 4, true);
 
 
         int[] expectedX1 = {2, 12, 40};
         int[] expectedY1 = {2, 6, 9};
 
         int[] expectedX2 = {2, 4, 9, 12, 33, 40};
-        int[] expectedY2 = {1, 2, 4, 5,  7,   9};
+        int[] expectedY2 = {1, 2, 4, 5, 7, 9};
 
         for (int i = 0; i < df1.rowCount(); i++) {
             if (df1.value(i, 0) != expectedX1[i]) {
@@ -574,7 +604,7 @@ public class DataFrame {
             }
         }
 
-        System.out.println("ResampleByEqualFrequency is OK " );
+        System.out.println("ResampleByEqualFrequency is OK ");
 
         for (int i = 0; i < df2.rowCount(); i++) {
             if (df2.value(i, 0) != expectedX2[i]) {
@@ -603,7 +633,7 @@ public class DataFrame {
         int[] expectedY1_ = {2, 6, 4};
 
         int[] expectedX2_ = {2, 4, 9, 12, 33, 40, 50};
-        int[] expectedY2_ = {1, 2, 4, 5,  7,  5, 2};
+        int[] expectedY2_ = {1, 2, 4, 5, 7, 5, 2};
 
         for (int i = 0; i < df1.rowCount(); i++) {
             if (df1.value(i, 0) != expectedX1_[i]) {
@@ -638,7 +668,7 @@ public class DataFrame {
 
         DataFrame sf1 = sf.sort(0);
         for (int i = 0; i < sf1.rowCount(); i++) {
-            System.out.println(sf1.value(i, 0) +  "  " + sf1.label(i, 0)+ "  " +  sf1.value(i, 1));
+            System.out.println(sf1.value(i, 0) + "  " + sf1.label(i, 0) + "  " + sf1.value(i, 1));
         }
 
         System.out.println("\nFunction column tests:");
@@ -650,12 +680,12 @@ public class DataFrame {
         df.addColumn(new Function() {
             @Override
             public double apply(double value) {
-                return (int)(value + 1);
+                return (int) (value + 1);
             }
         }, 1);
 
         int[] order = {0, 2};
-        try{
+        try {
             df1 = new DataFrame(df, order);
             throw new RuntimeException("Column order exception test Failed");
         } catch (IllegalArgumentException ex) {
@@ -668,8 +698,8 @@ public class DataFrame {
         int[] expectedCol0 = {7, 5, 3};
         int[] expectedCol1 = {6, 4, 2};
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(df1.value(i, 0) != expectedCol0[i] || df1.value(i, 1) != expectedCol1[i]) {
-                throw new RuntimeException(i+ " Column Order and view test failed ");
+            if (df1.value(i, 0) != expectedCol0[i] || df1.value(i, 1) != expectedCol1[i]) {
+                throw new RuntimeException(i + " Column Order and view test failed ");
             }
         }
         System.out.println("2) Column Order and view test OK");
@@ -678,14 +708,14 @@ public class DataFrame {
         DataFrame sortFr2 = df1.sort(1);
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(sortFr1.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr1.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
-                throw new RuntimeException(i+ " Sort test failed ");
+            if (sortFr1.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr1.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+                throw new RuntimeException(i + " Sort test failed ");
             }
         }
 
         for (int i = 0; i < df1.rowCount(); i++) {
-            if(sortFr2.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr2.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
-                throw new RuntimeException(i+ " Sort test failed ");
+            if (sortFr2.value(i, 0) != expectedCol0[expectedCol0.length - 1 - i] || sortFr2.value(i, 1) != expectedCol1[expectedCol1.length - 1 - i]) {
+                throw new RuntimeException(i + " Sort test failed ");
             }
         }
         System.out.println("3) Sort test OK");
@@ -693,34 +723,34 @@ public class DataFrame {
         df.setColumnAggFunctions(0, Aggregation.FIRST);
         df.setColumnAggFunctions(1, Aggregation.MIN, Aggregation.MAX);
 
-        DataFrame resampleFr = df.resampleByEqualPointsNumber(2);
-        int[] expectedCol0_ = {1,  5,  9};
-        int[] expectedCol1_ = {6,  2,  0};
-        int[] expectedCol2_ = {8,  4,  0};
+        DataFrame resampleFr = df.resampleByEqualPointsNumber(2, true);
+        int[] expectedCol0_ = {1, 5, 9};
+        int[] expectedCol1_ = {6, 2, 0};
+        int[] expectedCol2_ = {8, 4, 0};
 
         for (int i = 0; i < resampleFr.rowCount(); i++) {
-            if(resampleFr.value(i, 0) != expectedCol0_[i]
+            if (resampleFr.value(i, 0) != expectedCol0_[i]
                     || resampleFr.value(i, 1) != expectedCol1_[i]
                     || resampleFr.value(i, 2) != expectedCol2_[i]
                     || resampleFr.value(i, 3) != expectedCol1_[i] + 1
                     || resampleFr.value(i, 4) != expectedCol2_[i] + 1) {
-                throw new RuntimeException(i+ " Resample test failed ");
+                throw new RuntimeException(i + " Resample test failed ");
             }
         }
 
         // re-sample on already re-sampled frame
-        resampleFr = resampleFr.resampleByEqualPointsNumber(2);
-        int[] expectedCol0_1 = {1,  9};
-        int[] expectedCol1_1 = {2,  0};
-        int[] expectedCol2_1 = {8,  0};
+        resampleFr = resampleFr.resampleByEqualPointsNumber(2, true);
+        int[] expectedCol0_1 = {1, 9};
+        int[] expectedCol1_1 = {2, 0};
+        int[] expectedCol2_1 = {8, 0};
 
         for (int i = 0; i < resampleFr.rowCount(); i++) {
-            if(resampleFr.value(i, 0) != expectedCol0_1[i]
+            if (resampleFr.value(i, 0) != expectedCol0_1[i]
                     || resampleFr.value(i, 1) != expectedCol1_1[i]
                     || resampleFr.value(i, 2) != expectedCol2_1[i]
                     || resampleFr.value(i, 3) != expectedCol1_1[i] + 1
                     || resampleFr.value(i, 4) != expectedCol2_1[i] + 1) {
-                throw new RuntimeException(i+ " Resample test failed ");
+                throw new RuntimeException(i + " Resample test failed ");
             }
         }
 

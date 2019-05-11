@@ -31,6 +31,8 @@ public interface ChartData {
 
     ChartData view(int fromRowNumber, int length);
 
+    ChartData view(int fromRowNumber);
+
     ChartData slice(int fromRowNumber, int length);
 
     ChartData concat(ChartData data);
