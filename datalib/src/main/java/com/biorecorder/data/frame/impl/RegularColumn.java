@@ -117,10 +117,7 @@ class RegularColumn extends DoubleColumn {
 
     @Override
     public Column view(int from, int length) {
-        if(length >= 0) {
-            return new RegularColumn(value(from), step, length);
-        }
-        return new RegularColumn(value(from), step);
+        return new RegularColumn(value(from), step, length);
     }
 
     @Override

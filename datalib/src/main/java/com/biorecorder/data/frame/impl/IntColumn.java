@@ -54,16 +54,40 @@ class IntColumn implements Column {
     }
 
     @Override
-    public Column view(int from, int length) {
+    public Column slice(int from, int length) {
+        IntArrayList slicedData = new IntArrayList(length);
+        for (int i = 0; i < length; i++) {
+            slicedData.add(dataSequence.get(from + i));
+        }
+        return new IntColumn(slicedData);
+    }
+
+
+    public Column slice(int from) {
+        IntSequence slicedSequence = new IntSequence() {
+            IntArrayList slicedData = new IntArrayList();
+            @Override
+            public int size() {
+                return dataSequence.size() - from;
+            }
+
+            @Override
+            public int get(int index) {
+                if(index >= slicedData.size()) {
+                    for (int i = slicedData.size(); i <= index; i++) {
+                        slicedData.add(dataSequence.get(from + i));
+                    }
+                }
+                return slicedData.get(index);
+            }
+        };
+        return new IntColumn(slicedSequence);
+    }
+
+    public Column view(int from) {
         IntSequence subSequence = new IntSequence() {
             @Override
             public int size() {
-                if(length >= 0) {
-                    return length;
-                }
-                if(dataSequence.size() - from <= 0) {
-                    return 0;
-                }
                 return dataSequence.size() - from;
             }
 
@@ -74,6 +98,23 @@ class IntColumn implements Column {
         };
         return new IntColumn(subSequence);
     }
+
+    @Override
+    public Column view(int from, int length) {
+        IntSequence subSequence = new IntSequence() {
+            @Override
+            public int size() {
+                return length;
+            }
+
+            @Override
+            public int get(int index) {
+                return dataSequence.get(index + from);
+            }
+        };
+        return new IntColumn(subSequence);
+    }
+
 
     @Override
     public Column view(int[] order) {
@@ -91,25 +132,6 @@ class IntColumn implements Column {
         return new IntColumn(subSequence);
     }
 
-
-  @Override
-    public Column slice(int from, int length) {
-        int[] slicedData = new int[length];
-        for (int i = 0; i < length; i++) {
-            slicedData[i] = dataSequence.get(from + i);
-        }
-        return new IntColumn(new IntSequence() {
-            @Override
-            public int size() {
-                return slicedData.length;
-            }
-
-            @Override
-            public int get(int index) {
-                return slicedData[index];
-            }
-        });
-    }
 
     @Override
     public int bisect(double value, int from, int length) {
@@ -208,8 +230,6 @@ class IntColumn implements Column {
     public Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode) {
         IntSequence resultantSequence = new IntSequence() {
             private IntAggFunction aggFunction = getAggFunction(aggregation);
-            private IntArrayList aggData = new IntArrayList();
-            private int startIndex = -1;
 
             @Override
             public int size() {
@@ -218,39 +238,14 @@ class IntColumn implements Column {
 
             @Override
             public int get(int index) {
-                if(startIndex < 0) {
-                    startIndex = index;
+                aggFunction.reset();
+                int n = aggFunction.getN();
+                int length = groupIndexes.get(index + 1) - groupIndexes.get(index) - n;
+                int from = groupIndexes.get(index) + n;
+                if (length > 0) {
+                    aggFunction.add(dataSequence, from, length);
                 }
-                if(index < startIndex) {
-                    aggFunction.reset();
-                    int[] additionalData = new int[startIndex - index];
-                    for (int i = index; i < startIndex; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        additionalData[i - index] = aggFunction.getValue();
-                        aggFunction.reset();
-                    }
-                    aggData.add(0, additionalData);
-                    startIndex = index;
-                }
-
-                if(index >= aggData.size() + startIndex) {
-                    for (int i = aggData.size() + startIndex; i <= index; i++) {
-                        int n = aggFunction.getN();
-                        int length = groupIndexes.get(i + 1) - groupIndexes.get(i) - n;
-                        int from = groupIndexes.get(i) + n;
-                        if (length > 0) {
-                            aggFunction.add(dataSequence, from, length);
-                        }
-                        aggData.add(aggFunction.getValue());
-                        aggFunction.reset();
-                    }
-                }
-                return aggData.get(index - startIndex);
+                return aggFunction.getValue();
             }
         };
         return new IntColumn(resultantSequence);
