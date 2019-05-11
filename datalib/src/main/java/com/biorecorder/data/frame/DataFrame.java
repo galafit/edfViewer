@@ -14,7 +14,7 @@ import java.util.*;
  * in fact is simply a collection of columns
  */
 public class DataFrame {
-    private IntWrapper length = new IntWrapper(0);
+    private int length;
     protected List<Column> columns = new ArrayList<>();
     protected List<String> columnNames = new ArrayList<>();
     protected List<Aggregation[]> columnAggFunctions = new ArrayList<>();
@@ -173,7 +173,7 @@ public class DataFrame {
     }
 
     public int rowCount() {
-        return length.getValue();
+        return length;
     }
 
     public int columnCount() {
@@ -207,10 +207,10 @@ public class DataFrame {
     }
 
     public Stats stats(int columnNumber) {
-        if (length.getValue() < 1) {
+        if (length < 1) {
             return null;
         }
-        return columns.get(columnNumber).stats(length.getValue());
+        return columns.get(columnNumber).stats(length);
     }
 
     public boolean isColumnRegular(int columnNumber) {
@@ -240,9 +240,9 @@ public class DataFrame {
         if (sorter != null) {
             column = column.view(sorter);
         }
-        int length1 = length.getValue();
+        int length1 = length;
         if (sorter != null) {
-            length1 = Math.min(length.getValue(), sorter.length);
+            length1 = Math.min(length, sorter.length);
         }
         return column.bisect(value, 0, length1);
     }
@@ -257,7 +257,7 @@ public class DataFrame {
                 resultantFrame.columnNumberToFunctionInfo.put(i, functionColumnInfo1);
                 resultantFrame.columns.add(null);
             } else {
-                resultantFrame.columns.add(ColumnFactory.concat(columns.get(i), length.getValue(), dataFrame.columns.get(i)));
+                resultantFrame.columns.add(ColumnFactory.concat(columns.get(i), length, dataFrame.columns.get(i)));
             }
             resultantFrame.columnNames.add(columnNames.get(i));
             resultantFrame.columnAggFunctions.add(columnAggFunctions.get(i));
@@ -293,7 +293,7 @@ public class DataFrame {
      */
     public int[] sortedIndices(int sortColumn) {
         boolean isParallel = false;
-        return columns.get(sortColumn).sort(0, length.getValue(), isParallel);
+        return columns.get(sortColumn).sort(0, length, isParallel);
     }
 
     public DataFrame slice(int fromRowNumber, int length) {
@@ -450,15 +450,14 @@ public class DataFrame {
      * If columns has no aggregating functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval, boolean isResultCachingEnabled) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, length);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, null);
         return resample(groupIndexes, 1, isResultCachingEnabled);
     }
 
     public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval, boolean isResultCachingEnabled) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, length);
+        IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, null);
         return resample(groupIndexes, 1, isResultCachingEnabled);
     }
-
 
     private DataFrame resample(IntSequence groupIndexes, int points, boolean isResultCachingEnabled) {
         Map<Integer, int[]> colToResultantCols = new HashMap<>();
@@ -500,7 +499,7 @@ public class DataFrame {
                     if (groupIndexes != null) {
                         resultantFrame.columns.add(column.resample(aggregation, groupIndexes, isDataAppendMode));
                     } else {
-                        resultantFrame.columns.add(column.resample(aggregation, points, length, isDataAppendMode));
+                        resultantFrame.columns.add(column.resample(aggregation, points, isDataAppendMode));
                     }
                     resultantFrame.columnNames.add(columnNames.get(i) + "_" + aggregation.name());
                     Aggregation[] resultantAgg = {aggregation};
@@ -530,22 +529,22 @@ public class DataFrame {
 
     public void appendData() {
         if (columns.size() == 0) {
-            length.setValue(0);
+            length = 0;
             return;
         }
-        length.setValue(columns.get(0).size());
+        length = columns.get(0).size();
         for (int i = 1; i < columns.size(); i++) {
-            length.setValue(Math.min(length.getValue(), columns.get(i).size()));
+            length = (Math.min(length, columns.get(i).size()));
         }
     }
 
     private void rangeCheck(long rowNumber) {
-        if (rowNumber >= length.getValue() || rowNumber < 0)
+        if (rowNumber >= length || rowNumber < 0)
             throw new IndexOutOfBoundsException(outOfBoundsMsg(rowNumber));
     }
 
     private String outOfBoundsMsg(long index) {
-        return "Index: " + index + ", Size: " + length.getValue();
+        return "Index: " + index + ", Size: " + length;
     }
 
     class FunctionColumnInfo {

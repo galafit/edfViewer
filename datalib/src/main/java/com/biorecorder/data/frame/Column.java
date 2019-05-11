@@ -23,7 +23,6 @@ public interface Column {
      * @return array of indexes representing sorted view of the underlying data
      */
     int[] sort(int from, int length, boolean isParallel);
-
     Column slice(int from);
     Column slice(int from, int length);
     Column view(int from);
@@ -40,11 +39,11 @@ public interface Column {
      * unitMultiplier-bin-group and returns a sequence of that intervalStart indexes.
      * The column data must be sorted!!!
      */
-    IntSequence group(double interval, IntWrapper length);
+    IntSequence group(double interval, DynamicSize length);
 
-    IntSequence group(TimeInterval timeInterval, IntWrapper length);
+    IntSequence group(TimeInterval timeInterval, DynamicSize length);
 
     Column resample(Aggregation aggregation, IntSequence groupIndexes, boolean isDataAppendMode);
-    Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode);
+    Column resample(Aggregation aggregation, int points, boolean isDataAppendMode);
 
 }

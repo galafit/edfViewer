@@ -145,16 +145,16 @@ class IntColumn implements Column {
 
 
     @Override
-    public IntSequence group(double interval, IntWrapper length) {
+    public IntSequence group(double interval, DynamicSize length) {
         return group(new IntIntervalProvider(PrimitiveUtils.roundDouble2int(interval)), length);
     }
 
     @Override
-    public IntSequence group(TimeInterval timeInterval, IntWrapper length) {
+    public IntSequence group(TimeInterval timeInterval, DynamicSize length) {
         return group(new TimeIntervalProvider(timeInterval), length);
     }
 
-    private IntSequence group(IntervalProvider intervalProvider, IntWrapper length) {
+    private IntSequence group(IntervalProvider intervalProvider, DynamicSize length) {
         IntSequence groupIndexes = new IntSequence() {
             IntArrayList groupIndexesList = new IntArrayList();
             @Override
@@ -170,8 +170,8 @@ class IntColumn implements Column {
 
             private void update() {
                 int groupListSize = groupIndexesList.size();
-                int l = length.getValue();
-                if (l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == length.getValue())) {
+                int l = length.size();
+                if (l == 0 || (groupListSize > 0 && groupIndexesList.get(groupListSize - 1) == l)) {
                     return;
                 }
 
@@ -252,20 +252,21 @@ class IntColumn implements Column {
     }
 
     @Override
-    public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) {
-        return resample(aggregation, groupIndexes(points, length), isDataAppendMode);
+    public Column resample(Aggregation aggregation, int points, boolean isDataAppendMode) {
+        return resample(aggregation, groupIndexes(points), isDataAppendMode);
     }
 
-    protected IntSequence groupIndexes(int points, IntWrapper length) {
+    protected IntSequence groupIndexes(int points) {
         return new IntSequence() {
             int size;
 
             @Override
             public int size() {
-                if (length.getValue() % points == 0) {
-                    size = length.getValue() / points + 1;
+                int dataSize = dataSequence.size();
+                if (dataSize % points == 0) {
+                    size = dataSize / points + 1;
                 } else {
-                    size = length.getValue() / points + 2;
+                    size = dataSize / points + 2;
                 }
                 return size;
             }
@@ -273,7 +274,7 @@ class IntColumn implements Column {
             @Override
             public int get(int index) {
                 if (index == size - 1) {
-                    return length.getValue();
+                    return dataSequence.size();
                 } else {
                     return index * points;
                 }
