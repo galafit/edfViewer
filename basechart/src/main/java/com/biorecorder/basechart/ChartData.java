@@ -9,6 +9,8 @@ import com.biorecorder.data.frame.TimeUnit;
  * in fact is simply a collection of columns
  */
 public interface ChartData {
+    boolean isDataAppendMode();
+
     int rowCount();
 
     int columnCount();
@@ -17,9 +19,9 @@ public interface ChartData {
 
     boolean isNumberColumn(int columnNumber);
 
-    boolean isColumnRegular(int columnNumber);
+    boolean isRegular();
 
-    boolean isColumnIncreasing(int columnNumber);
+    boolean isIncreasing();
 
     double value(int rowNumber, int columnNumber);
 
@@ -27,7 +29,7 @@ public interface ChartData {
 
     Range columnMinMax(int columnNumber);
 
-    int bisect(int columnNumber, double value, int[] sorter);
+    int bisect( double value, int[] sorter);
 
     ChartData view(int fromRowNumber, int length);
 

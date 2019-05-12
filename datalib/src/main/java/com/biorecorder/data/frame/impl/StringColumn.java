@@ -109,12 +109,12 @@ public class StringColumn implements Column {
     }
 
     @Override
-    public IntSequence group(double interval, IntWrapper length) {
+    public IntSequence group(double interval, DynamicSize length) {
         return intColumn.group(interval, length);
     }
 
     @Override
-    public IntSequence group(TimeInterval timeInterval, IntWrapper length) {
+    public IntSequence group(TimeInterval timeInterval, DynamicSize length) {
         return intColumn.group(timeInterval, length);
     }
 
@@ -125,7 +125,7 @@ public class StringColumn implements Column {
     }
 
     @Override
-    public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) {
-        return new StringColumn((LongColumn) intColumn.resample(aggregation, points, length, isDataAppendMode), labelSequence);
+    public Column resample(Aggregation aggregation, int points, boolean isDataAppendMode) {
+        return new StringColumn((LongColumn) intColumn.resample(aggregation, points, isDataAppendMode), labelSequence);
     }
 }

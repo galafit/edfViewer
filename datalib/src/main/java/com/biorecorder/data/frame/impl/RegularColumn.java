@@ -132,7 +132,7 @@ class RegularColumn extends DoubleColumn {
     }
 
     @Override
-    public Column resample(Aggregation aggregation, int points, IntWrapper length, boolean isDataAppendMode) throws IllegalArgumentException {
+    public Column resample(Aggregation aggregation, int points,  boolean isDataAppendMode) throws IllegalArgumentException {
         int sizeNew = size/points;
         switch (aggregation) {
             case MIN:

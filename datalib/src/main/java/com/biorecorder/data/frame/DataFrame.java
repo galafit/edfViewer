@@ -221,6 +221,9 @@ public class DataFrame {
         return columnNumberToFunctionInfo.get(columnNumber) != null;
     }
 
+    public boolean isDataAppendMode() {
+        return isDataAppendMode;
+    }
 
     /**
      * Binary search algorithm. The column data must be sorted!
@@ -450,12 +453,12 @@ public class DataFrame {
      * If columns has no aggregating functions resultant dataframe will be empty
      */
     public DataFrame resampleByEqualInterval(int columnNumber, double interval, boolean isResultCachingEnabled) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(interval, null);
+        IntSequence groupIndexes = columns.get(columnNumber).group(interval, new ColumnsMinSize());
         return resample(groupIndexes, 1, isResultCachingEnabled);
     }
 
     public DataFrame resampleByEqualTimeInterval(int columnNumber, TimeInterval timeInterval, boolean isResultCachingEnabled) {
-        IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, null);
+        IntSequence groupIndexes = columns.get(columnNumber).group(timeInterval, new ColumnsMinSize());
         return resample(groupIndexes, 1, isResultCachingEnabled);
     }
 
@@ -545,6 +548,20 @@ public class DataFrame {
 
     private String outOfBoundsMsg(long index) {
         return "Index: " + index + ", Size: " + length;
+    }
+
+    class ColumnsMinSize implements DynamicSize {
+        @Override
+        public int size() {
+            if(columns.size() == 0) {
+                return 0;
+            }
+            int size = columns.get(0).size();
+            for (int i = 1; i < columns.size(); i++) {
+                size = (Math.min(size, columns.get(i).size()));
+            }
+            return size;
+        }
     }
 
     class FunctionColumnInfo {

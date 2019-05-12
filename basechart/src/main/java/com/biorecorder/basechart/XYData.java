@@ -83,6 +83,11 @@ public class XYData implements ChartData {
     }
 
     @Override
+    public boolean isDataAppendMode() {
+        return dataFrame.isDataAppendMode();
+    }
+
+    @Override
     public int rowCount() {
         return dataFrame.rowCount();
     }
@@ -103,17 +108,17 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public boolean isColumnRegular(int columnNumber) {
-        return dataFrame.isColumnRegular(columnNumber);
+    public boolean isRegular() {
+        return dataFrame.isColumnRegular(0);
     }
 
     @Override
-    public boolean isColumnIncreasing(int columnNumber) {
-        Stats stats = dataFrame.stats(columnNumber);
+    public boolean isIncreasing() {
+        Stats stats = dataFrame.stats(0);
         if (stats == null) {
-            return false;
+            return true;
         }
-        return dataFrame.stats(columnNumber).isIncreasing();
+        return dataFrame.stats(0).isIncreasing();
     }
 
     @Override
@@ -141,8 +146,8 @@ public class XYData implements ChartData {
     }
 
     @Override
-    public int bisect(int columnNumber, double value, int[] sorter) {
-        return dataFrame.bisect(columnNumber, value, sorter);
+    public int bisect(double value, int[] sorter) {
+        return dataFrame.bisect(0, value, sorter);
     }
 
     @Override
