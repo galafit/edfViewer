@@ -2,9 +2,7 @@ package com.biorecorder.data.frame;
 
 import com.biorecorder.data.frame.impl.ColumnFactory;
 import com.biorecorder.data.list.IntArrayList;
-import com.biorecorder.data.sequence.IntSequence;
-import com.biorecorder.data.sequence.LongSequence;
-import com.biorecorder.data.sequence.StringSequence;
+import com.biorecorder.data.sequence.*;
 
 import java.util.*;
 
@@ -104,6 +102,24 @@ public class DataFrame {
         addColumn(ColumnFactory.createColumn(start, step, size));
     }
 
+    public void addColumn(ShortSequence data) {
+        addColumn(ColumnFactory.createColumn(data));
+    }
+
+    public void addColumn(short[] data) {
+        addColumn(new ShortSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public short get(int index) {
+                return data[index];
+            }
+        });
+    }
+
     public void addColumn(IntSequence data) {
         addColumn(ColumnFactory.createColumn(data));
     }
@@ -135,6 +151,42 @@ public class DataFrame {
 
             @Override
             public long get(int index) {
+                return data[index];
+            }
+        });
+    }
+
+    public void addColumn(FloatSequence data) {
+        addColumn(ColumnFactory.createColumn(data));
+    }
+
+    public void addColumn(float[] data) {
+        addColumn(new FloatSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public float get(int index) {
+                return data[index];
+            }
+        });
+    }
+
+    public void addColumn(DoubleSequence data) {
+        addColumn(ColumnFactory.createColumn(data));
+    }
+
+    public void addColumn(double[] data) {
+        addColumn(new DoubleSequence() {
+            @Override
+            public int size() {
+                return data.length;
+            }
+
+            @Override
+            public double get(int index) {
                 return data[index];
             }
         });
@@ -539,6 +591,7 @@ public class DataFrame {
         for (int i = 1; i < columns.size(); i++) {
             length = (Math.min(length, columns.get(i).size()));
         }
+        System.out.println("length "+length);
     }
 
     private void rangeCheck(long rowNumber) {

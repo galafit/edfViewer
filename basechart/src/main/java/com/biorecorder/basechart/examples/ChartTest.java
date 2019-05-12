@@ -7,6 +7,7 @@ import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.data.frame.Aggregation;
 import com.biorecorder.data.frame.SquareFunction;
+import com.biorecorder.data.list.DoubleArrayList;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.data.list.LongArrayList;
@@ -26,7 +27,7 @@ public class ChartTest extends JFrame {
     IntArrayList yUnsort = new IntArrayList();
     IntArrayList xUnsort = new IntArrayList();
 
-    IntArrayList list1 = new IntArrayList();
+    DoubleArrayList list1 = new DoubleArrayList();
     IntArrayList list2 = new IntArrayList();
 
     List<String> labels = new ArrayList();
@@ -40,11 +41,13 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        for (int i = 0; i <= 250; i++) {
-            list1.add(i);
+        double value = 0;
+       /* for (int i = 0; i <= 250; i++) {
+            list1.add(value);
             list2.add(50);
             labels.add("lab_"+i);
-        }
+            value += 0.33;
+        }*/
 
 
         xUnsort.add(50);
@@ -63,13 +66,11 @@ public class ChartTest extends JFrame {
 
 
         XYData regularData = new XYData(0, 1, true);
-        //regularData.addColumn(new SquareFunction(), 0);
         regularData.addColumn(list1);
-        //regularData.setColumnAggFunctions(1, Aggregation.SUM);
-       // regularData.addColumn(list2);
+        //regularData.addColumn(new SquareFunction(), 0);
         regularData.setColumnName(1, "rg");
 
-        XYData noRegularData = new XYData(true);
+       /* XYData noRegularData = new XYData(true);
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
         noRegularData.setColumnName(1, "nr");
@@ -88,14 +89,9 @@ public class ChartTest extends JFrame {
         }
         XYData timeData = new XYData(false);
         timeData.addColumn(timeArray);
-        timeData.addColumn(list1);
+        timeData.addColumn(list1);*/
 
         chart = new Chart();
-
-        chart.addTrace(new LineTrace(unsortedData), false, true, false);
-        //chart.addTrace(new LineTrace(timeData), false, true, false);
-        chart.addStack();
-        chart.addTrace(new LineTrace(noRegularData), true);
         chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
@@ -109,6 +105,13 @@ public class ChartTest extends JFrame {
         setVisible(true);
         try {
             Thread.sleep(1000);
+            /*chart.addTrace(new LineTrace(unsortedData), false, true, false);
+            chart.addTrace(new LineTrace(timeData), false, true, false);
+            chart.addStack();
+            chart.addTrace(new LineTrace(noRegularData), true);
+            chart.addTrace(new LineTrace(regularData), true);
+            chartPanel.repaint();*/
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -124,11 +127,13 @@ public class ChartTest extends JFrame {
                         e.printStackTrace();
                     }
 
-
+                    double value = 0;
+                    if(list1.size() > 0) {
+                        value = list1.get(list1.size() - 1);
+                    }
                     for (int i = 1; i < 171; i++) {
-                        list1.add(list1.size());
-                        //list1.add(i + yData1Last);
-                       // list2.add(i + yData2Last);
+                        value += 1;
+                        list1.add(value);
                     }
 
                     chart.appendData();
@@ -137,7 +142,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        t.start();
+        //t.start();
     }
 
     public static void main(String[] args) {

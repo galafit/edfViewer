@@ -208,14 +208,6 @@ public class TraceDataManager {
         return (int) Math.abs(range[range.length - 1] - range[0]);
     }
 
-    private boolean isCropEnabled(Scale xScale) {
-        double[] domain = xScale.getDomain();
-        Double xMin = domain[0];
-        Double xMax = domain[domain.length - 1];
-        Range dataMinMax = traceData.columnMinMax(0);
-        return  processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
-    }
-
     private void createGroupingIntervals(Scale xScale) {
         double[] specifiedIntervals = processingConfig.getGroupingIntervals();
         if (xScale instanceof TimeScale) {
@@ -320,19 +312,18 @@ public class TraceDataManager {
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
 
-        Range traceDataMinMax = traceData.columnMinMax(0);
-        Range minMax = Range.intersect(traceDataMinMax, new Range(xMin, xMax));
+        Range dataMinMax = traceData.columnMinMax(0);
+        Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
         if (minMax == null) {
             return traceData.view(0, 0);
         }
 
-
         double xStart = range[0];
         double xEnd = range[range.length - 1];
 
-        double dataStart = xScale.scale(traceDataMinMax.getMin());
-        double dataEnd = xScale.scale(traceDataMinMax.getMax());
+        double dataStart = xScale.scale(dataMinMax.getMin());
+        double dataEnd = xScale.scale(dataMinMax.getMax());
 
         int drawingAreaWidth = 0;
         Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
@@ -370,15 +361,16 @@ public class TraceDataManager {
             }
         }
 
+        boolean isCropEnabled = processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
 
-        if (processedData.rowCount() > 1 &&  isCropEnabled(xScale)) {
+        if (processedData.rowCount() > 1 &&  isCropEnabled) {
             long minIndex = 0;
-            if (traceDataMinMax.getMin() < xMin) {
+            if (dataMinMax.getMin() < xMin) {
                 minIndex = processedData.bisect( minMax.getMin(), null) - cropShoulder;
             }
 
             long maxIndex = processedData.rowCount() - 1;
-            if (traceDataMinMax.getMax() > xMax) {
+            if (dataMinMax.getMax() > xMax) {
                 maxIndex = processedData.bisect(minMax.getMax(), null) + cropShoulder;
             }
             if (minIndex < 0) {

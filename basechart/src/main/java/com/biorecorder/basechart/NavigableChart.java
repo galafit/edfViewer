@@ -55,23 +55,25 @@ public class NavigableChart {
         for (int xIndex = 0; xIndex < chart.xAxesCount(); xIndex++) {
             if (scrolls.get(xIndex) == null  && chart.isXAxisVisible(xIndex)) {
                 double extent = chart.getBestExtent(xIndex, canvas);
-                Scroll scroll = new Scroll(scrollMin, scrollMax, extent);
-                chart.setXMinMax(xIndex, scrollMin, scrollMin + extent);
-                for (int i = 0; i < chart.yAxesCount(); i++) {
-                    chart.autoScaleY(i);
-                }
-                scrolls.put(xIndex, scroll);
-                final int scrollXIndex = xIndex;
-                scroll.addListener(new ScrollListener() {
-                    @Override
-                    public void onScrollChanged(double scrollValue, double scrollExtent) {
-                        Range xRange = new Range(scrollValue, scrollValue + scrollExtent);
-                        chart.setXMinMax(scrollXIndex, xRange.getMin(), xRange.getMax());
-                        isScrollsAtTheEnd = isScrollAtTheEnd(scrollXIndex);
+                if(extent > 0) {
+                    Scroll scroll = new Scroll(scrollMin, scrollMax, extent);
+                    chart.setXMinMax(xIndex, scrollMin, scrollMin + extent);
+                    for (int i = 0; i < chart.yAxesCount(); i++) {
+                        chart.autoScaleY(i);
                     }
-                });
-                if (config.isAutoScrollEnabled()) {
-                    scrollToEnd();
+                    scrolls.put(xIndex, scroll);
+                    final int scrollXIndex = xIndex;
+                    scroll.addListener(new ScrollListener() {
+                        @Override
+                        public void onScrollChanged(double scrollValue, double scrollExtent) {
+                            Range xRange = new Range(scrollValue, scrollValue + scrollExtent);
+                            chart.setXMinMax(scrollXIndex, xRange.getMin(), xRange.getMax());
+                            isScrollsAtTheEnd = isScrollAtTheEnd(scrollXIndex);
+                        }
+                    });
+                    if (config.isAutoScrollEnabled()) {
+                        scrollToEnd();
+                    }
                 }
             }
 
@@ -79,6 +81,7 @@ public class NavigableChart {
                 scrolls.remove(xIndex);
             }
         }
+        System.out.println("create scr "+scrolls.keySet().size());
     }
 
     private void autoScaleChartY() {
@@ -233,7 +236,6 @@ public class NavigableChart {
             canvas.setColor(scrollConfig.getFillColor());
             canvas.fillRect(scrollStart, scrollY, scrollWidth, scrollHeight);
         }
-
 
         canvas.setColor(scrollConfig.getColor());
         canvas.setStroke(new BStroke(borderWidth));

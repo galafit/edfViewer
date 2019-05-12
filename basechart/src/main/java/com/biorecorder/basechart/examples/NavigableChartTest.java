@@ -34,11 +34,11 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-        for (int i = 0; i < 100; i++) {
+      /*  for (int i = 0; i < 100; i++) {
             yData.add(i);
             xData.add(i);
             labels.add("l "+i);
-        }
+        }*/
 
 
         xyData = new XYData(0, 1, true);
@@ -97,18 +97,24 @@ public class NavigableChartTest extends JFrame{
         //t1.start();
 
         Thread t = new Thread(new Runnable() {
-            int interval = 10;
+            int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 20; count++) {
+                for (int count = 0; count < 1; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                    int yDataLast = yData.get(yData.size() - 1);
-                    int xDataLast = xData.get(xData.size() - 1);
+                    int yDataLast = 0;
+                    int xDataLast = 0;
+                    if(yData.size() > 0) {
+                        yDataLast = yData.get(yData.size() - 1);
+                    }
+                    if(xData.size() > 0) {
+                        xDataLast = xData.get(xData.size() - 1);
+                    }
 
                     for (int i = 1; i <= 100; i++) {
                         yData.add(i + yDataLast);
@@ -122,7 +128,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-       //t.start();
+       t.start();
     }
 
 

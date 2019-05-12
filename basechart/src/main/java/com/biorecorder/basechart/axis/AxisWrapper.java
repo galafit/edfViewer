@@ -68,7 +68,7 @@ public class AxisWrapper {
         return axis.scale(value);
     }
 
-    public double invert(float value) {
+    public double invert(double value) {
         return axis.invert(value);
     }
 

@@ -267,7 +267,7 @@ public abstract class Axis {
         return scale.scale(value);
     }
 
-    public double invert(float value) {
+    public double invert(double value) {
         return scale.invert(value);
     }
 

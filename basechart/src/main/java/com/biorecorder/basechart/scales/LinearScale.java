@@ -137,7 +137,7 @@ public class LinearScale implements Scale {
 
         public void setTickInterval(double tickInterval) {
             this.tickInterval = tickInterval;
-            labelFormat = getNumberFormat(new NormalizedNumber(tickInterval).exponent(), labelFormatInfo);
+            labelFormat = getNumberFormat(NormalizedNumber.firstDigitExponent(tickInterval), labelFormatInfo);
         }
 
         /**
@@ -189,7 +189,7 @@ public class LinearScale implements Scale {
         @Override
         public void increaseTickInterval(int increaseFactor) {
             tickInterval = tickInterval * increaseFactor;
-            labelFormat = getNumberFormat(new NormalizedNumber(tickInterval).exponent(), labelFormatInfo);
+            labelFormat = getNumberFormat(NormalizedNumber.firstDigitExponent(tickInterval), labelFormatInfo);
         }
 
         @Override
