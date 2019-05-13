@@ -35,11 +35,11 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-       for (int i = 0; i <= 10; i++) {
+     /*  for (int i = 0; i <= 10; i++) {
             yData.add(i);
             xData.add(i);
             labels.add("l_"+i);
-        }
+        }*/
 
 
         xyData = new XYData(labels, true);
@@ -117,7 +117,7 @@ public class NavigableChartTest extends JFrame{
 
                     }
 
-                    for (int i = 1; i <= 10; i++) {
+                    for (int i = 1; i <= 23; i++) {
                         yData.add(i + yDataLast);
                         xData.add(i + xDataLast);
                         labels.add("l_"+(i + xDataLast));
@@ -130,7 +130,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-       //t.start();
+       t.start();
     }
 
 

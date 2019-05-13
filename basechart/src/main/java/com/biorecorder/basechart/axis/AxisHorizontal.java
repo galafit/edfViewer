@@ -99,12 +99,11 @@ abstract class AxisHorizontal extends Axis {
                         longestLabel = l;
                     }
                 }
-                int bestLength = labels.size() * (tm.stringWidth(longestLabel) + getInterLabelGap());
+                int bestLength = labels.size() * (tm.stringWidth(longestLabel) + getInterLabelGap()) + getInterLabelGap();
                 bestLength = Math.max(bestLength, length);
                 Scale s = new CategoryScale(labels);
                 s.setDomain(0, labels.size());
                 s.setRange(0, bestLength);
-                System.out.println(" extent "+s.invert(length));
                 return s.invert(length);
             }
         }

@@ -52,11 +52,7 @@ public abstract class Trace {
     }
 
     public Range getFullXMinMax() {
-        Range minMax = dataManager.getFullXMinMax();
-        if(minMax != null && xScale instanceof CategoryScale) {
-            minMax = new Range(minMax.getMin() - 0.5, minMax.getMax() + 0.5);
-        }
-        return minMax;
+        return dataManager.getFullXMinMax(xScale);
     }
 
     public double getBestExtent(int drawingAreaWidth) {

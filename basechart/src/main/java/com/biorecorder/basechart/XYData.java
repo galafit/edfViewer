@@ -185,6 +185,12 @@ public class XYData implements ChartData {
     }
 
     @Override
+    public ChartData slice(int fromRowNumber) {
+        return new XYData(dataFrame.slice(fromRowNumber));
+    }
+
+
+    @Override
     public ChartData concat(ChartData data) {
         if(data instanceof XYData) {
             return new XYData(dataFrame.concat(((XYData)data).dataFrame));

@@ -1,6 +1,7 @@
 package com.biorecorder.basechart;
 
 
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.data.frame.TimeInterval;
@@ -81,11 +82,15 @@ public class TraceDataManager {
         return null;
     }
 
-    public Range getFullXMinMax() {
+    public Range getFullXMinMax(Scale xScale) {
         if (traceData.columnCount() == 0) {
             return null;
         }
-        return traceData.columnMinMax(0);
+        Range minMax = traceData.columnMinMax(0);
+        if(minMax != null && xScale instanceof CategoryScale) {
+            minMax = new Range(minMax.getMin() - 0.5, minMax.getMax() + 0.5);
+        }
+        return minMax;
     }
 
     public int nearest(double xValue) {
@@ -312,7 +317,7 @@ public class TraceDataManager {
         Double xMin = domain[0];
         Double xMax = domain[domain.length - 1];
 
-        Range dataMinMax = traceData.columnMinMax(0);
+        Range dataMinMax = getFullXMinMax(xScale);
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
         if (minMax == null) {
@@ -360,7 +365,6 @@ public class TraceDataManager {
                 isAlreadyGrouped = true;
             }
         }
-
         boolean isCropEnabled = processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
 
         if (processedData.rowCount() > 1 &&  isCropEnabled) {
@@ -380,14 +384,14 @@ public class TraceDataManager {
             if (maxIndex >= processedData.rowCount()) {
                 maxIndex = processedData.rowCount() - 1;
             }
-            
-            processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex));
+
+            processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex + 1));
             // if data was not grouped before we group only visible data
             if (!isAlreadyGrouped && groupingInterval != null) {
                 processedData = group(processedData, groupingInterval.getInterval());
             }
-            if (processingConfig.isCroppedDataCachingEnabled()) {
-
+            if (processingConfig.isCroppedDataCachingEnabled() && groupingInterval == null) {
+                processedData = processedData.slice(0);
             }
         } else { // if crop disabled
             // if grouping was not done before

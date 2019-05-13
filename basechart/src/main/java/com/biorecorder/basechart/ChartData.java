@@ -37,6 +37,8 @@ public interface ChartData {
 
     ChartData slice(int fromRowNumber, int length);
 
+    ChartData slice(int fromRowNumber);
+
     ChartData concat(ChartData data);
 
     int[] sortedIndices(int sortColumn);

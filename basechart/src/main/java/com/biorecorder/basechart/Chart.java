@@ -382,7 +382,6 @@ public class Chart {
      **/
     double getBestExtent(int xIndex, BCanvas canvas) {
         double extent = xAxisList.get(xIndex).getBestExtent(canvas, fullArea.width);
-        System.out.println(xIndex+ " Xaxis extent "+extent);
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
