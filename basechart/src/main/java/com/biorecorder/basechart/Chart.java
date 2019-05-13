@@ -7,7 +7,6 @@ import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
@@ -382,10 +381,12 @@ public class Chart {
      * ===================== Protected method for careful use (in NavigableChart)=========
      **/
     double getBestExtent(int xIndex, BCanvas canvas) {
-        double extent = xAxisList.get(xIndex).getBestLength(canvas, fullArea.width);
+        double extent = xAxisList.get(xIndex).getBestExtent(canvas, fullArea.width);
+        System.out.println(xIndex+ " Xaxis extent "+extent);
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
+               // System.out.println("trace extent "+traceExtent);
                 if (extent < 0) {
                     extent = traceExtent;
                 } else if(traceExtent > 0){

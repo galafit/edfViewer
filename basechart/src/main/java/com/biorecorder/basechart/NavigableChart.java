@@ -417,7 +417,10 @@ public class NavigableChart {
             double scrollPosition = navigatorScale(scrolls.get(key).getValue());
             maxScrollsPosition = (maxScrollsPosition == null) ? scrollPosition : Math.max(maxScrollsPosition, scrollPosition);
         }
-        return setScrollsPosition(maxScrollsPosition + dx, navigatorArea.y);
+        if(maxScrollsPosition != null) {
+            return setScrollsPosition(maxScrollsPosition + dx, navigatorArea.y);
+        }
+        return false;
     }
 
 

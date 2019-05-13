@@ -380,7 +380,7 @@ public class TraceDataManager {
             if (maxIndex >= processedData.rowCount()) {
                 maxIndex = processedData.rowCount() - 1;
             }
-
+            
             processedData = processedData.view(PrimitiveUtils.long2int(minIndex), PrimitiveUtils.long2int(maxIndex - minIndex));
             // if data was not grouped before we group only visible data
             if (!isAlreadyGrouped && groupingInterval != null) {
@@ -564,7 +564,6 @@ public class TraceDataManager {
                 markSize = 1;
             }
             double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth / markSize;
-            System.out.println(drawingAreaWidth+" trace extent "+traceExtent);
             if (processingConfig.isGroupingForced() && groupingIntervals != null) {
                 GroupInterval groupInterval = groupingIntervals.get(0);
                 double pointsInGroup = groupIntervalToPoints(traceData, groupInterval.intervalLength());

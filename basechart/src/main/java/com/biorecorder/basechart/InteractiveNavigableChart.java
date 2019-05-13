@@ -135,13 +135,14 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
             double scrollTranslation = 0;
             int xIndex = chart.getChartXIndex(startPoint);
             if(xIndex >= 0) {
-                scrollTranslation = chart.getScrollWidth(xIndex) / chart.getWidth();
+                if(chart.hasScroll(xIndex)) {
+                    scrollTranslation = chart.getScrollWidth(xIndex) / chart.getWidth();
+                }
             } else {
                 for (int i = 0; i < chart.chartXAxisCount(); i++) {
                     if(chart.hasScroll(i)) {
                         double translation = chart.getScrollWidth(i) / chart.getWidth();
                         scrollTranslation = Math.max(scrollTranslation, translation);
-
                     }
                 }
             }

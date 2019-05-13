@@ -87,7 +87,7 @@ abstract class AxisHorizontal extends Axis {
     }
 
     @Override
-    public double getBestLength(BCanvas canvas, int length) {
+    public double getBestExtent(BCanvas canvas, int length) {
         if (scale instanceof CategoryScale) {
             TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
             StringSequence labels = ((CategoryScale) scale).getLabels();
@@ -99,10 +99,12 @@ abstract class AxisHorizontal extends Axis {
                         longestLabel = l;
                     }
                 }
-                int bestLength = labels.size() * tm.stringWidth(longestLabel) + getInterLabelGap() * (labels.size() - 1);
+                int bestLength = labels.size() * (tm.stringWidth(longestLabel) + getInterLabelGap());
+                bestLength = Math.max(bestLength, length);
                 Scale s = new CategoryScale(labels);
-                s.setDomain(0, labels.size() - 1);
+                s.setDomain(0, labels.size());
                 s.setRange(0, bestLength);
+                System.out.println(" extent "+s.invert(length));
                 return s.invert(length);
             }
         }

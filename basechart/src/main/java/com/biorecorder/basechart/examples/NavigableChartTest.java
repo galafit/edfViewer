@@ -35,19 +35,18 @@ public class NavigableChartTest extends JFrame{
         yData = new IntArrayList();
         xData = new IntArrayList();
 
-      /*  for (int i = 0; i < 100; i++) {
+       for (int i = 0; i <= 10; i++) {
             yData.add(i);
             xData.add(i);
-            labels.add("l "+i);
-        }*/
+            labels.add("l_"+i);
+        }
 
 
-        xyData = new XYData(0, 1, true);
+        xyData = new XYData(labels, true);
         //xyData.addColumn(xData);
         xyData.addColumn(yData);
-        xyData.addColumn(new SquareFunction(), 0);
 
-        chart = new NavigableChart(new TimeScale());
+        chart = new NavigableChart(new CategoryScale());
         //chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
@@ -98,10 +97,10 @@ public class NavigableChartTest extends JFrame{
         //t1.start();
 
         Thread t = new Thread(new Runnable() {
-            int interval = 50;
+            int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 80; count++) {
+                for (int count = 0; count < 1; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -115,11 +114,13 @@ public class NavigableChartTest extends JFrame{
                     }
                     if(xData.size() > 0) {
                         xDataLast = xData.get(xData.size() - 1);
+
                     }
 
-                    for (int i = 1; i <= 1; i++) {
+                    for (int i = 1; i <= 10; i++) {
                         yData.add(i + yDataLast);
                         xData.add(i + xDataLast);
+                        labels.add("l_"+(i + xDataLast));
 
                     }
                     System.out.println("\ndata size: "+yData.size());
@@ -129,7 +130,7 @@ public class NavigableChartTest extends JFrame{
                 }
             }
         });
-       t.start();
+       //t.start();
     }
 
 

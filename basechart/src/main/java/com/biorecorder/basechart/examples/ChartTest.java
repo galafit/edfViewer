@@ -65,7 +65,7 @@ public class ChartTest extends JFrame {
         yUnsort.add(300);
 
 
-        XYData regularData = new XYData(0, 1, true);
+        XYData regularData = new XYData(labels, true);
         regularData.addColumn(list1);
         //regularData.addColumn(new SquareFunction(), 0);
         regularData.setColumnName(1, "rg");
@@ -91,7 +91,7 @@ public class ChartTest extends JFrame {
         timeData.addColumn(timeArray);
         timeData.addColumn(list1);*/
 
-        chart = new Chart();
+        chart = new Chart(new CategoryScale());
         chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
@@ -120,7 +120,7 @@ public class ChartTest extends JFrame {
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 5; count++) {
+                for (int count = 0; count < 10; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -131,9 +131,10 @@ public class ChartTest extends JFrame {
                     if(list1.size() > 0) {
                         value = list1.get(list1.size() - 1);
                     }
-                    for (int i = 1; i < 171; i++) {
+                    for (int i = 1; i < 2; i++) {
                         value += 1;
                         list1.add(value);
+                        labels.add("lab_"+value);
                     }
 
                     chart.appendData();
@@ -142,7 +143,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        //t.start();
+        t.start();
     }
 
     public static void main(String[] args) {

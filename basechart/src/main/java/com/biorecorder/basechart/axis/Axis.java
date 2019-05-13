@@ -3,12 +3,9 @@ package com.biorecorder.basechart.axis;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
-import com.biorecorder.basechart.scales.TimeScale;
+import com.biorecorder.basechart.scales.*;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
-import com.biorecorder.basechart.scales.Scale;
-import com.biorecorder.basechart.scales.Tick;
-import com.biorecorder.basechart.scales.TickProvider;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -594,7 +591,7 @@ public abstract class Axis {
         return (int)(2 * config.getTickLabelTextStyle().getSize());
     }
 
-    public abstract double getBestLength(BCanvas canvas, int length);
+    public abstract double getBestExtent(BCanvas canvas, int length);
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);
 
