@@ -26,7 +26,7 @@ public class AxisWrapper {
     }
 
     public double getBestLength(BCanvas canvas, int length) {
-        return axis.getBestExtent(canvas, length);
+        return axis.getBestLength(canvas, length);
     }
 
     private void setRoundingDirty() {

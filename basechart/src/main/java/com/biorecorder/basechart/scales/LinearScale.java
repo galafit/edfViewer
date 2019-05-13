@@ -126,7 +126,7 @@ public class LinearScale implements Scale {
 
 
     class LinearTickProvider implements TickProvider {
-        private double tickInterval;
+        private NormalizedNumber tickInterval;
         private LabelPrefixAndSuffix labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
         private double currentTick;
@@ -135,9 +135,9 @@ public class LinearScale implements Scale {
             this.labelFormatInfo = labelFormatInfo;
         }
 
-        public void setTickInterval(double tickInterval) {
-            this.tickInterval = tickInterval;
-            labelFormat = getNumberFormat(NormalizedNumber.firstDigitExponent(tickInterval), labelFormatInfo);
+        public void setTickInterval(double tickInterval1) {
+            this.tickInterval = new NormalizedNumber(tickInterval1);
+            labelFormat = getNumberFormat(tickInterval.exponent(), labelFormatInfo);
         }
 
         /**
@@ -182,42 +182,42 @@ public class LinearScale implements Scale {
                     exponent++;
                     break;
             }
-            tickInterval = firstDigit * Math.pow(10, exponent);
+            tickInterval = new NormalizedNumber(firstDigit,  exponent);
             labelFormat = getNumberFormat(exponent, labelFormatInfo);
         }
 
         @Override
         public void increaseTickInterval(int increaseFactor) {
-            tickInterval = tickInterval * increaseFactor;
-            labelFormat = getNumberFormat(NormalizedNumber.firstDigitExponent(tickInterval), labelFormatInfo);
+            tickInterval = tickInterval.multiply(increaseFactor);
+            labelFormat = getNumberFormat(tickInterval.exponent(), labelFormatInfo);
         }
 
         @Override
         public Tick getNextTick() {
-            currentTick += tickInterval;
+            currentTick += tickInterval.value();
             return new Tick(currentTick, format(currentTick));
         }
 
         @Override
         public Tick getPreviousTick() {
-            currentTick -= tickInterval;
+            currentTick -= tickInterval.value();
             return new Tick(currentTick, format(currentTick));
         }
 
         @Override
         public Tick getUpperTick(double value) {
-            currentTick = ((long)(value / tickInterval)) * tickInterval;
+            currentTick = ((long)(value / tickInterval.value())) * tickInterval.value();
             if(currentTick < value) {
-                currentTick += tickInterval;
+                currentTick += tickInterval.value();
             }
             return new Tick(currentTick, format(currentTick));
         }
 
         @Override
         public Tick getLowerTick(double value) {
-            currentTick = ((long)(value / tickInterval)) * tickInterval;
+            currentTick = ((long)(value / tickInterval.value())) * tickInterval.value();
             if(currentTick > value) {
-                currentTick -= tickInterval;
+                currentTick -= tickInterval.value();
             }
             return new Tick(currentTick, format(currentTick));
         }

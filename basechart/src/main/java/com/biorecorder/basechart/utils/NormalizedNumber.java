@@ -7,7 +7,7 @@ public class NormalizedNumber {
     private static final int MAX_MANTISSA_SIZE = 17;
     private long digits;
     private int exponent;
-    private double value;
+    private final double value;
 
 
     public NormalizedNumber(long digits1, int exponent1) {

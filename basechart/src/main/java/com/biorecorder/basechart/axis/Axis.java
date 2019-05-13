@@ -594,7 +594,7 @@ public abstract class Axis {
         return (int)(2 * config.getTickLabelTextStyle().getSize());
     }
 
-    public abstract double getBestExtent(BCanvas canvas, int length);
+    public abstract double getBestLength(BCanvas canvas, int length);
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);
 

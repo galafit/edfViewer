@@ -560,11 +560,11 @@ public class TraceDataManager {
 
     public double getBestExtent(double drawingAreaWidth, int markSize) {
         if (traceData.rowCount() > 1) {
-            Range dataMinMax = traceData.columnMinMax(0);
             if (markSize <= 0) {
                 markSize = 1;
             }
-            double traceExtent = (dataMinMax.length() * drawingAreaWidth) / (traceData.rowCount() * markSize);
+            double traceExtent = getDataAvgStep(traceData) * drawingAreaWidth / markSize;
+            System.out.println(drawingAreaWidth+" trace extent "+traceExtent);
             if (processingConfig.isGroupingForced() && groupingIntervals != null) {
                 GroupInterval groupInterval = groupingIntervals.get(0);
                 double pointsInGroup = groupIntervalToPoints(traceData, groupInterval.intervalLength());
@@ -578,7 +578,7 @@ public class TraceDataManager {
             }
             return traceExtent;
         }
-        return 0;
+        return -1;
     }
 
 

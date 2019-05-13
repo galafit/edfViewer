@@ -48,7 +48,6 @@ public class Chart {
     private Scale yScale;
 
     private boolean isDirty = true;
-    private boolean isDataAppended;
 
     public Chart() {
         this(new LinearScale(), new LinearScale());
@@ -386,10 +385,11 @@ public class Chart {
         double extent = xAxisList.get(xIndex).getBestLength(canvas, fullArea.width);
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
-                if (extent <= 0) {
-                    extent = trace.getBestExtent(fullArea.width);
-                } else {
-                    extent = Math.min(extent, trace.getBestExtent(fullArea.width));
+                double traceExtent = trace.getBestExtent(fullArea.width);
+                if (extent < 0) {
+                    extent = traceExtent;
+                } else if(traceExtent > 0){
+                    extent = Math.min(extent, traceExtent);
                 }
             }
         }
@@ -488,13 +488,6 @@ public class Chart {
             return;
         }
 
-        if (isDataAppended) {
-            for (Trace trace : traces) {
-                trace.appendData();
-            }
-            isDataAppended = false;
-        }
-
         if (isDirty) {
             doCalculations(canvas);
         }
@@ -579,8 +572,10 @@ public class Chart {
 
 
     public void appendData() {
+        for (Trace trace : traces) {
+            trace.appendData();
+        }
         isDirty = true;
-        isDataAppended = true;
     }
 
     public String[] getCurveNames() {

@@ -4,6 +4,7 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
+import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.data.frame.SquareFunction;
@@ -46,7 +47,7 @@ public class NavigableChartTest extends JFrame{
         xyData.addColumn(yData);
         xyData.addColumn(new SquareFunction(), 0);
 
-        chart = new NavigableChart();
+        chart = new NavigableChart(new TimeScale());
         //chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
@@ -97,10 +98,10 @@ public class NavigableChartTest extends JFrame{
         //t1.start();
 
         Thread t = new Thread(new Runnable() {
-            int interval = 1000;
+            int interval = 50;
             @Override
             public void run() {
-                for (int count = 0; count < 1; count++) {
+                for (int count = 0; count < 80; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -116,7 +117,7 @@ public class NavigableChartTest extends JFrame{
                         xDataLast = xData.get(xData.size() - 1);
                     }
 
-                    for (int i = 1; i <= 100; i++) {
+                    for (int i = 1; i <= 1; i++) {
                         yData.add(i + yDataLast);
                         xData.add(i + xDataLast);
 

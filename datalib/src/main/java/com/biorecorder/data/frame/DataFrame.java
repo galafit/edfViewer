@@ -591,7 +591,6 @@ public class DataFrame {
         for (int i = 1; i < columns.size(); i++) {
             length = (Math.min(length, columns.get(i).size()));
         }
-        System.out.println("length "+length);
     }
 
     private void rangeCheck(long rowNumber) {

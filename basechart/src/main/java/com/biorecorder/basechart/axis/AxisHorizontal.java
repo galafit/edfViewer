@@ -87,7 +87,7 @@ abstract class AxisHorizontal extends Axis {
     }
 
     @Override
-    public double getBestExtent(BCanvas canvas, int length) {
+    public double getBestLength(BCanvas canvas, int length) {
         if (scale instanceof CategoryScale) {
             TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
             StringSequence labels = ((CategoryScale) scale).getLabels();
@@ -106,6 +106,6 @@ abstract class AxisHorizontal extends Axis {
                 return s.invert(length);
             }
         }
-        return 0;
+        return -1;
     }
 }
