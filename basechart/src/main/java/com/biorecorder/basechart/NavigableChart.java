@@ -146,7 +146,6 @@ public class NavigableChart {
         }
     }
 
-
     private Range getScrollTouchRange(Scroll scroll) {
         int scrollStart = (int)navigatorScale(scroll.getValue());
         int scrollEnd = (int)navigatorScale(scroll.getValue() + scroll.getExtent());
@@ -187,11 +186,14 @@ public class NavigableChart {
         int gap = config.getGap();
 
         int width = fullArea.width - left - right;
-        int height = fullArea.height - top - bottom - gap;
+        int height = fullArea.height - top - bottom;
+        if(height > gap) {
+            height -= gap;
+        }
 
         int navigatorHeight;
         if (navigator.traceCount() == 0) {
-            navigatorHeight = config.getNavigatorHeightMin();
+            navigatorHeight = Math.min(config.getNavigatorHeightMin(), height/2);
         } else {
             int chartWeight = chart.getStacksSumWeight();
             int navigatorWeight = navigator.getStacksSumWeight();
@@ -200,10 +202,6 @@ public class NavigableChart {
         }
 
         int chartHeight = height - navigatorHeight;
-
-        if (chartHeight <= 0 || navigatorHeight <= 0) {
-           // TODO think...
-        }
 
         chartArea = new BRectangle(fullArea.x + left, fullArea.y + top, width, chartHeight);
         navigatorArea = new BRectangle(fullArea.x + left, fullArea.y + fullArea.height - navigatorHeight, width, navigatorHeight);
@@ -260,6 +258,17 @@ public class NavigableChart {
             setArea(canvas.getBounds());
         }
         if(isAreasDirty) {
+            int dx = 0;
+            if(chartArea != null) {
+                dx = fullArea.width - chartArea.width;
+            }
+            if(dx != 0) {
+                for (Integer key : scrolls.keySet()) {
+                    Scroll scroll = scrolls.get(key);
+                    double scrollExtentNew = chart.invert(key, fullArea.x +fullArea.width) - chart.invert(key, fullArea.x);
+                    scroll.setExtent(scrollExtentNew);
+                }
+            }
             calculateAndSetAreas();
             isAreasDirty = false;
         }

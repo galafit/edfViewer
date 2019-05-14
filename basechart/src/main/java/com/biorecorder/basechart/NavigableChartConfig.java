@@ -15,7 +15,7 @@ public class NavigableChartConfig {
     private BColor backgroundColor = BColor.BEIGE_WHITE;
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
-    private int navigatorHeightMin = 30; // px
+    private int navigatorHeightMin = 16; // px
     private boolean autoScrollEnabled = true;
     private boolean autoScaleEnabled = true; // chart Y auto scale during scrolling
 
