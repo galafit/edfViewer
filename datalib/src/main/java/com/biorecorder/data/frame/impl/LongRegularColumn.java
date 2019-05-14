@@ -7,15 +7,10 @@ import com.biorecorder.data.sequence.LongSequence;
 /**
  * Created by galafit on 7/5/19.
  */
-public class LongRegularColumn extends LongColumn {
-    private static final int MAX_SIZE = Integer.MAX_VALUE - 10;
+public class LongRegularColumn extends LongColumn implements RegularColumn{
     private long startValue;
     private long step;
     private int size;
-
-    public LongRegularColumn(long startValue, long step) {
-        this(startValue, step, MAX_SIZE);
-    }
 
     public LongRegularColumn(long startValue, long step, int size) {
         super(new LongSequence() {
@@ -32,6 +27,16 @@ public class LongRegularColumn extends LongColumn {
         this.startValue = startValue;
         this.step = step;
         this.size = size;
+    }
+
+    @Override
+    public double start() {
+        return startValue;
+    }
+
+    @Override
+    public double step() {
+        return step;
     }
 
     @Override

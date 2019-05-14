@@ -20,11 +20,7 @@ public class StringColumn implements Column {
 
     public StringColumn(StringSequence labelSequence) {
         this.labelSequence = labelSequence;
-        intColumn = new LongRegularColumn(0, 1);
-    }
-
-    public StringSequence getLabels() {
-        return labelSequence;
+        intColumn = new LongRegularColumn(0, 1, Integer.MAX_VALUE);
     }
 
     @Override

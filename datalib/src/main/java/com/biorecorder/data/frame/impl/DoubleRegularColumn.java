@@ -8,18 +8,13 @@ import com.biorecorder.data.sequence.IntSequence;
 /**
  * Created by galafit on 20/1/19.
  */
-class RegularColumn extends DoubleColumn {
-    private static final int MAX_SIZE = Integer.MAX_VALUE - 10;
+class DoubleRegularColumn extends DoubleColumn implements RegularColumn {
     private final boolean isLong;
     private final double startValue;
     private final double step;
     private int size;
 
-    public RegularColumn(double startValue, double step) {
-        this(startValue, step, MAX_SIZE);
-    }
-
-    public RegularColumn(double startValue, double step, int size) {
+    public DoubleRegularColumn(double startValue, double step, int size) {
         super(new DoubleSequence() {
             @Override
             public int size() {
@@ -41,11 +36,13 @@ class RegularColumn extends DoubleColumn {
         }
     }
 
-    public double getStartValue() {
+    @Override
+    public double start() {
         return startValue;
     }
 
-    public double getStep() {
+    @Override
+    public double step() {
         return step;
     }
 
@@ -112,23 +109,23 @@ class RegularColumn extends DoubleColumn {
 
     @Override
     public Column slice(int from, int length) {
-        return new RegularColumn(value(from), step, length);
+        return new DoubleRegularColumn(value(from), step, length);
     }
 
     @Override
     public Column slice(int from) {
-        return new RegularColumn(value(from), step, size - from);
+        return new DoubleRegularColumn(value(from), step, size - from);
     }
 
 
     @Override
     public Column view(int from) {
-        return new RegularColumn(value(from), step, size - from);
+        return new DoubleRegularColumn(value(from), step, size - from);
     }
 
     @Override
     public Column view(int from, int length) {
-        return new RegularColumn(value(from), step, length);
+        return new DoubleRegularColumn(value(from), step, length);
     }
 
     @Override
@@ -139,28 +136,28 @@ class RegularColumn extends DoubleColumn {
             case FIRST: {
                 double startNew = startValue;
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
             }
             case MAX:
             case LAST: {
                 double startNew = startValue + step * points;
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
             }
             case COUNT: {
                 double startNew = points;
                 double stepNew = 0;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
             }
             case SUM:{
                 double startNew = sum(0, points);
                 double stepNew = step * points * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
             }
             case AVERAGE:{
                 double startNew = avg(0, points);
                 double stepNew = step * points;
-                return new RegularColumn(startNew, stepNew, sizeNew);
+                return new DoubleRegularColumn(startNew, stepNew, sizeNew);
             }
             default:
                 String errMsg = "Unsupported Aggregate function: "+ aggregation;
