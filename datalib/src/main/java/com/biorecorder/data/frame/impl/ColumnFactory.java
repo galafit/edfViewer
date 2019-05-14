@@ -3,6 +3,7 @@ package com.biorecorder.data.frame.impl;
 import com.biorecorder.data.frame.Column;
 import com.biorecorder.data.frame.DataType;
 import com.biorecorder.data.frame.Function;
+import com.biorecorder.data.frame.RegularColumn;
 import com.biorecorder.data.sequence.*;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
@@ -50,13 +51,13 @@ public class ColumnFactory {
     }
 
     public static Column concat(Column column1, int column1Length, Column column2) {
-        if (column1.isRegular() && column2.isRegular()) {
-            DoubleRegularColumn regColumn1 = (DoubleRegularColumn) column1;
-            DoubleRegularColumn regColumn2 = (DoubleRegularColumn) column2;
-            if (regColumn1.step() == regColumn2.step() && regColumn2.start() == regColumn1.value(column1Length)) {
+        if (column1 instanceof RegularColumn && column2 instanceof RegularColumn) {
+            RegularColumn regColumn1 = (RegularColumn) column1;
+            RegularColumn regColumn2 = (RegularColumn) column2;
+            if (regColumn1.step() == regColumn2.step() && regColumn2.start() == column1.value(column1Length)) {
                 long size1 = column1Length;
                 long size2 = column2.size();
-                return new DoubleRegularColumn(regColumn1.start(), regColumn1.step(), PrimitiveUtils.long2int(size1 + size2));
+                return createColumn(regColumn1.start(), regColumn1.step(), PrimitiveUtils.long2int(size1 + size2));
             }
         }
 
