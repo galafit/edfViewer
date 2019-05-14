@@ -49,11 +49,6 @@ class LongColumn implements Column {
     }
 
     @Override
-    public boolean isRegular() {
-        return false;
-    }
-
-    @Override
     public Column slice(int from, int length) {
         LongArrayList slicedData = new LongArrayList(length);
         for (int i = 0; i < length; i++) {

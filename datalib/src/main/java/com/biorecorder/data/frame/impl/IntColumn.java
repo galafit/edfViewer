@@ -49,11 +49,6 @@ class IntColumn implements Column {
     }
 
     @Override
-    public boolean isRegular() {
-        return false;
-    }
-
-    @Override
     public Column slice(int from, int length) {
         IntArrayList slicedData = new IntArrayList(length);
         for (int i = 0; i < length; i++) {

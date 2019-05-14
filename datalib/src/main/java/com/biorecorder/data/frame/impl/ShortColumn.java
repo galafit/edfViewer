@@ -49,11 +49,6 @@ class ShortColumn implements Column {
     }
 
     @Override
-    public boolean isRegular() {
-        return false;
-    }
-
-    @Override
     public Column slice(int from, int length) {
         ShortArrayList slicedData = new ShortArrayList(length);
         for (int i = 0; i < length; i++) {

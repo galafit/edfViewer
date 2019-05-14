@@ -266,7 +266,7 @@ public class DataFrame {
     }
 
     public boolean isColumnRegular(int columnNumber) {
-        return columns.get(columnNumber).isRegular();
+        return columns.get(columnNumber) instanceof RegularColumn;
     }
 
     public boolean isColumnFunction(int columnNumber) {
