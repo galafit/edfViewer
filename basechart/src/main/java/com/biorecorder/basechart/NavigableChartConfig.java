@@ -16,6 +16,7 @@ public class NavigableChartConfig {
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 16; // px
+    private int navigatorMaxZoomFactor = -1;
     private boolean autoScrollEnabled = true;
     private boolean autoScaleEnabled = true; // chart Y auto scale during scrolling
 
@@ -39,7 +40,6 @@ public class NavigableChartConfig {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
 
-
         BColor scrollColor = chartConfig.getCrossHairConfig().getLineColor();
         scrollConfig.setColor(scrollColor);
     }
@@ -60,10 +60,18 @@ public class NavigableChartConfig {
         gap = config.gap;
         spacing = config.spacing;
         navigatorHeightMin = config.navigatorHeightMin;
+        navigatorMaxZoomFactor = config.navigatorMaxZoomFactor;
         autoScrollEnabled = config.autoScrollEnabled;
         autoScaleEnabled = config.autoScaleEnabled;
     }
 
+    public int getNavigatorMaxZoomFactor() {
+        return navigatorMaxZoomFactor;
+    }
+
+    public void setNavigatorMaxZoomFactor(int navigatorMaxZoomFactor) {
+        this.navigatorMaxZoomFactor = navigatorMaxZoomFactor;
+    }
 
     public ChartConfig getChartConfig() {
         return chartConfig;

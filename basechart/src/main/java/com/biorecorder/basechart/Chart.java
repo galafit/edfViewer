@@ -382,10 +382,21 @@ public class Chart {
      **/
     double getBestExtent(int xIndex, BCanvas canvas) {
         double extent = xAxisList.get(xIndex).getBestExtent(canvas, fullArea.width);
+        double tracesExtent = getTrcesBestExtent(xIndex);
+        if(extent < 0) {
+            extent = tracesExtent;
+        } else if(tracesExtent > 0) {
+            extent = Math.min(extent, tracesExtent);
+        }
+        return extent;
+    }
+
+    double getTrcesBestExtent(int xIndex) {
+        double extent = - 1;
         for (Trace trace : traces) {
             if (trace.getXScale() == xAxisList.get(xIndex).getScale()) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
-               // System.out.println("trace extent "+traceExtent);
+                // System.out.println("trace extent "+traceExtent);
                 if (extent < 0) {
                     extent = traceExtent;
                 } else if(traceExtent > 0){

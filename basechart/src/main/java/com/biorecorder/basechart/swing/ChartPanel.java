@@ -16,7 +16,7 @@ public class ChartPanel extends JPanel implements KeyListener {
 
     final int scrollPointsPerRotation = 10;
     // во сколько раз растягивается или сжимается ось при автозуме
-    private int defaultZoom = 2;
+    private double defaultZoom = 2;
     private BPoint pressPoint;
     private int pastX;
     private int pastY;

@@ -117,7 +117,7 @@ public class ChartTest extends JFrame {
         }
 
         Thread t = new Thread(new Runnable() {
-            int interval = 1000;
+            int interval = 100;
             @Override
             public void run() {
                 for (int count = 0; count < 10; count++) {

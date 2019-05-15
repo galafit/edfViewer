@@ -82,18 +82,18 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
         if (scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
-
         int xIndex = chart.getChartXIndex(startPoint);
         if(xIndex >= 0) {
-            chart.zoomScrollExtent(xIndex, scaleFactor);
+            return chart.zoomScrollExtent(xIndex, scaleFactor);
         } else {
+            boolean isChanged = false;
             for (int i = 0; i < chart.chartXAxisCount(); i++) {
                 if(chart.hasScroll(i)) {
-                    chart.zoomScrollExtent(i, scaleFactor);
+                    isChanged = chart.zoomScrollExtent(i, scaleFactor) || isChanged;
                 }
             }
+            return isChanged;
         }
-        return true;
     }
 
     @Override

@@ -433,11 +433,17 @@ public class NavigableChart {
     }
 
 
-    public void zoomScrollExtent(int xIndex, double zoomFactor) {
+    public boolean zoomScrollExtent(int xIndex, double zoomFactor) {
         Scroll scroll = scrolls.get(xIndex);
         if (scroll != null) {
-            scroll.setExtent(scroll.getExtent() * zoomFactor);
+            double bestExtent = chart.getTrcesBestExtent(xIndex);
+            double newExtent = scroll.getExtent() * zoomFactor;
+            if(config.getNavigatorMaxZoomFactor() <= 0 || newExtent / bestExtent < config.getNavigatorMaxZoomFactor()) {
+                scroll.setExtent(newExtent);
+                return true;
+            }
         }
+        return false;
     }
 
     public int getWidth() {
