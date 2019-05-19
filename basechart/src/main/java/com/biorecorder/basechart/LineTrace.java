@@ -13,42 +13,23 @@ public class LineTrace extends Trace {
     private LineTraceConfig traceConfig;
 
     public LineTrace(ChartData data) {
-        super(data);
-        traceConfig = new LineTraceConfig();
+        this(data, new LineTraceConfig());
     }
 
-    @Override
-    protected void initiateCurveNames(ChartData data) {
+    public LineTrace(ChartData data, LineTraceConfig config) {
+        super(data);
+        traceConfig = config;
         for (int i = 0; i < curveCount; i++) {
             curveNames[i] = data.getColumnName(i + 1);
+        }
+        for (int i = 0; i < curveColors.length; i++) {
+            curveColors[i] = traceConfig.getColor();
         }
     }
 
     @Override
     public int getMarkSize() {
         return traceConfig.getMarkSize();
-    }
-
-    @Override
-    public void setCurveColor(int curveNumber, BColor color) {
-        BColor[] colors = new BColor[curveCount()];
-        for (int i = 0; i < curveCount(); i++) {
-            if(i == curveNumber) {
-                colors[i] = color;
-            } else {
-                colors[i] = getCurveColor(i);
-            }
-        }
-        traceConfig.setCurveColors(colors);
-    }
-
-    @Override
-    public BColor getCurveColor(int curveNumber) {
-        BColor[] colors = traceConfig.getCurveColors();
-        if(colors != null) {
-            return colors[curveNumber % colors.length];
-        }
-        return null;
     }
 
     @Override

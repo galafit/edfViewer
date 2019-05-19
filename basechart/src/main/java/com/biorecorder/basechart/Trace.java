@@ -16,12 +16,13 @@ public abstract class Trace {
     protected TraceDataManager dataManager;
     protected final int curveCount;
     protected final String[] curveNames;
+    protected final BColor[] curveColors;
 
     public Trace(ChartData data) {
         dataManager = new TraceDataManager(data);
         curveCount = curveCount(data);
         curveNames = new String[curveCount];
-        initiateCurveNames(data);
+        curveColors = new BColor[curveCount];
     }
 
     public final void appendData() {
@@ -32,11 +33,20 @@ public abstract class Trace {
         return curveNames[curveNumber];
     }
 
-    public final void setCurveName(int curveNumber, String name) {
+    final void setCurveName(int curveNumber, String name) {
         curveNames[curveNumber] = name;
     }
 
-    public StringSequence getLabelsIfXColumnIsString() {
+    final void setCurveColor(int curveNumber, BColor color) {
+        curveColors[curveNumber] = color;
+    }
+
+    public final  BColor getCurveColor(int curveNumber) {
+        return curveColors[curveNumber];
+    }
+
+
+    final StringSequence getLabelsIfXColumnIsString() {
         return dataManager.getLabelsIfXColumnIsString();
     }
 
@@ -146,12 +156,6 @@ public abstract class Trace {
         }
         return new NearestPoint(new TraceCurvePoint(this, curveNumber, pointIndex), distanceMin);
     }
-
-    public abstract void setCurveColor(int curveNumber, BColor color);
-
-    public abstract BColor getCurveColor(int curveNumber);
-
-    protected abstract void initiateCurveNames(ChartData data);
 
     protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
 

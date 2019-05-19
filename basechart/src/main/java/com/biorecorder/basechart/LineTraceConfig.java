@@ -15,7 +15,7 @@ public class LineTraceConfig {
     private int mode;
     private boolean isFilled = false;
     private int markSize = 20 ; // point size
-    private BColor[] curveColors;
+    private BColor color;
 
     public LineTraceConfig() {
         this(LINEAR, false);
@@ -34,12 +34,12 @@ public class LineTraceConfig {
         this.isFilled = isFilled;
     }
 
-    public BColor[] getCurveColors() {
-        return curveColors;
+    public BColor getColor() {
+        return color;
     }
 
-    public void setCurveColors(BColor[] curveColors) {
-        this.curveColors = curveColors;
+    public void setColor(BColor color) {
+        this.color = color;
     }
 
     public int getMarkSize() {
