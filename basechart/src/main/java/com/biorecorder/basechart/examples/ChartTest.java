@@ -42,12 +42,12 @@ public class ChartTest extends JFrame {
         setTitle("Test chart");
 
         double value = 0;
-       /* for (int i = 0; i <= 250; i++) {
+        for (int i = 0; i <= 250; i++) {
             list1.add(value);
             list2.add(50);
             labels.add("lab_"+i);
-            value += 0.33;
-        }*/
+            value += 0.5;
+        }
 
 
         xUnsort.add(50);
@@ -67,12 +67,12 @@ public class ChartTest extends JFrame {
 
         XYData regularData = new XYData(labels, true);
         regularData.addColumn(list1);
-        //regularData.addColumn(new SquareFunction(), 0);
         regularData.setColumnName(1, "rg");
 
-       /* XYData noRegularData = new XYData(true);
+        XYData noRegularData = new XYData(true);
         noRegularData.addColumn(list1);
         noRegularData.addColumn(list1);
+        noRegularData.addColumn(new SquareFunction(), 0);
         noRegularData.setColumnName(1, "nr");
 
 
@@ -89,10 +89,10 @@ public class ChartTest extends JFrame {
         }
         XYData timeData = new XYData(false);
         timeData.addColumn(timeArray);
-        timeData.addColumn(list1);*/
+        timeData.addColumn(list1);
 
         chart = new Chart(new CategoryScale());
-        chart.addTrace(new LineTrace(regularData), true);
+        //chart.addTrace(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -105,12 +105,11 @@ public class ChartTest extends JFrame {
         setVisible(true);
         try {
             Thread.sleep(1000);
-            /*chart.addTrace(new LineTrace(unsortedData), false, true, false);
-            chart.addTrace(new LineTrace(timeData), false, true, false);
+            chart.addTrace(new LineTrace(unsortedData), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
             chart.addTrace(new LineTrace(noRegularData), true);
-            chart.addTrace(new LineTrace(regularData), true);
-            chartPanel.repaint();*/
+            chart.addTrace(new LineTrace(regularData), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
+            chartPanel.repaint();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -143,7 +142,7 @@ public class ChartTest extends JFrame {
                 System.out.println(list1.size());
             }
         });
-        t.start();
+       // t.start();
     }
 
     public static void main(String[] args) {

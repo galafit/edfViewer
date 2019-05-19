@@ -54,7 +54,7 @@ public class NavigableChartTest extends JFrame{
         navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
        */
-        chart.addChartTrace(new LineTrace(xyData), true , false, false);
+        chart.addChartTrace(new LineTrace(xyData), true);
 
         chart.addNavigatorTrace( new LineTrace(xyData), true);
 

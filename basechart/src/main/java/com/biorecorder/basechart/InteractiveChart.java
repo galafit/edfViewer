@@ -3,6 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BPoint;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 21/9/18.
@@ -26,20 +27,22 @@ public class InteractiveChart implements InteractiveDrawable {
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        int xIndex = chart.getXIndex(null);
-        int yIndex = chart.getYIndex(null);
-
-        if(xIndex >= 0 && yIndex >= 0) {
-            chart.autoScaleX(xIndex);
-            chart.autoScaleY(yIndex);
+        if(chart.isCurveSelected()) {
+            chart.autoScaleX(chart.getSelectedCurveX());
+            chart.autoScaleY(chart.getSelectedCurveStack(), chart.getSelectedCurveY());
         } else {
-            for (int i = 0; i < chart.xAxesCount(); i++) {
-                chart.autoScaleX(i);
+            XAxisPosition[] xAxisPositions = chart.getXAxes();
+            for (int i = 0; i < xAxisPositions.length; i++) {
+                chart.autoScaleX(xAxisPositions[i]);
             }
-            for (int i = 0; i < chart.yAxesCount(); i++) {
-                chart.autoScaleY(i);
+            for (int stack = 0; stack < chart.stackCount(); stack++) {
+                YAxisPosition[] yAxisPositions = chart.getYAxes(stack);
+                for (int i = 0; i < yAxisPositions.length; i++) {
+                    chart.autoScaleY(stack, yAxisPositions[i]);
+                }
             }
         }
+
         return true;
     }
 
@@ -58,66 +61,106 @@ public class InteractiveChart implements InteractiveDrawable {
     }
 
     @Override
-    public boolean onScaleX(BPoint startPoint, double scaleFactor) {
+    public boolean onScaleX(@Nullable BPoint startPoint, double scaleFactor) {
         if(scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
-        if(chart.traceCount() == 0) {
-            return false;
+
+        XAxisPosition[] xAxisPositions = new XAxisPosition[0];
+        if(chart.isCurveSelected()) {
+            XAxisPosition[] xAxisPositions1 = {chart.getSelectedCurveX()};
+            xAxisPositions = xAxisPositions1;
+        } else if(startPoint != null) {
+            XAxisPosition xPosition = chart.getXAxis(startPoint);
+            if(xPosition != null) {
+                XAxisPosition[] xAxisPositions1 = {xPosition};
+                xAxisPositions = xAxisPositions1;
+            }
+        } else {
+           xAxisPositions = chart.getXAxes();
         }
-        int xAxis = chart.getXIndex(startPoint);
-        if(xAxis >= 0) {
-            chart.zoomX(xAxis, scaleFactor);
+
+        if(xAxisPositions.length > 0) {
+            for (int i = 0; i < xAxisPositions.length; i++) {
+                chart.zoomX(xAxisPositions[i], scaleFactor);
+            }
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean onScaleY(BPoint startPoint, double scaleFactor) {
+    public boolean onScaleY(@Nullable BPoint startPoint, double scaleFactor) {
         if(scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
 
-        if(chart.traceCount() == 0) {
-            return false;
-        }
-        int yAxis = chart.getYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.zoomY(yAxis, scaleFactor);
+        if(chart.isCurveSelected()) {
+            chart.zoomY(chart.getSelectedCurveStack(), chart.getSelectedCurveY(), scaleFactor);
             return true;
+        }
+
+        if(startPoint != null) {
+            int stack = chart.getStack(startPoint);
+            if(stack >= 0) {
+                YAxisPosition yAxisPosition = chart.getYAxis(stack, startPoint);
+                if(yAxisPosition != null) {
+                    chart.zoomY(stack, yAxisPosition, scaleFactor);
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     @Override
-    public boolean onScrollX(BPoint startPoint, int dx) {
+    public boolean onScrollX(@Nullable BPoint startPoint, int dx) {
         if(dx == 0) {
             return false;
         }
-        if(chart.traceCount() == 0) {
-            return false;
+
+        XAxisPosition[] xAxisPositions = new XAxisPosition[0];
+        if(chart.isCurveSelected()) {
+            XAxisPosition[] xAxisPositions1 = {chart.getSelectedCurveX()};
+            xAxisPositions = xAxisPositions1;
+        } else if(startPoint != null) {
+            XAxisPosition xPosition = chart.getXAxis(startPoint);
+            if(xPosition != null) {
+                XAxisPosition[] xAxisPositions1 = {xPosition};
+                xAxisPositions = xAxisPositions1;
+            }
+        } else {
+            xAxisPositions = chart.getXAxes();
         }
-        int xAxis = chart.getXIndex(startPoint);
-        if(xAxis >= 0) {
-            chart.translateX(xAxis, dx);
+
+        if(xAxisPositions.length > 0) {
+            for (int i = 0; i < xAxisPositions.length; i++) {
+                chart.translateX(xAxisPositions[i], dx);
+            }
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean onScrollY(BPoint startPoint, int dy) {
+    public boolean onScrollY(@Nullable BPoint startPoint, int dy) {
         if(dy == 0) {
             return false;
         }
-        if(chart.traceCount() == 0) {
-            return false;
-        }
-        int yAxis = chart.getYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.translateY(yAxis, dy);
+        if(chart.isCurveSelected()) {
+            chart.translateY(chart.getSelectedCurveStack(), chart.getSelectedCurveY(), dy);
             return true;
+        }
+
+        if(startPoint != null) {
+            int stack = chart.getStack(startPoint);
+            if(stack >= 0) {
+                YAxisPosition yAxisPosition = chart.getYAxis(stack, startPoint);
+                if(yAxisPosition != null) {
+                    chart.translateY(stack, yAxisPosition, dy);
+                    return true;
+                }
+            }
         }
         return false;
     }

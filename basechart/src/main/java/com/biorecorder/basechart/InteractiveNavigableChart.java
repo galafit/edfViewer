@@ -35,32 +35,40 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        // AUTO SCALE both chart and preview
-
-        int xIndex = chart.getChartXIndex(null);
-        int yIndex = chart.getChartYIndex(null);
-        // if some trace is selected we auto scale only axis belonging to that trace
-        if (xIndex >= 0 && yIndex >= 0) {
-            chart.autoScaleScrollExtent(xIndex);
-            chart.autoScaleChartY(yIndex);
-        } else { // if no selected trace in chart we scale all x and y axis
-            for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                if(chart.hasScroll(i)) {
-                    chart.autoScaleScrollExtent(i);
+        // AUTO SCALE both chart and navigator
+        if(chart.isChartCurveSelected()) {
+            // if some trace is selected we auto scale only axis belonging to that trace
+            chart.autoScaleScrollExtent(chart.getChartSelectedCurveX());
+            chart.autoScaleChartY(chart.getChartSelectedCurveStack(), chart.getChartSelectedCurveY());
+        } else {
+            // if no selected trace in chart we scale all x and y axis
+            XAxisPosition[] xAxisPositions = chart.getChartXAxes();
+            for (int i = 0; i < xAxisPositions.length; i++) {
+                XAxisPosition xPosition = xAxisPositions[i];
+                if(chart.hasScroll(xPosition)) {
+                    chart.autoScaleScrollExtent(xPosition);
                 }
             }
-            for (int i = 0; i < chart.chartYAxisCount(); i++) {
-                chart.autoScaleChartY(i);
+            for (int stack = 0; stack < chart.chartStackCount(); stack++) {
+                YAxisPosition[] yAxisPositions = chart.getChartYAxes(stack);
+                for (int i = 0; i < yAxisPositions.length; i++) {
+                    chart.autoScaleChartY(stack, yAxisPositions[i]);
+                }
             }
         }
 
-        // do the same with preview...
-        int previewYIndex = chart.getNavigatorYIndex(null);
-        if (previewYIndex >= 0) {
-            chart.autoScaleNavigatorY(previewYIndex);
+        // do the same with navigator...
+        if(chart.isNavigatorCurveSelected()) {
+            // if some trace is selected we auto scale only axis belonging to that trace
+            chart.autoScaleNavigatorY(chart.getNavigatorSelectedCurveStack(), chart.getNavigatorSelectedCurveY());
         } else {
-            for (int i = 0; i < chart.navigatorYAxisCount(); i++) {
-                chart.autoScaleNavigatorY(i);
+            // if no selected trace in navigator we scale all  y axis
+
+            for (int stack = 0; stack < chart.navigatorStackCount(); stack++) {
+                YAxisPosition[] yAxisPositions = chart.getNavigatorYAxes(stack);
+                for (int i = 0; i < yAxisPositions.length; i++) {
+                    chart.autoScaleChartY(stack, yAxisPositions[i]);
+                }
             }
         }
         return true;
@@ -82,14 +90,16 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
         if (scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
-        int xIndex = chart.getChartXIndex(startPoint);
-        if(xIndex >= 0) {
-            return chart.zoomScrollExtent(xIndex, scaleFactor);
+        if(chart.isChartCurveSelected()) {
+            // if some trace is selected we auto scale only axis belonging to that trace
+            return chart.zoomScrollExtent(chart.getChartSelectedCurveX(), scaleFactor);
         } else {
             boolean isChanged = false;
-            for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                if(chart.hasScroll(i)) {
-                    isChanged = chart.zoomScrollExtent(i, scaleFactor) || isChanged;
+            XAxisPosition[] xAxisPositions = chart.getChartXAxes();
+            for (int i = 0; i < xAxisPositions.length; i++) {
+                XAxisPosition xPosition = xAxisPositions[i];
+                if(chart.hasScroll(xPosition)) {
+                    isChanged = chart.zoomScrollExtent(xPosition, scaleFactor) || isChanged;
                 }
             }
             return isChanged;
@@ -101,18 +111,37 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
         if (startPoint == null || scaleFactor == 0 || scaleFactor == 1) {
             return false;
         }
-        int yAxis = chart.getChartYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.zoomChartY(yAxis, scaleFactor);
-            return true;
+        if(chart.isChartContains(startPoint)) {
+            if(chart.isChartCurveSelected()) {
+                chart.zoomChartY(chart.getChartSelectedCurveStack(), chart.getChartSelectedCurveY(), scaleFactor);
+                return true;
+            } else {
+                int stack = chart.getChartStack(startPoint);
+                if(stack >= 0) {
+                    YAxisPosition yPosition = chart.getChartYAxis(stack, startPoint);
+                    if(yPosition != null) {
+                        chart.zoomChartY(stack, yPosition, scaleFactor);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        } else {
+            if(chart.isNavigatorCurveSelected()) {
+                chart.zoomNavigatorY(chart.getNavigatorSelectedCurveStack(), chart.getNavigatorSelectedCurveY(), scaleFactor);
+                return true;
+            } else {
+                int stack = chart.getNavigatorStack(startPoint);
+                if(stack >= 0) {
+                    YAxisPosition yPosition = chart.getNavigatorYAxis(stack, startPoint);
+                    if(yPosition != null) {
+                        chart.zoomNavigatorY(stack, yPosition, scaleFactor);
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
-
-        yAxis = chart.getNavigatorYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.zoomNavigatorY(yAxis, scaleFactor);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -133,15 +162,17 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
 
         if(startPoint == null || chart.isChartContains(startPoint)) {
             double scrollTranslation = 0;
-            int xIndex = chart.getChartXIndex(startPoint);
-            if(xIndex >= 0) {
-                if(chart.hasScroll(xIndex)) {
-                    scrollTranslation = chart.getScrollWidth(xIndex) / chart.getWidth();
+            if(chart.isChartCurveSelected()) {
+                XAxisPosition xPosition = chart.getChartSelectedCurveX();
+                if(chart.hasScroll(xPosition)) {
+                    scrollTranslation = chart.getScrollWidth(xPosition) / chart.getWidth();
                 }
             } else {
-                for (int i = 0; i < chart.chartXAxisCount(); i++) {
-                    if(chart.hasScroll(i)) {
-                        double translation = chart.getScrollWidth(i) / chart.getWidth();
+                XAxisPosition[] xAxisPositions = chart.getChartXAxes();
+                for (int i = 0; i < xAxisPositions.length; i++) {
+                    XAxisPosition xPosition = xAxisPositions[i];
+                    if(chart.hasScroll(xPosition)) {
+                        double translation = chart.getScrollWidth(xPosition) / chart.getWidth();
                         scrollTranslation = Math.max(scrollTranslation, translation);
                     }
                 }
@@ -159,18 +190,37 @@ public class InteractiveNavigableChart implements InteractiveDrawable {
             return false;
         }
 
-        int yAxis = chart.getChartYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.translateChartY(yAxis, dy);
-            return true;
+        if(chart.isChartContains(startPoint)) {
+            if(chart.isChartCurveSelected()) {
+                chart.translateChartY(chart.getChartSelectedCurveStack(), chart.getChartSelectedCurveY(), dy);
+                return true;
+            } else {
+                int stack = chart.getChartStack(startPoint);
+                if(stack >= 0) {
+                    YAxisPosition yPosition = chart.getChartYAxis(stack, startPoint);
+                    if(yPosition != null) {
+                        chart.translateChartY(stack, yPosition, dy);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        } else {
+            if(chart.isNavigatorCurveSelected()) {
+                chart.translateNavigatorY(chart.getNavigatorSelectedCurveStack(), chart.getNavigatorSelectedCurveY(), dy);
+                return true;
+            } else {
+                int stack = chart.getNavigatorStack(startPoint);
+                if(stack >= 0) {
+                    YAxisPosition yPosition = chart.getNavigatorYAxis(stack, startPoint);
+                    if(yPosition != null) {
+                        chart.translateNavigatorY(stack, yPosition, dy);
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
-
-        yAxis = chart.getNavigatorYIndex(startPoint);
-        if(yAxis >= 0) {
-            chart.translateNavigatorY(yAxis, dy);
-            return true;
-        }
-        return false;
     }
 
 

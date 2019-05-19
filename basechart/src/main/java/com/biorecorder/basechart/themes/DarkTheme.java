@@ -2,6 +2,8 @@ package com.biorecorder.basechart.themes;
 
 import com.biorecorder.basechart.ChartConfig;
 import com.biorecorder.basechart.NavigableChartConfig;
+import com.biorecorder.basechart.XAxisPosition;
+import com.biorecorder.basechart.YAxisPosition;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scroll.ScrollConfig;
@@ -61,8 +63,8 @@ public class DarkTheme implements Theme {
         chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
-        chartConfig.setLeftAxisPrimary(false);
-        chartConfig.setBottomAxisPrimary(true);
+        chartConfig.setPrimaryYPosition(YAxisPosition.LEFT);
+        chartConfig.setPrimaryXPosition(XAxisPosition.BOTTOM);
 
         this.chartConfig = chartConfig;
 
@@ -89,7 +91,9 @@ public class DarkTheme implements Theme {
 
         ChartConfig chartConfig1 = new ChartConfig(chartConfig);
         chartConfig1.getYAxisConfig().setTickLabelOutside(false);
-        chartConfig1.setBottomAxisPrimary(false);
+        chartConfig1.setPrimaryYPosition(YAxisPosition.RIGHT);
+        chartConfig1.setPrimaryXPosition(XAxisPosition.TOP);
+
 
         navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);
         navigableChartConfig.setBackgroundColor(bgColor);

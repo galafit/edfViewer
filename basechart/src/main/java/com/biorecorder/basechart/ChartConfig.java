@@ -31,8 +31,8 @@ public class ChartConfig {
 
     private boolean isMultiCurveTooltip = true;
 
-    private boolean isLeftAxisPrimary = true;
-    private boolean isBottomAxisPrimary = true;
+    private XAxisPosition primaryXPosition = XAxisPosition.BOTTOM;
+    private YAxisPosition primaryYPosition = YAxisPosition.LEFT;
 
     private int defaultStackWeight = 4;
 
@@ -91,8 +91,8 @@ public class ChartConfig {
         stackGap = chartConfig.stackGap;
         yAxisConfig = new AxisConfig(chartConfig.yAxisConfig);
         xAxisConfig = new AxisConfig(chartConfig.xAxisConfig);
-        isLeftAxisPrimary = chartConfig.isLeftAxisPrimary;
-        isBottomAxisPrimary = chartConfig.isBottomAxisPrimary;
+        primaryXPosition = chartConfig.primaryXPosition;
+        primaryYPosition = chartConfig.primaryYPosition;
         isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
         defaultStackWeight = chartConfig.defaultStackWeight;
     }
@@ -135,20 +135,20 @@ public class ChartConfig {
         this.autoSpacing = autoSpacing;
     }
 
-    public boolean isLeftAxisPrimary() {
-        return isLeftAxisPrimary;
+    public XAxisPosition getPrimaryXPosition() {
+        return primaryXPosition;
     }
 
-    public void setLeftAxisPrimary(boolean isLeftAxisPrimary) {
-        this.isLeftAxisPrimary = isLeftAxisPrimary;
+    public void setPrimaryXPosition(XAxisPosition primaryXPosition) {
+        this.primaryXPosition = primaryXPosition;
     }
 
-    public boolean isBottomAxisPrimary() {
-        return isBottomAxisPrimary;
+    public YAxisPosition getPrimaryYPosition() {
+        return primaryYPosition;
     }
 
-    public void setBottomAxisPrimary(boolean isBottomAxisPrimary) {
-        this.isBottomAxisPrimary = isBottomAxisPrimary;
+    public void setPrimaryYPosition(YAxisPosition primaryYPosition) {
+        this.primaryYPosition = primaryYPosition;
     }
 
     public boolean isMultiCurveTooltip() {

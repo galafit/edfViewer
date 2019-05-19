@@ -29,10 +29,11 @@ public class NavigableChartConfig {
         scrollConfig = new ScrollConfig();
 
         chartConfig.getYAxisConfig().setTickLabelOutside(false);
-        chartConfig.setLeftAxisPrimary(false);
+        chartConfig.setPrimaryYPosition(YAxisPosition.RIGHT);
+        chartConfig.setPrimaryXPosition(XAxisPosition.TOP);
 
         navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
-        navigatorConfig.setLeftAxisPrimary(false);
+        navigatorConfig.setPrimaryYPosition(YAxisPosition.RIGHT);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
         navigatorConfig.setStackGap(0);
