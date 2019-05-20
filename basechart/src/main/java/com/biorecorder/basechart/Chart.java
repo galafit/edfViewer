@@ -284,18 +284,6 @@ public class Chart {
         }
     }
 
-    private void addCurvePointToTooltip(Tooltip tooltip, Trace trace, int curveNumber, int pointIndex) {
-        NamedValue[] curveValues = trace.curveValues(curveNumber, pointIndex);
-        if (curveValues.length == 1) {
-            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), curveValues[0].getValueLabel());
-        } else {
-            tooltip.addLine(trace.getCurveColor(curveNumber), trace.getCurveName(curveNumber), "");
-            for (NamedValue curveValue : curveValues) {
-                tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
-            }
-        }
-    }
-
     private int chooseXAxisWithGrid(int stack) {
         AxisWrapper leftAxis = yAxisList.get(stack * 2);
         AxisWrapper rightAxis = yAxisList.get(stack * 2 + 1);
@@ -508,13 +496,13 @@ public class Chart {
     }
 
     int getSelectedCurveStack() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
+        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
         return getYStack(yIndex);
     }
 
 
     YAxisPosition getSelectedCurveY() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurveNumber());
+        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
         return getYPosition(yIndex);
     }
 
@@ -609,63 +597,90 @@ public class Chart {
             return hoverOff();
         }
         if (hoverPoint == null && selectedCurve != null) {
-            hoverPoint = new TraceCurvePoint(selectedCurve.getTrace(), selectedCurve.getCurveNumber(), -1);
-        }
-
-        if (hoverPoint != null) {
-            NearestPoint nearestPoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurveNumber());
-            if (nearestPoint == null) {
-                hoverPoint = null;
+            hoverPoint = selectedCurve.getTrace().nearest(x, y, selectedCurve.getCurve());
+            if(hoverPoint != null) {
+                updateTooltipAndCrosshair();
                 return true;
             }
-            if (hoverPoint.getPointIndex() == nearestPoint.getPointIndex()) {
-                return false;
-            } else {
-                hoverPoint = nearestPoint.getCurvePoint();
-            }
-        } else {
-            // find nearest trace curve
-            NearestPoint nearestPoint = null;
-            for (Trace trace : traces) {
-                NearestPoint np = trace.nearest(x, y, -1);
-                if (np != null && (nearestPoint == null || nearestPoint.getDistanceSq() > np.getDistanceSq())) {
-                    nearestPoint = np;
-                }
-            }
-
-            if (nearestPoint != null) {
-                hoverPoint = nearestPoint.getCurvePoint();
-            }
         }
 
         if (hoverPoint != null) {
-            if (hoverPoint.getPointIndex() >= 0) {
-                Trace hoverTrace = hoverPoint.getTrace();
-                int hoverCurveNumber = hoverPoint.getCurveNumber();
-                int hoverPointIndex = hoverPoint.getPointIndex();
-                int xPosition = hoverTrace.xPosition(hoverPointIndex);
-                int tooltipYPosition = 0;
-                NamedValue xValue = hoverTrace.xValue(hoverPointIndex);
+            TraceCurvePoint hoverPointNew = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurve());
+            if(hoverPointNew == null || hoverPoint.getPointIndex() != hoverPointNew.getPointIndex()) {
+                hoverPoint = hoverPointNew;
+                updateTooltipAndCrosshair();
+                return true;
+            }
+            return false;
+        }
 
-                crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
-                tooltip = new Tooltip(config.getTooltipConfig(), xPosition, tooltipYPosition);
-                tooltip.setHeader(null, null, xValue.getValueLabel());
-                if (config.isMultiCurveTooltip()) { // all trace curves
-                    for (int i = 0; i < hoverTrace.curveCount(); i++) {
-                        addCurvePointToTooltip(tooltip, hoverTrace, i, hoverPointIndex);
-                        crosshair.addY(hoverTrace.curveYPosition(i, hoverPointIndex));
-
+        else {
+            // find nearest trace curve
+            int distanceSqwMin = -1;
+            for (Trace trace : traces) {
+                TraceCurvePoint traceCurvePoint = trace.nearest(x, y);
+                if(traceCurvePoint != null) {
+                    int distanceSqw = trace.distanceSqw(traceCurvePoint.pointIndex, traceCurvePoint.curve, x, y);
+                    if(distanceSqwMin < 0 || distanceSqwMin > distanceSqw) {
+                        distanceSqwMin = distanceSqw;
+                        hoverPoint = traceCurvePoint;
                     }
-                } else { // only hover curve
-                    addCurvePointToTooltip(tooltip, hoverTrace, hoverCurveNumber, hoverPointIndex);
-                    crosshair.addY(hoverTrace.curveYPosition(hoverCurveNumber, hoverPointIndex));
+                    if(distanceSqwMin == 0) {
+                        break;
+                    }
                 }
             }
-            return true;
+
+            if (hoverPoint != null) {
+                updateTooltipAndCrosshair();
+                return true;
+            }
+            return false;
         }
-        return false;
+
     }
 
+    private void updateTooltipAndCrosshair() {
+        if(hoverPoint == null) {
+            return;
+        }
+        Trace hoverTrace = hoverPoint.getTrace();
+        int hoverCurve = hoverPoint.getCurve();
+        int hoverPointIndex = hoverPoint.getPointIndex();
+        int tooltipYPosition = 0;
+        NamedValue xValue = hoverTrace.xValue(hoverPointIndex);
+
+        List<Integer> curves;
+        int xPosition;
+        if (config.isMultiCurveTooltip()) { // all trace curves
+            curves = new ArrayList<>(hoverTrace.curveCount());
+            for (int i = 0; i < hoverTrace.curveCount(); i++) {
+                curves.add(i);
+            }
+            xPosition = hoverTrace.curveXPosition(hoverPointIndex, 0);
+        } else { // only hover curve
+            curves = new ArrayList<>(1);
+            curves.add(hoverCurve);
+            xPosition = hoverTrace.curveXPosition(hoverPointIndex, hoverCurve);
+        }
+
+        crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
+        tooltip = new Tooltip(config.getTooltipConfig(), xPosition, tooltipYPosition);
+        tooltip.setHeader(null, null, xValue.getValueLabel());
+
+        for (Integer curve : curves) {
+            NamedValue[] curveValues = hoverTrace.curveValues(hoverPointIndex, curve);
+            if (curveValues.length == 1) {
+                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), curveValues[0].getValueLabel());
+            } else {
+                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), "");
+                for (NamedValue curveValue : curveValues) {
+                    tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
+                }
+            }
+            crosshair.addY(hoverTrace.curveYPosition(hoverPointIndex, curve));
+        }
+    }
 
 
     /** =================================================*
@@ -805,7 +820,7 @@ public class Chart {
         if (selectedCurve != null) {
             for (int i = 0; i < traces.size(); i++) {
                 if (selectedCurve.getTrace() == traces.get(i)) {
-                    return new CurveNumber(i, selectedCurve.getCurveNumber());
+                    return new CurveNumber(i, selectedCurve.getCurve());
                 }
             }
         }
@@ -1027,7 +1042,7 @@ public class Chart {
                         if (isSelected) {
                             selectedCurve = new TraceCurve(trace, curveNumber);
                         }
-                        if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurveNumber() == curveNumber) {
+                        if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurve() == curveNumber) {
                             selectedCurve = null;
                         }
                     }

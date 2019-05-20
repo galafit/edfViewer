@@ -6,19 +6,19 @@ package com.biorecorder.basechart;
  */
 public class TraceCurve {
     protected final Trace trace;
-    protected final int curveNumber;
+    protected final int curve;
 
-    public TraceCurve(Trace trace, int curveNumber) {
+    public TraceCurve(Trace trace, int curve) {
         this.trace = trace;
-        this.curveNumber = curveNumber;
+        this.curve = curve;
     }
 
     public Trace getTrace() {
         return trace;
     }
 
-    public int getCurveNumber() {
-        return curveNumber;
+    public int getCurve() {
+        return curve;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class TraceCurve {
         if (obj instanceof TraceCurve) {
             TraceCurve r = (TraceCurve) obj;
             return ((trace == r.trace) &&
-                    (curveNumber == r.curveNumber));
+                    (curve == r.curve));
 
         }
         return super.equals(obj);
@@ -40,7 +40,7 @@ public class TraceCurve {
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + curveNumber;
+        result = 31 * result + curve;
         result = 31 * result + trace.hashCode();
         return result;
     }

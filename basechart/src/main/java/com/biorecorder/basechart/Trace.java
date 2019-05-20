@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.data.sequence.StringSequence;
 
@@ -29,20 +28,20 @@ public abstract class Trace {
         dataManager.appendData();
     }
 
-    public final String getCurveName(int curveNumber) {
-        return curveNames[curveNumber];
+    public final String getCurveName(int curve) {
+        return curveNames[curve];
     }
 
     final void setCurveName(int curveNumber, String name) {
         curveNames[curveNumber] = name;
     }
 
-    final void setCurveColor(int curveNumber, BColor color) {
-        curveColors[curveNumber] = color;
+    final void setCurveColor(int curve, BColor color) {
+        curveColors[curve] = color;
     }
 
-    public final  BColor getCurveColor(int curveNumber) {
-        return curveColors[curveNumber];
+    public final BColor getCurveColor(int curve) {
+        return curveColors[curve];
     }
 
 
@@ -82,21 +81,16 @@ public abstract class Trace {
         return new NamedValue("x: ", xValue, xScale.formatDomainValue(xValue));
     }
 
-    public int xPosition(int dataIndex) {
-        double xValue = getData().value(dataIndex, 0);
-        return (int) xScale.scale(xValue);
+    public final NamedValue[] curveValues(int dataIndex, int curve) {
+        return curveValues(dataIndex, curve, getData());
     }
 
-    public final NamedValue[] curveValues(int curveNumber, int dataIndex) {
-        return curveValues(curveNumber, dataIndex, getData());
+    public final int curveYPosition(int dataIndex, int curve) {
+        return curveYPosition(dataIndex, curve, getData());
     }
 
-    public final int curveYPosition(int curveNumber, int dataIndex) {
-        return curveYPosition(curveNumber, dataIndex, getData());
-    }
-
-    public final Range curveYMinMax(int curveNumber) {
-        return curveYMinMax(curveNumber, getData());
+    public final Range curveYMinMax(int curve) {
+        return curveYMinMax(curve, getData());
     }
 
     public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
@@ -119,47 +113,68 @@ public abstract class Trace {
         return yScales;
     }
 
-    public final Scale getYScale(int curveNumber) {
-        if (curveNumber < yScales.length - 1) {
-            return yScales[curveNumber];
+    public final Scale getYScale(int curve) {
+        if (curve < yScales.length - 1) {
+            return yScales[curve];
         }
         return yScales[yScales.length - 1];
     }
 
+
     public abstract int getMarkSize();
 
-    public NearestPoint nearest(int x, int y, int curveNumber1) {
+    public int distanceSqw(int pointIndex, int curve, int x, int y) {
+        int dy = curveYPosition(pointIndex, curve) - y;
+        int dx = curveXPosition(pointIndex, curve) - x;
+        return dy * dy + dx * dx;
+    }
+
+    public TraceCurvePoint nearest(int x, int y, int curve) {
         double xValue = xScale.invert(x);
         int pointIndex = dataManager.nearest(xValue);
         if (pointIndex < 0) {
             return null;
         }
-        int dx = xPosition(pointIndex) - x;
-        int dx2 = dx * dx;
-        int distanceMin = 0;
-        int curveNumber = 0;
-
-        int startCurve = 0;
-        int curveCount = curveCount();
-        if (curveNumber1 >= 0) {
-            startCurve = curveNumber1;
-            curveCount = 1;
-        }
-
-        for (int i = startCurve; i < startCurve + curveCount; i++) {
-            int dy = curveYPosition(i, pointIndex) - y;
-            int distance = dx2 + dy * dy;
-            if (distanceMin == 0 || distanceMin > distance) {
-                curveNumber = i;
-                distanceMin = distance;
-            }
-        }
-        return new NearestPoint(new TraceCurvePoint(this, curveNumber, pointIndex), distanceMin);
+        return new TraceCurvePoint(this, curve, pointIndex);
     }
 
-    protected abstract int curveYPosition(int curveNumber, int dataIndex, ChartData data);
+    public TraceCurvePoint nearest(int x, int y) {
+        double xValue = xScale.invert(x);
+        int pointIndex = dataManager.nearest(xValue);
+        if (pointIndex < 0) {
+            return null;
+        }
+        if (curveCount == 1) {
+            return new TraceCurvePoint(this, 0, pointIndex);
+        }
 
-    protected abstract NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data);
+        int dy_min = 0;
+        int closestCurve = 0;
+        for (int i = 0; i < curveCount; i++) {
+            int dy = Math.abs(curveYPosition(pointIndex, i) - y);
+            if (i == 0 || dy_min > dy) {
+                dy_min = dy;
+                closestCurve = i;
+            }
+            if (dy_min == 0) {
+                break;
+            }
+        }
+        return new TraceCurvePoint(this, closestCurve, pointIndex);
+    }
+
+    public final int curveXPosition(int dataIndex, int curve) {
+        return curveXPosition(dataIndex, 0, getData());
+    }
+
+    protected int curveXPosition(int dataIndex, int curve, ChartData data) {
+        double xValue = data.value(dataIndex, 0);
+        return (int) xScale.scale(xValue);
+    }
+
+    protected abstract int curveYPosition(int dataIndex, int curve, ChartData data);
+
+    protected abstract NamedValue[] curveValues(int dataIndex, int curve, ChartData data);
 
     protected abstract int curveCount(ChartData data);
 

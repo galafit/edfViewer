@@ -76,7 +76,7 @@ public class Legend {
 
     public void setCurveName(Trace trace, int curveNumber, String name) {
         for (TraceCurve key : traceCurvesToButtons.keySet()){
-            if(key.getTrace() == trace && key.getCurveNumber() == curveNumber) {
+            if(key.getTrace() == trace && key.getCurve() == curveNumber) {
                 SwitchButton button = traceCurvesToButtons.get(key);
                 button.setLabel(name);
                 isDirty = true;
@@ -125,7 +125,7 @@ public class Legend {
         if(!config.isAttachedToStacks()) {
             return  area;
         }
-        double[] yRange = traceCurve.getTrace().getYScale(traceCurve.getCurveNumber()).getRange();
+        double[] yRange = traceCurve.getTrace().getYScale(traceCurve.getCurve()).getRange();
         int yStart = (int)yRange[0];
         int yEnd = (int)yRange[yRange.length - 1];
         return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));
@@ -237,7 +237,7 @@ public class Legend {
             arrangeButtons(canvas);
         }
         for (TraceCurve traceCurve : traceCurvesToButtons.keySet()){
-            traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveColor(traceCurve.getCurveNumber()));
+            traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveColor(traceCurve.getCurve()));
         }
         canvas.setTextStyle(config.getTextStyle());
         for (TraceCurve key : traceCurvesToButtons.keySet()) {

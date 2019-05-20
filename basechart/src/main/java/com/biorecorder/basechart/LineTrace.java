@@ -33,8 +33,8 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected int curveYPosition(int curveNumber, int dataIndex, ChartData data) {
-        return (int) getYScale(curveNumber).scale(data.value(dataIndex, curveNumber + 1));
+    protected int curveYPosition(int dataIndex, int curve, ChartData data) {
+        return (int) getYScale(curve).scale(data.value(dataIndex, curve + 1));
     }
 
     @Override
@@ -43,9 +43,9 @@ public class LineTrace extends Trace {
     }
 
     @Override
-    protected NamedValue[] curveValues(int curveNumber, int dataIndex, ChartData data) {
-        XYViewer xyData = new XYViewer(data, curveNumber);
-        Scale yScale = getYScale(curveNumber);
+    protected NamedValue[] curveValues(int dataIndex, int curve, ChartData data) {
+        XYViewer xyData = new XYViewer(data, curve);
+        Scale yScale = getYScale(curve);
         double yValue = xyData.getY(dataIndex);
         NamedValue[] curveValues = {new NamedValue("", yValue, yScale.formatDomainValue(yValue))};
         return curveValues;
