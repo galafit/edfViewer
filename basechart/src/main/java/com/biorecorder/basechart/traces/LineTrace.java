@@ -1,6 +1,7 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.traces;
 
 
+import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
@@ -19,16 +20,29 @@ public class LineTrace extends Trace {
     public LineTrace(ChartData data, LineTraceConfig config) {
         super(data);
         traceConfig = config;
-        for (int i = 0; i < curveCount; i++) {
-            curveNames[i] = data.getColumnName(i + 1);
-        }
+
         for (int i = 0; i < curveColors.length; i++) {
             curveColors[i] = traceConfig.getColor();
         }
     }
 
     @Override
-    public int getMarkSize() {
+    protected String[] curveNames(ChartData data) {
+        String[] curveNames = new String[curveCount];
+        for (int i = 0; i < curveCount; i++) {
+            curveNames[i] = data.getColumnName(i + 1);
+        }
+        return curveNames;
+    }
+
+    @Override
+    protected int curveXPosition(int dataIndex, int curve, ChartData data) {
+        double xValue = data.value(dataIndex, 0);
+        return (int) xScale.scale(xValue);
+    }
+
+    @Override
+    protected int getMarkSize() {
         return traceConfig.getMarkSize();
     }
 

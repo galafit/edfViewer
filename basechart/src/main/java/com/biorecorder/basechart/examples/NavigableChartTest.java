@@ -3,11 +3,8 @@ package com.biorecorder.basechart.examples;
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
-import com.biorecorder.basechart.scales.LinearScale;
-import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.themes.WhiteTheme;
-import com.biorecorder.data.frame.SquareFunction;
+import com.biorecorder.basechart.traces.LineTrace;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 

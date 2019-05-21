@@ -2,22 +2,17 @@ package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.scales.CategoryScale;
-import com.biorecorder.basechart.scales.LinearScale;
-import com.biorecorder.basechart.scales.TimeScale;
-import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.data.frame.Aggregation;
+import com.biorecorder.basechart.traces.LineTrace;
 import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.DoubleArrayList;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 import com.biorecorder.data.list.LongArrayList;
-import com.biorecorder.data.utils.PrimitiveUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
