@@ -166,7 +166,7 @@ public class Chart {
                 for (Trace trace : traces) {
                     int curveCount = trace.curveCount();
                     for (int curve = 0; curve < curveCount; curve++) {
-                        if (trace.getYIndex(curve) == yIndex) {
+                        if (getCurveYIndex( trace,  curve) == yIndex) {
                             tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(curve, xAxisList.get(trace.getXIndex()).getScale(), yAxis.getScale()));
                         }
                     }
@@ -294,7 +294,7 @@ public class Chart {
         for (Trace trace : traces) {
             if (trace.getXIndex() == primaryAxisIndex) {
                 for (int curve = 0; curve < trace.curveCount(); curve++) {
-                    int curveYIndex = trace.getYIndex(curve);
+                    int curveYIndex = getCurveYIndex( trace,  curve);
                     if (curveYIndex == leftAxisIndex || curveYIndex == rightAxisIndex) {
                         return primaryAxisIndex;
                     }
@@ -357,6 +357,15 @@ public class Chart {
         }
         return XAxisPosition.TOP;
     }
+
+    int getCurveYIndex(Trace trace, int curve) {
+        if(trace.isSplit()) {
+            return trace.getYStartIndex() + curve * 2;
+        } else {
+            return trace.getYStartIndex();
+        }
+    }
+
 
 
     /**
@@ -482,13 +491,13 @@ public class Chart {
     }
 
     int getSelectedCurveStack() {
-        int yIndex = selectedCurve.getTrace().getYIndex(selectedCurve.getCurve());
+        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
         return getYStack(yIndex);
     }
 
 
     YAxisPosition getSelectedCurveY() {
-        int yIndex = selectedCurve.getTrace().getYIndex(selectedCurve.getCurve());
+        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
         return getYPosition(yIndex);
     }
 
@@ -584,7 +593,7 @@ public class Chart {
         }
         if (selectedCurve != null) {
             Scale xScale = xAxisList.get(selectedCurve.getTrace().getXIndex()).getScale();
-            Scale yScale = yAxisList.get(selectedCurve.getTrace().getYIndex(selectedCurve.getCurve())).getScale();
+            Scale yScale = yAxisList.get(getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve())).getScale();
 
             NearestCurvePoint nearestCurvePoint = selectedCurve.getTrace().nearest(x, y, selectedCurve.getCurve(), xScale, yScale);
             if (nearestCurvePoint != null) {
@@ -603,7 +612,7 @@ public class Chart {
 
         if (hoverPoint != null) {
             Scale xScale = xAxisList.get(hoverPoint.getTrace().getXIndex()).getScale();
-            Scale yScale = yAxisList.get(hoverPoint.getTrace().getYIndex(hoverPoint.getCurve())).getScale();
+            Scale yScale = yAxisList.get(getCurveYIndex(hoverPoint.getTrace(), hoverPoint.getCurve())).getScale();
             NearestCurvePoint nearestCurvePoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurve(), xScale, yScale);
             if (nearestCurvePoint != null) {
                 if (nearestCurvePoint.getCurvePoint().equals(hoverPoint)) {
@@ -621,7 +630,7 @@ public class Chart {
         for (Trace trace : traces) {
             Scale[] traceYScales = new Scale[trace.curveCount()];
             for (int curve = 0; curve < trace.curveCount(); curve++) {
-                traceYScales[curve] = yAxisList.get(trace.getYIndex(curve)).getScale();
+                traceYScales[curve] = yAxisList.get(getCurveYIndex( trace,  curve)).getScale();
             }
             Scale xScale = xAxisList.get(trace.getXIndex()).getScale();
 
@@ -668,7 +677,7 @@ public class Chart {
             curveStart = hoverCurve;
             curveEnd = hoverCurve;
         }
-        Scale yScale = yAxisList.get(hoverTrace.getYIndex(hoverCurve)).getScale();
+        Scale yScale = yAxisList.get(getCurveYIndex(hoverTrace, hoverCurve)).getScale();
         BRectangle hoverAreaStart = hoverTrace.curvePointHoverArea(hoverPointIndex, curveStart, xScale, yScale);
         BRectangle hoverAreaEnd = hoverTrace.curvePointHoverArea(hoverPointIndex, curveEnd, xScale, yScale);
 
@@ -679,7 +688,7 @@ public class Chart {
 
 
         for (int curve = curveStart; curve <= curveEnd; curve++) {
-            yScale = yAxisList.get(hoverTrace.getYIndex(curve)).getScale();
+            yScale = yAxisList.get(getCurveYIndex(hoverTrace, hoverCurve)).getScale();
             NamedValue[] curveValues = hoverTrace.curveValues(hoverPointIndex, curve, xScale, yScale);
             if (curveValues.length == 2) {
                 tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), curveValues[1].getValue());
@@ -776,7 +785,7 @@ public class Chart {
 
         for (Trace trace : traces) {
             for (int curve = 0; curve < trace.curveCount(); curve++) {
-                trace.drawCurve(canvas, curve, xAxisList.get(trace.getXIndex()).getScale(), yAxisList.get(trace.getYIndex(curve)).getScale());
+                trace.drawCurve(canvas, curve, xAxisList.get(trace.getXIndex()).getScale(), yAxisList.get(getCurveYIndex( trace,  curve)).getScale());
             }
         }
         canvas.restore();
@@ -930,7 +939,7 @@ public class Chart {
 
         for (Trace trace : traces) {
             for (int curve = 0; curve < trace.curveCount(); curve++) {
-                int curveYIndex = trace.getYIndex(curve);
+                int curveYIndex = getCurveYIndex( trace,  curve);
                 if(curveYIndex == leftYIndex || curveYIndex == rightYIndex) {
                     String errMsg = "Stack: " + stack + "can not be removed. It is used by trace";
                     throw new IllegalStateException(errMsg);
@@ -1069,7 +1078,7 @@ public class Chart {
         traces.remove(traceNumber);
         // remove the stacks used by the trace curves if that stacks
         // are not used anymore
-        int traceStartStack = trace.getYIndex(0) / 2;
+        int traceStartStack = trace.getYStartIndex() / 2;
         int traceStackCount = 1;
         if(trace.isSplit()) {
             traceStackCount = trace.curveCount();
@@ -1315,7 +1324,7 @@ public class Chart {
                 return  area;
             }
 
-            double[] yRange = yAxisList.get(traceCurve.getTrace().getYIndex(traceCurve.getCurve())).getScale().getRange();
+            double[] yRange = yAxisList.get(getCurveYIndex(traceCurve.getTrace(), traceCurve.getCurve())).getScale().getRange();
             int yStart = (int)yRange[0];
             int yEnd = (int)yRange[yRange.length - 1];
             return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));

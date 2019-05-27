@@ -12,7 +12,7 @@ import java.util.List;
 
 
 /**
- * Created by galafit on 16/9/17.
+ * TODO implement XY search nearest point (QuadTree)
  */
 class Trace {
     private int xIndex;
@@ -26,7 +26,10 @@ class Trace {
     private String[] curveNames;
     private BColor[] curveColors;
 
-    Trace(ChartData data, TracePainter tracePainter, boolean isSplit, DataProcessingConfig dataProcessingConfig, int xIndex, int yStartIndex) {
+    Trace(ChartData data1, TracePainter tracePainter, boolean isSplit, DataProcessingConfig dataProcessingConfig1, int xIndex, int yStartIndex) {
+        ChartData data = data1.view(0);
+        DataProcessingConfig dataProcessingConfig = new DataProcessingConfig(dataProcessingConfig1);
+
         if (tracePainter.traceType() == TraceType.LINE) {
             nearestSearchType = NearestSearchType.X;
         } else {
@@ -89,15 +92,6 @@ class Trace {
     int getXIndex() {
         return xIndex;
     }
-
-    int getYIndex(int curve) {
-        checkCurveNumber(curve);
-        if (isSplit) {
-            return yStartIndex + curve * 2;
-        }
-        return yStartIndex;
-    }
-
 
     private ChartData getData(Scale xScale) {
         return dataManager.getData(xScale, tracePainter.markWidth());

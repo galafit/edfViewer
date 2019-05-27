@@ -1,6 +1,8 @@
 package com.biorecorder.basechart;
 
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * Created by galafit on 9/7/18.
@@ -57,10 +59,7 @@ public class DataProcessingConfig {
         isSavingGroupedDataEnabled = config.isSavingGroupedDataEnabled;
         isCroppedDataCachingEnabled = config.isCroppedDataCachingEnabled;
         if(config.groupingIntervals != null) {
-            groupingIntervals = new double[config.groupingIntervals.length];
-            for (int i = 0; i < groupingIntervals.length; i++) {
-                groupingIntervals[i] = config.groupingIntervals[i];
-            }
+            groupingIntervals = Arrays.copyOf(config.groupingIntervals, config.groupingIntervals.length);
         }
     }
 
