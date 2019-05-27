@@ -32,9 +32,9 @@ public class TraceDataManager {
 
     private int[] sorter;
 
-    public TraceDataManager(ChartData traceData) {
+    public TraceDataManager(ChartData traceData, DataProcessingConfig dataProcessingConfig) {
         this.traceData = traceData;
-        setConfig(new DataProcessingConfig());
+        setConfig(dataProcessingConfig);
     }
 
     public void appendData() {
@@ -488,7 +488,7 @@ public class TraceDataManager {
                         int pointsRatio = pointsInGroup / pointsInGroup_i;
                         if (pointsRatio > 1) {
                             // regroup on the base of already grouped data
-                            groupedData =  regroup(groupedData, pointsRatio);
+                            groupedData = regroup(groupedData_i, pointsRatio);
                             break;
                         } else if (pointsRatio == 1) {
                             // use already grouped data as it is

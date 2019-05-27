@@ -22,7 +22,7 @@ public class ButtonModel {
 
     public void setSelected(boolean isSelected) {
         if (group != null) {
-            // use the groupByEqualIntervals model instead
+            // use the group model instead
             boolean oldSelection = isSelected();
             if (oldSelection != isSelected) {
                 group.setSelected(this, isSelected);

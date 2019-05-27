@@ -48,7 +48,7 @@ public class BColor {
             rangeError = true;
             badComponentString = badComponentString + " Green";
         }
-        if (rangeError == true) {
+        if (rangeError) {
             throw new IllegalArgumentException("Color parameter outside of expected minMax:"
                             + badComponentString);
         }

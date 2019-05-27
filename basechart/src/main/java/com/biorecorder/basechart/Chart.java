@@ -1,7 +1,9 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.*;
+import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.button.StateListener;
+import com.biorecorder.basechart.button.SwitchButton;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
@@ -130,51 +132,51 @@ public class Chart {
     }
 
     private void setXMinMax(BCanvas canvas) {
-        for (int i = 0; i < xAxisList.size(); i++) {
-            Range minMax = xAxisToMinMax.get(i);
-            AxisWrapper axis = xAxisList.get(i);
+        for (int xIndex = 0; xIndex < xAxisList.size(); xIndex++) {
+            Range minMax = xAxisToMinMax.get(xIndex);
+            AxisWrapper xAxis = xAxisList.get(xIndex);
             if (minMax != null) {
                 // NO ROUNDING !!! course the X min and max depends data processing
-                axis.setMinMax(minMax.getMin(), minMax.getMax());
+                xAxis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale X
                 Range tracesXMinMax = null;
                 for (Trace trace : traces) {
-                    if (trace.getXScale() == axis.getScale()) {
-                        tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax());
+                    if (trace.getXIndex() == xIndex) {
+                        tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax(xAxis.getScale()));
                     }
                 }
 
                 if (tracesXMinMax != null) {
-                    axis.setMinMax(tracesXMinMax.getMin(), tracesXMinMax.getMax());
+                    xAxis.setMinMax(tracesXMinMax.getMin(), tracesXMinMax.getMax());
                 }
                 // rounding only in the case of auto scale when no data processing
-                axis.roundMinMax(canvas);
+                xAxis.roundMinMax(canvas);
             }
         }
     }
 
     private void setYMinMax(BCanvas canvas) {
-        for (int i = 0; i < yAxisList.size(); i++) {
-            Range minMax = yAxisToMinMax.get(i);
-            AxisWrapper axis = yAxisList.get(i);
+        for (int yIndex = 0; yIndex < yAxisList.size(); yIndex++) {
+            Range minMax = yAxisToMinMax.get(yIndex);
+            AxisWrapper yAxis = yAxisList.get(yIndex);
             if (minMax != null) {
-                axis.setMinMax(minMax.getMin(), minMax.getMax());
+                yAxis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale Y
                 Range tracesYMinMax = null;
                 for (Trace trace : traces) {
                     int curveCount = trace.curveCount();
                     for (int curve = 0; curve < curveCount; curve++) {
-                        if (trace.getYScale(curve) == axis.getScale()) {
-                            tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(curve));
+                        if (trace.getYIndex(curve) == yIndex) {
+                            tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(curve, xAxisList.get(trace.getXIndex()).getScale(), yAxis.getScale()));
                         }
                     }
                 }
 
                 if (tracesYMinMax != null) {
-                    axis.setMinMax(tracesYMinMax.getMin(), tracesYMinMax.getMax());
+                    yAxis.setMinMax(tracesYMinMax.getMin(), tracesYMinMax.getMax());
                 }
             }
-            axis.roundMinMax(canvas);
+            yAxis.roundMinMax(canvas);
         }
     }
 
@@ -285,45 +287,26 @@ public class Chart {
     }
 
     private int chooseXAxisWithGrid(int stack) {
-        AxisWrapper leftAxis = yAxisList.get(stack * 2);
-        AxisWrapper rightAxis = yAxisList.get(stack * 2 + 1);
+        int leftAxisIndex = stack * 2;
+        int rightAxisIndex = stack * 2 + 1;
         int primaryAxisIndex = getXIndex(config.getPrimaryXPosition());
-        AxisWrapper primaryAxis = xAxisList.get(primaryAxisIndex);
 
         for (Trace trace : traces) {
-            if (trace.getXScale() == primaryAxis.getScale()) {
-                Scale[] traceYScales = trace.getYScales();
-                for (Scale yScale : traceYScales) {
-                    if (yScale == leftAxis.getScale() || yScale == rightAxis.getScale()) {
+            if (trace.getXIndex() == primaryAxisIndex) {
+                for (int curve = 0; curve < trace.curveCount(); curve++) {
+                    int curveYIndex = trace.getYIndex(curve);
+                    if (curveYIndex == leftAxisIndex || curveYIndex == rightAxisIndex) {
                         return primaryAxisIndex;
                     }
                 }
             }
         }
-        
+
         if (config.getPrimaryXPosition() == XAxisPosition.BOTTOM) {
             return getXIndex(XAxisPosition.TOP);
         } else {
             return getXIndex(XAxisPosition.BOTTOM);
         }
-    }
-
-    private int getCurveXIndex(Trace trace) {
-        for (int i = 0; i < xAxisList.size(); i++) {
-            if (xAxisList.get(i).getScale() == trace.getXScale()) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int getCurveYIndex(Trace trace, int curveNumber) {
-        for (int i = 0; i < yAxisList.size(); i++) {
-            if (yAxisList.get(i).getScale() == trace.getYScale(curveNumber)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private void checkStackNumber(int stack) {
@@ -335,16 +318,16 @@ public class Chart {
     }
 
     private int getYIndex(int stack, YAxisPosition yPosition) {
-        if(yPosition == YAxisPosition.LEFT){
-            return  2 * stack;
+        if (yPosition == YAxisPosition.LEFT) {
+            return 2 * stack;
         } else {
             return 2 * stack + 1;
         }
     }
 
     private int getXIndex(XAxisPosition xPosition) {
-        if(xPosition == XAxisPosition.BOTTOM){
-            return  0;
+        if (xPosition == XAxisPosition.BOTTOM) {
+            return 0;
         } else {
             return 1;
         }
@@ -376,31 +359,32 @@ public class Chart {
     }
 
 
-
-    /** =============================================================*
-     *   Protected method for careful use                            *
-     * ==============================================================*/
+    /**
+     * =============================================================*
+     * Protected method for careful use                            *
+     * ==============================================================
+     */
 
     double getBestExtent(XAxisPosition xAxisPosition, BCanvas canvas) {
         double extent = xAxisList.get(getXIndex(xAxisPosition)).getBestExtent(canvas, fullArea.width);
         double tracesExtent = getTracesBestExtent(xAxisPosition);
-        if(extent < 0) {
+        if (extent < 0) {
             extent = tracesExtent;
-        } else if(tracesExtent > 0) {
+        } else if (tracesExtent > 0) {
             extent = Math.min(extent, tracesExtent);
         }
         return extent;
     }
 
     double getTracesBestExtent(XAxisPosition xAxisPosition) {
-        double extent = - 1;
+        double extent = -1;
         for (Trace trace : traces) {
-            if (trace.getXScale() == xAxisList.get(getXIndex(xAxisPosition)).getScale()) {
+            if (trace.getXIndex() == getXIndex(xAxisPosition)) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
                 // System.out.println("trace extent "+traceExtent);
                 if (extent < 0) {
                     extent = traceExtent;
-                } else if(traceExtent > 0){
+                } else if (traceExtent > 0) {
                     extent = Math.min(extent, traceExtent);
                 }
             }
@@ -412,9 +396,11 @@ public class Chart {
     // for all x axis
     Range getAllTracesFullMinMax() {
         Range minMax = null;
-        for (int i = 0; i < traces.size(); i++) {
-            minMax = Range.join(minMax, traces.get(i).getFullXMinMax());
+        for (Trace trace : traces) {
+            Scale traceXScale = xAxisList.get(trace.getXIndex()).getScale();
+            minMax = Range.join(minMax, trace.getFullXMinMax(traceXScale));
         }
+
         return minMax;
     }
 
@@ -492,17 +478,17 @@ public class Chart {
     }
 
     XAxisPosition getSelectedCurveX() {
-        return getXPosition(getCurveXIndex(selectedCurve.getTrace()));
+        return getXPosition(selectedCurve.getTrace().getXIndex());
     }
 
     int getSelectedCurveStack() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
+        int yIndex = selectedCurve.getTrace().getYIndex(selectedCurve.getCurve());
         return getYStack(yIndex);
     }
 
 
     YAxisPosition getSelectedCurveY() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
+        int yIndex = selectedCurve.getTrace().getYIndex(selectedCurve.getCurve());
         return getYPosition(yIndex);
     }
 
@@ -541,10 +527,10 @@ public class Chart {
                         return null;
                     }
                     if (!axisLeft.isVisible()) {
-                        return  YAxisPosition.RIGHT;
+                        return YAxisPosition.RIGHT;
                     }
                     if (!axisRight.isVisible()) {
-                        return  YAxisPosition.LEFT;
+                        return YAxisPosition.LEFT;
                     }
                     if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible()) { // left half
                         return YAxisPosition.LEFT;
@@ -569,7 +555,7 @@ public class Chart {
             } else if (!bottomAxis.isVisible() && topAxis.isVisible()) {
                 return XAxisPosition.TOP;
             } else if (bottomAxis.isVisible() && topAxis.isVisible()) {
-                if (point != null && fullArea.contains(point.getX(), point.getY())) {
+                if (fullArea.contains(point.getX(), point.getY())) {
                     // find point stack
                     int stackCount = yAxisList.size() / 2;
                     for (int i = 0; i < stackCount; i++) {
@@ -596,96 +582,124 @@ public class Chart {
         if (!graphArea.contains(x, y)) {
             return hoverOff();
         }
-        if (hoverPoint == null && selectedCurve != null) {
-            hoverPoint = selectedCurve.getTrace().nearest(x, y, selectedCurve.getCurve());
-            if(hoverPoint != null) {
-                updateTooltipAndCrosshair();
-                return true;
+        if (selectedCurve != null) {
+            Scale xScale = xAxisList.get(selectedCurve.getTrace().getXIndex()).getScale();
+            Scale yScale = yAxisList.get(selectedCurve.getTrace().getYIndex(selectedCurve.getCurve())).getScale();
+
+            NearestCurvePoint nearestCurvePoint = selectedCurve.getTrace().nearest(x, y, selectedCurve.getCurve(), xScale, yScale);
+            if (nearestCurvePoint != null) {
+                if (nearestCurvePoint.getCurvePoint().equals(hoverPoint)) {
+                    return false;
+                } else {
+                    hoverPoint = nearestCurvePoint.getCurvePoint();
+                    updateTooltipAndCrosshair();
+                    return true;
+                }
+            } else if (hoverPoint == null) {
+                return false;
             }
+            return true;
         }
 
         if (hoverPoint != null) {
-            TraceCurvePoint hoverPointNew = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurve());
-            if(hoverPointNew == null || hoverPoint.getPointIndex() != hoverPointNew.getPointIndex()) {
-                hoverPoint = hoverPointNew;
-                updateTooltipAndCrosshair();
-                return true;
+            Scale xScale = xAxisList.get(hoverPoint.getTrace().getXIndex()).getScale();
+            Scale yScale = yAxisList.get(hoverPoint.getTrace().getYIndex(hoverPoint.getCurve())).getScale();
+            NearestCurvePoint nearestCurvePoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurve(), xScale, yScale);
+            if (nearestCurvePoint != null) {
+                if (nearestCurvePoint.getCurvePoint().equals(hoverPoint)) {
+                    return false;
+                } else {
+                    hoverPoint = nearestCurvePoint.getCurvePoint();
+                    updateTooltipAndCrosshair();
+                    return true;
+                }
             }
-            return false;
         }
 
-        else {
-            // find nearest trace curve
-            int distanceSqwMin = -1;
-            for (Trace trace : traces) {
-                TraceCurvePoint traceCurvePoint = trace.nearest(x, y);
-                if(traceCurvePoint != null) {
-                    int distanceSqw = trace.distanceSqw(traceCurvePoint.pointIndex, traceCurvePoint.curve, x, y);
-                    if(distanceSqwMin < 0 || distanceSqwMin > distanceSqw) {
-                        distanceSqwMin = distanceSqw;
-                        hoverPoint = traceCurvePoint;
-                    }
-                    if(distanceSqwMin == 0) {
-                        break;
+        // find nearest trace curve
+        NearestCurvePoint closestTracePoint = null;
+        for (Trace trace : traces) {
+            Scale[] traceYScales = new Scale[trace.curveCount()];
+            for (int curve = 0; curve < trace.curveCount(); curve++) {
+                traceYScales[curve] = yAxisList.get(trace.getYIndex(curve)).getScale();
+            }
+            Scale xScale = xAxisList.get(trace.getXIndex()).getScale();
+
+            NearestCurvePoint nearestCurvePoint = trace.nearest(x, y, xScale, traceYScales);
+            if (nearestCurvePoint != null) {
+                if (nearestCurvePoint.getDistanceSqw() == 0) {
+                    closestTracePoint = nearestCurvePoint;
+                    break;
+                } else {
+                    if (closestTracePoint == null || closestTracePoint.getDistanceSqw() > nearestCurvePoint.getDistanceSqw()) {
+                        closestTracePoint = nearestCurvePoint;
                     }
                 }
             }
-
-            if (hoverPoint != null) {
-                updateTooltipAndCrosshair();
-                return true;
-            }
-            return false;
         }
 
+        if (closestTracePoint != null) {
+            hoverPoint = closestTracePoint.getCurvePoint();
+            updateTooltipAndCrosshair();
+            return true;
+        }
+
+        return false;
     }
 
     private void updateTooltipAndCrosshair() {
-        if(hoverPoint == null) {
+        if (hoverPoint == null) {
             return;
         }
         Trace hoverTrace = hoverPoint.getTrace();
         int hoverCurve = hoverPoint.getCurve();
         int hoverPointIndex = hoverPoint.getPointIndex();
         int tooltipYPosition = 0;
-        NamedValue xValue = hoverTrace.xValue(hoverPointIndex);
+        Scale xScale = xAxisList.get(hoverTrace.getXIndex()).getScale();
+        NamedValue xValue = hoverTrace.xValue(hoverPointIndex, xScale);
 
-        List<Integer> curves;
         int xPosition;
+        int curveStart;
+        int curveEnd;
         if (config.isMultiCurveTooltip()) { // all trace curves
-            curves = new ArrayList<>(hoverTrace.curveCount());
-            for (int i = 0; i < hoverTrace.curveCount(); i++) {
-                curves.add(i);
-            }
-            xPosition = hoverTrace.curveXPosition(hoverPointIndex, 0);
+            curveStart = 0;
+            curveEnd = hoverTrace.curveCount() - 1;
         } else { // only hover curve
-            curves = new ArrayList<>(1);
-            curves.add(hoverCurve);
-            xPosition = hoverTrace.curveXPosition(hoverPointIndex, hoverCurve);
+            curveStart = hoverCurve;
+            curveEnd = hoverCurve;
         }
+        Scale yScale = yAxisList.get(hoverTrace.getYIndex(hoverCurve)).getScale();
+        BRectangle hoverAreaStart = hoverTrace.curvePointHoverArea(hoverPointIndex, curveStart, xScale, yScale);
+        BRectangle hoverAreaEnd = hoverTrace.curvePointHoverArea(hoverPointIndex, curveEnd, xScale, yScale);
 
+        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
         crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
         tooltip = new Tooltip(config.getTooltipConfig(), xPosition, tooltipYPosition);
-        tooltip.setHeader(null, null, xValue.getValueLabel());
+        tooltip.setHeader(null, null, xValue.getValue());
 
-        for (Integer curve : curves) {
-            NamedValue[] curveValues = hoverTrace.curveValues(hoverPointIndex, curve);
-            if (curveValues.length == 1) {
-                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), curveValues[0].getValueLabel());
+
+        for (int curve = curveStart; curve <= curveEnd; curve++) {
+            yScale = yAxisList.get(hoverTrace.getYIndex(curve)).getScale();
+            NamedValue[] curveValues = hoverTrace.curveValues(hoverPointIndex, curve, xScale, yScale);
+            if (curveValues.length == 2) {
+                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), curveValues[1].getValue());
             } else {
                 tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), "");
                 for (NamedValue curveValue : curveValues) {
-                    tooltip.addLine(null, curveValue.getValueName(), curveValue.getValueLabel());
+                    tooltip.addLine(null, curveValue.getValueName(), curveValue.getValue());
                 }
             }
-            crosshair.addY(hoverTrace.curveYPosition(hoverPointIndex, curve));
+            crosshair.addY(hoverTrace.curvePointHoverArea(hoverPointIndex, curve, xScale, yScale).y);
         }
+
     }
 
 
-    /** =================================================*
-     *                   Base methods to interact        *
-     * ==================================================*/
+    /**
+     * =================================================*
+     * Base methods to interact        *
+     * ==================================================
+     */
     public void draw(BCanvas canvas) {
         if (fullArea == null) {
             setArea(canvas.getBounds());
@@ -761,7 +775,9 @@ public class Chart {
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 
         for (Trace trace : traces) {
-            trace.draw(canvas);
+            for (int curve = 0; curve < trace.curveCount(); curve++) {
+                trace.drawCurve(canvas, curve, xAxisList.get(trace.getXIndex()).getScale(), yAxisList.get(trace.getYIndex(curve)).getScale());
+            }
         }
         canvas.restore();
 
@@ -868,13 +884,6 @@ public class Chart {
         isDirty = true;
     }
 
-    public void setDataProcessingConfig(DataProcessingConfig dataProcessingConfig1) {
-        this.dataProcessingConfig = dataProcessingConfig1;
-        for (Trace trace : traces) {
-            trace.setDataProcessingConfig(dataProcessingConfig);
-        }
-        isDirty = true;
-    }
 
     public void setTitle(String title) {
         this.title.setTitle(title);
@@ -916,18 +925,23 @@ public class Chart {
      */
     public void removeStack(int stack) throws IllegalStateException {
         // check that no trace use that stack
-        Scale leftScale = yAxisList.get(stack * 2).getScale();
-        Scale rightScale = yAxisList.get(stack * 2 + 1).getScale();
+        int leftYIndex = stack * 2;
+        int rightYIndex = stack * 2 + 1;
 
-
-        for (int i = 0; i < traces.size(); i++) {
-            for (Scale scale : traces.get(i).getYScales()) {
-                if (scale == leftScale || scale == rightScale) {
-                    String errMsg = "Stack: " + stack + "can not be removed. It is used by trace number: " + i;
+        for (Trace trace : traces) {
+            for (int curve = 0; curve < trace.curveCount(); curve++) {
+                int curveYIndex = trace.getYIndex(curve);
+                if(curveYIndex == leftYIndex || curveYIndex == rightYIndex) {
+                    String errMsg = "Stack: " + stack + "can not be removed. It is used by trace";
                     throw new IllegalStateException(errMsg);
                 }
             }
+
+            if(trace.getYStartIndex() > leftYIndex) {
+                trace.setYStartIndex(trace.getYStartIndex() - 2);
+            }
         }
+
         stackWeights.remove(stack);
         yAxisList.remove(stack * 2 + 1);
         yAxisList.remove(stack * 2);
@@ -937,42 +951,41 @@ public class Chart {
     /**
      * add trace to the last stack
      */
-    public void addTrace(Trace trace) {
-        addTrace(trace, true);
+    public void addTrace(ChartData data, TracePainter tracePainter) {
+        addTrace(data, tracePainter, true);
     }
 
 
     /**
      * add trace to the last stack
      */
-    public void addTrace(Trace trace, boolean isSplit) {
+    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
         int stack = Math.max(0, yAxisList.size() / 2 - 1);
-        addTrace(trace, isSplit, stack);
+        addTrace(data, tracePainter, isSplit, stack);
     }
 
 
     /**
      * add trace to the stack with the given number
      */
-    public void addTrace(Trace trace, boolean isSplit, int stack) {
-        addTrace(trace, isSplit, stack, config.getPrimaryXPosition(), config.getPrimaryYPosition());
+    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack) {
+        addTrace(data, tracePainter, isSplit, stack, config.getPrimaryXPosition(), config.getPrimaryYPosition());
     }
 
-    public void addTrace(Trace trace, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
+    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
         int stack = Math.max(0, yAxisList.size() / 2 - 1);
-        addTrace(trace, isSplit, stack, xPosition, yPosition);
+        addTrace(data, tracePainter, isSplit, stack, xPosition, yPosition);
     }
 
     /**
      * add trace to the stack with the given number
      */
-    public void addTrace(Trace trace, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
+    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
+        Trace trace = new Trace(data, tracePainter, isSplit, dataProcessingConfig, getXIndex(xPosition), getYIndex(stack, yPosition));
         if (trace.curveCount() < 1) {
             String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
             throw new IllegalArgumentException(errMsg);
         }
-
-        trace.setDataProcessingConfig(dataProcessingConfig);
 
         if (yAxisList.size() == 0) {
             addStack(); // add stack if there is no stack
@@ -993,12 +1006,10 @@ public class Chart {
             }
         }
 
-        trace.setXScale(xAxis.getScale());
         xAxis.setVisible(true);
         if (!isSplit) {
             AxisWrapper yAxis = yAxisList.get(yIndex);
             yAxis.setVisible(true);
-            trace.setYScales(yAxis.getScale());
         } else {
             int stackCount = yAxisList.size() / 2;
             int availableStacks = stackCount - stack;
@@ -1007,13 +1018,10 @@ public class Chart {
                     addStack();
                 }
             }
-            Scale[] yScales = new Scale[trace.curveCount()];
             for (int i = 0; i < trace.curveCount(); i++) {
                 AxisWrapper yAxis = yAxisList.get(yIndex + i * 2);
-                yScales[i] = yAxis.getScale();
                 yAxis.setVisible(true);
             }
-            trace.setYScales(yScales);
         }
 
         BColor[] colors = config.getTraceColors();
@@ -1061,14 +1069,12 @@ public class Chart {
         traces.remove(traceNumber);
         // remove the stacks used by the trace curves if that stacks
         // are not used anymore
-        int traceStack = 0;
-        for (int i = 0; i < yAxisList.size(); i++) {
-            if (trace.getYScale(0) == yAxisList.get(i).getScale()) {
-                traceStack = i / 2;
-            }
+        int traceStartStack = trace.getYIndex(0) / 2;
+        int traceStackCount = 1;
+        if(trace.isSplit()) {
+            traceStackCount = trace.curveCount();
         }
-        int stacks = trace.getYScales().length;
-        for (int i = traceStack + stacks - 1; i >= traceStack; i--) {
+        for (int i = traceStartStack + traceStackCount - 1; i >= traceStartStack; i--) {
             try {
                 removeStack(i);
             } catch (IllegalStateException ex) {
@@ -1146,25 +1152,12 @@ public class Chart {
 
     public void setXScale(XAxisPosition xPosition, Scale scale) {
         AxisWrapper axis = xAxisList.get(getXIndex(xPosition));
-        for (Trace trace : traces) {
-            if (trace.getXScale() == axis.getScale()) {
-                trace.setXScale(scale);
-            }
-        }
         axis.setScale(scale);
         isDirty = true;
     }
 
     public void setYScale(int stack, YAxisPosition yPosition, Scale scale) {
         AxisWrapper axis = yAxisList.get(getYIndex(stack, yPosition));
-        for (Trace trace : traces) {
-            Scale[] traceYScales = trace.getYScales();
-            for (int i = 0; i < traceYScales.length; i++) {
-                if (traceYScales[i] == axis.getScale()) {
-                    traceYScales[i] = scale;
-                }
-            }
-        }
         axis.setScale(scale);
         isDirty = true;
     }
@@ -1205,4 +1198,242 @@ public class Chart {
         }
         return false;
     }
+
+
+    class Legend {
+        private ButtonGroup buttonGroup;
+        // only LinkedHashMap will iterate in the order in which the entries were put into the map
+        private Map<TraceCurve, SwitchButton> traceCurvesToButtons = new LinkedHashMap<>();
+        private BRectangle area;
+        private int height;
+
+        private LegendConfig config;
+        private boolean isDirty = true;
+
+        public Legend(LegendConfig legendConfig) {
+            this.config = legendConfig;
+            this.buttonGroup = new ButtonGroup();
+        }
+
+        public boolean isEnabled() {
+            return config.isEnabled();
+        }
+
+        public int getHeight(BCanvas canvas) {
+            if(!config.isAttachedToStacks()) {
+                if(isDirty) {
+                    arrangeButtons(canvas);
+                }
+                return height;
+            }
+            return 0;
+        }
+
+        public boolean isAttachedToStacks() {
+            return config.isAttachedToStacks();
+        }
+
+        public boolean isTop() {
+            if(config.getVerticalAlign() == VerticalAlign.TOP) {
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isBottom() {
+            if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
+                return true;
+            }
+            return false;
+        }
+
+        public boolean selectItem(int x, int y) {
+            for (TraceCurve key : traceCurvesToButtons.keySet()){
+                SwitchButton button = traceCurvesToButtons.get(key);
+                if(button.contains(x, y)) {
+                    button.switchState();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public  void setArea(BRectangle area) {
+            this.area = area;
+            isDirty = true;
+        }
+
+        public void setCurveName(Trace trace, int curveNumber, String name) {
+            for (TraceCurve key : traceCurvesToButtons.keySet()){
+                if(key.getTrace() == trace && key.getCurve() == curveNumber) {
+                    SwitchButton button = traceCurvesToButtons.get(key);
+                    button.setLabel(name);
+                    isDirty = true;
+                    return;
+                }
+            }
+        }
+
+
+        public void setConfig(LegendConfig legendConfig) {
+            config = legendConfig;
+            for (TraceCurve key : traceCurvesToButtons.keySet()){
+                SwitchButton button = traceCurvesToButtons.get(key);
+                button.setBackgroundColor(config.getBackgroundColor());
+                button.setTextStyle(config.getTextStyle());
+                button.setMargin(config.getPadding());
+            }
+            isDirty = true;
+        }
+
+        public void add(Trace trace, int curveNumber, StateListener traceSelectionListener) {
+            // add curve legend button
+            TraceCurve traceCurve = new TraceCurve(trace, curveNumber);
+            SwitchButton traceButton = new SwitchButton(trace.getCurveName(curveNumber));
+            traceButton.addListener(traceSelectionListener);
+            traceCurvesToButtons.put(traceCurve, traceButton);
+            buttonGroup.add(traceButton.getModel());
+            traceButton.setBackgroundColor(config.getBackgroundColor());
+            traceButton.setTextStyle(config.getTextStyle());
+            traceButton.setMargin(config.getPadding());
+            isDirty = true;
+        }
+
+        public void remove(Trace trace) {
+            for (int i = 0; i < trace.curveCount(); i++) {
+                TraceCurve traceCurve = new TraceCurve(trace, i);
+                SwitchButton traceButton = traceCurvesToButtons.get(traceCurve);
+                buttonGroup.remove(traceButton.getModel());
+                traceCurvesToButtons.remove(traceCurve);
+            }
+
+            isDirty = true;
+        }
+
+        private BRectangle getTraceCurveArea(TraceCurve traceCurve) {
+            if(!config.isAttachedToStacks()) {
+                return  area;
+            }
+
+            double[] yRange = yAxisList.get(traceCurve.getTrace().getYIndex(traceCurve.getCurve())).getScale().getRange();
+            int yStart = (int)yRange[0];
+            int yEnd = (int)yRange[yRange.length - 1];
+            return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));
+        }
+
+        private void arrangeButtons(BCanvas canvas) {
+            // only LinkedHashMap will iterate in the order in which the entries were put into the map
+            Map<BRectangle, List<TraceCurve>> areasToTraces = new LinkedHashMap<>();
+            for (TraceCurve traceCurve : traceCurvesToButtons.keySet()) {
+                BRectangle traceArea = getTraceCurveArea(traceCurve);
+                List<TraceCurve> traceCurves = areasToTraces.get(traceArea);
+                if(traceCurves == null) {
+                    traceCurves = new ArrayList<>();
+                    areasToTraces.put(traceArea, traceCurves);
+                }
+                traceCurves.add(traceCurve);
+            }
+
+            List<SwitchButton> lineButtons = new ArrayList<SwitchButton>();
+            Insets margin = config.getMargin();
+            for (BRectangle area : areasToTraces.keySet()) {
+                List<TraceCurve> traceCurves = areasToTraces.get(area);
+                height = 0;
+                int width = 0;
+                int x = area.x;
+                int y = area.y;
+                for (TraceCurve traceCurve : traceCurves) {
+                    SwitchButton button = traceCurvesToButtons.get(traceCurve);
+                    BRectangle btnArea = button.getBounds(canvas);
+                    if(height == 0) {
+                        height = btnArea.height;
+                        lineButtons.clear();
+                    }
+                    if(lineButtons.size() > 0 && x + config.getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
+                        width += (lineButtons.size() - 1) * config.getInterItemSpace();
+                        if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                            moveButtons(lineButtons, margin.left(),0);
+                        }
+                        if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
+                            moveButtons(lineButtons, area.width - width - margin.right(),0);
+                        }
+                        if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
+                            moveButtons(lineButtons, (area.width - width) / 2,0);
+                        }
+
+                        x = area.x;
+                        y += btnArea.height + config.getInterLineSpace();
+                        button.setLocation(x, y, canvas);
+
+                        x += btnArea.width + config.getInterItemSpace();
+                        height += btnArea.height + config.getInterLineSpace();
+                        width = btnArea.width;
+                        lineButtons.clear();
+                        lineButtons.add(button);
+                    } else {
+                        button.setLocation(x, y, canvas);
+                        x += config.getInterItemSpace() + btnArea.width;
+                        width += btnArea.width;
+                        lineButtons.add(button);
+                    }
+                }
+                width += (lineButtons.size() - 1) * config.getInterItemSpace();
+                if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                    moveButtons(lineButtons, margin.left(),0);
+                }
+                if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
+                    moveButtons(lineButtons, area.width - width - margin.right(),0);
+                }
+                if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
+                    moveButtons(lineButtons, (area.width - width) / 2,0);
+                }
+
+                if(config.getVerticalAlign() == VerticalAlign.TOP) {
+                    moveTracesButtons(traceCurves, 0, margin.top());
+                }
+                if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
+                    moveTracesButtons(traceCurves, 0, area.height - height - margin.bottom());
+                }
+                if(config.getVerticalAlign() == VerticalAlign.MIDDLE) {
+                    moveTracesButtons(traceCurves, 0, (area.height - height)/2);
+                }
+            }
+            height += margin.top() + margin.bottom();
+            isDirty = false;
+        }
+
+        private void moveTracesButtons(List<TraceCurve> curves, int dx, int dy) {
+            if(dx != 0 || dy != 0) {
+                for (TraceCurve curve : curves) {
+                    traceCurvesToButtons.get(curve).moveLocation(dx, dy);
+                }
+            }
+        }
+        private void moveButtons(List<SwitchButton> buttons, int dx, int dy) {
+            if(dx != 0 || dy != 0) {
+                for (SwitchButton button : buttons) {
+                    button.moveLocation(dx, dy);
+                }
+            }
+        }
+
+
+
+        public void draw(BCanvas canvas) {
+            if (traceCurvesToButtons.size() == 0) {
+                return;
+            }
+            if(isDirty) {
+                arrangeButtons(canvas);
+            }
+            for (TraceCurve traceCurve : traceCurvesToButtons.keySet()){
+                traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveColor(traceCurve.getCurve()));
+            }
+            canvas.setTextStyle(config.getTextStyle());
+            for (TraceCurve key : traceCurvesToButtons.keySet()) {
+                traceCurvesToButtons.get(key).draw(canvas);
+            }
+        }
+    }
+
 }

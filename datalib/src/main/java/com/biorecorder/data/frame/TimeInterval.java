@@ -4,8 +4,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by galafit on 2/5/19.
+/*
+ * from d3 scales (https://github.com/d3/d3-scale)
+ * The following time intervals are considered for automatic ticks:
+ 1-, 5-, 15- and 30-second.
+ 1-, 5-, 15- and 30-minute.
+ 1-, 3-, 6- and 12-hour.
+ 1- and 2-day.
+ 1-week.
+ 1- and 3-month.
+ 1-year.
+
+
+    %Y - for year boundaries, such as 2011.
+    %B - for month boundaries, such as February.
+    %b %d - for week boundaries, such as Feb 06.
+    %a %d - for day boundaries, such as Mon 07.
+    %I %p - for hour boundaries, such as 01 AM.
+    %I:%M - for minute boundaries, such as 01:23.
+    :%S - for second boundaries, such as :45.
+    .%L - milliseconds for all other times, such as .012.
+
+
  */
 public enum TimeInterval {
     MILLISECOND_1(TimeUnit.MILLISECOND, 1),
@@ -67,10 +87,10 @@ public enum TimeInterval {
 
     public static TimeInterval getClosest(long interval, boolean isWeekIncluded) {
         List<TimeInterval> timeIntervals = Arrays.asList(values());
-        if(!isWeekIncluded) {
+        if (!isWeekIncluded) {
             List<TimeInterval> timeIntervals1 = new ArrayList<>(timeIntervals.size() - 1);
             for (TimeInterval timeInterval : timeIntervals) {
-                if(timeInterval != WEEK) {
+                if (timeInterval != WEEK) {
                     timeIntervals1.add(timeInterval);
                 }
             }
@@ -80,8 +100,8 @@ public enum TimeInterval {
         for (int i = 0; i < timeIntervals.size(); i++) {
             TimeInterval timeInterval_i = timeIntervals.get(i);
             long diff = timeInterval_i.toMilliseconds() - interval;
-            if(diff >= 0) {
-                if(i > 0 && diffPrev < diff) {
+            if (diff >= 0) {
+                if (i > 0 && diffPrev < diff) {
                     return timeIntervals.get(i - 1);
 
                 }
@@ -94,20 +114,18 @@ public enum TimeInterval {
 
     public static TimeInterval getUpper(long interval, boolean isWeekIncluded) {
         List<TimeInterval> timeIntervals = Arrays.asList(values());
-        if(!isWeekIncluded) {
-            if(!isWeekIncluded) {
-                List<TimeInterval> timeIntervals1 = new ArrayList<>(timeIntervals.size() - 1);
-                for (TimeInterval timeInterval : timeIntervals) {
-                    if(timeInterval != WEEK) {
-                        timeIntervals1.add(timeInterval);
-                    }
+        if (!isWeekIncluded) {
+            List<TimeInterval> timeIntervals1 = new ArrayList<>(timeIntervals.size() - 1);
+            for (TimeInterval timeInterval : timeIntervals) {
+                if (timeInterval != WEEK) {
+                    timeIntervals1.add(timeInterval);
                 }
-                timeIntervals = timeIntervals1;
             }
+            timeIntervals = timeIntervals1;
         }
         for (int i = 0; i < timeIntervals.size(); i++) {
             TimeInterval timeInterval_i = timeIntervals.get(i);
-            if(timeInterval_i.toMilliseconds() - interval >= 0) {
+            if (timeInterval_i.toMilliseconds() - interval >= 0) {
                 return timeInterval_i;
             }
         }

@@ -5,111 +5,99 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BPath;
+import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
 
 /**
  * Created by galafit on 11/10/17.
  */
-public class LineTrace extends Trace {
+public class LineTrace implements TracePainter {
     private LineTraceConfig traceConfig;
 
-    public LineTrace(ChartData data) {
-        this(data, new LineTraceConfig());
+    public LineTrace() {
+        this(new LineTraceConfig());
     }
-
-    public LineTrace(ChartData data, LineTraceConfig config) {
-        super(data);
+    
+    public LineTrace(LineTraceConfig config) {
         traceConfig = config;
-
-        for (int i = 0; i < curveColors.length; i++) {
-            curveColors[i] = traceConfig.getColor();
-        }
     }
 
     @Override
-    protected String[] curveNames(ChartData data) {
-        String[] curveNames = new String[curveCount];
-        for (int i = 0; i < curveCount; i++) {
-            curveNames[i] = data.getColumnName(i + 1);
-        }
-        return curveNames;
+    public TraceType traceType() {
+        return TraceType.LINE;
     }
 
     @Override
-    protected int curveXPosition(int dataIndex, int curve, ChartData data) {
-        double xValue = data.value(dataIndex, 0);
-        return (int) xScale.scale(xValue);
+    public GroupApproximation[] groupApproximations() {
+        GroupApproximation[] approximations = {GroupApproximation.OPEN, GroupApproximation.AVERAGE};
+        return approximations;
     }
 
     @Override
-    protected int getMarkSize() {
+    public String curveName(ChartData data, int curve) {
+       return data.getColumnName(curve + 1);
+    }
+
+    @Override
+    public int markWidth() {
         return traceConfig.getMarkSize();
     }
 
     @Override
-    protected int curveYPosition(int dataIndex, int curve, ChartData data) {
-        return (int) getYScale(curve).scale(data.value(dataIndex, curve + 1));
+    public BRectangle curvePointHoverArea(ChartData data, int dataIndex, int curve, Scale xScale, Scale yScale) {
+        int x = (int) xScale.scale(data.value(dataIndex, 0));
+        int y = (int) yScale.scale(data.value(dataIndex, curve + 1));
+        return new BRectangle(x, y, 0, 0);
     }
 
     @Override
-    protected int curveCount(ChartData data) {
-        return data.columnCount() - 1;
+    public Range curveYMinMax(ChartData data, int curve) {
+        return data.columnMinMax(curve + 1);
     }
 
     @Override
-    protected NamedValue[] curveValues(int dataIndex, int curve, ChartData data) {
-        XYViewer xyData = new XYViewer(data, curve);
-        Scale yScale = getYScale(curve);
-        double yValue = xyData.getY(dataIndex);
-        NamedValue[] curveValues = {new NamedValue("", yValue, yScale.formatDomainValue(yValue))};
+    public Range xMinMax(ChartData data) {
+        return data.columnMinMax(0);
+    }
+
+    @Override
+    public NamedValue[] curvePointValues(ChartData data, int dataIndex, int curve, Scale xScale, Scale yScale) {
+        NamedValue[] curveValues = {new NamedValue("",  xScale.formatDomainValue(data.value(dataIndex, 0))),
+                new NamedValue("",  yScale.formatDomainValue(data.value(dataIndex, curve + 1)))};
         return curveValues;
     }
 
+
     @Override
-    protected Range curveYMinMax(int curveNumber, ChartData data) {
-        return data.columnMinMax(curveNumber + 1);
+    public int curveCount(ChartData data) {
+        return data.columnCount() - 1;
     }
 
-    private BColor getLineColor(int curveNumber) {
-        return getCurveColor(curveNumber);
-    }
 
-    private BColor getMarkColor(int curveNumber) {
-        return getCurveColor(curveNumber);
-    }
-
-    private BColor getFillColor(int curveNumber) {
-        return new BColor(getCurveColor(curveNumber).getRed(), getCurveColor(curveNumber).getGreen(), getCurveColor(curveNumber).getBlue(), 110);
+    private BColor getFillColor(BColor color) {
+        return new BColor(color.getRed(), color.getGreen(), color.getBlue(), 110);
     }
 
     @Override
-    protected void draw(BCanvas canvas, ChartData data) {
-        for (int i = 0; i < curveCount(); i++) {
-            drawCurve(canvas, i, data);
-        }
-    }
-
-    private void drawCurve(BCanvas canvas, int curveNumber, ChartData data) {
-        XYViewer xyData = new XYViewer(data, curveNumber);
+    public void drawCurve(BCanvas canvas, ChartData data, int curve, BColor curveColor, int curveCount, boolean isSplit, Scale xScale, Scale yScale) {
+        XYViewer xyData = new XYViewer(data, curve);
         if (xyData.size() == 0) {
             return;
         }
-        Scale yScale = getYScale(curveNumber);
 
         BPath path = null;
         canvas.setStroke(traceConfig.getLineStroke());
-        BColor lineColor = getLineColor(curveNumber);
-        BColor markColor = getMarkColor(curveNumber);
+        BColor lineColor = curveColor;
+        BColor markColor = curveColor;
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
-            path = drawLinearPath(canvas, xyData, yScale, lineColor, markColor);
+            path = drawLinearPath(canvas, xyData, xScale, yScale, lineColor, markColor);
         }
         if(traceConfig.getMode() == LineTraceConfig.STEP) {
-            path = drawStepPath(canvas, xyData, yScale, lineColor, markColor);
+            path = drawStepPath(canvas, xyData, xScale, yScale, lineColor, markColor);
         }
         if(traceConfig.getMode() == LineTraceConfig.VERTICAL_LINES) {
-            path = drawVerticalLinesPath(canvas, xyData, yScale, lineColor, markColor);
+            path = drawVerticalLinesPath(canvas, xyData, xScale, yScale, lineColor, markColor);
         }
-
 
         if(path != null && traceConfig.isFilled()) {
             int x_0 = (int) xScale.scale(xyData.getX(0));
@@ -117,12 +105,12 @@ public class LineTrace extends Trace {
             path.lineTo(x_last, (int)yScale.getRange()[0]);
             path.lineTo(x_0, (int)yScale.getRange()[0]);
             path.close();
-            canvas.setColor(getFillColor(curveNumber));
+            canvas.setColor(getFillColor(curveColor));
             canvas.fillPath(path);
         }
     }
 
-    private BPath drawLinearPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
+    private BPath drawLinearPath(BCanvas canvas, XYViewer xyData, Scale xScale, Scale yScale, BColor lineColor, BColor markColor) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
@@ -141,7 +129,7 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawStepPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
+    private BPath drawStepPath(BCanvas canvas, XYViewer xyData, Scale xScale,  Scale yScale, BColor lineColor, BColor markColor) {
         BPath path = canvas.getEmptyPath();
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
@@ -161,7 +149,7 @@ public class LineTrace extends Trace {
         return path;
     }
 
-    private BPath drawVerticalLinesPath(BCanvas canvas, XYViewer xyData, Scale yScale, BColor lineColor, BColor markColor) {
+    private BPath drawVerticalLinesPath(BCanvas canvas, XYViewer xyData, Scale xScale,  Scale yScale, BColor lineColor, BColor markColor) {
         int x = (int) xScale.scale(xyData.getX(0));
         int y = (int) yScale.scale(xyData.getY(0));
         int pointRadius = traceConfig.getMarkSize() / 2;

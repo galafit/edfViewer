@@ -103,12 +103,106 @@ public class XYData implements ChartData {
         dataFrame.setColumnName(columnNumber, columnName);
     }
 
-    public void setColumnAggFunctions(int columnNumber, Aggregation aggFunction) throws IllegalArgumentException {
+    public void setColumnAggFunction(int columnNumber, Aggregation aggFunction) throws IllegalArgumentException {
         if (aggFunction == null) {
             String errMsg = "Aggregate function must be not null";
             throw new IllegalArgumentException(errMsg);
         }
         dataFrame.setColumnAggFunctions(columnNumber, aggFunction);
+    }
+
+    private GroupApproximation aggregationsToAproximation(Aggregation[] aggregations) throws IllegalArgumentException {
+        switch (aggregations.length) {
+            case 1: {
+                switch (aggregations[0]) {
+                    case FIRST:
+                        return GroupApproximation.OPEN;
+                    case LAST:
+                        return GroupApproximation.CLOSE;
+                    case MIN:
+                        return GroupApproximation.LOW;
+                    case MAX:
+                        return GroupApproximation.HIGH;
+                    case AVERAGE:
+                        return GroupApproximation.AVERAGE;
+                    case SUM:
+                        return GroupApproximation.SUM;
+                }
+                break;
+            }
+            case 2: {
+                if(aggregations[0] == Aggregation.MIN
+                        && aggregations[1]  == Aggregation.MAX) {
+                    return GroupApproximation.RANGE;
+                }
+                break;
+            }
+            case 4: {
+                if(aggregations[0] == Aggregation.FIRST
+                        && aggregations[1]  == Aggregation.MAX
+                        && aggregations[2]  == Aggregation.MIN
+                        && aggregations[3]  == Aggregation.LAST) {
+                    return GroupApproximation.OHLC;
+                }
+                break;
+            }
+        }
+        StringBuilder errMsg = new StringBuilder("Unsupported Aggregations: ");
+        for (Aggregation agg : aggregations) {
+            errMsg.append("  " + agg);
+        }
+        throw new IllegalArgumentException(errMsg.toString());
+    }
+
+    private Aggregation[] aproximationToAggregations(GroupApproximation approximation) throws IllegalArgumentException {
+        switch (approximation) {
+            case SUM: {
+                Aggregation[] aggregations = {Aggregation.SUM};
+                return aggregations;
+            }
+            case OPEN: {
+                Aggregation[] aggregations = {Aggregation.FIRST};
+                return aggregations;
+            }
+            case CLOSE: {
+                Aggregation[] aggregations = {Aggregation.LAST};
+                return aggregations;
+            }
+            case AVERAGE: {
+                Aggregation[] aggregations = {Aggregation.AVERAGE};
+                return aggregations;
+            }
+            case HIGH: {
+                Aggregation[] aggregations = {Aggregation.MAX};
+                return aggregations;
+            }
+            case LOW: {
+                Aggregation[] aggregations = {Aggregation.MIN};
+                return aggregations;
+            }
+            case RANGE: {
+                Aggregation[] aggregations = {Aggregation.MIN, Aggregation.MAX};
+                return aggregations;
+            }
+            case OHLC: {
+                Aggregation[] aggregations = {Aggregation.FIRST, Aggregation.MAX, Aggregation.MIN, Aggregation.LAST};
+                return aggregations;
+            }
+        }
+        String errMsg = "Unsupported approximation: " + approximation;
+        throw new IllegalArgumentException(errMsg.toString());
+
+    }
+
+
+    @Override
+    public void setColumnGroupApproximation(int columnNumber, GroupApproximation groupApproximation) {
+        dataFrame.setColumnAggFunctions(columnNumber, aproximationToAggregations(groupApproximation));
+    }
+
+    @Override
+    public GroupApproximation getColumnGroupApproximation(int columnNumber) {
+        return aggregationsToAproximation(dataFrame.getColumnAggFunctions(columnNumber));
     }
 
     @Override

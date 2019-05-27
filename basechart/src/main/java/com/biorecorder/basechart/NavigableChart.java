@@ -476,20 +476,6 @@ public class NavigableChart {
         }
     }
 
-    public void setChartDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
-        chart.setDataProcessingConfig(dataProcessingConfig);
-        scrolls.clear();
-        isAreasDirty = true;
-        isScrollsDirty = true;
-    }
-
-    public void setNavigatorDataProcessingConfig(DataProcessingConfig dataProcessingConfig) {
-        navigator.setDataProcessingConfig(dataProcessingConfig);
-        scrolls.clear();
-        isAreasDirty = true;
-        isScrollsDirty = true;
-    }
-
     public void zoomNavigatorY(int stack, YAxisPosition yPosition, double zoomFactor) {
         navigator.zoomY(stack, yPosition, zoomFactor);
     }
@@ -637,32 +623,32 @@ public class NavigableChart {
         isAreasDirty = true;
     }
 
-    public void addChartTrace(Trace trace) {
-        chart.addTrace(trace);
+    public void addChartTrace(ChartData data, TracePainter tracePainter) {
+        chart.addTrace(data, tracePainter);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(Trace trace, boolean isSplit) {
-        chart.addTrace(trace, isSplit);
+    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
+        chart.addTrace(data, tracePainter, isSplit);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(Trace trace, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
-        chart.addTrace(trace, isSplit, xPosition, yPosition);
+    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
+        chart.addTrace(data,  tracePainter, isSplit, xPosition, yPosition);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(Trace trace, boolean isSplit, int stackNumber) {
-        chart.addTrace(trace, isSplit, stackNumber);
+    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stackNumber) {
+        chart.addTrace(data,  tracePainter, isSplit, stackNumber);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(Trace trace, boolean isSplit, int stackNumber, XAxisPosition xPosition, YAxisPosition yPosition) {
-        chart.addTrace(trace, isSplit, stackNumber, xPosition, yPosition);
+    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stackNumber, XAxisPosition xPosition, YAxisPosition yPosition) {
+        chart.addTrace(data,  tracePainter, isSplit, stackNumber, xPosition, yPosition);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
@@ -784,20 +770,20 @@ public class NavigableChart {
         isAreasDirty = true;
     }
 
-    public void addNavigatorTrace(Trace trace) {
-        navigator.addTrace(trace, true);
+    public void addNavigatorTrace(ChartData data, TracePainter tracePainter) {
+        navigator.addTrace(data,  tracePainter, true);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addNavigatorTrace(Trace trace, boolean isSplit) {
-        navigator.addTrace(trace, isSplit);
+    public void addNavigatorTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
+        navigator.addTrace(data,  tracePainter, isSplit);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addNavigatorTrace(Trace trace, boolean isSplit, int stack) {
-        navigator.addTrace(trace, isSplit, stack);
+    public void addNavigatorTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack) {
+        navigator.addTrace(data,  tracePainter, isSplit, stack);
         isAreasDirty = true;
         isScrollsDirty = true;
     }

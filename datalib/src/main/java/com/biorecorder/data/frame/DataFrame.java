@@ -233,8 +233,14 @@ public class DataFrame {
     }
 
     public void setColumnAggFunctions(int columnNumber, Aggregation... aggFunctions) {
-        columnAggFunctions.set(columnNumber, aggFunctions);
+        columnAggFunctions.set(columnNumber, Arrays.copyOf(aggFunctions, aggFunctions.length));
     }
+
+    public Aggregation[] getColumnAggFunctions(int columnNumber) {
+        Aggregation[] aggregations = columnAggFunctions.get(columnNumber);
+        return Arrays.copyOf(aggregations, aggregations.length);
+    }
+
 
     public String getColumnName(int columnNumber) {
         return columnNames.get(columnNumber);

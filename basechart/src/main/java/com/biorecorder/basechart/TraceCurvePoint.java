@@ -14,4 +14,16 @@ public class TraceCurvePoint extends TraceCurve {
     public int getPointIndex() {
         return pointIndex;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof TraceCurvePoint)) {
+            return false;
+        }
+
+        TraceCurvePoint tcp = (TraceCurvePoint) o;
+        return ((trace == tcp.trace) &&
+                (curve == tcp.curve) && (pointIndex == tcp.pointIndex));
+    }
 }

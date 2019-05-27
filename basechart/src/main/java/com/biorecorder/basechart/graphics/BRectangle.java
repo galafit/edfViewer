@@ -4,10 +4,10 @@ package com.biorecorder.basechart.graphics;
  * Created by galafit on 29/12/17.
  */
 public class BRectangle {
-    public int x;
-    public int y;
-    public int width;
-    public int height;
+    public  int x;
+    public  int y;
+    public  int width;
+    public  int height;
 
     public BRectangle(int x, int y, int width, int height) {
         if(width < 0) {
@@ -24,11 +24,53 @@ public class BRectangle {
         this.height = height;
     }
 
-    public boolean contains(float x, float y) {
-        if(x < this.x || y < this.y || x > this.x + width || y > this.y + height) {
+    // taken from
+    // http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/awt/Rectangle.java
+    public boolean contains(int X, int Y) {
+        int w = this.width;
+        int h = this.height;
+        if ((w | h) < 0) {
+            // At least one of the dimensions is negative...
             return false;
         }
-        return true;
+
+        // Note: if either dimension is zero, tests below must return false...
+        int x = this.x;
+        int y = this.y;
+        if (X < x || Y < y) {
+            return false;
+        }
+        w += x;
+        h += y;
+        //    overflow || intersect
+        return ((w < x || w > X) &&
+                (h < y || h > Y));
+    }
+
+    public boolean containsX(int X) {
+        int w = this.width;
+        if (w < 0) {
+            return false;
+        }
+        int x = this.x;
+        if (X < x) {
+            return false;
+        }
+        w += x;
+        return (w < x || w > X);
+    }
+
+    public boolean containsY(int Y) {
+        int h = this.height;
+        if (h < 0) {
+            return false;
+        }
+        int y = this.y;
+        if (Y < y) {
+            return false;
+        }
+        h += y;
+        return (h < y || h > Y);
     }
 
     @Override

@@ -22,16 +22,17 @@ public class TraceCurve {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof TraceCurve) {
-            TraceCurve r = (TraceCurve) obj;
-            return ((trace == r.trace) &&
-                    (curve == r.curve));
-
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof TraceCurve)) {
+            return false;
         }
-        return super.equals(obj);
 
+        TraceCurve tc = (TraceCurve) o;
+        return ((trace == tc.trace) &&
+                (curve == tc.curve));
     }
+
 
     /**
      * https://www.mkyong.com/java/java-how-to-overrides-equals-and-hashcode/

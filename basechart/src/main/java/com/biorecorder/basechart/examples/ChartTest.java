@@ -100,10 +100,10 @@ public class ChartTest extends JFrame {
         setVisible(true);
         try {
             Thread.sleep(1000);
-            chart.addTrace(new LineTrace(unsortedData), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
+            chart.addTrace(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
-            chart.addTrace(new LineTrace(noRegularData), true);
-            chart.addTrace(new LineTrace(regularData), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
+            chart.addTrace(noRegularData, new LineTrace(), true);
+            chart.addTrace(regularData, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
             chartPanel.repaint();
 
         } catch (InterruptedException e) {

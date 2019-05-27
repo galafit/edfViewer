@@ -43,6 +43,10 @@ public interface ChartData {
 
     int[] sortedIndices(int sortColumn);
 
+    void setColumnGroupApproximation(int columnNumber, GroupApproximation groupApproximation);
+
+    GroupApproximation getColumnGroupApproximation(int columnNumber);
+
     ChartData resampleByEqualPointsNumber(int points);
 
     ChartData resampleByEqualInterval(int columnNumber, double interval);

@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.sun.istack.internal.Nullable;
+
 import java.text.MessageFormat;
 
 /**
@@ -58,7 +60,7 @@ public class Range {
      * min = min(range1.min, range2.min)
      * intervalLength = min(range1.intervalLength, range2.intervalLength) if both lengths > 0
      */
-    public static Range min(Range range1, Range range2) {
+    public static Range min(@Nullable Range range1, @Nullable Range range2) {
         if(range1 == null && range2 == null) {
             return null;
         }
