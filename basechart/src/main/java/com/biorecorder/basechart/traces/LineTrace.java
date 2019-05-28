@@ -11,7 +11,7 @@ import com.biorecorder.basechart.scales.Scale;
 /**
  * Created by galafit on 11/10/17.
  */
-public class LineTrace implements TracePainter {
+public class LineTrace implements Trace {
     private LineTraceConfig traceConfig;
 
     public LineTrace() {
@@ -34,8 +34,8 @@ public class LineTrace implements TracePainter {
     }
 
     @Override
-    public String curveName(ChartData data, int curve) {
-       return data.getColumnName(curve + 1);
+    public String traceName(ChartData data, int trace) {
+       return data.getColumnName(trace + 1);
     }
 
     @Override
@@ -44,15 +44,15 @@ public class LineTrace implements TracePainter {
     }
 
     @Override
-    public BRectangle curvePointHoverArea(ChartData data, int dataIndex, int curve, Scale xScale, Scale yScale) {
+    public BRectangle tracePointHoverArea(ChartData data, int dataIndex, int trace, Scale xScale, Scale yScale) {
         int x = (int) xScale.scale(data.value(dataIndex, 0));
-        int y = (int) yScale.scale(data.value(dataIndex, curve + 1));
+        int y = (int) yScale.scale(data.value(dataIndex, trace + 1));
         return new BRectangle(x, y, 0, 0);
     }
 
     @Override
-    public Range curveYMinMax(ChartData data, int curve) {
-        return data.columnMinMax(curve + 1);
+    public Range traceYMinMax(ChartData data, int trace) {
+        return data.columnMinMax(trace + 1);
     }
 
     @Override
@@ -61,15 +61,15 @@ public class LineTrace implements TracePainter {
     }
 
     @Override
-    public NamedValue[] curvePointValues(ChartData data, int dataIndex, int curve, Scale xScale, Scale yScale) {
-        NamedValue[] curveValues = {new NamedValue("",  xScale.formatDomainValue(data.value(dataIndex, 0))),
-                new NamedValue("",  yScale.formatDomainValue(data.value(dataIndex, curve + 1)))};
-        return curveValues;
+    public NamedValue[] tracePointValues(ChartData data, int dataIndex, int trace, Scale xScale, Scale yScale) {
+        NamedValue[] traceValues = {new NamedValue("",  xScale.formatDomainValue(data.value(dataIndex, 0))),
+                new NamedValue("",  yScale.formatDomainValue(data.value(dataIndex, trace + 1)))};
+        return traceValues;
     }
 
 
     @Override
-    public int curveCount(ChartData data) {
+    public int traceCount(ChartData data) {
         return data.columnCount() - 1;
     }
 
@@ -79,16 +79,16 @@ public class LineTrace implements TracePainter {
     }
 
     @Override
-    public void drawCurve(BCanvas canvas, ChartData data, int curve, BColor curveColor, int curveCount, boolean isSplit, Scale xScale, Scale yScale) {
-        XYViewer xyData = new XYViewer(data, curve);
+    public void drawTrace(BCanvas canvas, ChartData data, int trace, BColor traceColor, int traceCount, boolean isSplit, Scale xScale, Scale yScale) {
+        XYViewer xyData = new XYViewer(data, trace);
         if (xyData.size() == 0) {
             return;
         }
 
         BPath path = null;
         canvas.setStroke(traceConfig.getLineStroke());
-        BColor lineColor = curveColor;
-        BColor markColor = curveColor;
+        BColor lineColor = traceColor;
+        BColor markColor = traceColor;
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {
             path = drawLinearPath(canvas, xyData, xScale, yScale, lineColor, markColor);
         }
@@ -105,7 +105,7 @@ public class LineTrace implements TracePainter {
             path.lineTo(x_last, (int)yScale.getRange()[0]);
             path.lineTo(x_0, (int)yScale.getRange()[0]);
             path.close();
-            canvas.setColor(getFillColor(curveColor));
+            canvas.setColor(getFillColor(traceColor));
             canvas.fillPath(path);
         }
     }

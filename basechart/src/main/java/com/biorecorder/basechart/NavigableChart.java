@@ -8,7 +8,6 @@ import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 
@@ -336,36 +335,36 @@ public class NavigableChart {
         return navigator.getYAxis(stack, point);
     }
 
-    public boolean isNavigatorCurveSelected() {
-        return navigator.isCurveSelected();
+    public boolean isNavigatorTraceSelected() {
+        return navigator.isTraceSelected();
     }
 
-    XAxisPosition getNavigatorSelectedCurveX() {
-        return navigator.getSelectedCurveX();
+    XAxisPosition getNavigatorSelectedTraceX() {
+        return navigator.getSelectedTraceX();
     }
 
-    int getNavigatorSelectedCurveStack() {
-        return navigator.getSelectedCurveStack();
+    int getNavigatorSelectedTraceStack() {
+        return navigator.getSelectedTraceStack();
     }
 
-    YAxisPosition getNavigatorSelectedCurveY() {
-        return navigator.getSelectedCurveY();
+    YAxisPosition getNavigatorSelectedTraceY() {
+        return navigator.getSelectedTraceY();
     }
 
-    public boolean isChartCurveSelected() {
-        return chart.isCurveSelected();
+    public boolean isChartTraceSelected() {
+        return chart.isTraceSelected();
     }
 
-    XAxisPosition getChartSelectedCurveX() {
-        return chart.getSelectedCurveX();
+    XAxisPosition getChartSelectedTraceX() {
+        return chart.getSelectedTraceX();
     }
 
-    int getChartSelectedCurveStack() {
-        return chart.getSelectedCurveStack();
+    int getChartSelectedTraceStack() {
+        return chart.getSelectedTraceStack();
     }
 
-    YAxisPosition getChartSelectedCurveY() {
-        return chart.getSelectedCurveY();
+    YAxisPosition getChartSelectedTraceY() {
+        return chart.getSelectedTraceY();
     }
 
     XAxisPosition[] getNavigatorXAxes() {
@@ -569,10 +568,10 @@ public class NavigableChart {
     }
 
     public boolean selectTrace(int x, int y) {
-        if (chart.selectCurve(x, y)) {
+        if (chart.selectTrace(x, y)) {
             return true;
         } else {
-            return navigator.selectCurve(x, y);
+            return navigator.selectTrace(x, y);
         }
     }
 
@@ -615,7 +614,7 @@ public class NavigableChart {
     }
 
     /**
-     * @throws IllegalStateException if stack axis are used by some trace curves and
+     * @throws IllegalStateException if stack axis are used by some trace traces and
      *                               therefor can not be deleted
      */
     public void removeChartStack(int stackNumber) throws IllegalStateException {
@@ -623,32 +622,32 @@ public class NavigableChart {
         isAreasDirty = true;
     }
 
-    public void addChartTrace(ChartData data, TracePainter tracePainter) {
-        chart.addTrace(data, tracePainter);
+    public void addChartTrace(ChartData data, Trace tracePainter) {
+        chart.addTraces(data, tracePainter);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
-        chart.addTrace(data, tracePainter, isSplit);
+    public void addChartTrace(ChartData data, Trace tracePainter, boolean isSplit) {
+        chart.addTraces(data, tracePainter, isSplit);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
-        chart.addTrace(data,  tracePainter, isSplit, xPosition, yPosition);
+    public void addChartTrace(ChartData data, Trace tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
+        chart.addTraces(data,  tracePainter, isSplit, xPosition, yPosition);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stackNumber) {
-        chart.addTrace(data,  tracePainter, isSplit, stackNumber);
+    public void addChartTrace(ChartData data, Trace tracePainter, boolean isSplit, int stackNumber) {
+        chart.addTraces(data,  tracePainter, isSplit, stackNumber);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addChartTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stackNumber, XAxisPosition xPosition, YAxisPosition yPosition) {
-        chart.addTrace(data,  tracePainter, isSplit, stackNumber, xPosition, yPosition);
+    public void addChartTrace(ChartData data, Trace tracePainter, boolean isSplit, int stackNumber, XAxisPosition xPosition, YAxisPosition yPosition) {
+        chart.addTraces(data,  tracePainter, isSplit, stackNumber, xPosition, yPosition);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
@@ -697,29 +696,25 @@ public class NavigableChart {
         return chart.getYConfig(stack, yPosition);
     }
 
-    public String[] getChartCurveNames() {
-        return chart.getCurveNames();
+    public String[] getChartTraceNames() {
+        return chart.getTraceNames();
     }
 
-    public void setChartCurveColor(int traceNumber, int curveNumber, BColor color) {
-        chart.setCurveColor(traceNumber, curveNumber, color);
+    public void setChartTraceColor(int trace, BColor color) {
+        chart.setTraceColor(trace, color);
     }
 
-    public void setChartCurveName(int traceNumber, int curveNumber, String name) {
-        chart.setCurveName(traceNumber, curveNumber, name);
+    public void setChartTraceName(int trace, String name) {
+        chart.setTraceName(trace, name);
     }
 
-    public int chartTraceCurveCount(int traceNumber) {
-        return chart.traceCurveCount(traceNumber);
-    }
-
-    public CurveNumber getChartCurveNumberByName(String name) {
-        return chart.getCurveNumberByName(name);
+    public int getChartTraceNumberByName(String name) {
+        return chart.getTraceNumberByName(name);
 
     }
 
-    public CurveNumber getChartSelectedCurveNumber() {
-        return chart.getSelectedCurveNumber();
+    public int getChartSelectedTraceNumber() {
+        return chart.getSelectedTraceNumber();
     }
 
     public void setChartYMinMax(int stack, YAxisPosition yPosition, double min, double max) {
@@ -762,7 +757,7 @@ public class NavigableChart {
     }
 
     /**
-     * @throws IllegalStateException if stack axis are used by some trace curves and
+     * @throws IllegalStateException if stack axis are used by some trace traces and
      *                               therefor can not be deleted
      */
     public void removeNavigatorStack(int stack) throws IllegalStateException {
@@ -770,20 +765,20 @@ public class NavigableChart {
         isAreasDirty = true;
     }
 
-    public void addNavigatorTrace(ChartData data, TracePainter tracePainter) {
-        navigator.addTrace(data,  tracePainter, true);
+    public void addNavigatorTrace(ChartData data, Trace tracePainter) {
+        navigator.addTraces(data,  tracePainter, true);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addNavigatorTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
-        navigator.addTrace(data,  tracePainter, isSplit);
+    public void addNavigatorTrace(ChartData data, Trace tracePainter, boolean isSplit) {
+        navigator.addTraces(data,  tracePainter, isSplit);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
 
-    public void addNavigatorTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack) {
-        navigator.addTrace(data,  tracePainter, isSplit, stack);
+    public void addNavigatorTrace(ChartData data, Trace tracePainter, boolean isSplit, int stack) {
+        navigator.addTraces(data,  tracePainter, isSplit, stack);
         isAreasDirty = true;
         isScrollsDirty = true;
     }
@@ -798,12 +793,12 @@ public class NavigableChart {
         return navigator.traceCount();
     }
 
-    public void setNavigatorCurveColor(int traceNumber, int curveNumber, BColor color) {
-        navigator.setCurveColor(traceNumber, curveNumber, color);
+    public void setNavigatorTraceColor(int trace, BColor color) {
+        navigator.setTraceColor(trace, color);
     }
 
-    public void setNavigatorCurveName(int traceNumber, int curveNumber, String name) {
-        navigator.setCurveName(traceNumber, curveNumber, name);
+    public void setNavigatorTraceName(int trace, String name) {
+        navigator.setTraceName(trace, name);
     }
 
 
@@ -841,21 +836,17 @@ public class NavigableChart {
         return navigator.getYConfig(stack, yPosition);
     }
 
-    public String[] getNavigatorCurveNames() {
-        return navigator.getCurveNames();
+    public String[] getNavigatorTraceNames() {
+        return navigator.getTraceNames();
     }
 
-    public int navigatorTraceCurveCount(int traceNumber) {
-        return navigator.traceCurveCount(traceNumber);
-    }
-
-    public CurveNumber getNavigatorCurveNumberByName(String name) {
-        return navigator.getCurveNumberByName(name);
+    public int getNavigatorTraceNumberByName(String name) {
+        return navigator.getTraceNumberByName(name);
 
     }
 
-    public CurveNumber getNavigatorSelectedCurveNumber() {
-        return navigator.getSelectedCurveNumber();
+    public int getNavigatorSelectedTraceNumber() {
+        return navigator.getSelectedTraceNumber();
     }
 
     public void setNavigatorYMinMax(int stack, YAxisPosition yPosition, double min, double max) {

@@ -4,33 +4,33 @@ package com.biorecorder.basechart;
 /**
  * Created by galafit on 14/2/19.
  */
-public class TraceCurve {
-    protected final Trace trace;
-    protected final int curve;
+public class DataPainterTrace {
+    protected final DataPainter dataPainter;
+    protected final int trace;
 
-    public TraceCurve(Trace trace, int curve) {
+    public DataPainterTrace(DataPainter dataPainter, int trace) {
+        this.dataPainter = dataPainter;
         this.trace = trace;
-        this.curve = curve;
     }
 
-    public Trace getTrace() {
+    public DataPainter getDataPainter() {
+        return dataPainter;
+    }
+
+    public int getTrace() {
         return trace;
-    }
-
-    public int getCurve() {
-        return curve;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof TraceCurve)) {
+        if (!(o instanceof DataPainterTrace)) {
             return false;
         }
 
-        TraceCurve tc = (TraceCurve) o;
+        DataPainterTrace tc = (DataPainterTrace) o;
         return ((trace == tc.trace) &&
-                (curve == tc.curve));
+                (dataPainter == tc.dataPainter));
     }
 
 
@@ -41,8 +41,8 @@ public class TraceCurve {
     @Override
     public int hashCode() {
         int result = 17;
-        result = 31 * result + curve;
-        result = 31 * result + trace.hashCode();
+        result = 31 * result + trace;
+        result = 31 * result + dataPainter.hashCode();
         return result;
     }
 

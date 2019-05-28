@@ -44,7 +44,6 @@ public class NavigableChartTest extends JFrame{
         xyData.addColumn(yData);
 
         chart = new NavigableChart(new CategoryScale());
-        //chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};
@@ -76,8 +75,8 @@ public class NavigableChartTest extends JFrame{
                     e.printStackTrace();
                 }
 
-                chart.setChartCurveColor(0, 1, BColor.RED);
-                chart.setChartCurveName(0, 1, "new Name");
+                chart.setChartTraceColor(1, BColor.RED);
+                chart.setChartTraceName(1, "new Name");
                 chartPanel.repaint();
 
                 try {

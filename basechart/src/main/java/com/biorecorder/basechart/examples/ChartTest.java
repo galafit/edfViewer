@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.traces.LineTrace;
 import com.biorecorder.data.frame.SquareFunction;
@@ -87,7 +88,7 @@ public class ChartTest extends JFrame {
         timeData.addColumn(list1);
 
         chart = new Chart(new CategoryScale());
-        //chart.addTrace(new LineTrace(regularData), true);
+        //chart.addTraces(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -100,11 +101,16 @@ public class ChartTest extends JFrame {
         setVisible(true);
         try {
             Thread.sleep(1000);
-            chart.addTrace(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
+            chart.addTraces(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
-            chart.addTrace(noRegularData, new LineTrace(), true);
-            chart.addTrace(regularData, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
+            chart.addTraces(noRegularData, new LineTrace(), true);
+            chart.addTraces(regularData, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
             chartPanel.repaint();
+            Thread.sleep(1000);
+            chart.setTraceColor(2, BColor.CYAN);
+            chart.setTraceName(1, "bla-bla");
+            chartPanel.repaint();
+
 
         } catch (InterruptedException e) {
             e.printStackTrace();

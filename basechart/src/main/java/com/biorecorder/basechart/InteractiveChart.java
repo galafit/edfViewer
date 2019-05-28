@@ -22,14 +22,14 @@ public class InteractiveChart implements InteractiveDrawable {
 
     @Override
     public boolean onTap(int x, int y) {
-        return chart.selectCurve(x, y);
+        return chart.selectTrace(x, y);
     }
 
     @Override
     public boolean onDoubleTap(int x, int y) {
-        if(chart.isCurveSelected()) {
-            chart.autoScaleX(chart.getSelectedCurveX());
-            chart.autoScaleY(chart.getSelectedCurveStack(), chart.getSelectedCurveY());
+        if(chart.isTraceSelected()) {
+            chart.autoScaleX(chart.getSelectedTraceX());
+            chart.autoScaleY(chart.getSelectedTraceStack(), chart.getSelectedTraceY());
         } else {
             XAxisPosition[] xAxisPositions = chart.getXAxes();
             for (int i = 0; i < xAxisPositions.length; i++) {
@@ -67,8 +67,8 @@ public class InteractiveChart implements InteractiveDrawable {
         }
 
         XAxisPosition[] xAxisPositions = new XAxisPosition[0];
-        if(chart.isCurveSelected()) {
-            XAxisPosition[] xAxisPositions1 = {chart.getSelectedCurveX()};
+        if(chart.isTraceSelected()) {
+            XAxisPosition[] xAxisPositions1 = {chart.getSelectedTraceX()};
             xAxisPositions = xAxisPositions1;
         } else if(startPoint != null) {
             XAxisPosition xPosition = chart.getXAxis(startPoint);
@@ -95,8 +95,8 @@ public class InteractiveChart implements InteractiveDrawable {
             return false;
         }
 
-        if(chart.isCurveSelected()) {
-            chart.zoomY(chart.getSelectedCurveStack(), chart.getSelectedCurveY(), scaleFactor);
+        if(chart.isTraceSelected()) {
+            chart.zoomY(chart.getSelectedTraceStack(), chart.getSelectedTraceY(), scaleFactor);
             return true;
         }
 
@@ -120,8 +120,8 @@ public class InteractiveChart implements InteractiveDrawable {
         }
 
         XAxisPosition[] xAxisPositions = new XAxisPosition[0];
-        if(chart.isCurveSelected()) {
-            XAxisPosition[] xAxisPositions1 = {chart.getSelectedCurveX()};
+        if(chart.isTraceSelected()) {
+            XAxisPosition[] xAxisPositions1 = {chart.getSelectedTraceX()};
             xAxisPositions = xAxisPositions1;
         } else if(startPoint != null) {
             XAxisPosition xPosition = chart.getXAxis(startPoint);
@@ -147,8 +147,8 @@ public class InteractiveChart implements InteractiveDrawable {
         if(dy == 0) {
             return false;
         }
-        if(chart.isCurveSelected()) {
-            chart.translateY(chart.getSelectedCurveStack(), chart.getSelectedCurveY(), dy);
+        if(chart.isTraceSelected()) {
+            chart.translateY(chart.getSelectedTraceStack(), chart.getSelectedTraceY(), dy);
             return true;
         }
 

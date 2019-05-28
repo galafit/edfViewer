@@ -3,10 +3,10 @@ package com.biorecorder.basechart;
 /**
  * Created by galafit on 15/2/19.
  */
-public class TraceCurvePoint extends TraceCurve {
+public class DataPainterTracePoint extends DataPainterTrace {
     protected final int pointIndex;
 
-    public TraceCurvePoint(Trace trace, int curveNumber, int pointIndex) {
+    public DataPainterTracePoint(DataPainter trace, int curveNumber, int pointIndex) {
         super(trace, curveNumber);
         this.pointIndex = pointIndex;
     }
@@ -18,12 +18,12 @@ public class TraceCurvePoint extends TraceCurve {
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof TraceCurvePoint)) {
+        if (!(o instanceof DataPainterTracePoint)) {
             return false;
         }
 
-        TraceCurvePoint tcp = (TraceCurvePoint) o;
-        return ((trace == tcp.trace) &&
-                (curve == tcp.curve) && (pointIndex == tcp.pointIndex));
+        DataPainterTracePoint tcp = (DataPainterTracePoint) o;
+        return ((dataPainter == tcp.dataPainter) &&
+                (trace == tcp.trace) && (pointIndex == tcp.pointIndex));
     }
 }

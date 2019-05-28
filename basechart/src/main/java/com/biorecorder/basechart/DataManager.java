@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by galafit on 9/7/18.
  */
-public class TraceDataManager {
+public class DataManager {
     // NO REGROUPING if axis length change less then GROUPING_STABILITY
     private static final int GROUPING_STABILITY = 20; // percents
 
@@ -32,7 +32,7 @@ public class TraceDataManager {
 
     private int[] sorter;
 
-    public TraceDataManager(ChartData traceData, DataProcessingConfig dataProcessingConfig) {
+    public DataManager(ChartData traceData, DataProcessingConfig dataProcessingConfig) {
         this.traceData = traceData;
         setConfig(dataProcessingConfig);
     }

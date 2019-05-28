@@ -29,7 +29,7 @@ public class ChartConfig {
     private AxisConfig yAxisConfig = new AxisConfig();
     private AxisConfig xAxisConfig = new AxisConfig();
 
-    private boolean isMultiCurveTooltip = true;
+    private boolean isMultiTraceTooltip = true;
 
     private XAxisPosition primaryXPosition = XAxisPosition.BOTTOM;
     private YAxisPosition primaryYPosition = YAxisPosition.LEFT;
@@ -93,7 +93,7 @@ public class ChartConfig {
         xAxisConfig = new AxisConfig(chartConfig.xAxisConfig);
         primaryXPosition = chartConfig.primaryXPosition;
         primaryYPosition = chartConfig.primaryYPosition;
-        isMultiCurveTooltip = chartConfig.isMultiCurveTooltip;
+        isMultiTraceTooltip = chartConfig.isMultiTraceTooltip;
         defaultStackWeight = chartConfig.defaultStackWeight;
     }
 
@@ -151,12 +151,12 @@ public class ChartConfig {
         this.primaryYPosition = primaryYPosition;
     }
 
-    public boolean isMultiCurveTooltip() {
-        return isMultiCurveTooltip;
+    public boolean isMultiTraceTooltip() {
+        return isMultiTraceTooltip;
     }
 
-    public void setMultiCurveTooltip(boolean isSingleCurveTooltip) {
-        this.isMultiCurveTooltip = isSingleCurveTooltip;
+    public void setMultiTraceTooltip(boolean isSingleTraceTooltip) {
+        this.isMultiTraceTooltip = isSingleTraceTooltip;
     }
 
     public int getDefaultStackWeight() {

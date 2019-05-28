@@ -33,7 +33,7 @@ public class Chart {
     private Map<Integer, Range> yAxisToMinMax = new HashMap<>(1);
 
     private ArrayList<Integer> stackWeights = new ArrayList<Integer>();
-    private List<Trace> traces = new ArrayList<Trace>();
+    private List<DataPainter> dataPainters = new ArrayList<DataPainter>();
     private Legend legend;
     private Title title;
     private BRectangle fullArea;
@@ -43,8 +43,8 @@ public class Chart {
     private Crosshair crosshair;
     private Tooltip tooltip;
 
-    private TraceCurve selectedCurve;
-    private TraceCurvePoint hoverPoint;
+    private DataPainterTrace selectedTrace;
+    private DataPainterTracePoint hoverPoint;
     private DataProcessingConfig dataProcessingConfig;
     private Scale yScale;
 
@@ -140,7 +140,7 @@ public class Chart {
                 xAxis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale X
                 Range tracesXMinMax = null;
-                for (Trace trace : traces) {
+                for (DataPainter trace : dataPainters) {
                     if (trace.getXIndex() == xIndex) {
                         tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax(xAxis.getScale()));
                     }
@@ -163,11 +163,11 @@ public class Chart {
                 yAxis.setMinMax(minMax.getMin(), minMax.getMax());
             } else { // auto scale Y
                 Range tracesYMinMax = null;
-                for (Trace trace : traces) {
-                    int curveCount = trace.curveCount();
-                    for (int curve = 0; curve < curveCount; curve++) {
-                        if (getCurveYIndex( trace,  curve) == yIndex) {
-                            tracesYMinMax = Range.join(tracesYMinMax, trace.curveYMinMax(curve, xAxisList.get(trace.getXIndex()).getScale(), yAxis.getScale()));
+                for (DataPainter dataPainter : dataPainters) {
+                    int traceCount = dataPainter.traceCount();
+                    for (int trace = 0; trace < traceCount; trace++) {
+                        if (getTraceYIndex(dataPainter,  trace) == yIndex) {
+                            tracesYMinMax = Range.join(tracesYMinMax, dataPainter.traceYMinMax(trace, xAxisList.get(dataPainter.getXIndex()).getScale(), yAxis.getScale()));
                         }
                     }
                 }
@@ -291,11 +291,11 @@ public class Chart {
         int rightAxisIndex = stack * 2 + 1;
         int primaryAxisIndex = getXIndex(config.getPrimaryXPosition());
 
-        for (Trace trace : traces) {
-            if (trace.getXIndex() == primaryAxisIndex) {
-                for (int curve = 0; curve < trace.curveCount(); curve++) {
-                    int curveYIndex = getCurveYIndex( trace,  curve);
-                    if (curveYIndex == leftAxisIndex || curveYIndex == rightAxisIndex) {
+        for (DataPainter dataPainter : dataPainters) {
+            if (dataPainter.getXIndex() == primaryAxisIndex) {
+                for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+                    int traceYIndex = getTraceYIndex( dataPainter,  trace);
+                    if (traceYIndex == leftAxisIndex || traceYIndex == rightAxisIndex) {
                         return primaryAxisIndex;
                     }
                 }
@@ -358,15 +358,13 @@ public class Chart {
         return XAxisPosition.TOP;
     }
 
-    int getCurveYIndex(Trace trace, int curve) {
-        if(trace.isSplit()) {
-            return trace.getYStartIndex() + curve * 2;
+    int getTraceYIndex(DataPainter dataPainter, int trace) {
+        if(dataPainter.isSplit()) {
+            return dataPainter.getYStartIndex() + trace * 2;
         } else {
-            return trace.getYStartIndex();
+            return dataPainter.getYStartIndex();
         }
     }
-
-
 
     /**
      * =============================================================*
@@ -387,7 +385,7 @@ public class Chart {
 
     double getTracesBestExtent(XAxisPosition xAxisPosition) {
         double extent = -1;
-        for (Trace trace : traces) {
+        for (DataPainter trace : dataPainters) {
             if (trace.getXIndex() == getXIndex(xAxisPosition)) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
                 // System.out.println("trace extent "+traceExtent);
@@ -405,7 +403,7 @@ public class Chart {
     // for all x axis
     Range getAllTracesFullMinMax() {
         Range minMax = null;
-        for (Trace trace : traces) {
+        for (DataPainter trace : dataPainters) {
             Scale traceXScale = xAxisList.get(trace.getXIndex()).getScale();
             minMax = Range.join(minMax, trace.getFullXMinMax(traceXScale));
         }
@@ -482,22 +480,22 @@ public class Chart {
         return new Range(yAxis.getMin(), yAxis.getMax());
     }
 
-    public boolean isCurveSelected() {
-        return selectedCurve != null;
+    public boolean isTraceSelected() {
+        return selectedTrace != null;
     }
 
-    XAxisPosition getSelectedCurveX() {
-        return getXPosition(selectedCurve.getTrace().getXIndex());
+    XAxisPosition getSelectedTraceX() {
+        return getXPosition(selectedTrace.getDataPainter().getXIndex());
     }
 
-    int getSelectedCurveStack() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
+    int getSelectedTraceStack() {
+        int yIndex = getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace());
         return getYStack(yIndex);
     }
 
 
-    YAxisPosition getSelectedCurveY() {
-        int yIndex = getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve());
+    YAxisPosition getSelectedTraceY() {
+        int yIndex = getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace());
         return getYPosition(yIndex);
     }
 
@@ -591,16 +589,16 @@ public class Chart {
         if (!graphArea.contains(x, y)) {
             return hoverOff();
         }
-        if (selectedCurve != null) {
-            Scale xScale = xAxisList.get(selectedCurve.getTrace().getXIndex()).getScale();
-            Scale yScale = yAxisList.get(getCurveYIndex(selectedCurve.getTrace(), selectedCurve.getCurve())).getScale();
+        if (selectedTrace != null) {
+            Scale xScale = xAxisList.get(selectedTrace.getDataPainter().getXIndex()).getScale();
+            Scale yScale = yAxisList.get(getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace())).getScale();
 
-            NearestCurvePoint nearestCurvePoint = selectedCurve.getTrace().nearest(x, y, selectedCurve.getCurve(), xScale, yScale);
-            if (nearestCurvePoint != null) {
-                if (nearestCurvePoint.getCurvePoint().equals(hoverPoint)) {
+            NearestTracePoint nearestTracePoint = selectedTrace.getDataPainter().nearest(x, y, selectedTrace.getTrace(), xScale, yScale);
+            if (nearestTracePoint != null) {
+                if (nearestTracePoint.getTracePoint().equals(hoverPoint)) {
                     return false;
                 } else {
-                    hoverPoint = nearestCurvePoint.getCurvePoint();
+                    hoverPoint = nearestTracePoint.getTracePoint();
                     updateTooltipAndCrosshair();
                     return true;
                 }
@@ -611,44 +609,44 @@ public class Chart {
         }
 
         if (hoverPoint != null) {
-            Scale xScale = xAxisList.get(hoverPoint.getTrace().getXIndex()).getScale();
-            Scale yScale = yAxisList.get(getCurveYIndex(hoverPoint.getTrace(), hoverPoint.getCurve())).getScale();
-            NearestCurvePoint nearestCurvePoint = hoverPoint.getTrace().nearest(x, y, hoverPoint.getCurve(), xScale, yScale);
-            if (nearestCurvePoint != null) {
-                if (nearestCurvePoint.getCurvePoint().equals(hoverPoint)) {
+            Scale xScale = xAxisList.get(hoverPoint.getDataPainter().getXIndex()).getScale();
+            Scale yScale = yAxisList.get(getTraceYIndex(hoverPoint.getDataPainter(), hoverPoint.getTrace())).getScale();
+            NearestTracePoint nearestTracePoint = hoverPoint.getDataPainter().nearest(x, y, hoverPoint.getTrace(), xScale, yScale);
+            if (nearestTracePoint != null) {
+                if (nearestTracePoint.getTracePoint().equals(hoverPoint)) {
                     return false;
                 } else {
-                    hoverPoint = nearestCurvePoint.getCurvePoint();
+                    hoverPoint = nearestTracePoint.getTracePoint();
                     updateTooltipAndCrosshair();
                     return true;
                 }
             }
         }
 
-        // find nearest trace curve
-        NearestCurvePoint closestTracePoint = null;
-        for (Trace trace : traces) {
-            Scale[] traceYScales = new Scale[trace.curveCount()];
-            for (int curve = 0; curve < trace.curveCount(); curve++) {
-                traceYScales[curve] = yAxisList.get(getCurveYIndex( trace,  curve)).getScale();
+        // find nearest trace trace
+        NearestTracePoint closestTracePoint = null;
+        for (DataPainter dataPainter : dataPainters) {
+            Scale[] traceYScales = new Scale[dataPainter.traceCount()];
+            for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+                traceYScales[trace] = yAxisList.get(getTraceYIndex(dataPainter,  trace)).getScale();
             }
-            Scale xScale = xAxisList.get(trace.getXIndex()).getScale();
+            Scale xScale = xAxisList.get(dataPainter.getXIndex()).getScale();
 
-            NearestCurvePoint nearestCurvePoint = trace.nearest(x, y, xScale, traceYScales);
-            if (nearestCurvePoint != null) {
-                if (nearestCurvePoint.getDistanceSqw() == 0) {
-                    closestTracePoint = nearestCurvePoint;
+            NearestTracePoint nearestTracePoint = dataPainter.nearest(x, y, xScale, traceYScales);
+            if (nearestTracePoint != null) {
+                if (nearestTracePoint.getDistanceSqw() == 0) {
+                    closestTracePoint = nearestTracePoint;
                     break;
                 } else {
-                    if (closestTracePoint == null || closestTracePoint.getDistanceSqw() > nearestCurvePoint.getDistanceSqw()) {
-                        closestTracePoint = nearestCurvePoint;
+                    if (closestTracePoint == null || closestTracePoint.getDistanceSqw() > nearestTracePoint.getDistanceSqw()) {
+                        closestTracePoint = nearestTracePoint;
                     }
                 }
             }
         }
 
         if (closestTracePoint != null) {
-            hoverPoint = closestTracePoint.getCurvePoint();
+            hoverPoint = closestTracePoint.getTracePoint();
             updateTooltipAndCrosshair();
             return true;
         }
@@ -660,26 +658,26 @@ public class Chart {
         if (hoverPoint == null) {
             return;
         }
-        Trace hoverTrace = hoverPoint.getTrace();
-        int hoverCurve = hoverPoint.getCurve();
+        DataPainter hoverDataPainter = hoverPoint.getDataPainter();
+        int hoverTrace = hoverPoint.getTrace();
         int hoverPointIndex = hoverPoint.getPointIndex();
         int tooltipYPosition = 0;
-        Scale xScale = xAxisList.get(hoverTrace.getXIndex()).getScale();
-        NamedValue xValue = hoverTrace.xValue(hoverPointIndex, xScale);
+        Scale xScale = xAxisList.get(hoverDataPainter.getXIndex()).getScale();
+        NamedValue xValue = hoverDataPainter.xValue(hoverPointIndex, xScale);
 
         int xPosition;
-        int curveStart;
-        int curveEnd;
-        if (config.isMultiCurveTooltip()) { // all trace curves
-            curveStart = 0;
-            curveEnd = hoverTrace.curveCount() - 1;
-        } else { // only hover curve
-            curveStart = hoverCurve;
-            curveEnd = hoverCurve;
+        int traceStart;
+        int traceEnd;
+        if (config.isMultiTraceTooltip()) { // all trace traces
+            traceStart = 0;
+            traceEnd = hoverDataPainter.traceCount() - 1;
+        } else { // only hover trace
+            traceStart = hoverTrace;
+            traceEnd = hoverTrace;
         }
-        Scale yScale = yAxisList.get(getCurveYIndex(hoverTrace, hoverCurve)).getScale();
-        BRectangle hoverAreaStart = hoverTrace.curvePointHoverArea(hoverPointIndex, curveStart, xScale, yScale);
-        BRectangle hoverAreaEnd = hoverTrace.curvePointHoverArea(hoverPointIndex, curveEnd, xScale, yScale);
+        Scale yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, hoverTrace)).getScale();
+        BRectangle hoverAreaStart = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScale);
+        BRectangle hoverAreaEnd = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScale);
 
         xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
         crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
@@ -687,18 +685,18 @@ public class Chart {
         tooltip.setHeader(null, null, xValue.getValue());
 
 
-        for (int curve = curveStart; curve <= curveEnd; curve++) {
-            yScale = yAxisList.get(getCurveYIndex(hoverTrace, hoverCurve)).getScale();
-            NamedValue[] curveValues = hoverTrace.curveValues(hoverPointIndex, curve, xScale, yScale);
-            if (curveValues.length == 2) {
-                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), curveValues[1].getValue());
+        for (int trace = traceStart; trace <= traceEnd; trace++) {
+            yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, hoverTrace)).getScale();
+            NamedValue[] traceValues = hoverDataPainter.traceValues(hoverPointIndex, trace, xScale, yScale);
+            if (traceValues.length == 2) {
+                tooltip.addLine(hoverDataPainter.getTraceColor(trace), hoverDataPainter.getTraceName(trace), traceValues[1].getValue());
             } else {
-                tooltip.addLine(hoverTrace.getCurveColor(curve), hoverTrace.getCurveName(curve), "");
-                for (NamedValue curveValue : curveValues) {
-                    tooltip.addLine(null, curveValue.getValueName(), curveValue.getValue());
+                tooltip.addLine(hoverDataPainter.getTraceColor(trace), hoverDataPainter.getTraceName(trace), "");
+                for (NamedValue traceValue : traceValues) {
+                    tooltip.addLine(null, traceValue.getValueName(), traceValue.getValue());
                 }
             }
-            crosshair.addY(hoverTrace.curvePointHoverArea(hoverPointIndex, curve, xScale, yScale).y);
+            crosshair.addY(hoverDataPainter.tracePointHoverArea(hoverPointIndex, trace, xScale, yScale).y);
         }
 
     }
@@ -783,9 +781,9 @@ public class Chart {
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
 
-        for (Trace trace : traces) {
-            for (int curve = 0; curve < trace.curveCount(); curve++) {
-                trace.drawCurve(canvas, curve, xAxisList.get(trace.getXIndex()).getScale(), yAxisList.get(getCurveYIndex( trace,  curve)).getScale());
+        for (DataPainter dataPainter : dataPainters) {
+            for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+                dataPainter.drawTrace(canvas, trace, xAxisList.get(dataPainter.getXIndex()).getScale(), yAxisList.get(getTraceYIndex(dataPainter,  trace)).getScale());
             }
         }
         canvas.restore();
@@ -808,49 +806,71 @@ public class Chart {
 
 
     public void appendData() {
-        for (Trace trace : traces) {
+        for (DataPainter trace : dataPainters) {
             trace.appendData();
         }
         isDirty = true;
     }
 
-    public String[] getCurveNames() {
+    public String[] getTraceNames() {
         List<String> names = new ArrayList<>();
-        for (Trace trace : traces) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-                names.add(trace.getCurveName(i));
+        for (DataPainter trace : dataPainters) {
+            for (int i = 0; i < trace.traceCount(); i++) {
+                names.add(trace.getTraceName(i));
             }
         }
         String[] namesArr = new String[names.size()];
         return names.toArray(namesArr);
     }
 
-    public int traceCurveCount(int traceNumber) {
-        return traces.get(traceNumber).curveCount();
+    public int dataPainterTraceCount(int traceNumber) {
+        return dataPainters.get(traceNumber).traceCount();
     }
 
-    public CurveNumber getCurveNumberByName(String name) {
-        for (int i = 0; i < traces.size(); i++) {
-            Trace trace = traces.get(i);
-            for (int j = 0; j < trace.curveCount(); j++) {
-                if (trace.getCurveName(i).equals(name)) {
-                    return new CurveNumber(i, j);
+    private int dataPainterTraceToGeneralTraceNumber(DataPainterTrace dataPainterTrace) throws IllegalArgumentException {
+        int traceCount = 0;
+        for (DataPainter dataPainter : dataPainters) {
+            if(dataPainter == dataPainterTrace.getDataPainter()) {
+                traceCount += dataPainterTrace.getTrace();
+                return traceCount;
+            }
+            traceCount += dataPainter.traceCount();
+        }
+        String errMsg = "Invalid DataPainterTrace. Corresponding DataPainter does not exist";
+        throw new IllegalArgumentException(errMsg);
+    }
+
+    private DataPainterTrace generalTraceNumberToDataPainterTrace(int trace) throws IllegalArgumentException{
+        int traceCount = 0;
+        for (DataPainter dataPainter : dataPainters) {
+            if(trace < traceCount + dataPainter.traceCount()) {
+                return new DataPainterTrace(dataPainter, trace - traceCount);
+            }
+            traceCount += dataPainter.traceCount();
+        }
+        String errMsg = "Invalid trace number. No DataPainter corresponds it: "+trace;
+        throw new IllegalArgumentException(errMsg);
+
+
+    }
+
+    public int getTraceNumberByName(String name) {
+        for (int i = 0; i < dataPainters.size(); i++) {
+            DataPainter dataPainter = dataPainters.get(i);
+            for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+                if (dataPainter.getTraceName(trace).equals(name)) {
+                    return dataPainterTraceToGeneralTraceNumber(new DataPainterTrace(dataPainter, trace));
                 }
             }
         }
-        return null;
+        return -1;
     }
 
-    public CurveNumber getSelectedCurveNumber() {
-        if (selectedCurve != null) {
-            for (int i = 0; i < traces.size(); i++) {
-                if (selectedCurve.getTrace() == traces.get(i)) {
-                    return new CurveNumber(i, selectedCurve.getCurve());
-                }
-            }
+    public int getSelectedTraceNumber() {
+        if (selectedTrace != null) {
+            return dataPainterTraceToGeneralTraceNumber(selectedTrace);
         }
-
-        return null;
+        return -1;
     }
 
     /**
@@ -865,9 +885,9 @@ public class Chart {
     }
 
     /**
-     * if isTraceColorChangeEnabled is true all curves colors will be
+     * if isTraceColorChangeEnabled is true all traces colors will be
      * changed according with the config traceColors.
-     * Otherwise curve colors will stay as they are.
+     * Otherwise trace colors will stay as they are.
      */
     public void setConfig(ChartConfig chartConfig, boolean isTraceColorChangeEnabled) {
         this.config = new ChartConfig(chartConfig);
@@ -882,11 +902,11 @@ public class Chart {
 
         BColor[] colors = this.config.getTraceColors();
         if (isTraceColorChangeEnabled) {
-            int curve = 0;
-            for (Trace trace : traces) {
-                for (int i = 0; i < trace.curveCount(); i++) {
-                    trace.setCurveColor(i, colors[(curve + i) % colors.length]);
-                    curve++;
+            int trace = 0;
+            for (DataPainter dataPainter : dataPainters) {
+                for (int i = 0; i < dataPainter.traceCount(); i++) {
+                    dataPainter.setTraceColor(i, colors[(trace + i) % colors.length]);
+                    trace++;
                 }
             }
         }
@@ -899,13 +919,15 @@ public class Chart {
         isDirty = true;
     }
 
-    public void setCurveColor(int traceNumber, int curveNumber, BColor color) {
-        traces.get(traceNumber).setCurveColor(curveNumber, color);
+    public void setTraceColor(int trace, BColor color) {
+        DataPainterTrace dataPainterTrace = generalTraceNumberToDataPainterTrace(trace);
+        dataPainterTrace.getDataPainter().setTraceColor(dataPainterTrace.getTrace(), color);
     }
 
-    public void setCurveName(int traceNumber, int curveNumber, String name) {
-        traces.get(traceNumber).setCurveName(curveNumber, name);
-        legend.setCurveName(traces.get(traceNumber), curveNumber, name);
+    public void setTraceName(int trace, String name) {
+        DataPainterTrace dataPainterTrace = generalTraceNumberToDataPainterTrace(trace);
+        dataPainterTrace.getDataPainter().setTraceName(dataPainterTrace.getTrace(), name);
+        legend.setTraceName(dataPainterTrace, name);
     }
 
     public void setStackWeight(int stack, int weight) {
@@ -929,7 +951,7 @@ public class Chart {
     }
 
     /**
-     * @throws IllegalStateException if stack axis are used by some trace curves and
+     * @throws IllegalStateException if stack axis are used by some trace traces and
      *                               therefor can not be deleted
      */
     public void removeStack(int stack) throws IllegalStateException {
@@ -937,17 +959,17 @@ public class Chart {
         int leftYIndex = stack * 2;
         int rightYIndex = stack * 2 + 1;
 
-        for (Trace trace : traces) {
-            for (int curve = 0; curve < trace.curveCount(); curve++) {
-                int curveYIndex = getCurveYIndex( trace,  curve);
-                if(curveYIndex == leftYIndex || curveYIndex == rightYIndex) {
+        for (DataPainter dataPainter : dataPainters) {
+            for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+                int traceYIndex = getTraceYIndex(dataPainter,  trace);
+                if(traceYIndex == leftYIndex || traceYIndex == rightYIndex) {
                     String errMsg = "Stack: " + stack + "can not be removed. It is used by trace";
                     throw new IllegalStateException(errMsg);
                 }
             }
 
-            if(trace.getYStartIndex() > leftYIndex) {
-                trace.setYStartIndex(trace.getYStartIndex() - 2);
+            if(dataPainter.getYStartIndex() > leftYIndex) {
+                dataPainter.setYStartIndex(dataPainter.getYStartIndex() - 2);
             }
         }
 
@@ -960,39 +982,37 @@ public class Chart {
     /**
      * add trace to the last stack
      */
-    public void addTrace(ChartData data, TracePainter tracePainter) {
-        addTrace(data, tracePainter, true);
+    public void addTraces(ChartData data, Trace tracePainter) {
+        addTraces(data, tracePainter, true);
     }
-
 
     /**
      * add trace to the last stack
      */
-    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit) {
+    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit) {
         int stack = Math.max(0, yAxisList.size() / 2 - 1);
-        addTrace(data, tracePainter, isSplit, stack);
-    }
-
-
-    /**
-     * add trace to the stack with the given number
-     */
-    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack) {
-        addTrace(data, tracePainter, isSplit, stack, config.getPrimaryXPosition(), config.getPrimaryYPosition());
-    }
-
-    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
-        int stack = Math.max(0, yAxisList.size() / 2 - 1);
-        addTrace(data, tracePainter, isSplit, stack, xPosition, yPosition);
+        addTraces(data, tracePainter, isSplit, stack);
     }
 
     /**
      * add trace to the stack with the given number
      */
-    public void addTrace(ChartData data, TracePainter tracePainter, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
-        Trace trace = new Trace(data, tracePainter, isSplit, dataProcessingConfig, getXIndex(xPosition), getYIndex(stack, yPosition));
-        if (trace.curveCount() < 1) {
-            String errMsg = "Number of trace curves: " + trace.curveCount() + ". Please specify valid trace data";
+    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, int stack) {
+        addTraces(data, tracePainter, isSplit, stack, config.getPrimaryXPosition(), config.getPrimaryYPosition());
+    }
+
+    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
+        int stack = Math.max(0, yAxisList.size() / 2 - 1);
+        addTraces(data, tracePainter, isSplit, stack, xPosition, yPosition);
+    }
+
+    /**
+     * add trace to the stack with the given number
+     */
+    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
+        DataPainter dataPainter = new DataPainter(data, tracePainter, isSplit, dataProcessingConfig, getXIndex(xPosition), getYIndex(stack, yPosition));
+        if (dataPainter.traceCount() < 1) {
+            String errMsg = "Number of trace traces: " + dataPainter.traceCount() + ". Please specify valid trace data";
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -1005,7 +1025,7 @@ public class Chart {
         int yIndex = getYIndex(stack, yPosition);
 
         AxisWrapper xAxis = xAxisList.get(xIndex);
-        StringSequence dataLabels = trace.getLabelsIfXColumnIsString();
+        StringSequence dataLabels = dataPainter.getLabelsIfXColumnIsString();
 
         if (dataLabels != null && xAxis.getScale() instanceof CategoryScale) {
             CategoryScale scale = (CategoryScale) xAxis.getScale();
@@ -1022,73 +1042,68 @@ public class Chart {
         } else {
             int stackCount = yAxisList.size() / 2;
             int availableStacks = stackCount - stack;
-            if (trace.curveCount() > availableStacks) {
-                for (int i = 0; i < trace.curveCount() - availableStacks; i++) {
+            if (dataPainter.traceCount() > availableStacks) {
+                for (int i = 0; i < dataPainter.traceCount() - availableStacks; i++) {
                     addStack();
                 }
             }
-            for (int i = 0; i < trace.curveCount(); i++) {
+            for (int i = 0; i < dataPainter.traceCount(); i++) {
                 AxisWrapper yAxis = yAxisList.get(yIndex + i * 2);
                 yAxis.setVisible(true);
             }
         }
 
         BColor[] colors = config.getTraceColors();
-        int totalCurves = 0;
-        for (Trace trace1 : traces) {
-            totalCurves += trace1.curveCount();
+        int totalTraces = 0;
+        for (DataPainter trace1 : dataPainters) {
+            totalTraces += trace1.traceCount();
         }
-        for (int i = 0; i < trace.curveCount(); i++) {
-            if (trace.getCurveColor(i) == null) {
-                trace.setCurveColor(i, colors[(totalCurves + i) % colors.length]);
+        for (int i = 0; i < dataPainter.traceCount(); i++) {
+            if (dataPainter.getTraceColor(i) == null) {
+                dataPainter.setTraceColor(i, colors[(totalTraces + i) % colors.length]);
             }
-            if (trace.getCurveName(i) == null || StringUtils.isNullOrBlank(trace.getCurveName(i))) {
-                trace.setCurveName(i, "Trace" + traces.size() + "_curve" + i);
+            if (dataPainter.getTraceName(i) == null || StringUtils.isNullOrBlank(dataPainter.getTraceName(i))) {
+                dataPainter.setTraceName(i, "Trace" + dataPainters.size() + "_trace" + i);
             }
 
         }
 
-        traces.add(trace);
+        dataPainters.add(dataPainter);
 
         if (isLegendEnabled()) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-                final int curveNumber = i;
+            for (int i = 0; i < dataPainter.traceCount(); i++) {
+                final int traceNumber = i;
                 StateListener traceSelectionListener = new StateListener() {
                     @Override
                     public void stateChanged(boolean isSelected) {
                         if (isSelected) {
-                            selectedCurve = new TraceCurve(trace, curveNumber);
+                            selectedTrace = new DataPainterTrace(dataPainter, traceNumber);
                         }
-                        if (!isSelected && selectedCurve.getTrace() == trace && selectedCurve.getCurve() == curveNumber) {
-                            selectedCurve = null;
+                        if (!isSelected && selectedTrace.getDataPainter() == dataPainter && selectedTrace.getTrace() == traceNumber) {
+                            selectedTrace = null;
                         }
                     }
                 };
-                legend.add(trace, curveNumber, traceSelectionListener);
+                legend.add(new DataPainterTrace(dataPainter, traceNumber), traceSelectionListener);
             }
         }
         isDirty = true;
     }
 
-    public void removeTrace(int traceNumber) {
-        Trace trace = traces.get(traceNumber);
+    public void removeTrace(int trace) {
+        DataPainterTrace dataPainterTrace = generalTraceNumberToDataPainterTrace(trace);
+        DataPainter dataPainter = dataPainterTrace.getDataPainter();
+        
         if (isLegendEnabled()) {
-            legend.remove(trace);
+            legend.remove(dataPainterTrace);
         }
-        traces.remove(traceNumber);
-        // remove the stacks used by the trace curves if that stacks
-        // are not used anymore
-        int traceStartStack = trace.getYStartIndex() / 2;
-        int traceStackCount = 1;
-        if(trace.isSplit()) {
-            traceStackCount = trace.curveCount();
-        }
-        for (int i = traceStartStack + traceStackCount - 1; i >= traceStartStack; i--) {
-            try {
-                removeStack(i);
-            } catch (IllegalStateException ex) {
-                // do nothing;
-            }
+        dataPainter.hideTrace(dataPainterTrace.getTrace());
+        // try to remove empty stack 
+        int traceStartStack = dataPainter.getYStartIndex() / 2;
+        try {
+            removeStack(traceStartStack + dataPainter.traceCount());
+        } catch (IllegalStateException ex) {
+            // do nothing;
         }
         isDirty = true;
     }
@@ -1100,7 +1115,7 @@ public class Chart {
     }
 
     public int traceCount() {
-        return traces.size();
+        return dataPainters.size();
     }
 
     public void setXConfig(XAxisPosition xPosition, AxisConfig axisConfig) {
@@ -1201,7 +1216,7 @@ public class Chart {
     }
 
 
-    public boolean selectCurve(int x, int y) {
+    public boolean selectTrace(int x, int y) {
         if (isLegendEnabled() && legend.selectItem(x, y)) {
             return true;
         }
@@ -1212,7 +1227,7 @@ public class Chart {
     class Legend {
         private ButtonGroup buttonGroup;
         // only LinkedHashMap will iterate in the order in which the entries were put into the map
-        private Map<TraceCurve, SwitchButton> traceCurvesToButtons = new LinkedHashMap<>();
+        private Map<DataPainterTrace, SwitchButton> dataPainterTracesToButtons = new LinkedHashMap<>();
         private BRectangle area;
         private int height;
 
@@ -1257,8 +1272,8 @@ public class Chart {
         }
 
         public boolean selectItem(int x, int y) {
-            for (TraceCurve key : traceCurvesToButtons.keySet()){
-                SwitchButton button = traceCurvesToButtons.get(key);
+            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
+                SwitchButton button = dataPainterTracesToButtons.get(key);
                 if(button.contains(x, y)) {
                     button.switchState();
                     return true;
@@ -1272,10 +1287,10 @@ public class Chart {
             isDirty = true;
         }
 
-        public void setCurveName(Trace trace, int curveNumber, String name) {
-            for (TraceCurve key : traceCurvesToButtons.keySet()){
-                if(key.getTrace() == trace && key.getCurve() == curveNumber) {
-                    SwitchButton button = traceCurvesToButtons.get(key);
+        public void setTraceName(DataPainterTrace dataPainterTrace, String name) {
+            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
+                if(key.equals(dataPainterTrace)) {
+                    SwitchButton button = dataPainterTracesToButtons.get(key);
                     button.setLabel(name);
                     isDirty = true;
                     return;
@@ -1286,8 +1301,8 @@ public class Chart {
 
         public void setConfig(LegendConfig legendConfig) {
             config = legendConfig;
-            for (TraceCurve key : traceCurvesToButtons.keySet()){
-                SwitchButton button = traceCurvesToButtons.get(key);
+            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
+                SwitchButton button = dataPainterTracesToButtons.get(key);
                 button.setBackgroundColor(config.getBackgroundColor());
                 button.setTextStyle(config.getTextStyle());
                 button.setMargin(config.getPadding());
@@ -1295,12 +1310,11 @@ public class Chart {
             isDirty = true;
         }
 
-        public void add(Trace trace, int curveNumber, StateListener traceSelectionListener) {
-            // add curve legend button
-            TraceCurve traceCurve = new TraceCurve(trace, curveNumber);
-            SwitchButton traceButton = new SwitchButton(trace.getCurveName(curveNumber));
+        public void add(DataPainterTrace dataPainterTrace, StateListener traceSelectionListener) {
+            // add trace legend button
+            SwitchButton traceButton = new SwitchButton(dataPainterTrace.getDataPainter().getTraceName(dataPainterTrace.getTrace()));
             traceButton.addListener(traceSelectionListener);
-            traceCurvesToButtons.put(traceCurve, traceButton);
+            dataPainterTracesToButtons.put(dataPainterTrace, traceButton);
             buttonGroup.add(traceButton.getModel());
             traceButton.setBackgroundColor(config.getBackgroundColor());
             traceButton.setTextStyle(config.getTextStyle());
@@ -1308,23 +1322,20 @@ public class Chart {
             isDirty = true;
         }
 
-        public void remove(Trace trace) {
-            for (int i = 0; i < trace.curveCount(); i++) {
-                TraceCurve traceCurve = new TraceCurve(trace, i);
-                SwitchButton traceButton = traceCurvesToButtons.get(traceCurve);
-                buttonGroup.remove(traceButton.getModel());
-                traceCurvesToButtons.remove(traceCurve);
-            }
+        public void remove(DataPainterTrace dataPainterTrace) {
+            SwitchButton traceButton = dataPainterTracesToButtons.get(dataPainterTrace);
+            buttonGroup.remove(traceButton.getModel());
+            dataPainterTracesToButtons.remove(dataPainterTrace);
 
             isDirty = true;
         }
 
-        private BRectangle getTraceCurveArea(TraceCurve traceCurve) {
+        private BRectangle getTraceTraceArea(DataPainterTrace dataPainterTrace) {
             if(!config.isAttachedToStacks()) {
                 return  area;
             }
 
-            double[] yRange = yAxisList.get(getCurveYIndex(traceCurve.getTrace(), traceCurve.getCurve())).getScale().getRange();
+            double[] yRange = yAxisList.get(getTraceYIndex(dataPainterTrace.getDataPainter(), dataPainterTrace.getTrace())).getScale().getRange();
             int yStart = (int)yRange[0];
             int yEnd = (int)yRange[yRange.length - 1];
             return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));
@@ -1332,27 +1343,27 @@ public class Chart {
 
         private void arrangeButtons(BCanvas canvas) {
             // only LinkedHashMap will iterate in the order in which the entries were put into the map
-            Map<BRectangle, List<TraceCurve>> areasToTraces = new LinkedHashMap<>();
-            for (TraceCurve traceCurve : traceCurvesToButtons.keySet()) {
-                BRectangle traceArea = getTraceCurveArea(traceCurve);
-                List<TraceCurve> traceCurves = areasToTraces.get(traceArea);
-                if(traceCurves == null) {
-                    traceCurves = new ArrayList<>();
-                    areasToTraces.put(traceArea, traceCurves);
+            Map<BRectangle, List<DataPainterTrace>> areasToTraces = new LinkedHashMap<>();
+            for (DataPainterTrace dataPainterTrace : dataPainterTracesToButtons.keySet()) {
+                BRectangle traceArea = getTraceTraceArea(dataPainterTrace);
+                List<DataPainterTrace> dataPainterTraces = areasToTraces.get(traceArea);
+                if(dataPainterTraces == null) {
+                    dataPainterTraces = new ArrayList<>();
+                    areasToTraces.put(traceArea, dataPainterTraces);
                 }
-                traceCurves.add(traceCurve);
+                dataPainterTraces.add(dataPainterTrace);
             }
 
             List<SwitchButton> lineButtons = new ArrayList<SwitchButton>();
             Insets margin = config.getMargin();
             for (BRectangle area : areasToTraces.keySet()) {
-                List<TraceCurve> traceCurves = areasToTraces.get(area);
+                List<DataPainterTrace> dataPainterTraces = areasToTraces.get(area);
                 height = 0;
                 int width = 0;
                 int x = area.x;
                 int y = area.y;
-                for (TraceCurve traceCurve : traceCurves) {
-                    SwitchButton button = traceCurvesToButtons.get(traceCurve);
+                for (DataPainterTrace dataPainterTrace : dataPainterTraces) {
+                    SwitchButton button = dataPainterTracesToButtons.get(dataPainterTrace);
                     BRectangle btnArea = button.getBounds(canvas);
                     if(height == 0) {
                         height = btnArea.height;
@@ -1398,23 +1409,23 @@ public class Chart {
                 }
 
                 if(config.getVerticalAlign() == VerticalAlign.TOP) {
-                    moveTracesButtons(traceCurves, 0, margin.top());
+                    moveTracesButtons(dataPainterTraces, 0, margin.top());
                 }
                 if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
-                    moveTracesButtons(traceCurves, 0, area.height - height - margin.bottom());
+                    moveTracesButtons(dataPainterTraces, 0, area.height - height - margin.bottom());
                 }
                 if(config.getVerticalAlign() == VerticalAlign.MIDDLE) {
-                    moveTracesButtons(traceCurves, 0, (area.height - height)/2);
+                    moveTracesButtons(dataPainterTraces, 0, (area.height - height)/2);
                 }
             }
             height += margin.top() + margin.bottom();
             isDirty = false;
         }
 
-        private void moveTracesButtons(List<TraceCurve> curves, int dx, int dy) {
+        private void moveTracesButtons(List<DataPainterTrace> traces, int dx, int dy) {
             if(dx != 0 || dy != 0) {
-                for (TraceCurve curve : curves) {
-                    traceCurvesToButtons.get(curve).moveLocation(dx, dy);
+                for (DataPainterTrace trace : traces) {
+                    dataPainterTracesToButtons.get(trace).moveLocation(dx, dy);
                 }
             }
         }
@@ -1426,21 +1437,19 @@ public class Chart {
             }
         }
 
-
-
         public void draw(BCanvas canvas) {
-            if (traceCurvesToButtons.size() == 0) {
+            if (dataPainterTracesToButtons.size() == 0) {
                 return;
             }
             if(isDirty) {
                 arrangeButtons(canvas);
             }
-            for (TraceCurve traceCurve : traceCurvesToButtons.keySet()){
-                traceCurvesToButtons.get(traceCurve).setColor(traceCurve.getTrace().getCurveColor(traceCurve.getCurve()));
+            for (DataPainterTrace dataPainterTrace : dataPainterTracesToButtons.keySet()){
+                dataPainterTracesToButtons.get(dataPainterTrace).setColor(dataPainterTrace.getDataPainter().getTraceColor(dataPainterTrace.getTrace()));
             }
             canvas.setTextStyle(config.getTextStyle());
-            for (TraceCurve key : traceCurvesToButtons.keySet()) {
-                traceCurvesToButtons.get(key).draw(canvas);
+            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()) {
+                dataPainterTracesToButtons.get(key).draw(canvas);
             }
         }
     }
