@@ -28,6 +28,10 @@ class IntColumn implements Column {
         return dataSequence.get(index);
     }
 
+    public Column copy() {
+        return new IntColumn(dataSequence);
+    }
+
     @Override
     public int size() {
         return dataSequence.size();
@@ -276,7 +280,6 @@ class IntColumn implements Column {
             }
         };
     }
-
 
     private StatsInt calculateStats(int from, int length) {
         int min1 = dataSequence.get(from);

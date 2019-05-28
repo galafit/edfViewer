@@ -29,7 +29,7 @@ public class DataFrame {
         isDataAppendMode = dataFrame.isDataAppendMode;
         for (int i = 0; i < columnOrder.length; i++) {
             int originalColumnNumber = columnOrder[i];
-            Column columnToAdd = dataFrame.columns.get(originalColumnNumber);
+            Column columnToAdd = dataFrame.columns.get(originalColumnNumber).view(0);
             FunctionColumnInfo functionColumnInfo = dataFrame.columnNumberToFunctionInfo.get(originalColumnNumber);
             if (functionColumnInfo != null) {
                 // check that columnOrder contains the column used by this one
