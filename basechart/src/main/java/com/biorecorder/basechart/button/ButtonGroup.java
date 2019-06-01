@@ -1,31 +1,31 @@
 package com.biorecorder.basechart.button;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Created by galafit on 18/12/17.
  */
 public class ButtonGroup {
-    private List<ButtonModel> items = new ArrayList<ButtonModel>();
-    private ButtonModel selection;
+    private Vector<SwitchButton> buttons = new Vector<SwitchButton>();
+    private SwitchButton selection;
 
 
-    public void add(ButtonModel item) {
-       items.add(item);
+    public void add(SwitchButton item) {
+       buttons.add(item);
        item.setGroup(this);
     }
 
-    public void remove(ButtonModel item) {
+    public void remove(SwitchButton item) {
         if(selection == item) {
             selection = null;
         }
-        items.remove(item);
+        buttons.remove(item);
     }
 
-    public void setSelected(ButtonModel item, boolean isSelected) {
+    public void setSelected(SwitchButton item, boolean isSelected) {
         if (isSelected && item != null && item != selection) {
-            ButtonModel oldSelection = selection;
+            SwitchButton oldSelection = selection;
             selection = item;
             if (oldSelection != null) {
                 oldSelection.setSelected(false);
@@ -37,11 +37,15 @@ public class ButtonGroup {
         }
     }
 
-    public ButtonModel getSelection() {
+    public Enumeration<SwitchButton> getElements() {
+        return buttons.elements();
+    }
+
+    public SwitchButton getSelection() {
         return selection;
     }
 
-    public boolean isSelected(ButtonModel m) {
+    public boolean isSelected(SwitchButton m) {
         return (m == selection);
     }
 }

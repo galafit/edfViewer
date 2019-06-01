@@ -5,11 +5,16 @@ import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.TextStyle;
 import com.biorecorder.basechart.graphics.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by galafit on 18/12/17.
  */
 public class SwitchButton {
-    private ButtonModel model = new ButtonModel();
+    private ButtonGroup group;
+    private List<StateListener> selectionListeners = new ArrayList<StateListener>();
+
     private BColor color = BColor.BLACK_LIGHT;
     private String label = "";
     private BColor backgroundColor = BColor.WHITE_DARK;
@@ -27,6 +32,10 @@ public class SwitchButton {
         }
     }
 
+    public void addListener(StateListener listener) {
+        selectionListeners.add(listener);
+    }
+
     public void setLabel(String label) {
         if(label != null) {
             this.label = label;
@@ -34,11 +43,38 @@ public class SwitchButton {
         }
     }
 
+    public void setGroup(ButtonGroup group) {
+        this.group = group;
+    }
+
+    public void setSelected(boolean isSelected) {
+        if (group != null) {
+            // use the group model instead
+            boolean oldSelection = isSelected();
+            if (oldSelection != isSelected) {
+                group.setSelected(this, isSelected);
+            }
+            if (oldSelection != isSelected()) {
+                for (StateListener listener : selectionListeners) {
+                    listener.stateChanged(isSelected);
+                }
+            }
+        }
+    }
+
+    public boolean isSelected() {
+        if(group != null) {
+            return group.isSelected(this);
+        }
+        return false;
+    }
+
+
     public void switchState() {
-        if(model.isSelected()) {
-            model.setSelected(false);
+        if(isSelected()) {
+            setSelected(false);
         } else {
-            model.setSelected(true);
+            setSelected(true);
         }
     }
 
@@ -47,14 +83,6 @@ public class SwitchButton {
             return true;
         }
         return false;
-    }
-
-    public void addListener(StateListener listener) {
-        model.addListener(listener);
-    }
-
-    public ButtonModel getModel() {
-        return model;
     }
 
     public void setLocation(int x, int y, BCanvas canvas) {
@@ -105,7 +133,7 @@ public class SwitchButton {
         int y = bounds.y + margin.top() + tm.ascent();
         canvas.drawString(label, x, y);
 
-        if(model.isSelected()) {
+        if(isSelected()) {
             // draw border
             canvas.drawRect(bounds.x, bounds.y, bounds.width - 1, bounds.height);
             // draw selection marker

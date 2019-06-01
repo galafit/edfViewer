@@ -2,7 +2,6 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.ButtonGroup;
-import com.biorecorder.basechart.button.StateListener;
 import com.biorecorder.basechart.button.SwitchButton;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.CategoryScale;
@@ -43,7 +42,6 @@ public class Chart {
     private Crosshair crosshair;
     private Tooltip tooltip;
 
-    private DataPainterTrace selectedTrace;
     private DataPainterTracePoint hoverPoint;
     private DataProcessingConfig dataProcessingConfig;
     private Scale yScale;
@@ -480,21 +478,30 @@ public class Chart {
         return new Range(yAxis.getMin(), yAxis.getMax());
     }
 
+    private DataPainterTrace getSelectedTrace() {
+        if(legend != null) {
+            return legend.getSelectedTrace();
+        }
+        return null;
+    }
+
     public boolean isTraceSelected() {
-        return selectedTrace != null;
+        return getSelectedTrace() != null;
     }
 
     XAxisPosition getSelectedTraceX() {
-        return getXPosition(selectedTrace.getDataPainter().getXIndex());
+        return getXPosition(getSelectedTrace().getDataPainter().getXIndex());
     }
 
     int getSelectedTraceStack() {
+        DataPainterTrace selectedTrace = getSelectedTrace();
         int yIndex = getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace());
         return getYStack(yIndex);
     }
 
 
     YAxisPosition getSelectedTraceY() {
+        DataPainterTrace selectedTrace = getSelectedTrace();
         int yIndex = getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace());
         return getYPosition(yIndex);
     }
@@ -589,6 +596,7 @@ public class Chart {
         if (!graphArea.contains(x, y)) {
             return hoverOff();
         }
+        DataPainterTrace selectedTrace = getSelectedTrace();
         if (selectedTrace != null) {
             Scale xScale = xAxisList.get(selectedTrace.getDataPainter().getXIndex()).getScale();
             Scale yScale = yAxisList.get(getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace())).getScale();
@@ -867,6 +875,7 @@ public class Chart {
     }
 
     public int getSelectedTraceNumber() {
+        DataPainterTrace selectedTrace = getSelectedTrace();
         if (selectedTrace != null) {
             return dataPainterTraceToGeneralTraceNumber(selectedTrace);
         }
@@ -1073,18 +1082,7 @@ public class Chart {
         if (isLegendEnabled()) {
             for (int i = 0; i < dataPainter.traceCount(); i++) {
                 final int traceNumber = i;
-                StateListener traceSelectionListener = new StateListener() {
-                    @Override
-                    public void stateChanged(boolean isSelected) {
-                        if (isSelected) {
-                            selectedTrace = new DataPainterTrace(dataPainter, traceNumber);
-                        }
-                        if (!isSelected && selectedTrace.getDataPainter() == dataPainter && selectedTrace.getTrace() == traceNumber) {
-                            selectedTrace = null;
-                        }
-                    }
-                };
-                legend.add(new DataPainterTrace(dataPainter, traceNumber), traceSelectionListener);
+                legend.add(new DataPainterTrace(dataPainter, traceNumber));
             }
         }
         isDirty = true;
@@ -1227,7 +1225,9 @@ public class Chart {
     class Legend {
         private ButtonGroup buttonGroup;
         // only LinkedHashMap will iterate in the order in which the entries were put into the map
-        private Map<DataPainterTrace, SwitchButton> dataPainterTracesToButtons = new LinkedHashMap<>();
+        private Map<DataPainterTrace, SwitchButton> dataPainterTracesToButtons_ = new LinkedHashMap<>();
+        private Map<SwitchButton, DataPainterTrace> buttonsToDataPainterTraces = new LinkedHashMap<>();
+
         private BRectangle area;
         private int height;
 
@@ -1237,6 +1237,10 @@ public class Chart {
         public Legend(LegendConfig legendConfig) {
             this.config = legendConfig;
             this.buttonGroup = new ButtonGroup();
+        }
+
+        public DataPainterTrace getSelectedTrace() {
+           return buttonsToDataPainterTraces.get(buttonGroup.getSelection());
         }
 
         public boolean isEnabled() {
@@ -1272,8 +1276,7 @@ public class Chart {
         }
 
         public boolean selectItem(int x, int y) {
-            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
-                SwitchButton button = dataPainterTracesToButtons.get(key);
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
                 if(button.contains(x, y)) {
                     button.switchState();
                     return true;
@@ -1288,9 +1291,8 @@ public class Chart {
         }
 
         public void setTraceName(DataPainterTrace dataPainterTrace, String name) {
-            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
-                if(key.equals(dataPainterTrace)) {
-                    SwitchButton button = dataPainterTracesToButtons.get(key);
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
+                if(buttonsToDataPainterTraces.get(button).equals(dataPainterTrace)) {
                     button.setLabel(name);
                     isDirty = true;
                     return;
@@ -1301,8 +1303,7 @@ public class Chart {
 
         public void setConfig(LegendConfig legendConfig) {
             config = legendConfig;
-            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()){
-                SwitchButton button = dataPainterTracesToButtons.get(key);
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
                 button.setBackgroundColor(config.getBackgroundColor());
                 button.setTextStyle(config.getTextStyle());
                 button.setMargin(config.getPadding());
@@ -1310,12 +1311,11 @@ public class Chart {
             isDirty = true;
         }
 
-        public void add(DataPainterTrace dataPainterTrace, StateListener traceSelectionListener) {
+        public void add(DataPainterTrace dataPainterTrace) {
             // add trace legend button
             SwitchButton traceButton = new SwitchButton(dataPainterTrace.getDataPainter().getTraceName(dataPainterTrace.getTrace()));
-            traceButton.addListener(traceSelectionListener);
-            dataPainterTracesToButtons.put(dataPainterTrace, traceButton);
-            buttonGroup.add(traceButton.getModel());
+            buttonsToDataPainterTraces.put(traceButton, dataPainterTrace);
+            buttonGroup.add(traceButton);
             traceButton.setBackgroundColor(config.getBackgroundColor());
             traceButton.setTextStyle(config.getTextStyle());
             traceButton.setMargin(config.getPadding());
@@ -1323,10 +1323,14 @@ public class Chart {
         }
 
         public void remove(DataPainterTrace dataPainterTrace) {
-            SwitchButton traceButton = dataPainterTracesToButtons.get(dataPainterTrace);
-            buttonGroup.remove(traceButton.getModel());
-            dataPainterTracesToButtons.remove(dataPainterTrace);
-
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
+                DataPainterTrace buttonDataPainterTrace = buttonsToDataPainterTraces.get(button);
+                if(buttonDataPainterTrace.equals(dataPainterTrace)) {
+                    buttonGroup.remove(button);
+                    buttonsToDataPainterTraces.remove(button);
+                    break;
+                }
+            }
             isDirty = true;
         }
 
@@ -1343,27 +1347,28 @@ public class Chart {
 
         private void arrangeButtons(BCanvas canvas) {
             // only LinkedHashMap will iterate in the order in which the entries were put into the map
-            Map<BRectangle, List<DataPainterTrace>> areasToTraces = new LinkedHashMap<>();
-            for (DataPainterTrace dataPainterTrace : dataPainterTracesToButtons.keySet()) {
+            Map<BRectangle, List<SwitchButton>> areaToButtons = new LinkedHashMap<>();
+
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()) {
+                DataPainterTrace dataPainterTrace = buttonsToDataPainterTraces.get(button);
                 BRectangle traceArea = getTraceTraceArea(dataPainterTrace);
-                List<DataPainterTrace> dataPainterTraces = areasToTraces.get(traceArea);
-                if(dataPainterTraces == null) {
-                    dataPainterTraces = new ArrayList<>();
-                    areasToTraces.put(traceArea, dataPainterTraces);
+                List<SwitchButton> areaButtons = areaToButtons.get(traceArea);
+                if(areaButtons == null) {
+                    areaButtons = new ArrayList<>();
+                    areaToButtons.put(traceArea, areaButtons);
                 }
-                dataPainterTraces.add(dataPainterTrace);
+                areaButtons.add(button);
             }
 
             List<SwitchButton> lineButtons = new ArrayList<SwitchButton>();
             Insets margin = config.getMargin();
-            for (BRectangle area : areasToTraces.keySet()) {
-                List<DataPainterTrace> dataPainterTraces = areasToTraces.get(area);
+            for (BRectangle area : areaToButtons.keySet()) {
+                List<SwitchButton> areaButtons = areaToButtons.get(area);
                 height = 0;
                 int width = 0;
                 int x = area.x;
                 int y = area.y;
-                for (DataPainterTrace dataPainterTrace : dataPainterTraces) {
-                    SwitchButton button = dataPainterTracesToButtons.get(dataPainterTrace);
+                for (SwitchButton button : areaButtons) {
                     BRectangle btnArea = button.getBounds(canvas);
                     if(height == 0) {
                         height = btnArea.height;
@@ -1397,6 +1402,7 @@ public class Chart {
                         lineButtons.add(button);
                     }
                 }
+
                 width += (lineButtons.size() - 1) * config.getInterItemSpace();
                 if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
                     moveButtons(lineButtons, margin.left(),0);
@@ -1409,26 +1415,19 @@ public class Chart {
                 }
 
                 if(config.getVerticalAlign() == VerticalAlign.TOP) {
-                    moveTracesButtons(dataPainterTraces, 0, margin.top());
+                    moveButtons(lineButtons, 0, margin.top());
                 }
                 if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
-                    moveTracesButtons(dataPainterTraces, 0, area.height - height - margin.bottom());
+                    moveButtons(lineButtons, 0, area.height - height - margin.bottom());
                 }
                 if(config.getVerticalAlign() == VerticalAlign.MIDDLE) {
-                    moveTracesButtons(dataPainterTraces, 0, (area.height - height)/2);
+                    moveButtons(lineButtons, 0, (area.height - height)/2);
                 }
             }
             height += margin.top() + margin.bottom();
             isDirty = false;
         }
 
-        private void moveTracesButtons(List<DataPainterTrace> traces, int dx, int dy) {
-            if(dx != 0 || dy != 0) {
-                for (DataPainterTrace trace : traces) {
-                    dataPainterTracesToButtons.get(trace).moveLocation(dx, dy);
-                }
-            }
-        }
         private void moveButtons(List<SwitchButton> buttons, int dx, int dy) {
             if(dx != 0 || dy != 0) {
                 for (SwitchButton button : buttons) {
@@ -1438,20 +1437,18 @@ public class Chart {
         }
 
         public void draw(BCanvas canvas) {
-            if (dataPainterTracesToButtons.size() == 0) {
+            if (buttonsToDataPainterTraces.size() == 0) {
                 return;
             }
             if(isDirty) {
                 arrangeButtons(canvas);
             }
-            for (DataPainterTrace dataPainterTrace : dataPainterTracesToButtons.keySet()){
-                dataPainterTracesToButtons.get(dataPainterTrace).setColor(dataPainterTrace.getDataPainter().getTraceColor(dataPainterTrace.getTrace()));
-            }
             canvas.setTextStyle(config.getTextStyle());
-            for (DataPainterTrace key : dataPainterTracesToButtons.keySet()) {
-                dataPainterTracesToButtons.get(key).draw(canvas);
+            for (SwitchButton button : buttonsToDataPainterTraces.keySet()) {
+                DataPainterTrace dataPainterTrace = buttonsToDataPainterTraces.get(button);
+                button.setColor(dataPainterTrace.getDataPainter().getTraceColor(dataPainterTrace.getTrace()));
+                button.draw(canvas);
             }
         }
     }
-
 }

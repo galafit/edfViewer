@@ -103,8 +103,8 @@ public class ChartTest extends JFrame {
             Thread.sleep(1000);
             chart.addTraces(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
-            chart.addTraces(noRegularData, new LineTrace(), true);
-            chart.addTraces(regularData, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
+            chart.addTraces(noRegularData, new LineTrace(), false);
+            chart.addTraces(regularData, new LineTrace(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
             chartPanel.repaint();
             Thread.sleep(1000);
             chart.setTraceColor(2, BColor.CYAN);
