@@ -5,6 +5,30 @@ package com.biorecorder.data.utils;
  */
 public class PrimitiveUtils {
 
+    public static int intMinValue() {
+        return 1;
+    }
+
+    public static short shortMinValue() {
+        return 1;
+    }
+
+    public static long longMinValue() {
+        return 1;
+    }
+
+    public static float floatMinValue() {
+        return Float.MIN_VALUE;
+    }
+
+    public static double doubleMinValue() {
+        return Double.MIN_VALUE;
+    }
+
+
+
+
+
     public static int long2int(long l) {
         if(l > Integer.MAX_VALUE) {
             return Integer.MAX_VALUE;

@@ -28,6 +28,7 @@ class LongColumn implements Column {
         return dataSequence.get(index);
     }
 
+
     @Override
     public int size() {
         return dataSequence.size();
@@ -141,7 +142,11 @@ class LongColumn implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new LongIntervalProvider(PrimitiveUtils.roundDouble2long(interval)), length);
+        long intervalCasted = PrimitiveUtils.roundDouble2long(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.longMinValue();
+        }
+        return group(new LongIntervalProvider(intervalCasted), length);
     }
 
     @Override

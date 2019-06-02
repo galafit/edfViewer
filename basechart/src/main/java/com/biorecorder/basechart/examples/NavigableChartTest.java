@@ -41,7 +41,7 @@ public class NavigableChartTest extends JFrame{
 
         xyData = new XYData(labels, true);
         //xyData.addColumn(xData);
-        xyData.addColumn(yData);
+        xyData.addColumn("y", yData);
 
         chart = new NavigableChart(new CategoryScale());
 

@@ -19,15 +19,27 @@ public class XYData implements ChartData {
         dataFrame = new DataFrame(isDataAppendMode);
     }
 
+    public XYData(String name, double xStart, double xStep, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(name, xStart, xStep);
+        onColumnAdded();
+    }
+
     public XYData(double xStart, double xStep, boolean isDataAppendMode) {
         dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn(xStart, xStep);
+        dataFrame.addColumn("x", xStart, xStep);
+        onColumnAdded();
+    }
+
+    public XYData(String name, List<String> xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(name, xData);
         onColumnAdded();
     }
 
     public XYData(List<String> xData, boolean isDataAppendMode) {
         dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn(xData);
+        dataFrame.addColumn("x", xData);
         onColumnAdded();
     }
 
@@ -36,66 +48,61 @@ public class XYData implements ChartData {
     }
 
     private void onColumnAdded(int columnNumber) {
-        Aggregation agg = Aggregation.AVERAGE;
-        if (columnNumber == 0) {
-            agg = Aggregation.FIRST;
-        }
-        dataFrame.setColumnName(columnNumber, "");
-        dataFrame.setColumnAggFunctions(columnNumber, agg);
+       // do nothing
     }
 
-    public void addColumn(Function function, int argColumnNumber) {
-        dataFrame.addColumn(function, argColumnNumber);
+    public void addColumn(String name, Function function, int argColumnNumber) {
+        dataFrame.addColumn(name, function, argColumnNumber);
         onColumnAdded();
     }
 
-    public void addColumn(ShortSequence columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, ShortSequence columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(short[] columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, short[] columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(IntSequence columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, IntSequence columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(int[] columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, int[] columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(LongSequence columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, LongSequence columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(long[] columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, long[] columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(FloatSequence columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, FloatSequence columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(float[] columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, float[] columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(DoubleSequence columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, DoubleSequence columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
-    public void addColumn(double[] columnData) {
-        dataFrame.addColumn(columnData);
+    public void addColumn(String name, double[] columnData) {
+        dataFrame.addColumn(name, columnData);
         onColumnAdded();
     }
 
@@ -103,16 +110,11 @@ public class XYData implements ChartData {
         dataFrame.setColumnName(columnNumber, columnName);
     }
 
-    public void setColumnAggFunction(int columnNumber, Aggregation aggFunction) throws IllegalArgumentException {
-        if (aggFunction == null) {
-            String errMsg = "Aggregate function must be not null";
-            throw new IllegalArgumentException(errMsg);
-        }
-        dataFrame.setColumnAggFunctions(columnNumber, aggFunction);
-    }
-
     private GroupApproximation aggregationsToAproximation(Aggregation[] aggregations) throws IllegalArgumentException {
         switch (aggregations.length) {
+            case 0: {
+                return null;
+            }
             case 1: {
                 switch (aggregations[0]) {
                     case FIRST:
@@ -155,6 +157,9 @@ public class XYData implements ChartData {
     }
 
     private Aggregation[] aproximationToAggregations(GroupApproximation approximation) throws IllegalArgumentException {
+        if(approximation == null) {
+            return new Aggregation[0];
+        }
         switch (approximation) {
             case SUM: {
                 Aggregation[] aggregations = {Aggregation.SUM};

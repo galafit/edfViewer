@@ -683,9 +683,11 @@ public class Chart {
             traceStart = hoverTrace;
             traceEnd = hoverTrace;
         }
-        Scale yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, hoverTrace)).getScale();
-        BRectangle hoverAreaStart = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScale);
-        BRectangle hoverAreaEnd = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScale);
+        Scale yScaleStart = yAxisList.get(getTraceYIndex(hoverDataPainter, traceStart)).getScale();
+        Scale yScaleEnd = yAxisList.get(getTraceYIndex(hoverDataPainter, traceEnd)).getScale();
+
+        BRectangle hoverAreaStart = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScaleStart);
+        BRectangle hoverAreaEnd = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScaleEnd);
 
         xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
         crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
@@ -694,7 +696,7 @@ public class Chart {
 
 
         for (int trace = traceStart; trace <= traceEnd; trace++) {
-            yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, hoverTrace)).getScale();
+            Scale yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, trace)).getScale();
             NamedValue[] traceValues = hoverDataPainter.traceValues(hoverPointIndex, trace, xScale, yScale);
             if (traceValues.length == 2) {
                 tooltip.addLine(hoverDataPainter.getTraceColor(trace), hoverDataPainter.getTraceName(trace), traceValues[1].getValue());
@@ -704,7 +706,8 @@ public class Chart {
                     tooltip.addLine(null, traceValue.getValueName(), traceValue.getValue());
                 }
             }
-            crosshair.addY(hoverDataPainter.tracePointHoverArea(hoverPointIndex, trace, xScale, yScale).y);
+            BRectangle traceArea = hoverDataPainter.tracePointHoverArea(hoverPointIndex, trace, xScale, yScale);
+            crosshair.addY(traceArea.y);
         }
 
     }
@@ -814,8 +817,8 @@ public class Chart {
 
 
     public void appendData() {
-        for (DataPainter trace : dataPainters) {
-            trace.appendData();
+        for (DataPainter dataPainter : dataPainters) {
+            dataPainter.appendData();
         }
         isDirty = true;
     }
@@ -883,7 +886,7 @@ public class Chart {
     }
 
     /**
-     * return COPY of chart config. To change chart config use setConfig
+     * return COPY of chart legendConfig. To change chart legendConfig use setConfig
      */
     public ChartConfig getConfig() {
         return new ChartConfig(config);
@@ -895,7 +898,7 @@ public class Chart {
 
     /**
      * if isTraceColorChangeEnabled is true all traces colors will be
-     * changed according with the config traceColors.
+     * changed according with the legendConfig traceColors.
      * Otherwise trace colors will stay as they are.
      */
     public void setConfig(ChartConfig chartConfig, boolean isTraceColorChangeEnabled) {
@@ -1068,11 +1071,12 @@ public class Chart {
             totalTraces += trace1.traceCount();
         }
         for (int i = 0; i < dataPainter.traceCount(); i++) {
+            int trace = totalTraces + i;
             if (dataPainter.getTraceColor(i) == null) {
-                dataPainter.setTraceColor(i, colors[(totalTraces + i) % colors.length]);
+                dataPainter.setTraceColor(i, colors[trace % colors.length]);
             }
-            if (dataPainter.getTraceName(i) == null || StringUtils.isNullOrBlank(dataPainter.getTraceName(i))) {
-                dataPainter.setTraceName(i, "Trace" + dataPainters.size() + "_trace" + i);
+            if (StringUtils.isNullOrBlank(dataPainter.getTraceName(i))) {
+                dataPainter.setTraceName(i, "Trace" + trace);
             }
 
         }
@@ -1127,14 +1131,14 @@ public class Chart {
     }
 
     /**
-     * return COPY of X axis config. To change axis config use setXConfig
+     * return COPY of X axis legendConfig. To change axis legendConfig use setXConfig
      */
     public AxisConfig getXConfig(XAxisPosition xPosition) {
         return xAxisList.get(getXIndex(xPosition)).getConfig();
     }
 
     /**
-     * return COPY of Y axis config. To change axis config use setYConfig
+     * return COPY of Y axis legendConfig. To change axis legendConfig use setYConfig
      */
     public AxisConfig getYConfig(int stack, YAxisPosition yPosition) {
         return yAxisList.get(getYIndex(stack, yPosition)).getConfig();
@@ -1225,17 +1229,16 @@ public class Chart {
     class Legend {
         private ButtonGroup buttonGroup;
         // only LinkedHashMap will iterate in the order in which the entries were put into the map
-        private Map<DataPainterTrace, SwitchButton> dataPainterTracesToButtons_ = new LinkedHashMap<>();
         private Map<SwitchButton, DataPainterTrace> buttonsToDataPainterTraces = new LinkedHashMap<>();
 
-        private BRectangle area;
+        private BRectangle legendArea;
         private int height;
 
-        private LegendConfig config;
-        private boolean isDirty = true;
+        private LegendConfig legendConfig;
+        private boolean isLegendDirty = true;
 
         public Legend(LegendConfig legendConfig) {
-            this.config = legendConfig;
+            this.legendConfig = legendConfig;
             this.buttonGroup = new ButtonGroup();
         }
 
@@ -1244,12 +1247,12 @@ public class Chart {
         }
 
         public boolean isEnabled() {
-            return config.isEnabled();
+            return legendConfig.isEnabled();
         }
 
         public int getHeight(BCanvas canvas) {
-            if(!config.isAttachedToStacks()) {
-                if(isDirty) {
+            if(!legendConfig.isAttachedToStacks()) {
+                if(isLegendDirty) {
                     arrangeButtons(canvas);
                 }
                 return height;
@@ -1258,18 +1261,18 @@ public class Chart {
         }
 
         public boolean isAttachedToStacks() {
-            return config.isAttachedToStacks();
+            return legendConfig.isAttachedToStacks();
         }
 
         public boolean isTop() {
-            if(config.getVerticalAlign() == VerticalAlign.TOP) {
+            if(legendConfig.getVerticalAlign() == VerticalAlign.TOP) {
                 return true;
             }
             return false;
         }
 
         public boolean isBottom() {
-            if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
+            if(legendConfig.getVerticalAlign() == VerticalAlign.BOTTOM) {
                 return true;
             }
             return false;
@@ -1285,16 +1288,16 @@ public class Chart {
             return false;
         }
 
-        public  void setArea(BRectangle area) {
-            this.area = area;
-            isDirty = true;
+        public  void setArea(BRectangle legendArea) {
+            this.legendArea = legendArea;
+            isLegendDirty = true;
         }
 
         public void setTraceName(DataPainterTrace dataPainterTrace, String name) {
             for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
                 if(buttonsToDataPainterTraces.get(button).equals(dataPainterTrace)) {
                     button.setLabel(name);
-                    isDirty = true;
+                    isLegendDirty = true;
                     return;
                 }
             }
@@ -1302,13 +1305,13 @@ public class Chart {
 
 
         public void setConfig(LegendConfig legendConfig) {
-            config = legendConfig;
+            this.legendConfig = legendConfig;
             for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
-                button.setBackgroundColor(config.getBackgroundColor());
-                button.setTextStyle(config.getTextStyle());
-                button.setMargin(config.getPadding());
+                button.setBackgroundColor(this.legendConfig.getBackgroundColor());
+                button.setTextStyle(this.legendConfig.getTextStyle());
+                button.setMargin(this.legendConfig.getPadding());
             }
-            isDirty = true;
+            isLegendDirty = true;
         }
 
         public void add(DataPainterTrace dataPainterTrace) {
@@ -1316,10 +1319,10 @@ public class Chart {
             SwitchButton traceButton = new SwitchButton(dataPainterTrace.getDataPainter().getTraceName(dataPainterTrace.getTrace()));
             buttonsToDataPainterTraces.put(traceButton, dataPainterTrace);
             buttonGroup.add(traceButton);
-            traceButton.setBackgroundColor(config.getBackgroundColor());
-            traceButton.setTextStyle(config.getTextStyle());
-            traceButton.setMargin(config.getPadding());
-            isDirty = true;
+            traceButton.setBackgroundColor(legendConfig.getBackgroundColor());
+            traceButton.setTextStyle(legendConfig.getTextStyle());
+            traceButton.setMargin(legendConfig.getPadding());
+            isLegendDirty = true;
         }
 
         public void remove(DataPainterTrace dataPainterTrace) {
@@ -1331,18 +1334,18 @@ public class Chart {
                     break;
                 }
             }
-            isDirty = true;
+            isLegendDirty = true;
         }
 
         private BRectangle getTraceTraceArea(DataPainterTrace dataPainterTrace) {
-            if(!config.isAttachedToStacks()) {
-                return  area;
+            if(!legendConfig.isAttachedToStacks()) {
+                return legendArea;
             }
 
             double[] yRange = yAxisList.get(getTraceYIndex(dataPainterTrace.getDataPainter(), dataPainterTrace.getTrace())).getScale().getRange();
             int yStart = (int)yRange[0];
             int yEnd = (int)yRange[yRange.length - 1];
-            return new BRectangle(area.x, yEnd, area.width, Math.abs(yStart - yEnd));
+            return new BRectangle(legendArea.x, yEnd, legendArea.width, Math.abs(yStart - yEnd));
         }
 
         private void arrangeButtons(BCanvas canvas) {
@@ -1361,7 +1364,7 @@ public class Chart {
             }
 
             List<SwitchButton> lineButtons = new ArrayList<SwitchButton>();
-            Insets margin = config.getMargin();
+            Insets margin = legendConfig.getMargin();
             for (BRectangle area : areaToButtons.keySet()) {
                 List<SwitchButton> areaButtons = areaToButtons.get(area);
                 height = 0;
@@ -1374,58 +1377,58 @@ public class Chart {
                         height = btnArea.height;
                         lineButtons.clear();
                     }
-                    if(lineButtons.size() > 0 && x + config.getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
-                        width += (lineButtons.size() - 1) * config.getInterItemSpace();
-                        if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                    if(lineButtons.size() > 0 && x + legendConfig.getInterItemSpace() + btnArea.width >= area.x + area.width - margin.left() - margin.right()) {
+                        width += (lineButtons.size() - 1) * legendConfig.getInterItemSpace();
+                        if(legendConfig.getHorizontalAlign() == HorizontalAlign.LEFT) {
                             moveButtons(lineButtons, margin.left(),0);
                         }
-                        if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
+                        if(legendConfig.getHorizontalAlign() == HorizontalAlign.RIGHT) {
                             moveButtons(lineButtons, area.width - width - margin.right(),0);
                         }
-                        if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
+                        if(legendConfig.getHorizontalAlign() == HorizontalAlign.CENTER) {
                             moveButtons(lineButtons, (area.width - width) / 2,0);
                         }
 
                         x = area.x;
-                        y += btnArea.height + config.getInterLineSpace();
+                        y += btnArea.height + legendConfig.getInterLineSpace();
                         button.setLocation(x, y, canvas);
 
-                        x += btnArea.width + config.getInterItemSpace();
-                        height += btnArea.height + config.getInterLineSpace();
+                        x += btnArea.width + legendConfig.getInterItemSpace();
+                        height += btnArea.height + legendConfig.getInterLineSpace();
                         width = btnArea.width;
                         lineButtons.clear();
                         lineButtons.add(button);
                     } else {
                         button.setLocation(x, y, canvas);
-                        x += config.getInterItemSpace() + btnArea.width;
+                        x += legendConfig.getInterItemSpace() + btnArea.width;
                         width += btnArea.width;
                         lineButtons.add(button);
                     }
                 }
 
-                width += (lineButtons.size() - 1) * config.getInterItemSpace();
-                if(config.getHorizontalAlign() == HorizontalAlign.LEFT) {
+                width += (lineButtons.size() - 1) * legendConfig.getInterItemSpace();
+                if(legendConfig.getHorizontalAlign() == HorizontalAlign.LEFT) {
                     moveButtons(lineButtons, margin.left(),0);
                 }
-                if(config.getHorizontalAlign() == HorizontalAlign.RIGHT) {
+                if(legendConfig.getHorizontalAlign() == HorizontalAlign.RIGHT) {
                     moveButtons(lineButtons, area.width - width - margin.right(),0);
                 }
-                if(config.getHorizontalAlign() == HorizontalAlign.CENTER) {
+                if(legendConfig.getHorizontalAlign() == HorizontalAlign.CENTER) {
                     moveButtons(lineButtons, (area.width - width) / 2,0);
                 }
 
-                if(config.getVerticalAlign() == VerticalAlign.TOP) {
+                if(legendConfig.getVerticalAlign() == VerticalAlign.TOP) {
                     moveButtons(lineButtons, 0, margin.top());
                 }
-                if(config.getVerticalAlign() == VerticalAlign.BOTTOM) {
+                if(legendConfig.getVerticalAlign() == VerticalAlign.BOTTOM) {
                     moveButtons(lineButtons, 0, area.height - height - margin.bottom());
                 }
-                if(config.getVerticalAlign() == VerticalAlign.MIDDLE) {
+                if(legendConfig.getVerticalAlign() == VerticalAlign.MIDDLE) {
                     moveButtons(lineButtons, 0, (area.height - height)/2);
                 }
             }
             height += margin.top() + margin.bottom();
-            isDirty = false;
+            isLegendDirty = false;
         }
 
         private void moveButtons(List<SwitchButton> buttons, int dx, int dy) {
@@ -1440,10 +1443,10 @@ public class Chart {
             if (buttonsToDataPainterTraces.size() == 0) {
                 return;
             }
-            if(isDirty) {
+            if(isLegendDirty) {
                 arrangeButtons(canvas);
             }
-            canvas.setTextStyle(config.getTextStyle());
+            canvas.setTextStyle(legendConfig.getTextStyle());
             for (SwitchButton button : buttonsToDataPainterTraces.keySet()) {
                 DataPainterTrace dataPainterTrace = buttonsToDataPainterTraces.get(button);
                 button.setColor(dataPainterTrace.getDataPainter().getTraceColor(dataPainterTrace.getTrace()));

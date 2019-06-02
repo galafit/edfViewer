@@ -70,15 +70,15 @@ public class DataFrame {
         appendData();
     }
 
-    private void addColumn(Column column) {
+    private void addColumn(String name, Column column) {
         columns.add(column);
-        columnNames.add("Column " + (columns.size() - 1));
+        columnNames.add(name);
         Aggregation[] agg = new Aggregation[0];
         columnAggFunctions.add(agg);
         appendData();
     }
 
-    public void addColumn(Function function, int argColumnNumber) {
+    public void addColumn(String name, Function function, int argColumnNumber) {
         if (columns.get(argColumnNumber).dataType() == DataType.String) {
             String errMsg = "Function column may not depend upon String column";
             throw new IllegalArgumentException(errMsg);
@@ -91,23 +91,23 @@ public class DataFrame {
             }
         }
         columnNumberToFunctionInfo.put(columns.size(), new FunctionColumnInfo(function, argColumnNumber));
-        addColumn(ColumnFactory.createColumn(function, columns.get(argColumnNumber)));
+        addColumn(name, ColumnFactory.createColumn(function, columns.get(argColumnNumber)));
     }
 
-    public void addColumn(double start, double step) {
-        addColumn(ColumnFactory.createColumn(start, step));
+    public void addColumn(String name, double start, double step) {
+        addColumn(name, ColumnFactory.createColumn(start, step));
     }
 
-    public void addColumn(double start, double step, int size) {
-        addColumn(ColumnFactory.createColumn(start, step, size));
+    public void addColumn(String name, double start, double step, int size) {
+        addColumn(name, ColumnFactory.createColumn(start, step, size));
     }
 
-    public void addColumn(ShortSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, ShortSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(short[] data) {
-        addColumn(new ShortSequence() {
+    public void addColumn(String name, short[] data) {
+        addColumn(name, new ShortSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -120,12 +120,12 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(IntSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, IntSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(int[] data) {
-        addColumn(new IntSequence() {
+    public void addColumn(String name, int[] data) {
+        addColumn(name, new IntSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -138,12 +138,12 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(LongSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, LongSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(long[] data) {
-        addColumn(new LongSequence() {
+    public void addColumn(String name, long[] data) {
+        addColumn(name, new LongSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -156,12 +156,12 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(FloatSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, FloatSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(float[] data) {
-        addColumn(new FloatSequence() {
+    public void addColumn(String name, float[] data) {
+        addColumn(name, new FloatSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -174,12 +174,12 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(DoubleSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, DoubleSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(double[] data) {
-        addColumn(new DoubleSequence() {
+    public void addColumn(String name, double[] data) {
+        addColumn(name, new DoubleSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -192,12 +192,12 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(StringSequence data) {
-        addColumn(ColumnFactory.createColumn(data));
+    public void addColumn(String name, StringSequence data) {
+        addColumn(name, ColumnFactory.createColumn(data));
     }
 
-    public void addColumn(List<String> data) {
-        addColumn(new StringSequence() {
+    public void addColumn(String name, List<String> data) {
+        addColumn(name, new StringSequence() {
             @Override
             public int size() {
                 return data.size();
@@ -210,8 +210,8 @@ public class DataFrame {
         });
     }
 
-    public void addColumn(String[] data) {
-        addColumn(new StringSequence() {
+    public void addColumn(String name, String[] data) {
+        addColumn(name, new StringSequence() {
             @Override
             public int size() {
                 return data.length;
@@ -499,7 +499,12 @@ public class DataFrame {
      * one aggregating function is specified!!!
      * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualPointsNumber(int points, boolean isResultCachingEnabled) {
+    public DataFrame resampleByEqualPointsNumber(int points, boolean isResultCachingEnabled) throws IllegalArgumentException {
+        if(points < 2) {
+            String errMsg = "Points = "+ points;
+            throw new IllegalArgumentException(errMsg);
+        }
+
         return resample(null, points, isResultCachingEnabled);
     }
 
@@ -510,7 +515,11 @@ public class DataFrame {
      * one aggregating function is specified!!!
      * If columns has no aggregating functions resultant dataframe will be empty
      */
-    public DataFrame resampleByEqualInterval(int columnNumber, double interval, boolean isResultCachingEnabled) {
+    public DataFrame resampleByEqualInterval(int columnNumber, double interval, boolean isResultCachingEnabled) throws IllegalArgumentException {
+        if(interval == 0) {
+            String errMsg = "Interval = "+ interval;
+            throw new IllegalArgumentException(errMsg);
+        }
         IntSequence groupIndexes = columns.get(columnNumber).group(interval, new ColumnsMinSize());
         return resample(groupIndexes, 1, isResultCachingEnabled);
     }
@@ -652,8 +661,8 @@ public class DataFrame {
         IntArrayList xList = new IntArrayList(xData);
         IntArrayList yList = new IntArrayList(yData);
 
-        df.addColumn(xList);
-        df.addColumn(yList);
+        df.addColumn("x", xList);
+        df.addColumn("y", yList);
         df.setColumnAggFunctions(0, Aggregation.FIRST);
         df.setColumnAggFunctions(1, Aggregation.AVERAGE);
 
@@ -736,9 +745,9 @@ public class DataFrame {
         System.out.println("\nString sort test");
         DataFrame sf = new DataFrame(false);
         String[] labels = {"mama", "baba", "papa", "deda"};
-        sf.addColumn(labels);
+        sf.addColumn("labels", labels);
         int[] values = {1, 2, 3, 4, 5};
-        sf.addColumn(values);
+        sf.addColumn("y", values);
 
         DataFrame sf1 = sf.sort(0);
         for (int i = 0; i < sf1.rowCount(); i++) {
@@ -749,9 +758,9 @@ public class DataFrame {
         df = new DataFrame(false);
         int[] col0 = {1, 3, 5, 7, 9};
         int[] col1 = {8, 6, 4, 2, 0};
-        df.addColumn(col0);
-        df.addColumn(col1);
-        df.addColumn(new Function() {
+        df.addColumn("x", col0);
+        df.addColumn("y", col1);
+        df.addColumn("function", new Function() {
             @Override
             public double apply(double value) {
                 return (int) (value + 1);

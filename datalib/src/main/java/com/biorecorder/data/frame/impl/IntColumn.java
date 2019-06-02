@@ -28,9 +28,6 @@ class IntColumn implements Column {
         return dataSequence.get(index);
     }
 
-    public Column copy() {
-        return new IntColumn(dataSequence);
-    }
 
     @Override
     public int size() {
@@ -145,7 +142,11 @@ class IntColumn implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new IntIntervalProvider(PrimitiveUtils.roundDouble2int(interval)), length);
+        int intervalCasted = PrimitiveUtils.roundDouble2int(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.intMinValue();
+        }
+        return group(new IntIntervalProvider(intervalCasted), length);
     }
 
     @Override
@@ -280,6 +281,7 @@ class IntColumn implements Column {
             }
         };
     }
+
 
     private StatsInt calculateStats(int from, int length) {
         int min1 = dataSequence.get(from);

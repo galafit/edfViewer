@@ -28,6 +28,7 @@ class ShortColumn implements Column {
         return dataSequence.get(index);
     }
 
+
     @Override
     public int size() {
         return dataSequence.size();
@@ -141,7 +142,11 @@ class ShortColumn implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new ShortIntervalProvider(PrimitiveUtils.roundDouble2short(interval)), length);
+        short intervalCasted = PrimitiveUtils.roundDouble2short(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.shortMinValue();
+        }
+        return group(new ShortIntervalProvider(intervalCasted), length);
     }
 
     @Override

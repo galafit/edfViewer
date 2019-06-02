@@ -28,6 +28,7 @@ class DoubleColumn implements Column {
         return dataSequence.get(index);
     }
 
+
     @Override
     public int size() {
         return dataSequence.size();
@@ -141,7 +142,11 @@ class DoubleColumn implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new DoubleIntervalProvider(PrimitiveUtils.roundDouble2double(interval)), length);
+        double intervalCasted = PrimitiveUtils.roundDouble2double(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.doubleMinValue();
+        }
+        return group(new DoubleIntervalProvider(intervalCasted), length);
     }
 
     @Override

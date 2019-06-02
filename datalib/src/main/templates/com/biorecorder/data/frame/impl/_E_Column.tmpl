@@ -142,7 +142,11 @@ class #E#Column implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new #E#IntervalProvider(PrimitiveUtils.roundDouble2#e#(interval)), length);
+        #e# intervalCasted = PrimitiveUtils.roundDouble2#e#(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.#e#MinValue();
+        }
+        return group(new #E#IntervalProvider(intervalCasted), length);
     }
 
     @Override

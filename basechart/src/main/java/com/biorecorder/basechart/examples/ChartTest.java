@@ -23,7 +23,7 @@ public class ChartTest extends JFrame {
     IntArrayList yUnsort = new IntArrayList();
     IntArrayList xUnsort = new IntArrayList();
 
-    DoubleArrayList list1 = new DoubleArrayList();
+    IntArrayList list1 = new IntArrayList();
     IntArrayList list2 = new IntArrayList();
 
     List<String> labels = new ArrayList();
@@ -37,12 +37,12 @@ public class ChartTest extends JFrame {
 
         setTitle("Test chart");
 
-        double value = 0;
+        int value = 0;
         for (int i = 0; i <= 250; i++) {
             list1.add(value);
             list2.add(50);
             labels.add("lab_"+i);
-            value += 0.5;
+            value += 1;
         }
 
 
@@ -62,19 +62,18 @@ public class ChartTest extends JFrame {
 
 
         XYData regularData = new XYData(labels, true);
-        regularData.addColumn(list1);
-        regularData.setColumnName(1, "rg");
+        regularData.addColumn("reg", list1);
+
 
         XYData noRegularData = new XYData(true);
-        noRegularData.addColumn(list1);
-        noRegularData.addColumn(list1);
-        noRegularData.addColumn(new SquareFunction(), 0);
-        noRegularData.setColumnName(1, "nr");
+        noRegularData.addColumn("x", list1);
+        noRegularData.addColumn("non-reg", list1);
+        noRegularData.addColumn("function", new SquareFunction(), 0);
 
 
         XYData unsortedData = new XYData(false);
-        unsortedData.addColumn(xUnsort);
-        unsortedData.addColumn(yUnsort);
+        unsortedData.addColumn("x", xUnsort);
+        unsortedData.addColumn("unsort", yUnsort);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(0);
@@ -84,8 +83,8 @@ public class ChartTest extends JFrame {
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
         XYData timeData = new XYData(false);
-        timeData.addColumn(timeArray);
-        timeData.addColumn(list1);
+        timeData.addColumn("time", timeArray);
+        timeData.addColumn("y", list1);
 
         chart = new Chart(new CategoryScale());
         //chart.addTraces(new LineTrace(regularData), true);
@@ -103,12 +102,9 @@ public class ChartTest extends JFrame {
             Thread.sleep(1000);
             chart.addTraces(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
-            chart.addTraces(noRegularData, new LineTrace(), false);
+            chart.addTraces(noRegularData, new LineTrace(), true);
             chart.addTraces(regularData, new LineTrace(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
-            chartPanel.repaint();
-            Thread.sleep(1000);
-            chart.setTraceColor(2, BColor.CYAN);
-            chart.setTraceName(1, "bla-bla");
+
             chartPanel.repaint();
 
 
@@ -127,7 +123,7 @@ public class ChartTest extends JFrame {
                         e.printStackTrace();
                     }
 
-                    double value = 0;
+                    int value = 0;
                     if(list1.size() > 0) {
                         value = list1.get(list1.size() - 1);
                     }

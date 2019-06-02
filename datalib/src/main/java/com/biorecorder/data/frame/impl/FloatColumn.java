@@ -28,6 +28,7 @@ class FloatColumn implements Column {
         return dataSequence.get(index);
     }
 
+
     @Override
     public int size() {
         return dataSequence.size();
@@ -141,7 +142,11 @@ class FloatColumn implements Column {
 
     @Override
     public IntSequence group(double interval, DynamicSize length) {
-        return group(new FloatIntervalProvider(PrimitiveUtils.roundDouble2float(interval)), length);
+        float intervalCasted = PrimitiveUtils.roundDouble2float(interval);
+        if(intervalCasted == 0) {
+            intervalCasted = PrimitiveUtils.floatMinValue();
+        }
+        return group(new FloatIntervalProvider(intervalCasted), length);
     }
 
     @Override
