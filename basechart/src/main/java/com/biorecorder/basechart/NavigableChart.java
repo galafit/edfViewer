@@ -89,7 +89,7 @@ public class NavigableChart {
             if (extent > scrollRange.length()) {
                 scrollRange = new Range(scrollRange.getMin(), scrollRange.getMin() + extent);
             }
-            if (scrolls.get(xAxisPosition) == null && chart.isXAxisVisible(xAxisPosition)) {
+            if (scrolls.get(xAxisPosition) == null) {
                 if (extent > 0) {
                     Scroll scroll = new Scroll(scrollRange.getMin(), scrollRange.getMax(), extent);
                     chart.setXMinMax(xAxisPosition, scrollRange.getMin(), scrollRange.getMin() + extent);
@@ -113,10 +113,6 @@ public class NavigableChart {
                         scrollToEnd();
                     }
                 }
-            }
-
-            if (scrolls.get(xAxisPosition) != null && !chart.isXAxisVisible(xAxisPosition)) {
-                scrolls.remove(xAxisPosition);
             }
 
             if (scrolls.get(xAxisPosition) != null) {

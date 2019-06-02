@@ -463,13 +463,6 @@ public class Chart {
         return xAxisList.get(getXIndex(xAxisPosition)).getScale().invert(value);
     }
 
-    boolean isXAxisVisible(XAxisPosition xAxisPosition) {
-        if (xAxisList.get(getXIndex(xAxisPosition)).isVisible()) {
-            return true;
-        }
-        return false;
-    }
-
     Range getYMinMax(int stack, YAxisPosition yAxisPosition, BCanvas canvas) {
         if (isDirty) {
             doCalculations(canvas);

@@ -13,9 +13,7 @@ import java.util.List;
 
 /**
  * TODO implement XY search nearest point (QuadTree)
- * колонки сразу с именами в апи
- * обнуление аггрегации
- *
+
  * убрать двойку в формированиее тултипов
  * x, y оси переименовать в h, v
  *
@@ -23,8 +21,7 @@ import java.util.List;
  * во всех действиях проверять что если ось unused то ничего с ней  не делать
  * а инвизибл должна идти как обычная ось
  *
- * брать в дата менеджере квадрат из экстеншн в случае нон-лайн трес
- * full data min max  делать в трейсе ?
+ * удаление неиспользуемых скролов в чарте с навигацией
  */
 class DataPainter {
     private int xIndex;
@@ -37,7 +34,7 @@ class DataPainter {
     private int traceCount;
     private String[] traceNames;
     private BColor[] traceColors;
-    private boolean[] visibleTraces;
+    private boolean[] tracesVisibleMask;
     private int hiddenTraceCount = 0;
 
     DataPainter(ChartData data1, Trace tracePainter, boolean isSplit, DataProcessingConfig dataProcessingConfig1, int xIndex, int yStartIndex) {
@@ -56,10 +53,10 @@ class DataPainter {
         traceCount = tracePainter.traceCount(data);
         traceNames = new String[traceCount];
         traceColors = new BColor[traceCount];
-        visibleTraces = new boolean[traceCount];
+        tracesVisibleMask = new boolean[traceCount];
         for (int trace = 0; trace < traceCount; trace++) {
             traceNames[trace] = tracePainter.traceName(data, trace);
-            visibleTraces[trace] = true;
+            tracesVisibleMask[trace] = true;
         }
 
         // set approximations
@@ -89,7 +86,7 @@ class DataPainter {
     }
 
     void hideTrace(int trace) {
-        visibleTraces[trace] = false;
+        tracesVisibleMask[trace] = false;
         hiddenTraceCount++;
     }
 
@@ -138,7 +135,7 @@ class DataPainter {
     }
 
     double getBestExtent(int drawingAreaWidth) {
-        return dataManager.getBestExtent(drawingAreaWidth, tracePainter.markWidth());
+        return dataManager.getBestExtent(drawingAreaWidth, tracePainter.markWidth(), tracePainter.traceType());
     }
 
     NamedValue[] traceValues(int dataIndex, int trace, Scale xScale, Scale yScale) {
@@ -219,7 +216,7 @@ class DataPainter {
         int minDistance = -1;
         int closestTrace = -1;
         for (int trace = 0; trace < traceCount; trace++) {
-            if(visibleTraces[trace]) {
+            if(tracesVisibleMask[trace]) {
                 int distance = distanceSqw(pointIndex, trace, x, y, xScale, yScales[trace]);
                 if (distance == 0) {
                     return new NearestTracePoint(new DataPainterTracePoint(this, trace, pointIndex), 0);
@@ -257,7 +254,7 @@ class DataPainter {
     }
 
     void drawTrace(BCanvas canvas, int trace, Scale xScale, Scale yScale) {
-        if(visibleTraces[trace]) {
+        if(tracesVisibleMask[trace]) {
             tracePainter.drawTrace(canvas, getData(xScale), trace, getTraceColor(trace), traceCount(), isSplit, xScale, yScale);
         }
     }

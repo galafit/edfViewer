@@ -574,13 +574,13 @@ public class DataManager {
         return groupedData;
     }
 
-    public double getBestExtent(double drawingAreaWidth, int markSize) {
+    public double getBestExtent(double drawingAreaWidth, int markSize, TraceType traceType) {
         if (data.rowCount() > 1) {
             if (markSize <= 0) {
                 markSize = 1;
             }
             double traceExtent = getDataAvgStep(data) * drawingAreaWidth / markSize;
-            if (processingConfig.isGroupingForced() && groupingIntervals != null) {
+            if (processingConfig.isGroupingEnabled() && processingConfig.isGroupingForced() && groupingIntervals != null) {
                 GroupInterval groupInterval = groupingIntervals.get(0);
                 double pointsInGroup = groupIntervalToPoints(data, groupInterval.intervalLength());
                 if (pointsInGroup > 1) {
@@ -590,6 +590,9 @@ public class DataManager {
                         traceExtent *= pointsInGroup;
                     }
                 }
+            }
+            if(traceType == TraceType.DIMENSIONAL2) {
+                traceExtent = Math.sqrt(traceExtent);
             }
             return traceExtent;
         }
