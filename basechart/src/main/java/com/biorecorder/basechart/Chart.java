@@ -86,11 +86,11 @@ public class Chart {
         for (int i = 0; i < yAxisList.size(); i++) {
             AxisWrapper axis = yAxisList.get(i);
             if (i % 2 == 0) { // left
-                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if (axis.isUsed() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingLeft = config.getAutoSpacing();
                 }
             } else { // right
-                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if (axis.isUsed() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingRight = config.getAutoSpacing();
                 }
             }
@@ -99,11 +99,11 @@ public class Chart {
         for (int i = 0; i < xAxisList.size(); i++) {
             AxisWrapper axis = xAxisList.get(i);
             if (i % 2 == 0) { // bottom
-                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if (axis.isUsed() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingBottom = config.getAutoSpacing();
                 }
             } else { // top
-                if (axis.isVisible() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
+                if (axis.isUsed() && (axis.isTickLabelOutside() || !StringUtils.isNullOrBlank(axis.getTitle()))) {
                     spacingTop = config.getAutoSpacing();
                 }
             }
@@ -131,50 +131,70 @@ public class Chart {
 
     private void setXMinMax(BCanvas canvas) {
         for (int xIndex = 0; xIndex < xAxisList.size(); xIndex++) {
-            Range minMax = xAxisToMinMax.get(xIndex);
             AxisWrapper xAxis = xAxisList.get(xIndex);
-            if (minMax != null) {
-                // NO ROUNDING !!! course the X min and max depends data processing
-                xAxis.setMinMax(minMax.getMin(), minMax.getMax());
-            } else { // auto scale X
-                Range tracesXMinMax = null;
-                for (DataPainter trace : dataPainters) {
-                    if (trace.getXIndex() == xIndex) {
-                        tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax(xAxis.getScale()));
+            if(xAxis.isUsed()) {
+                Range minMax = xAxisToMinMax.get(xIndex);
+                if (minMax != null) {
+                    // NO ROUNDING !!! course the X min and max depends data processing
+                    xAxis.setMinMax(minMax.getMin(), minMax.getMax());
+                } else { // auto scale X
+                    Range tracesXMinMax = null;
+                    for (DataPainter trace : dataPainters) {
+                        if (trace.getXIndex() == xIndex) {
+                            tracesXMinMax = Range.join(tracesXMinMax, trace.getFullXMinMax());
+                        }
+                    }
+
+                    if (tracesXMinMax != null) {
+                        if(xAxis.getScale() instanceof CategoryScale) {
+                            CategoryScale xScale = (CategoryScale)xAxis.getScale();
+                            xScale.setMinMax(xScale.normalizeMin(tracesXMinMax.getMin()), xScale.normalizeMax(tracesXMinMax.getMax()));
+                        } else {
+                            xAxis.setMinMax(tracesXMinMax.getMin(), tracesXMinMax.getMax());
+
+                        }
+                    }
+                    // rounding only in the case of auto scale when no data processing
+                    if(xAxis.isRoundingEnabled()) {
+                        xAxis.roundMinMax(canvas);
                     }
                 }
-
-                if (tracesXMinMax != null) {
-                    xAxis.setMinMax(tracesXMinMax.getMin(), tracesXMinMax.getMax());
-                }
-                // rounding only in the case of auto scale when no data processing
-                xAxis.roundMinMax(canvas);
             }
         }
     }
 
     private void setYMinMax(BCanvas canvas) {
         for (int yIndex = 0; yIndex < yAxisList.size(); yIndex++) {
-            Range minMax = yAxisToMinMax.get(yIndex);
             AxisWrapper yAxis = yAxisList.get(yIndex);
-            if (minMax != null) {
-                yAxis.setMinMax(minMax.getMin(), minMax.getMax());
-            } else { // auto scale Y
-                Range tracesYMinMax = null;
-                for (DataPainter dataPainter : dataPainters) {
-                    int traceCount = dataPainter.traceCount();
-                    for (int trace = 0; trace < traceCount; trace++) {
-                        if (getTraceYIndex(dataPainter,  trace) == yIndex) {
-                            tracesYMinMax = Range.join(tracesYMinMax, dataPainter.traceYMinMax(trace, xAxisList.get(dataPainter.getXIndex()).getScale(), yAxis.getScale()));
+            if(yAxis.isUsed()) {
+                Range minMax = yAxisToMinMax.get(yIndex);
+                if (minMax != null) {
+                    yAxis.setMinMax(minMax.getMin(), minMax.getMax());
+                } else { // auto scale Y
+                    Range tracesYMinMax = null;
+                    for (DataPainter dataPainter : dataPainters) {
+                        int traceCount = dataPainter.traceCount();
+                        for (int trace = 0; trace < traceCount; trace++) {
+                            if (getTraceYIndex(dataPainter,  trace) == yIndex) {
+                                tracesYMinMax = Range.join(tracesYMinMax, dataPainter.traceYMinMax(trace, xAxisList.get(dataPainter.getXIndex()).getScale(), yAxis.getScale()));
+                            }
+                        }
+                    }
+                    if (tracesYMinMax != null) {
+                        if(yAxis.getScale() instanceof CategoryScale) {
+                            CategoryScale yScale = (CategoryScale)yAxis.getScale();
+                            yScale.setMinMax(yScale.normalizeMin(tracesYMinMax.getMin()), yScale.normalizeMax(tracesYMinMax.getMax()));
+                        } else {
+                            yAxis.setMinMax(tracesYMinMax.getMin(), tracesYMinMax.getMax());
+                            // rounding only in the case of auto scale
+                            if(yAxis.isRoundingEnabled()) {
+                                yAxis.roundMinMax(canvas);
+                            }
                         }
                     }
                 }
 
-                if (tracesYMinMax != null) {
-                    yAxis.setMinMax(tracesYMinMax.getMin(), tracesYMinMax.getMax());
-                }
             }
-            yAxis.roundMinMax(canvas);
         }
     }
 
@@ -198,12 +218,19 @@ public class Chart {
             graphArea = fullArea;
         }
 
-
         setXStartEnd(graphArea.x, graphArea.width);
         setXMinMax(canvas);
 
-        int top = spacing.top() + titleHeight + xAxisList.get(1).getWidth(canvas);
-        int bottom = spacing.bottom() + xAxisList.get(0).getWidth(canvas);
+        int top = spacing.top() + titleHeight;
+        int bottom = spacing.bottom();
+        AxisWrapper topAxis = xAxisList.get(getXIndex(XAxisPosition.TOP));
+        AxisWrapper bottomAxis = xAxisList.get(getXIndex(XAxisPosition.BOTTOM));
+        if(topAxis.isUsed()) {
+            top += topAxis.getWidth(canvas);
+        }
+        if(bottomAxis.isUsed()) {
+            bottom += bottomAxis.getWidth(canvas);
+        }
 
         int legendHeight = 0;
         if (isLegendEnabled() && !legend.isAttachedToStacks()) {
@@ -225,10 +252,13 @@ public class Chart {
         int left = 0;
         int right = 0;
         for (int i = 0; i < yAxisList.size(); i++) {
-            if (i % 2 == 0) {
-                left = Math.max(left, yAxisList.get(i).getWidth(canvas));
-            } else {
-                right = Math.max(right, yAxisList.get(i).getWidth(canvas));
+            AxisWrapper yAxis = yAxisList.get(i);
+            if(yAxis.isUsed()) {
+                if (i % 2 == 0) {
+                    left = Math.max(left, yAxis.getWidth(canvas));
+                } else {
+                    right = Math.max(right, yAxis.getWidth(canvas));
+                }
             }
         }
 
@@ -258,9 +288,7 @@ public class Chart {
 
     private void setYStartEnd(int areaY, int areaHeight) {
         int weightSum = getStacksSumWeight();
-
         int stackCount = yAxisList.size() / 2;
-
         int gap = Math.abs(config.getStackGap());
         int height = areaHeight - (stackCount - 1) * gap;
         if (height <= 0) {
@@ -278,17 +306,19 @@ public class Chart {
                 // so we fix that
                 start = areaY + areaHeight;
             }*/
-            yAxisList.get(stack * 2).setStartEnd(start, end);
-            yAxisList.get(stack * 2 + 1).setStartEnd(start, end);
+            AxisWrapper leftAxis = yAxisList.get(stack * 2);
+            AxisWrapper rightAxis = yAxisList.get(stack * 2 + 1);
+            leftAxis.setStartEnd(start, end);
+            rightAxis.setStartEnd(start, end);
             end = start + gap;
         }
     }
 
     private int chooseXAxisWithGrid(int stack) {
-        int leftAxisIndex = stack * 2;
-        int rightAxisIndex = stack * 2 + 1;
         int primaryAxisIndex = getXIndex(config.getPrimaryXPosition());
 
+        int leftAxisIndex = getYIndex(stack, YAxisPosition.LEFT);
+        int rightAxisIndex = getYIndex(stack, YAxisPosition.RIGHT);
         for (DataPainter dataPainter : dataPainters) {
             if (dataPainter.getXIndex() == primaryAxisIndex) {
                 for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
@@ -299,7 +329,6 @@ public class Chart {
                 }
             }
         }
-
         if (config.getPrimaryXPosition() == XAxisPosition.BOTTOM) {
             return getXIndex(XAxisPosition.TOP);
         } else {
@@ -372,6 +401,7 @@ public class Chart {
 
     double getBestExtent(XAxisPosition xAxisPosition, BCanvas canvas) {
         double extent = xAxisList.get(getXIndex(xAxisPosition)).getBestExtent(canvas, fullArea.width);
+
         double tracesExtent = getTracesBestExtent(xAxisPosition);
         if (extent < 0) {
             extent = tracesExtent;
@@ -386,7 +416,6 @@ public class Chart {
         for (DataPainter trace : dataPainters) {
             if (trace.getXIndex() == getXIndex(xAxisPosition)) {
                 double traceExtent = trace.getBestExtent(fullArea.width);
-                // System.out.println("trace extent "+traceExtent);
                 if (extent < 0) {
                     extent = traceExtent;
                 } else if (traceExtent > 0) {
@@ -402,10 +431,15 @@ public class Chart {
     Range getAllTracesFullMinMax() {
         Range minMax = null;
         for (DataPainter trace : dataPainters) {
-            Scale traceXScale = xAxisList.get(trace.getXIndex()).getScale();
-            minMax = Range.join(minMax, trace.getFullXMinMax(traceXScale));
-        }
+            Range traceXMinMax = trace.getFullXMinMax();
+            AxisWrapper traceXAxis = xAxisList.get(trace.getXIndex());
+            if(traceXMinMax != null && traceXAxis.getScale() instanceof CategoryScale){
+                CategoryScale xScale = (CategoryScale) traceXAxis.getScale();
+                traceXMinMax = new Range(xScale.normalizeMin(traceXMinMax.getMin()), xScale.normalizeMax(traceXMinMax.getMax()));
+            }
 
+            minMax = Range.join(minMax, traceXMinMax);
+        }
         return minMax;
     }
 
@@ -515,11 +549,25 @@ public class Chart {
     }
 
     XAxisPosition[] getXAxes() {
-        return XAxisPosition.values();
+        List<XAxisPosition> positions = new ArrayList<>();
+        for (XAxisPosition position : XAxisPosition.values()) {
+            if(xAxisList.get(getXIndex(position)).isUsed()) {
+                positions.add(position);
+            }
+
+        }
+        return positions.toArray(new XAxisPosition[positions.size()]);
     }
 
     YAxisPosition[] getYAxes(int stack) {
-        return YAxisPosition.values();
+        List<YAxisPosition> positions = new ArrayList<>();
+        for (YAxisPosition position : YAxisPosition.values()) {
+            if(yAxisList.get(getYIndex(stack, position)).isUsed()) {
+                positions.add(position);
+            }
+
+        }
+        return positions.toArray(new YAxisPosition[positions.size()]);
     }
 
 
@@ -530,16 +578,16 @@ public class Chart {
             AxisWrapper axisRight = yAxisList.get(2 * stack + 1);
             if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
                 if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
-                    if (!axisLeft.isVisible() && !axisRight.isVisible()) {
+                    if (!axisLeft.isUsed() && !axisRight.isUsed()) {
                         return null;
                     }
-                    if (!axisLeft.isVisible()) {
+                    if (!axisLeft.isUsed()) {
                         return YAxisPosition.RIGHT;
                     }
-                    if (!axisRight.isVisible()) {
+                    if (!axisRight.isUsed()) {
                         return YAxisPosition.LEFT;
                     }
-                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isVisible()) { // left half
+                    if (fullArea.x <= point.getX() && point.getX() <= fullArea.x + fullArea.width / 2 && axisLeft.isUsed()) { // left half
                         return YAxisPosition.LEFT;
                     } else {
                         return YAxisPosition.RIGHT;
@@ -552,24 +600,23 @@ public class Chart {
 
     XAxisPosition getXAxis(BPoint point) {
         if (fullArea != null && fullArea.contains(point.getX(), point.getY())) {
-            int bottomAxisIndex = 0;
-            int topAxisIndex = 1;
+            int bottomAxisIndex = getXIndex(XAxisPosition.BOTTOM);
+            int topAxisIndex = getXIndex(XAxisPosition.TOP);;
             AxisWrapper bottomAxis = xAxisList.get(bottomAxisIndex);
             AxisWrapper topAxis = xAxisList.get(topAxisIndex);
-
-            if (bottomAxis.isVisible() && !topAxis.isVisible()) {
+            if(!bottomAxis.isUsed() && !topAxis.isUsed()) {
+                return null;
+            } else if (!topAxis.isUsed()) {
                 return XAxisPosition.BOTTOM;
-            } else if (!bottomAxis.isVisible() && topAxis.isVisible()) {
+            } else if (!bottomAxis.isUsed()) {
                 return XAxisPosition.TOP;
-            } else if (bottomAxis.isVisible() && topAxis.isVisible()) {
-                if (fullArea.contains(point.getX(), point.getY())) {
-                    // find point stack
-                    int stackCount = yAxisList.size() / 2;
-                    for (int i = 0; i < stackCount; i++) {
-                        AxisWrapper axisLeft = yAxisList.get(2 * i);
-                        if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
-                            return getXPosition(chooseXAxisWithGrid(i));
-                        }
+            } else { // both axis is used
+                // find point stack
+                int stackCount = yAxisList.size() / 2;
+                for (int stack = 0; stack < stackCount; stack++) {
+                    AxisWrapper axisLeft = yAxisList.get(2 * stack);
+                    if (axisLeft.getEnd() <= point.getY() && axisLeft.getStart() >= point.getY()) {
+                        return getXPosition(chooseXAxisWithGrid(stack));
                     }
                 }
             }
@@ -739,33 +786,43 @@ public class Chart {
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
 
-        // draw X axes grids
-        AxisWrapper bottomAxis = xAxisList.get(0);
-        AxisWrapper topAxis = xAxisList.get(1);
+        // draw X axes grids separately for every stack
 
-        // draw separately for every stack
-        for (int i = 0; i < stackCount; i++) {
-            AxisWrapper yAxis = yAxisList.get(2 * i);
+        for (int stack = 0; stack < stackCount; stack++) {
+            AxisWrapper yAxis = yAxisList.get(2 * stack);
             BRectangle stackArea = new BRectangle(graphArea.x, (int) yAxis.getEnd(), graphArea.width, (int) yAxis.length());
-            if (bottomAxis.isVisible() && !topAxis.isVisible()) {
-                bottomAxis.drawGrid(canvas, stackArea);
-            } else if (!bottomAxis.isVisible() && topAxis.isVisible()) {
+
+            int bottomAxisIndex = getXIndex(XAxisPosition.BOTTOM);
+            int topAxisIndex = getXIndex(XAxisPosition.TOP);;
+            AxisWrapper bottomAxis = xAxisList.get(bottomAxisIndex);
+            AxisWrapper topAxis = xAxisList.get(topAxisIndex);
+
+            if(!bottomAxis.isUsed() && !topAxis.isUsed()) {
+                // do nothing
+            } else if(!bottomAxis.isUsed()) {
                 topAxis.drawGrid(canvas, stackArea);
-            } else if (bottomAxis.isVisible() && topAxis.isVisible()) {
-                xAxisList.get(chooseXAxisWithGrid(i)).drawGrid(canvas, stackArea);
+            } else if(!topAxis.isUsed()) {
+                bottomAxis.drawGrid(canvas, stackArea);
+            } else { // both axis used
+                AxisWrapper xAxisWithGrid = xAxisList.get(chooseXAxisWithGrid(stack));
+                if(xAxisWithGrid.isUsed()) {
+                    xAxisWithGrid.drawGrid(canvas, stackArea);
+                }
             }
         }
 
         // draw Y axes grids
         for (int i = 0; i < stackCount; i++) {
-            AxisWrapper leftAxis = yAxisList.get(i * 2);
-            AxisWrapper rightAxis = yAxisList.get(i * 2 + 1);
+            AxisWrapper leftAxis = yAxisList.get(getYIndex(i, YAxisPosition.LEFT));
+            AxisWrapper rightAxis = yAxisList.get(getYIndex(i, YAxisPosition.RIGHT));
 
-            if (rightAxis.isVisible() && !leftAxis.isVisible()) {
+            if(!rightAxis.isUsed() && !leftAxis.isUsed()) {
+               // do nothing
+            } else if (!leftAxis.isUsed()) {
                 rightAxis.drawGrid(canvas, graphArea);
-            } else if (!rightAxis.isVisible() && leftAxis.isVisible()) {
+            } else if (!rightAxis.isUsed() ) {
                 leftAxis.drawGrid(canvas, graphArea);
-            } else if (rightAxis.isVisible() && leftAxis.isVisible()) {
+            } else { // both axis is used
                 if (config.getPrimaryYPosition() == YAxisPosition.LEFT) {
                     leftAxis.drawGrid(canvas, graphArea);
                 } else {
@@ -775,12 +832,17 @@ public class Chart {
         }
 
         // draw X axes
-        bottomAxis.drawAxis(canvas, graphArea);
-        topAxis.drawAxis(canvas, graphArea);
+        for (AxisWrapper axis : xAxisList) {
+            if(axis.isUsed()) {
+                axis.drawAxis(canvas, graphArea);
+            }
+        }
 
         // draw Y axes
         for (AxisWrapper axis : yAxisList) {
-            axis.drawAxis(canvas, graphArea);
+            if(axis.isUsed()) {
+                axis.drawAxis(canvas, graphArea);
+            }
         }
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
@@ -1040,10 +1102,10 @@ public class Chart {
             }
         }
 
-        xAxis.setVisible(true);
+        xAxis.setUsed(true);
         if (!isSplit) {
             AxisWrapper yAxis = yAxisList.get(yIndex);
-            yAxis.setVisible(true);
+            yAxis.setUsed(true);
         } else {
             int stackCount = yAxisList.size() / 2;
             int availableStacks = stackCount - stack;
@@ -1054,7 +1116,7 @@ public class Chart {
             }
             for (int i = 0; i < dataPainter.traceCount(); i++) {
                 AxisWrapper yAxis = yAxisList.get(yIndex + i * 2);
-                yAxis.setVisible(true);
+                yAxis.setUsed(true);
             }
         }
 
@@ -1184,29 +1246,29 @@ public class Chart {
 
     public void zoomY(int stack, YAxisPosition yPosition, double zoomFactor) {
         Scale zoomedScale = yAxisList.get(getYIndex(stack, yPosition)).zoom(zoomFactor);
-        double zoomedMin = zoomedScale.getDomain()[0];
-        double zoomedMax = zoomedScale.getDomain()[zoomedScale.getDomain().length - 1];
+        double zoomedMin = zoomedScale.getMin();
+        double zoomedMax = zoomedScale.getMax();
         setYMinMax(stack, yPosition, zoomedMin, zoomedMax);
     }
 
     public void zoomX(XAxisPosition xPosition, double zoomFactor) {
         Scale zoomedScale = xAxisList.get(getXIndex(xPosition)).zoom(zoomFactor);
-        double zoomedMin = zoomedScale.getDomain()[0];
-        double zoomedMax = zoomedScale.getDomain()[zoomedScale.getDomain().length - 1];
+        double zoomedMin = zoomedScale.getMin();
+        double zoomedMax = zoomedScale.getMax();
         setXMinMax(xPosition, zoomedMin, zoomedMax);
     }
 
     public void translateY(int stack, YAxisPosition yPosition, int translation) {
         Scale translatedScale = yAxisList.get(getYIndex(stack, yPosition)).translate(translation);
-        double translatedMin = translatedScale.getDomain()[0];
-        double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
+        double translatedMin = translatedScale.getMin();
+        double translatedMax = translatedScale.getMax();
         setYMinMax(stack, yPosition, translatedMin, translatedMax);
     }
 
     public void translateX(XAxisPosition xPosition, int translation) {
         Scale translatedScale = xAxisList.get(getXIndex(xPosition)).translate(translation);
-        double translatedMin = translatedScale.getDomain()[0];
-        double translatedMax = translatedScale.getDomain()[translatedScale.getDomain().length - 1];
+        double translatedMin = translatedScale.getMin();
+        double translatedMax = translatedScale.getMax();
         setXMinMax(xPosition, translatedMin, translatedMax);
     }
 
@@ -1335,10 +1397,8 @@ public class Chart {
                 return legendArea;
             }
 
-            double[] yRange = yAxisList.get(getTraceYIndex(dataPainterTrace.getDataPainter(), dataPainterTrace.getTrace())).getScale().getRange();
-            int yStart = (int)yRange[0];
-            int yEnd = (int)yRange[yRange.length - 1];
-            return new BRectangle(legendArea.x, yEnd, legendArea.width, Math.abs(yStart - yEnd));
+            Scale yScale = yAxisList.get(getTraceYIndex(dataPainterTrace.getDataPainter(), dataPainterTrace.getTrace())).getScale();
+            return new BRectangle(legendArea.x, (int)yScale.getEnd(), legendArea.width, (int)yScale.getLength());
         }
 
         private void arrangeButtons(BCanvas canvas) {

@@ -113,7 +113,7 @@ public class NavigableChartTest extends JFrame{
 
                     }
 
-                    for (int i = 1; i <= 523; i++) {
+                    for (int i = 1; i <= 20; i++) {
                         yData.add(i + yDataLast);
                         xData.add(i + xDataLast);
                         labels.add("label_"+(i + xDataLast));

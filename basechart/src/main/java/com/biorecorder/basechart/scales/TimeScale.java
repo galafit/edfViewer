@@ -5,6 +5,7 @@ import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
 import com.biorecorder.data.frame.TimeIntervalProvider;
 import com.biorecorder.data.frame.TimeUnit;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -18,9 +19,17 @@ public class TimeScale extends LinearScale {
     @Override
     public Scale copy() {
         TimeScale copyScale = new TimeScale();
-        copyScale.setDomain(getDomain());
-        copyScale.setRange(getRange());
+        copyScale.setMinMax(getMin(), getMax());
+        copyScale.setStartEnd(getStart(), getEnd());
         return copyScale;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof TimeScale)) {
+            return false;
+        }
+        return super.equals(o);
     }
 
     @Override

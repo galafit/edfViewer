@@ -1,7 +1,5 @@
 package com.biorecorder.basechart;
 
-
-import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.TimeScale;
 import com.biorecorder.data.frame.TimeInterval;
@@ -18,7 +16,7 @@ import java.util.List;
 public class DataManager {
     // NO REGROUPING if axis length change less then GROUPING_STABILITY
     private static final int GROUPING_STABILITY = 20; // percents
-    private static final int X_COLUMN = 0;
+    private static final int ARGUMENT_COLUMN = 0;
 
     private final ChartData data;
     private DataProcessingConfig processingConfig;
@@ -81,16 +79,6 @@ public class DataManager {
         return null;
     }
 
-    public Range getFullXMinMax(Scale xScale) {
-        if (data.columnCount() == 0) {
-            return null;
-        }
-        Range minMax = data.columnMinMax(X_COLUMN);
-        if(minMax != null && xScale instanceof CategoryScale) {
-            minMax = new Range(minMax.getMin() - 0.5, minMax.getMax() + 0.5);
-        }
-        return minMax;
-    }
 
     public int nearest(double xValue) {
         // "lazy" sorting solo when "nearest" is called
@@ -149,7 +137,11 @@ public class DataManager {
         return true;
     }
 
-    public ChartData getData(Scale xScale, int markSize) {
+    public ChartData getData() {
+        return data;
+    }
+
+    public ChartData getProcessedData(Scale xScale, int markSize) {
         if (!isDataProcessingEnabled()) { // No processing
             processedData = null;
             return data;
@@ -187,7 +179,7 @@ public class DataManager {
             return false;
         }
 
-        if (!Arrays.equals(prevXScale.getDomain(), xScale.getDomain())) {
+        if (prevXScale.getMin() != xScale.getMin() || prevXScale.getMax() != xScale.getMax()) {
             return false;
         }
 
@@ -202,9 +194,7 @@ public class DataManager {
         }
 
         if (data.rowCount() != prevDataSize) {
-            double[] domain = xScale.getDomain();
-            Double xMax = domain[domain.length - 1];
-            if (data.value(prevDataSize - 1, 0) < xMax) {
+            if (data.value(prevDataSize - 1, 0) < xScale.getMax()) {
                 return false;
             }
         }
@@ -213,8 +203,7 @@ public class DataManager {
     }
 
     private int length(Scale scale) {
-        double[] range = scale.getRange();
-        return (int) Math.abs(range[range.length - 1] - range[0]);
+        return (int) scale.getLength();
     }
 
     private void createGroupingIntervals(Scale xScale) {
@@ -324,26 +313,23 @@ public class DataManager {
         if (data.rowCount() <= 1) {
             return data;
         }
-        double[] range = xScale.getRange();
-        double[] domain = xScale.getDomain();
-        Double xMin = domain[0];
-        Double xMax = domain[domain.length - 1];
 
-        Range dataMinMax = data.columnMinMax(X_COLUMN);
+        Double xMin = xScale.getMin();
+        Double xMax = xScale.getMax();
+
+        Range dataMinMax = data.columnMinMax(ARGUMENT_COLUMN);
+        //dataMinMax = getFullXMinMax(xScale);
         Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
 
         if (minMax == null) {
             return data.view(0, 0);
         }
 
-        double xStart = range[0];
-        double xEnd = range[range.length - 1];
-
         double dataStart = xScale.scale(dataMinMax.getMin());
         double dataEnd = xScale.scale(dataMinMax.getMax());
 
         int drawingAreaWidth = 0;
-        Range intersection = Range.intersect(new Range(xStart, xEnd), new Range(dataStart, dataEnd));
+        Range intersection = Range.intersect(new Range(xScale.getStart(), xScale.getEnd()), new Range(dataStart, dataEnd));
         if (intersection != null) {
             drawingAreaWidth = (int)intersection.length();
         }
@@ -381,12 +367,20 @@ public class DataManager {
         if (processedData.rowCount() > 1 &&  isCropEnabled) {
             long minIndex = 0;
             if (dataMinMax.getMin() < xMin) {
-                minIndex = processedData.bisect( minMax.getMin(), null) - cropShoulder;
+                minIndex = processedData.bisect( xMin, null);
+                if(minIndex > 0 && processedData.value((int)minIndex, ARGUMENT_COLUMN) < xMin) {
+                    minIndex++;
+                }
+                minIndex -= cropShoulder;
             }
 
             long maxIndex = processedData.rowCount() - 1;
             if (dataMinMax.getMax() > xMax) {
-                maxIndex = processedData.bisect(minMax.getMax(), null) + cropShoulder;
+                maxIndex = processedData.bisect(xMax, null);
+                if(maxIndex < processedData.rowCount() - 1 && processedData.value((int)maxIndex, ARGUMENT_COLUMN) > xMax) {
+                    maxIndex--;
+                }
+                maxIndex += cropShoulder;
             }
             if (minIndex < 0) {
                 minIndex = 0;

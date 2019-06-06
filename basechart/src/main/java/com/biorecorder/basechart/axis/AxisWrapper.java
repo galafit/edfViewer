@@ -5,14 +5,14 @@ import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
 
 /**
- * This class do axis rounding and add isVisible property.
+ * This class do axis rounding and add isUsed property.
  * <p>
  * Implement axis rounding when methods:
  * drawAxis or drawGrid or getWidth is invoked !!!
  */
 public class AxisWrapper {
     private Axis axis;
-    private boolean isVisible = false;
+    private boolean isUsed = false;
     // need this field to implement smooth zooming and translate when minMaxRounding enabled
     private double rowMin; // without rounding
     private double rowMax; // without rounding
@@ -39,7 +39,6 @@ public class AxisWrapper {
     public boolean isRoundingEnabled() {
         return axis.isRoundingEnabled();
     }
-
 
     private boolean isDirty() {
         if (axis.isRoundingEnabled() && roundingDirty) {
@@ -166,18 +165,15 @@ public class AxisWrapper {
         return axis.getEnd();
     }
 
-    public boolean isVisible() {
-        return isVisible;
+    public boolean isUsed() {
+        return isUsed;
     }
 
     /**
      * this method DO AXIS ROUNDING
      */
     public int getWidth(BCanvas canvas) {
-        if (isVisible) {
-            return axis.getWidth(canvas);
-        }
-        return 0;
+        return axis.getWidth(canvas);
     }
 
     public void roundMinMax(BCanvas canvas) {
@@ -198,13 +194,11 @@ public class AxisWrapper {
      * this method DO AXIS ROUNDING
      */
     public void drawAxis(BCanvas canvas, BRectangle area) {
-        if(isVisible) {
-            axis.drawAxis(canvas, area);
-        }
+        axis.drawAxis(canvas, area);
     }
 
-    public void setVisible(boolean isVisible) {
-        this.isVisible = isVisible;
+    public void setUsed(boolean isUsed) {
+        this.isUsed = isUsed;
     }
 
 }

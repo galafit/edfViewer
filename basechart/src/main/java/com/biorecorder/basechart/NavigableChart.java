@@ -2,6 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.*;
+import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
@@ -46,6 +47,7 @@ public class NavigableChart {
         }
         chart = new Chart(xScale, yScale);
         navigator = new Chart(xScale, yScale);
+
         chart.setConfig(config.getChartConfig(), true);
         navigator.setConfig(config.getNavigatorConfig(), true);
     }

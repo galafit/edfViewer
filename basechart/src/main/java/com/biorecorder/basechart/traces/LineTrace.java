@@ -51,19 +51,19 @@ public class LineTrace implements Trace {
     }
 
     @Override
-    public Range traceYMinMax(ChartData data, int trace) {
+    public Range traceMinMax(ChartData data, int trace) {
         return data.columnMinMax(trace + 1);
     }
 
     @Override
-    public Range xMinMax(ChartData data) {
+    public Range argumentMinMax(ChartData data) {
         return data.columnMinMax(0);
     }
 
     @Override
-    public NamedValue[] tracePointValues(ChartData data, int dataIndex, int trace, Scale xScale, Scale yScale) {
-        NamedValue[] traceValues = {new NamedValue("",  xScale.formatDomainValue(data.value(dataIndex, 0))),
-                new NamedValue("",  yScale.formatDomainValue(data.value(dataIndex, trace + 1)))};
+    public NamedValue[] tracePointValues(ChartData data, int dataIndex, int trace, Scale argumentScale, Scale valueScale) {
+        NamedValue[] traceValues = {new NamedValue("",  argumentScale.formatDomainValue(data.value(dataIndex, 0))),
+                new NamedValue("",  valueScale.formatDomainValue(data.value(dataIndex, trace + 1)))};
         return traceValues;
     }
 
@@ -102,8 +102,8 @@ public class LineTrace implements Trace {
         if(path != null && traceConfig.isFilled()) {
             int x_0 = (int) xScale.scale(xyData.getX(0));
             int x_last = (int) xScale.scale(xyData.getX(xyData.size() - 1));
-            path.lineTo(x_last, (int)yScale.getRange()[0]);
-            path.lineTo(x_0, (int)yScale.getRange()[0]);
+            path.lineTo(x_last, (int)yScale.getStart());
+            path.lineTo(x_0, (int)yScale.getStart());
             path.close();
             canvas.setColor(getFillColor(traceColor));
             canvas.fillPath(path);

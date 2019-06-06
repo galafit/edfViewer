@@ -15,17 +15,21 @@ import java.util.List;
  * TODO implement XY search nearest point (QuadTree)
 
  * убрать двойку в формированиее тултипов
- * x, y оси переименовать в h, v
  *
  * оси - два признака visible и unused
  * во всех действиях проверять что если ось unused то ничего с ней  не делать
  * а инвизибл должна идти как обычная ось
  *
  * удаление неиспользуемых скролов в чарте с навигацией
+ *
+ * убрать -0.5 и +0.5 из getXFullMinMax()
+ *
+ * задавать где то DataProcessingConfig
  */
 class DataPainter {
     private int xIndex;
     private int yStartIndex;
+    private GroupApproximation[] defaultApproximations = {GroupApproximation.OPEN, GroupApproximation.AVERAGE};
 
     private boolean isSplit;
     private DataManager dataManager;
@@ -44,7 +48,6 @@ class DataPainter {
         if (tracePainter.traceType() == TraceType.LINE) {
             nearestSearchType = NearestSearchType.X;
         } else {
-            disableDataProcessing(dataProcessingConfig);
             nearestSearchType = NearestSearchType.XY;
         }
         this.isSplit = isSplit;
@@ -61,25 +64,24 @@ class DataPainter {
 
         // set approximations
         GroupApproximation[] approximations = tracePainter.groupApproximations();
-        if (approximations != null && approximations.length > 0) {
-            if (approximations.length < data.columnCount()) {
-                // we need it in the case of RANGE and OHLC approximations
-                // when data is already grouped and so is multi-dimensional
-                List<GroupApproximation> deployedApproximations = new ArrayList<>();
-                for (int i = 0; i < approximations.length; i++) {
-                    GroupApproximation[] deployedApprox_i = approximations[i].getAsArray();
-                    for (GroupApproximation approx : deployedApprox_i) {
-                        deployedApproximations.add(approx);
-                    }
+        if (approximations == null || approximations.length > 0) {
+            approximations = defaultApproximations;
+        }
+        if (approximations.length < data.columnCount()) {
+            // we need it in the case of RANGE and OHLC approximations
+            // if data is already grouped and so is multi-dimensional
+            List<GroupApproximation> deployedApproximations = new ArrayList<>();
+            for (int i = 0; i < approximations.length; i++) {
+                GroupApproximation[] deployedApprox_i = approximations[i].getAsArray();
+                for (GroupApproximation approx : deployedApprox_i) {
+                    deployedApproximations.add(approx);
                 }
             }
-            for (int column = 0; column < data.columnCount(); column++) {
-                if (data.getColumnGroupApproximation(column) == null) {
-                    data.setColumnGroupApproximation(column, approximations[Math.min(column, approximations.length - 1)]);
-                }
+        }
+        for (int column = 0; column < data.columnCount(); column++) {
+            if (data.getColumnGroupApproximation(column) == null) {
+                data.setColumnGroupApproximation(column, approximations[Math.min(column, approximations.length - 1)]);
             }
-        } else {
-            disableDataProcessing(dataProcessingConfig);
         }
         this.tracePainter = tracePainter;
         dataManager = new DataManager(data, dataProcessingConfig);
@@ -88,11 +90,6 @@ class DataPainter {
     void hideTrace(int trace) {
         tracesVisibleMask[trace] = false;
         hiddenTraceCount++;
-    }
-
-    private static void disableDataProcessing(DataProcessingConfig dataProcessingConfig) {
-        dataProcessingConfig.setGroupingEnabled(false);
-        dataProcessingConfig.setCropEnabled(false);
     }
 
     boolean isSplit() {
@@ -112,7 +109,10 @@ class DataPainter {
     }
 
     private ChartData getData(Scale xScale) {
-        return dataManager.getData(xScale, tracePainter.markWidth());
+        if(tracePainter.traceType() == TraceType.DIMENSIONAL2) {
+            dataManager.getData();
+        }
+        return dataManager.getProcessedData(xScale, tracePainter.markWidth());
     }
 
     private void checkTraceNumber(int traceNumber) {
@@ -130,8 +130,8 @@ class DataPainter {
         return dataManager.getLabelsIfXColumnIsString();
     }
 
-    Range getFullXMinMax(Scale xScale) {
-        return dataManager.getFullXMinMax(xScale);
+    Range getFullXMinMax() {
+        return tracePainter.argumentMinMax(dataManager.getData());
     }
 
     double getBestExtent(int drawingAreaWidth) {
@@ -150,11 +150,11 @@ class DataPainter {
 
     Range traceYMinMax(int trace, Scale xScale, Scale yScale) {
         checkTraceNumber(trace);
-        return tracePainter.traceYMinMax(getData(xScale), trace);
+        return tracePainter.traceMinMax(getData(xScale), trace);
     }
 
     Range xMinMax(Scale xScale) {
-        return tracePainter.xMinMax(getData(xScale));
+        return tracePainter.argumentMinMax(getData(xScale));
     }
 
     int distanceSqw(int pointIndex, int trace, int x, int y, Scale xScale, Scale yScale) {

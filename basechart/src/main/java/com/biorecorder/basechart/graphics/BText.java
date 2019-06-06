@@ -137,6 +137,6 @@ public class BText {
                 g.drawLine(p1.x - 300, p1.y, p1.x + 300, p1.y);
             }
         });
-        frame.setVisible(true);
+        frame.setUsed(true);
     }*/
 }

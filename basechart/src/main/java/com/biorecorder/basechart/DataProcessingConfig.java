@@ -1,7 +1,5 @@
 package com.biorecorder.basechart;
 
-
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -9,7 +7,7 @@ import java.util.Arrays;
  */
 public class DataProcessingConfig {
     private boolean isCropEnabled = true;
-    private int cropShoulder = 2; // number of additional points that we leave on every side during crop
+    private int cropShoulder = 1; // number of additional points that we leave on every side during crop
 
     private boolean isGroupingEnabled = true;
 

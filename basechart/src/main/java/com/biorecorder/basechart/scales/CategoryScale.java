@@ -1,11 +1,9 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
-import com.biorecorder.basechart.utils.NormalizedNumber;
 import com.biorecorder.data.sequence.StringSequence;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -14,11 +12,12 @@ import java.util.List;
 public class CategoryScale extends LinearScale {
     private StringSequence labels;
 
-    public CategoryScale() {
-    }
-
     public CategoryScale(StringSequence labels) {
         this.labels = labels;
+    }
+
+    public CategoryScale() {
+
     }
 
     public CategoryScale(List<String> labels1) {
@@ -35,6 +34,24 @@ public class CategoryScale extends LinearScale {
         };
     }
 
+
+    public double normalizeMin(double min) {
+        long minLong = (long) min;
+        if(Math.abs(minLong - min) < 0.5) {
+            min = minLong - 0.5;
+        }
+        return min;
+    }
+
+    public double normalizeMax(double max) {
+        long maxLong = (long) max;
+        if(Math.abs(maxLong - max) < 0.5) {
+            max = maxLong + 0.5;
+        }
+        return max;
+    }
+
+
     public StringSequence getLabels() {
         return labels;
     }
@@ -46,11 +63,18 @@ public class CategoryScale extends LinearScale {
     @Override
     public Scale copy() {
         CategoryScale copyScale = new CategoryScale(labels);
-        copyScale.setDomain(getDomain());
-        copyScale.setRange(getRange());
+        copyScale.setMinMax(getMin(), getMax());
+        copyScale.setStartEnd(getStart(), getEnd());
         return copyScale;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof CategoryScale)) {
+            return false;
+        }
+        return super.equals(o);
+    }
 
     @Override
     public String formatDomainValue(double value) {

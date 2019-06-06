@@ -10,6 +10,7 @@ import com.biorecorder.basechart.scales.Tick;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.sequence.StringSequence;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,13 +42,13 @@ abstract class AxisHorizontal extends Axis {
         if (config.isTickLabelOutside()) {
             x = tickPosition + labelShift;
             if (x < getStart()) {
-                int x1 = tickPosition + tickPixelInterval -  labelSize - 2 * charSize + labelShift;
+                int x1 = tickPosition + tickPixelInterval -  labelSize - getInterLabelGap() + labelShift;
                 int x2 = (int) getStart();
                 x = Math.max(x + labelShift, Math.min(x1, x2));
             }
 
             if (x + labelSize > getEnd()) {
-                int x1 = tickPosition - tickPixelInterval + labelShift + 2 * labelSize + 2 * charSize;
+                int x1 = tickPosition - tickPixelInterval + labelShift + 2 * labelSize + getInterLabelGap();
                 int x2 = (int) getEnd();
                 x = Math.min(x + labelSize, Math.max(x1, x2));
                 return new BText(tickLabel, x, y, TextAnchor.END, labelVAnchor, tm);
@@ -86,27 +87,4 @@ abstract class AxisHorizontal extends Axis {
         return point <= Math.round(getEnd()) && point >= Math.round(getStart());
     }
 
-    @Override
-    public double getBestExtent(BCanvas canvas, int length) {
-        if (scale instanceof CategoryScale) {
-            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-            StringSequence labels = ((CategoryScale) scale).getLabels();
-            String longestLabel = "";
-            if(labels != null && labels.size() > 0) {
-                for (int i = 0; i < labels.size(); i++) {
-                    String l = labels.get(i);
-                    if (l.length() > longestLabel.length()) {
-                        longestLabel = l;
-                    }
-                }
-                int bestLength = labels.size() * (tm.stringWidth(longestLabel) + getInterLabelGap()) + getInterLabelGap();
-                bestLength = Math.max(bestLength, length);
-                Scale s = new CategoryScale(labels);
-                s.setDomain(0, labels.size());
-                s.setRange(0, bestLength);
-                return s.invert(length);
-            }
-        }
-        return -1;
-    }
 }

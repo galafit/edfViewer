@@ -1,12 +1,15 @@
 package com.biorecorder.basechart.axis;
 
+import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.*;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
+import com.biorecorder.data.sequence.StringSequence;
 
+import java.awt.font.NumericShaper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,10 +154,9 @@ public abstract class Axis {
 
         double zoomedLength = (end - start) * zoomFactor;
         double zoomedEnd = start + zoomedLength;
-        zoomedScale.setRange(start, zoomedEnd);
+        zoomedScale.setStartEnd(start, zoomedEnd);
         double maxNew = zoomedScale.invert(end);
-        zoomedScale.setDomain(getMin(), maxNew);
-
+        zoomedScale.setMinMax(getMin(), maxNew);
         return zoomedScale;
     }
 
@@ -173,7 +175,7 @@ public abstract class Axis {
         double end = getEnd();
         double minNew = translatedScale.invert(start + translation);
         double maxNew = translatedScale.invert(end + translation);
-        translatedScale.setDomain(minNew, maxNew);
+        translatedScale.setMinMax(minNew, maxNew);
         return translatedScale;
     }
 
@@ -186,78 +188,31 @@ public abstract class Axis {
     }
 
     public boolean setMinMax(double min, double max) {
-        if (Double.isNaN(min)) {
-            String errMsg = "Min is NaN";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isNaN(max)) {
-            String errMsg = "Max is NaN";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isInfinite(min)) {
-            String errMsg = "Min is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isInfinite(max)) {
-            String errMsg = "Max is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (min == max) {
-            String errMsg = "min == max";
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        if (min == getMin() && max == getMax()) {
-            return false;
-        }
-        scale.setDomain(min, max);
+        scale.setMinMax(min, max);
         setDirty();
         return true;
     }
 
     public boolean setStartEnd(double start, double end) {
-        if (Double.isNaN(start)) {
-            String errMsg = "Start is NaN";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isNaN(end)) {
-            String errMsg = "End is NaN";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isInfinite(start)) {
-            String errMsg = "Start is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (Double.isInfinite(end)) {
-            String errMsg = "End is infinity";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (start == end) {
-            String errMsg = "start == end";
-            throw new IllegalArgumentException(errMsg);
-        }
-        if (start == getStart() && end == getEnd()) {
-            return false;
-        }
-        scale.setRange(start, end);
+        scale.setStartEnd(start, end);
         setDirty();
         return true;
     }
 
     public double getMin() {
-        return scale.getDomain()[0];
+        return scale.getMin();
     }
 
     public double getMax() {
-        return scale.getDomain()[scale.getDomain().length - 1];
+        return scale.getMax();
     }
 
     public double getStart() {
-        return scale.getRange()[0];
+        return scale.getStart();
     }
 
     public double getEnd() {
-        return scale.getRange()[scale.getRange().length - 1];
+        return scale.getEnd();
     }
 
     public double scale(double value) {
@@ -272,6 +227,28 @@ public abstract class Axis {
         return Math.abs(getEnd() - getStart());
     }
 
+    public double getBestExtent(BCanvas canvas, int length) {
+        if (scale instanceof CategoryScale) {
+            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+            StringSequence labels = ((CategoryScale) scale).getLabels();
+            if(labels != null && labels.size() > 0) {
+                List<Tick> ticks = new ArrayList<>(labels.size());
+                for (int i = 0; i < labels.size(); i++) {
+                    ticks.add(new Tick(i, labels.get(i)));
+                }
+
+                int requiredSpaceForTickLabel = getRequiredSpaceForTickLabel(tm, ticks);
+                int bestLength = labels.size() * requiredSpaceForTickLabel + getInterLabelGap();
+                bestLength = Math.max(bestLength, length);
+                Scale s = new CategoryScale(labels);
+                s.setMinMax(0, labels.size());
+                s.setStartEnd(0, bestLength);
+                return s.invert(length);
+            }
+        }
+        return -1;
+    }
+
     public void roundMinMax(BCanvas canvas) {
         TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
         if (ticks == null) {
@@ -282,7 +259,7 @@ public abstract class Axis {
         }
         Tick tickMin = ticks.get(1);
         Tick tickMax = ticks.get(ticks.size() - 2);
-        scale.setDomain(tickMin.getValue(), tickMax.getValue());
+        scale.setMinMax(tickMin.getValue(), tickMax.getValue());
     }
 
     public void drawGrid(BCanvas canvas, BRectangle area) {
@@ -453,8 +430,7 @@ public abstract class Axis {
         if (ticks.size() >= 2) {
             double tickPixelInterval = Math.abs(scale(ticks.get(1).getValue()) - scale(ticks.get(0).getValue()));
             // calculate tick distance to avoid labels overlapping.
-            int labelSize = labelSizeForOverlap(tm, ticks);
-            int requiredSpaceForTickLabel = labelSize + getInterLabelGap();
+            int requiredSpaceForTickLabel = getRequiredSpaceForTickLabel(tm, ticks);
 
             if (tickPixelInterval < requiredSpaceForTickLabel) {
                 if(isRoundingEnabled()) {
@@ -588,10 +564,12 @@ public abstract class Axis {
     }
 
     protected int getInterLabelGap() {
-        return (int)(2 * config.getTickLabelTextStyle().getSize());
+        return  (int)(2 * config.getTickLabelTextStyle().getSize());
     }
 
-    public abstract double getBestExtent(BCanvas canvas, int length);
+    protected int getRequiredSpaceForTickLabel(TextMetric tm, List<Tick> ticks) {
+        return  labelSizeForOverlap(tm, ticks) + getInterLabelGap();
+    }
 
     protected abstract void translateCanvas(BCanvas canvas, BRectangle area);
 

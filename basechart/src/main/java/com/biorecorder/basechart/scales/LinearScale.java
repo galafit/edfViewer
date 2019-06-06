@@ -11,49 +11,52 @@ import java.util.Arrays;
 /**
  * Created by galafit on 6/9/17.
  */
-public class LinearScale implements Scale {
+public class LinearScale extends Scale {
     private DecimalFormat numberFormatter;
-    protected double domain[] = {0, 1};
-    protected double range[] = {0, 1};
 
     @Override
     public Scale copy() {
         LinearScale copyScale = new LinearScale();
-        copyScale.setDomain(domain);
-        copyScale.setRange(range);
+        copyScale.setMinMax(getMin(), getMax());
+        copyScale.setStartEnd(getStart(), getEnd());
         return copyScale;
     }
 
     @Override
-    public void setDomain(double... domain) {
-        this.domain = Arrays.copyOf(domain, domain.length);
-        numberFormatter = null;
+    public boolean equals(Object o) {
+        if (!(o instanceof LinearScale)) {
+            return false;
+        }
+        return super.equals(o);
+    }
+
+
+    @Override
+    public boolean setMinMax(double min, double max) {
+        boolean isChanged = super.setMinMax(min, max);
+        if(isChanged) {
+            numberFormatter = null;
+        }
+        return isChanged;
     }
 
     @Override
-    public void setRange(double... range) {
-        this.range = Arrays.copyOf(range, range.length);
-        numberFormatter = null;
-    }
-
-    @Override
-    public double[] getDomain() {
-        return Arrays.copyOf(domain, domain.length);
-    }
-
-    @Override
-    public double[] getRange() {
-        return Arrays.copyOf(range, range.length);
+    public boolean setStartEnd(double start, double end) {
+        boolean isChanged = super.setStartEnd(start, end);
+        if(isChanged) {
+            numberFormatter = null;
+        }
+        return isChanged;
     }
 
     @Override
     public double scale(double value) {
-        return (range[0] + (value - domain[0]) * (range[range.length - 1] - range[0]) / (domain[domain.length - 1] - domain[0]));
+        return (getStart() + (value - getMin()) * (getEnd()- getStart()) / (getMax() - getMin()));
     }
 
     @Override
     public double invert(double value) {
-        return domain[0] + (value - range[0]) * (domain[domain.length - 1] - domain[0]) / (range[range.length - 1] - range[0]);
+        return getMin() + (value - getStart()) * (getMax() - getMin()) / (getEnd() - getStart());
     }
 
     @Override
