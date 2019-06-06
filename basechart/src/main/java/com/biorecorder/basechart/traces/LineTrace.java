@@ -86,7 +86,7 @@ public class LineTrace implements Trace {
         }
 
         BPath path = null;
-        canvas.setStroke(traceConfig.getLineStroke());
+        canvas.setStroke(traceConfig.getLineWidth(), traceConfig.getLineDashStyle());
         BColor lineColor = traceColor;
         BColor markColor = traceColor;
         if(traceConfig.getMode() == LineTraceConfig.LINEAR) {

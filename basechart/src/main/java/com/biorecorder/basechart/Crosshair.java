@@ -2,7 +2,7 @@ package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.graphics.BStroke;
+import com.biorecorder.basechart.graphics.DashStyle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Crosshair {
     }
 
     public void draw(BCanvas canvas, BRectangle area){
-        canvas.setStroke(new BStroke(crossHairConfig.getLineWidth()));
+        canvas.setStroke(crossHairConfig.getLineWidth(), DashStyle.SOLID);
         canvas.setColor(crossHairConfig.getLineColor());
         canvas.drawLine(x,area.y, x,area.y + area.height);
         for (Integer y : yList) {

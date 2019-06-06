@@ -18,9 +18,9 @@ public class AxisRight extends AxisVertical {
     @Override
     protected int getLabelX() {
         if(config.isTickLabelOutside()) {
-            return config.getAxisLineStroke().getWidth() / 2 + config.getTickMarkOutsideSize() + config.getTickPadding();
+            return config.getAxisLineWidth() / 2 + config.getTickMarkOutsideSize() + config.getTickPadding();
         } else {
-            return -config.getAxisLineStroke().getWidth() / 2  - config.getTickPadding();
+            return -config.getAxisLineWidth() / 2  - config.getTickPadding();
         }
     }
 
@@ -35,7 +35,7 @@ public class AxisRight extends AxisVertical {
 
     @Override
     protected void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize) {
-        int axisWidth = config.getAxisLineStroke().getWidth();
+        int axisWidth = config.getAxisLineWidth();
         int y = tickPosition;
         int x1 = axisWidth / 2 + outsideSize;
         int x2 = -axisWidth / 2 - insideSize;

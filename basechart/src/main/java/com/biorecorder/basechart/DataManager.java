@@ -7,7 +7,6 @@ import com.biorecorder.data.sequence.StringSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

@@ -248,7 +248,7 @@ public class NavigableChart {
         }
 
         canvas.setColor(scrollConfig.getColor());
-        canvas.setStroke(new BStroke(borderWidth));
+        canvas.setStroke(borderWidth, DashStyle.SOLID);
         canvas.drawRect(scrollStart, scrollY, scrollWidth, scrollHeight);
 
     }

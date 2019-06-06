@@ -18,7 +18,7 @@ public interface BCanvas {
     public TextMetric getTextMetric();
 
     public void setColor(BColor color);
-    public void setStroke(BStroke stroke);
+    public void setStroke(int width, DashStyle dashStyle);
     public void setTextStyle(TextStyle textStyle);
 
     public void setClip(int x, int y, int width, int height);

@@ -1,6 +1,5 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextMetric;
 import com.biorecorder.basechart.graphics.*;
@@ -9,8 +8,6 @@ import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.data.sequence.StringSequence;
 
-import java.awt.font.NumericShaper;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +42,7 @@ public abstract class Axis {
 
     public int getWidth(BCanvas canvas) {
         if (isTooShort()) {
-            return config.getAxisLineStroke().getWidth() / 2;
+            return config.getAxisLineWidth() / 2;
         }
         if (width < 0) { // calculateStats width
             width = calculateWidth(canvas);
@@ -263,7 +260,7 @@ public abstract class Axis {
     }
 
     public void drawGrid(BCanvas canvas, BRectangle area) {
-        if (isTooShort() || config.getGridLineStroke().getWidth() == 0) {
+        if (isTooShort() || config.getGridLineWidth() == 0) {
             return;
         }
         canvas.save();
@@ -274,13 +271,13 @@ public abstract class Axis {
         translateCanvas(canvas, area);
 
         canvas.setColor(config.getGridColor());
-        canvas.setStroke(config.getGridLineStroke());
+        canvas.setStroke(config.getGridLineWidth(), config.getGridLineDashStyle());
         for (int i = 0; i < tickPositions.size(); i++) {
             drawGridLine(canvas, tickPositions.get(i), area);
         }
 
         canvas.setColor(config.getMinorGridColor());
-        canvas.setStroke(config.getMinorGridLineStroke());
+        canvas.setStroke(config.getMinorGridLineWidth(), config.getMinorGridLineDashStyle());
         for (int i = 0; i < minorTickPositions.size(); i++) {
             drawGridLine(canvas, minorTickPositions.get(i), area);
         }
@@ -299,7 +296,7 @@ public abstract class Axis {
         if (!isTooShort()) {
             if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
                 canvas.setColor(config.getTickMarkColor());
-                canvas.setStroke(new BStroke(config.getTickMarkWidth()));
+                canvas.setStroke(config.getTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < tickPositions.size(); i++) {
                     drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
                 }
@@ -307,13 +304,13 @@ public abstract class Axis {
 
             if (config.getMinorTickMarkInsideSize() > 0 || config.getMinorTickMarkOutsideSize() > 0) {
                 canvas.setColor(config.getMinorTickMarkColor());
-                canvas.setStroke(new BStroke(config.getMinorTickMarkWidth()));
+                canvas.setStroke(config.getMinorTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < minorTickPositions.size(); i++) {
                     drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
                 }
             }
 
-            canvas.setStroke(new BStroke(1));
+            canvas.setStroke(1, DashStyle.SOLID);
             canvas.setColor(config.getTickLabelColor());
             canvas.setTextStyle(config.getTickLabelTextStyle());
             for (BText tickLabel : tickLabels) {
@@ -330,9 +327,9 @@ public abstract class Axis {
             }
         }
 
-        if (config.getAxisLineStroke().getWidth() > 0) {
+        if (config.getAxisLineWidth() > 0) {
             canvas.setColor(config.getAxisLineColor());
-            canvas.setStroke(config.getAxisLineStroke());
+            canvas.setStroke(config.getAxisLineWidth(), config.getAxisLineDashStyle());
             drawAxisLine(canvas);
         }
 
@@ -341,7 +338,7 @@ public abstract class Axis {
 
     private int calculateWidth(BCanvas canvas) {
         int width = 0;
-        width += config.getAxisLineStroke().getWidth() / 2;
+        width += config.getAxisLineWidth() / 2;
         width += config.getTickMarkOutsideSize();
 
         if (config.isTickLabelOutside()) {

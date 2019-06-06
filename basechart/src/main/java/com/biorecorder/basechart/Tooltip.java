@@ -54,7 +54,7 @@ public class Tooltip {
         canvas.setColor(tooltipConfig.getBackgroundColor());
         canvas.fillRect(tooltipArea.x, tooltipArea.y, tooltipArea.width, tooltipArea.height);
         canvas.setColor(tooltipConfig.getBorderColor());
-        canvas.setStroke(new BStroke(tooltipConfig.getBorderWidth()));
+        canvas.setStroke(tooltipConfig.getBorderWidth(), DashStyle.SOLID);
         canvas.drawRect(tooltipArea.x, tooltipArea.y, tooltipArea.width, tooltipArea.height);
         drawTooltipInfo(canvas, tooltipArea);
     }

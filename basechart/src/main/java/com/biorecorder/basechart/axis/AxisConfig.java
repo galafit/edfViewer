@@ -1,8 +1,8 @@
 package com.biorecorder.basechart.axis;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BStroke;
 import com.biorecorder.basechart.TextStyle;
+import com.biorecorder.basechart.graphics.DashStyle;
 import com.sun.istack.internal.Nullable;
 
 /**
@@ -10,7 +10,8 @@ import com.sun.istack.internal.Nullable;
  */
 public class AxisConfig {
     private BColor axisLineColor =  BColor.GRAY;
-    private BStroke axisLineStroke = new BStroke(1); // if width = 0 line will not be drawn
+    private int axisLineWidth = 1; // if width = 0 line will not be drawn
+    private DashStyle axisLineDashStyle = DashStyle.SOLID;
 
     private int tickPadding; // (px) padding between tick mark and tick label
     private TextStyle tickLabelTextStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
@@ -32,10 +33,12 @@ public class AxisConfig {
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
-    private BStroke gridLineStroke = new BStroke(1);
     private BColor gridColor = BColor.GRAY_LIGHT;
+    private int gridLineWidth = 1;
+    private DashStyle gridLineDashStyle = DashStyle.SOLID;
 
-    private BStroke minorGridLineStroke = new BStroke(1, BStroke.DOT);
+    private int minorGridLineWidth = 1;
+    private DashStyle minorGridLineDashStyle = DashStyle.DOT;
     private BColor minorGridColor = BColor.GRAY_LIGHT;
     private int minorTickMarkInsideSize = 0; // px
     private int minorTickMarkOutsideSize = 0; // px
@@ -43,6 +46,9 @@ public class AxisConfig {
     private boolean isRoundingEnabled = false;
     private boolean isTickLabelOutside = true;
 
+    private BColor crosshairLineColor = BColor.GRAY;
+    private int crosshairLineWidth = 1;
+    private DashStyle crosshairLineDashStyle = DashStyle.SOLID;
 
     public AxisConfig() {
         titlePadding = titleTextStyle.getSize() / 2;
@@ -51,12 +57,15 @@ public class AxisConfig {
 
     public AxisConfig(AxisConfig axisConfig) {
         axisLineColor = axisConfig.axisLineColor;
-        axisLineStroke = new BStroke(axisConfig.axisLineStroke);
+        axisLineWidth = axisConfig.axisLineWidth;
+        axisLineDashStyle = axisConfig.axisLineDashStyle;
 
         gridColor = axisConfig.gridColor;
         minorGridColor = axisConfig.minorGridColor;
-        gridLineStroke = new BStroke(axisConfig.gridLineStroke);
-        minorGridLineStroke = new BStroke(axisConfig.minorGridLineStroke);
+        gridLineDashStyle = axisConfig.gridLineDashStyle;
+        gridLineWidth = axisConfig.gridLineWidth;
+        minorGridLineDashStyle = axisConfig.minorGridLineDashStyle;
+        minorGridLineWidth = axisConfig.minorGridLineWidth;
 
         tickPadding = axisConfig.tickPadding;
         tickMarkWidth = axisConfig.tickMarkWidth;
@@ -81,8 +90,39 @@ public class AxisConfig {
         titleColor = axisConfig.titleColor;
 
         isTickLabelOutside = axisConfig.isTickLabelOutside;
+
+        crosshairLineColor = axisConfig.crosshairLineColor;
+        crosshairLineDashStyle = axisConfig.crosshairLineDashStyle;
+        crosshairLineWidth = axisConfig.crosshairLineWidth;
     }
 
+    public void setTickLabelTextStyle(TextStyle tickLabelTextStyle) {
+        this.tickLabelTextStyle = tickLabelTextStyle;
+    }
+
+    public BColor getCrosshairLineColor() {
+        return crosshairLineColor;
+    }
+
+    public void setCrosshairLineColor(BColor crosshairLineColor) {
+        this.crosshairLineColor = crosshairLineColor;
+    }
+
+    public int getCrosshairLineWidth() {
+        return crosshairLineWidth;
+    }
+
+    public void setCrosshairLineWidth(int crosshairLineWidth) {
+        this.crosshairLineWidth = crosshairLineWidth;
+    }
+
+    public DashStyle getCrosshairLineDashStyle() {
+        return crosshairLineDashStyle;
+    }
+
+    public void setCrosshairLineDashStyle(DashStyle crosshairLineDashStyle) {
+        this.crosshairLineDashStyle = crosshairLineDashStyle;
+    }
 
     public boolean isRoundingEnabled() {
         return isRoundingEnabled;
@@ -96,7 +136,7 @@ public class AxisConfig {
         this.tickInterval = tickInterval;
     }
 
-    public void setLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
+    public void setTickLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
         tickLabelPrefixAndSuffix = new LabelPrefixAndSuffix(prefix, suffix);
     }
 
@@ -124,12 +164,12 @@ public class AxisConfig {
         this.minorTickIntervalCount = minorTickIntervalCount;
     }
 
-    public void setColors(BColor baseColor, BColor gridColor, BColor minorGridColor) {
-        axisLineColor = baseColor;
-        tickLabelColor = baseColor;
-        tickMarkColor = baseColor;
-        minorTickMarkColor = baseColor;
-        titleColor = baseColor;
+    public void setColors(BColor axisColor, BColor gridColor, BColor minorGridColor) {
+        axisLineColor = axisColor;
+        tickLabelColor = axisColor;
+        tickMarkColor = axisColor;
+        minorTickMarkColor = axisColor;
+        titleColor = axisColor;
         this.gridColor = gridColor;
         this.minorGridColor = minorGridColor;
     }
@@ -146,14 +186,21 @@ public class AxisConfig {
         this.axisLineColor = lineColor;
     }
 
-    public BStroke getAxisLineStroke() {
-        return axisLineStroke;
+    public int getAxisLineWidth() {
+        return axisLineWidth;
     }
 
-    public void setAxisLineStroke(BStroke axisLineStroke) {
-        this.axisLineStroke = axisLineStroke;
+    public void setAxisLineWidth(int axisLineWidth) {
+        this.axisLineWidth = axisLineWidth;
     }
 
+    public DashStyle getAxisLineDashStyle() {
+        return axisLineDashStyle;
+    }
+
+    public void setAxisLineDashStyle(DashStyle axisLineDashStyle) {
+        this.axisLineDashStyle = axisLineDashStyle;
+    }
 
     /** ======================= Title ========================== **/
 
@@ -262,14 +309,21 @@ public class AxisConfig {
         return minorTickMarkColor;
     }
 
-    public BStroke getMinorGridLineStroke() {
-        return minorGridLineStroke;
+    public int getMinorGridLineWidth() {
+        return minorGridLineWidth;
     }
 
-    public void setMinorGridLineStroke(BStroke minorGridLineStroke) {
-        this.minorGridLineStroke = minorGridLineStroke;
+    public void setMinorGridLineWidth(int minorGridLineWidth) {
+        this.minorGridLineWidth = minorGridLineWidth;
     }
 
+    public DashStyle getMinorGridLineDashStyle() {
+        return minorGridLineDashStyle;
+    }
+
+    public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle) {
+        this.minorGridLineDashStyle = minorGridLineDashStyle;
+    }
 
     public int getMinorTickMarkWidth() {
         return minorTickMarkWidth;
@@ -299,12 +353,19 @@ public class AxisConfig {
         return minorGridColor;
     }
 
-    public BStroke getGridLineStroke() {
-        return gridLineStroke;
+    public int getGridLineWidth() {
+        return gridLineWidth;
     }
 
-    public void setGridLineStroke(BStroke gridLineStroke) {
-        this.gridLineStroke = gridLineStroke;
+    public void setGridLineWidth(int gridLineWidth) {
+        this.gridLineWidth = gridLineWidth;
     }
 
+    public DashStyle getGridLineDashStyle() {
+        return gridLineDashStyle;
+    }
+
+    public void setGridLineDashStyle(DashStyle gridLineDashStyle) {
+        this.gridLineDashStyle = gridLineDashStyle;
+    }
 }

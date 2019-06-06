@@ -13,17 +13,11 @@ import java.util.List;
 
 /**
  * TODO implement XY search nearest point (QuadTree)
-
  * убрать двойку в формированиее тултипов
- *
- * оси - два признака visible и unused
- * во всех действиях проверять что если ось unused то ничего с ней  не делать
- * а инвизибл должна идти как обычная ось
  *
  * удаление неиспользуемых скролов в чарте с навигацией
  *
- * убрать -0.5 и +0.5 из getXFullMinMax()
- *
+ * метод isInverted в Trace
  * задавать где то DataProcessingConfig
  */
 class DataPainter {

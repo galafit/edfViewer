@@ -62,7 +62,7 @@ public class SwingCanvas implements BCanvas {
     @Override
     public void restore() {
         int lastTransform = affineTransforms.size() - 1;
-        if(lastTransform >= 0) {
+        if (lastTransform >= 0) {
             g2.setTransform(affineTransforms.get(lastTransform));
             g2.setClip(boundsList.get(lastTransform));
             boundsList.remove(lastTransform);
@@ -78,14 +78,14 @@ public class SwingCanvas implements BCanvas {
 
     private Font getFont(TextStyle textStyle) {
         String fontName = textStyle.getFontName();
-        if(fontName == TextStyle.DEFAULT) {
+        if (fontName == TextStyle.DEFAULT) {
             fontName = new JLabel().getFont().getFontName();
         }
         int style = Font.PLAIN;
-        if(textStyle.isBold()) {
+        if (textStyle.isBold()) {
             style += Font.BOLD;
         }
-        if(textStyle.isItalic()) {
+        if (textStyle.isItalic()) {
             style += Font.ITALIC;
         }
         return new Font(fontName, style, textStyle.getSize());
@@ -95,6 +95,7 @@ public class SwingCanvas implements BCanvas {
     public TextMetric getTextMetric() {
         return new TextMetric() {
             FontMetrics fm = g2.getFontMetrics();
+
             @Override
             public int ascent() {
                 return fm.getAscent();
@@ -112,7 +113,7 @@ public class SwingCanvas implements BCanvas {
 
             @Override
             public int stringWidth(String str) {
-                if(str != null) {
+                if (str != null) {
                     return fm.stringWidth(str);
                 }
                 return 0;
@@ -125,6 +126,7 @@ public class SwingCanvas implements BCanvas {
     public TextMetric getTextMetric(TextStyle textStyle) {
         return new TextMetric() {
             FontMetrics fm = g2.getFontMetrics(getFont(textStyle));
+
             @Override
             public int ascent() {
                 return fm.getAscent();
@@ -142,7 +144,7 @@ public class SwingCanvas implements BCanvas {
 
             @Override
             public int stringWidth(String str) {
-                if(str != null) {
+                if (str != null) {
                     return fm.stringWidth(str);
                 }
                 return 0;
@@ -153,32 +155,39 @@ public class SwingCanvas implements BCanvas {
 
     @Override
     public void setColor(BColor color) {
-        g2.setColor(new Color(color.getRed(),  color.getGreen(), color.getBlue(), color.getAlpha()));
+        g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()));
     }
 
     @Override
-    public void setStroke(BStroke stroke) {
-        Stroke awtStroke = new BasicStroke(stroke.getWidth());
-
-        if(stroke.getStyle() == BStroke.DASH_LONG) {
-            float[] dash = {4f, 0f, 2f};
-            awtStroke = new BasicStroke(stroke.getWidth(), BasicStroke.CAP_BUTT,
-                    BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
-        }
-        if(stroke.getStyle() == BStroke.DASH_SHORT) {
-            float[] dash = {2f, 0f, 2f};
-            awtStroke = new BasicStroke(stroke.getWidth(), BasicStroke.CAP_BUTT,
-                    BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
-        }
-        if(stroke.getStyle() == BStroke.DASH_DOT) {
-            float[] dash = {4f, 4f, 1f};
-            awtStroke = new BasicStroke(stroke.getWidth(), BasicStroke.CAP_BUTT,
-                    BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
-        }
-        if(stroke.getStyle() == BStroke.DOT) {
-            float[] dash = {1f, 3f};
-            awtStroke = new BasicStroke(stroke.getWidth(), BasicStroke.CAP_BUTT,
-                    BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
+    public void setStroke(int width, DashStyle dashStyle) {
+        Stroke awtStroke;
+        switch (dashStyle) {
+            case DOT: {
+                float[] dash = {1f, 3f};
+                awtStroke = new BasicStroke(width, BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
+                break;
+            }
+            case DASH_DOT: {
+                float[] dash = {4f, 4f, 1f};
+                awtStroke = new BasicStroke(width, BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
+                break;
+            }
+            case DASH_LONG: {
+                float[] dash = {4f, 0f, 2f};
+                awtStroke = new BasicStroke(width, BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
+                break;
+            }
+            case DASH_SHORT: {
+                float[] dash = {2f, 0f, 2f};
+                awtStroke = new BasicStroke(width, BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_ROUND, 1.0f, dash, 2f);
+                break;
+            }
+            default:
+                awtStroke = new BasicStroke(width);
         }
         g2.setStroke(awtStroke);
 

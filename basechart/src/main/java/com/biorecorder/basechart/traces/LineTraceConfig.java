@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BStroke;
+import com.biorecorder.basechart.graphics.DashStyle;
 
 /**
  * Created by galafit on 11/10/17.
@@ -11,7 +11,8 @@ public class LineTraceConfig {
     public static final int STEP = 1;
     public static final int VERTICAL_LINES = 2;
 
-    private BStroke lineStroke = new BStroke();
+    private int lineWidth = 1;
+    private DashStyle lineDashStyle = DashStyle.SOLID;
     private int mode;
     private boolean isFilled = false;
     private int markSize = 20 ; // point size
@@ -58,11 +59,19 @@ public class LineTraceConfig {
         return isFilled;
     }
 
-    public BStroke getLineStroke() {
-        return lineStroke;
+    public int getLineWidth() {
+        return lineWidth;
     }
 
-    public void setLineStroke(BStroke lineStroke) {
-        this.lineStroke = lineStroke;
+    public void setLineWidth(int lineWidth) {
+        this.lineWidth = lineWidth;
+    }
+
+    public DashStyle getLineDashStyle() {
+        return lineDashStyle;
+    }
+
+    public void setLineDashStyle(DashStyle lineDashStyle) {
+        this.lineDashStyle = lineDashStyle;
     }
 }
