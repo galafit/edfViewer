@@ -1,5 +1,6 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.AxisWrapper;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
@@ -226,6 +227,71 @@ class DataPainter {
             return new NearestTracePoint(new DataPainterTracePoint(this, closestTrace, pointIndex), minDistance);
         }
         return null;
+    }
+
+    public List<Crosshair> createCrosshairs(int hoverPointIndex, int hoverTrace, boolean isMultiTrace, AxisWrapper xAxis, AxisWrapper[] yAxes) {
+        List<Crosshair> crosshairs =  new ArrayList<>();
+
+        int xPosition;
+        int traceStart;
+        int traceEnd;
+        if (isMultiTrace) { // all trace traces
+            traceStart = 0;
+            traceEnd = traceCount() - 1;
+        } else { // only hover trace
+            traceStart = hoverTrace;
+            traceEnd = hoverTrace;
+        }
+
+        BRectangle hoverAreaStart = tracePointHoverArea(hoverPointIndex, traceStart, xAxis.getScale(), yAxes[0].getScale());
+        BRectangle hoverAreaEnd = tracePointHoverArea(hoverPointIndex, traceEnd, xAxis.getScale(), yAxes[yAxes.length - 1].getScale());
+
+        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
+        crosshairs.add(new Crosshair(xAxis, xPosition));
+
+        for (int trace = traceStart; trace <= traceEnd; trace++) {
+            AxisWrapper yAxis = yAxes[trace];
+            BRectangle traceArea = tracePointHoverArea(hoverPointIndex, trace, xAxis.getScale(), yAxis.getScale());
+            crosshairs.add(new Crosshair(yAxis,traceArea.y));
+        }
+        return crosshairs;
+    }
+
+    public Tooltip createTooltip(TooltipConfig tooltipConfig, int hoverPointIndex, int hoverTrace, boolean isMultiTrace, Scale xScale, Scale[] yScales) {
+        int tooltipYPosition = 0;
+        NamedValue xValue = xValue(hoverPointIndex, xScale);
+
+        int xPosition;
+        int traceStart;
+        int traceEnd;
+        if (isMultiTrace) { // all trace traces
+            traceStart = 0;
+            traceEnd = traceCount() - 1;
+        } else { // only hover trace
+            traceStart = hoverTrace;
+            traceEnd = hoverTrace;
+        }
+
+        BRectangle hoverAreaStart = tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScales[0]);
+        BRectangle hoverAreaEnd = tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScales[yScales.length - 1]);
+
+        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
+        Tooltip tooltip = new Tooltip(tooltipConfig, xPosition, tooltipYPosition);
+        tooltip.setHeader(null, null, xValue.getValue());
+
+        for (int trace = traceStart; trace <= traceEnd; trace++) {
+            Scale yScale = yScales[trace];
+            NamedValue[] traceValues = traceValues(hoverPointIndex, trace, xScale, yScale);
+            if (traceValues.length == 2) {
+                tooltip.addLine(getTraceColor(trace), getTraceName(trace), traceValues[1].getValue());
+            } else {
+                tooltip.addLine(getTraceColor(trace), getTraceName(trace), "");
+                for (NamedValue traceValue : traceValues) {
+                    tooltip.addLine(null, traceValue.getValueName(), traceValue.getValue());
+                }
+            }
+        }
+        return tooltip;
     }
 
     void setTraceName(int trace, String name) {

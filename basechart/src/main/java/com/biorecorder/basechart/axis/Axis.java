@@ -259,6 +259,15 @@ public abstract class Axis {
         scale.setMinMax(tickMin.getValue(), tickMax.getValue());
     }
 
+    public void drawCrosshair(BCanvas canvas, BRectangle area, int position) {
+        canvas.save();
+        translateCanvas(canvas, area);
+        canvas.setColor(config.getCrosshairLineColor());
+        canvas.setStroke(config.getCrosshairLineWidth(), config.getCrosshairLineDashStyle());
+        drawGridLine(canvas, position, area);
+        canvas.restore();
+    }
+
     public void drawGrid(BCanvas canvas, BRectangle area) {
         if (isTooShort() || config.getGridLineWidth() == 0) {
             return;

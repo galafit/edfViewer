@@ -1,6 +1,5 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 
@@ -41,7 +40,7 @@ public class NavigableChartConfig {
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
 
-        BColor scrollColor = chartConfig.getCrossHairConfig().getLineColor();
+        BColor scrollColor = BColor.GRAY_LIGHT;
         scrollConfig.setColor(scrollColor);
     }
 

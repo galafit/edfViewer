@@ -46,12 +46,13 @@ public class WhiteTheme implements Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
+        xAxisConfig.setCrosshairLineColor(crosshairColor);
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
-
+        yAxisConfig.setCrosshairLineColor(crosshairColor);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);
@@ -60,7 +61,6 @@ public class WhiteTheme implements Theme {
         chartConfig.getTitleConfig().setTextColor(titleColor);
         chartConfig.setYAxisConfig(yAxisConfig);
         chartConfig.setXAxisConfig(xAxisConfig);
-        chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
         chartConfig.setPrimaryYPosition(YAxisPosition.LEFT);

@@ -39,7 +39,7 @@ public class Chart {
     private BRectangle graphArea;
     private Insets margin;
 
-    private Crosshair crosshair;
+    private List<Crosshair> crosshairs = new ArrayList<>(0);
     private Tooltip tooltip;
 
     private DataPainterTracePoint hoverPoint;
@@ -627,10 +627,31 @@ public class Chart {
     boolean hoverOff() {
         if (hoverPoint != null) {
             hoverPoint = null;
+            tooltip = null;
+            crosshairs = new ArrayList<>(0);
             return true;
         }
         return false;
     }
+
+    private void updateTooltipAndCrosshairs(DataPainterTracePoint hoverPoint) {
+        DataPainter dataPainter = hoverPoint.getDataPainter();
+
+        AxisWrapper xAxis = xAxisList.get(dataPainter.getXIndex());
+        AxisWrapper[] traceYAxes = new AxisWrapper[dataPainter.traceCount()];
+        for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+            traceYAxes[trace] = yAxisList.get(getTraceYIndex(dataPainter,  trace));
+        }
+        Scale[] traceYScales = new Scale[traceYAxes.length];
+        for (int i = 0; i < traceYAxes.length; i++) {
+            traceYScales[i] = traceYAxes[i].getScale();
+        }
+
+        tooltip = dataPainter.createTooltip(config.getTooltipConfig(), hoverPoint.getPointIndex(), hoverPoint.getTrace(), config.isMultiTraceTooltip(), xAxis.getScale(), traceYScales);
+        crosshairs = dataPainter.createCrosshairs(hoverPoint.getPointIndex(), hoverPoint.getTrace(), config.isMultiTraceTooltip(), xAxis, traceYAxes);
+
+    }
+
 
     boolean hoverOn(int x, int y) {
         if (!graphArea.contains(x, y)) {
@@ -647,7 +668,7 @@ public class Chart {
                     return false;
                 } else {
                     hoverPoint = nearestTracePoint.getTracePoint();
-                    updateTooltipAndCrosshair();
+                    updateTooltipAndCrosshairs(hoverPoint);
                     return true;
                 }
             } else if (hoverPoint == null) {
@@ -665,7 +686,7 @@ public class Chart {
                     return false;
                 } else {
                     hoverPoint = nearestTracePoint.getTracePoint();
-                    updateTooltipAndCrosshair();
+                    updateTooltipAndCrosshairs(hoverPoint);
                     return true;
                 }
             }
@@ -695,61 +716,11 @@ public class Chart {
 
         if (closestTracePoint != null) {
             hoverPoint = closestTracePoint.getTracePoint();
-            updateTooltipAndCrosshair();
+            updateTooltipAndCrosshairs(hoverPoint);
             return true;
         }
 
         return false;
-    }
-
-    private void updateTooltipAndCrosshair() {
-        if (hoverPoint == null) {
-            return;
-        }
-        DataPainter hoverDataPainter = hoverPoint.getDataPainter();
-        int hoverTrace = hoverPoint.getTrace();
-        int hoverPointIndex = hoverPoint.getPointIndex();
-        int tooltipYPosition = 0;
-        Scale xScale = xAxisList.get(hoverDataPainter.getXIndex()).getScale();
-        NamedValue xValue = hoverDataPainter.xValue(hoverPointIndex, xScale);
-
-        int xPosition;
-        int traceStart;
-        int traceEnd;
-        if (config.isMultiTraceTooltip()) { // all trace traces
-            traceStart = 0;
-            traceEnd = hoverDataPainter.traceCount() - 1;
-        } else { // only hover trace
-            traceStart = hoverTrace;
-            traceEnd = hoverTrace;
-        }
-        Scale yScaleStart = yAxisList.get(getTraceYIndex(hoverDataPainter, traceStart)).getScale();
-        Scale yScaleEnd = yAxisList.get(getTraceYIndex(hoverDataPainter, traceEnd)).getScale();
-
-        BRectangle hoverAreaStart = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScaleStart);
-        BRectangle hoverAreaEnd = hoverDataPainter.tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScaleEnd);
-
-        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
-        crosshair = new Crosshair(config.getCrossHairConfig(), xPosition);
-        tooltip = new Tooltip(config.getTooltipConfig(), xPosition, tooltipYPosition);
-        tooltip.setHeader(null, null, xValue.getValue());
-
-
-        for (int trace = traceStart; trace <= traceEnd; trace++) {
-            Scale yScale = yAxisList.get(getTraceYIndex(hoverDataPainter, trace)).getScale();
-            NamedValue[] traceValues = hoverDataPainter.traceValues(hoverPointIndex, trace, xScale, yScale);
-            if (traceValues.length == 2) {
-                tooltip.addLine(hoverDataPainter.getTraceColor(trace), hoverDataPainter.getTraceName(trace), traceValues[1].getValue());
-            } else {
-                tooltip.addLine(hoverDataPainter.getTraceColor(trace), hoverDataPainter.getTraceName(trace), "");
-                for (NamedValue traceValue : traceValues) {
-                    tooltip.addLine(null, traceValue.getValueName(), traceValue.getValue());
-                }
-            }
-            BRectangle traceArea = hoverDataPainter.tracePointHoverArea(hoverPointIndex, trace, xScale, yScale);
-            crosshair.addY(traceArea.y);
-        }
-
     }
 
 
@@ -860,9 +831,11 @@ public class Chart {
             legend.draw(canvas);
         }
 
-        if (hoverPoint != null) {
-            crosshair.draw(canvas, graphArea);
+        if (tooltip != null) {
             tooltip.draw(canvas, fullArea);
+        }
+        for (Crosshair crosshair : crosshairs) {
+            crosshair.draw(canvas, graphArea);
         }
     }
 

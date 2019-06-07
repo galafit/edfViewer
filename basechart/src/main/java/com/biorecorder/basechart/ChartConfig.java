@@ -17,7 +17,6 @@ public class ChartConfig {
     private TitleConfig titleConfig = new TitleConfig();
     private LegendConfig legendConfig = new LegendConfig();
     private TooltipConfig tooltipConfig = new TooltipConfig();
-    private CrosshairConfig crossHairConfig = new CrosshairConfig();
 
     private Insets margin;
     private Insets spacing;
@@ -62,9 +61,11 @@ public class ChartConfig {
 
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
+        xAxisConfig.setCrosshairLineColor(crosshairColor);
 
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(4, 0);
+        yAxisConfig.setCrosshairLineColor(crosshairColor);
         
         traceColors = colors;
         backgroundColor = bgColor;
@@ -72,7 +73,7 @@ public class ChartConfig {
         titleConfig.setTextColor(titleColor);
         yAxisConfig = new AxisConfig(yAxisConfig);
         xAxisConfig = new AxisConfig(yAxisConfig);
-        crossHairConfig.setLineColor(crosshairColor);
+
         legendConfig.setBackgroundColor(bgColor);
         legendConfig.setMargin(new Insets(1));
     }
@@ -84,7 +85,6 @@ public class ChartConfig {
         titleConfig = new TitleConfig(chartConfig.titleConfig);
         legendConfig = new LegendConfig(chartConfig.legendConfig);
         tooltipConfig = new TooltipConfig(chartConfig.tooltipConfig);
-        crossHairConfig = new CrosshairConfig(chartConfig.crossHairConfig);
         spacing = chartConfig.spacing;
         margin = chartConfig.margin;
         autoSpacing = chartConfig.autoSpacing;
@@ -201,10 +201,6 @@ public class ChartConfig {
 
     public TooltipConfig getTooltipConfig() {
         return tooltipConfig;
-    }
-
-    public CrosshairConfig getCrossHairConfig() {
-        return crossHairConfig;
     }
 
     public AxisConfig getYAxisConfig() {

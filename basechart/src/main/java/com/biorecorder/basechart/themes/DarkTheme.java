@@ -45,12 +45,14 @@ public class DarkTheme implements Theme {
         AxisConfig xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
+        xAxisConfig.setCrosshairLineColor(crosshairColor);
         //xAxisConfig.setMinorTickIntervalCount(3);
 
         AxisConfig yAxisConfig = new AxisConfig();
         yAxisConfig.setColors(axisColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
+        yAxisConfig.setCrosshairLineColor(crosshairColor);
         //yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
@@ -60,7 +62,6 @@ public class DarkTheme implements Theme {
         chartConfig.getTitleConfig().setTextColor(titleColor);
         chartConfig.setYAxisConfig(yAxisConfig);
         chartConfig.setXAxisConfig(xAxisConfig);
-        chartConfig.getCrossHairConfig().setLineColor(crosshairColor);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
         chartConfig.setDefaultStackWeight(4);
         chartConfig.setPrimaryYPosition(YAxisPosition.LEFT);

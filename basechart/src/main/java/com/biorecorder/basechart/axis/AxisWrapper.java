@@ -183,16 +183,13 @@ public class AxisWrapper {
         }
     }
 
-    /**
-     * this method DO AXIS ROUNDING
-     */
+    public void drawCrosshair(BCanvas canvas, BRectangle area, int position) {
+        axis.drawCrosshair(canvas, area, position);
+    }
     public void drawGrid(BCanvas canvas, BRectangle area) {
         axis.drawGrid(canvas, area);
     }
 
-    /**
-     * this method DO AXIS ROUNDING
-     */
     public void drawAxis(BCanvas canvas, BRectangle area) {
         axis.drawAxis(canvas, area);
     }
