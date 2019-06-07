@@ -14,11 +14,10 @@ import java.util.List;
 
 /**
  * TODO implement XY search nearest point (QuadTree)
- * убрать двойку в формированиее тултипов
- *
  * удаление неиспользуемых скролов в чарте с навигацией
  *
  * метод isInverted в Trace
+ *
  * задавать где то DataProcessingConfig
  */
 class DataPainter {
@@ -103,13 +102,6 @@ class DataPainter {
         return xIndex;
     }
 
-    private ChartData getData(Scale xScale) {
-        if(tracePainter.traceType() == TraceType.DIMENSIONAL2) {
-            dataManager.getData();
-        }
-        return dataManager.getProcessedData(xScale, tracePainter.markWidth());
-    }
-
     private void checkTraceNumber(int traceNumber) {
         if (traceNumber >= traceCount()) {
             String errMsg = "Trace = " + traceNumber + " Number of traces: " + traceCount();
@@ -152,38 +144,9 @@ class DataPainter {
         return tracePainter.argumentMinMax(getData(xScale));
     }
 
-    int distanceSqw(int pointIndex, int trace, int x, int y, Scale xScale, Scale yScale) {
-        checkTraceNumber(trace);
-        BRectangle hoverRect = tracePainter.tracePointHoverArea(getData(xScale), pointIndex, trace, xScale, yScale);
-        if (hoverRect.width > 0 && hoverRect.height > 0) {
-            if (hoverRect.contains(x, y)) {
-                return 0;
-            } else {
-                return -1;
-            }
-        } else if (hoverRect.width > 0) {
-            if (hoverRect.containsX(x)) {
-                return 0;
-            } else {
-                return -1;
-            }
-        } else if (hoverRect.height > 0) {
-            if (hoverRect.containsY(y)) {
-                return 0;
-            } else {
-                return -1;
-            }
-        }
-
-        int dy = hoverRect.y - y;
-        int dx = hoverRect.x - x;
-        return dy * dy + dx * dx;
-    }
-
     int traceCount() {
         return traceCount - hiddenTraceCount;
     }
-
 
     @Nullable
     NearestTracePoint nearest(int x, int y, int trace, Scale xScale, Scale yScale) {
@@ -199,7 +162,6 @@ class DataPainter {
             return null;
         }
     }
-
 
     @Nullable
     NearestTracePoint nearest(int x, int y, Scale xScale, Scale[] yScales) {
@@ -229,26 +191,21 @@ class DataPainter {
         return null;
     }
 
-    public List<Crosshair> createCrosshairs(int hoverPointIndex, int hoverTrace, boolean isMultiTrace, AxisWrapper xAxis, AxisWrapper[] yAxes) {
+    List<Crosshair> createCrosshairs(int hoverPointIndex, int hoverTrace, boolean isMultiTrace, AxisWrapper xAxis, AxisWrapper[] yAxes) {
         List<Crosshair> crosshairs =  new ArrayList<>();
+        Double xValue = argumentValue(hoverPointIndex, xAxis.getScale());
+        int xPosition = (int)xAxis.scale(xValue);
+        crosshairs.add(new Crosshair(xAxis, xPosition));
 
-        int xPosition;
         int traceStart;
         int traceEnd;
-        if (isMultiTrace) { // all trace traces
+        if (isMultiTrace) { // all  traces
             traceStart = 0;
             traceEnd = traceCount() - 1;
         } else { // only hover trace
             traceStart = hoverTrace;
             traceEnd = hoverTrace;
         }
-
-        BRectangle hoverAreaStart = tracePointHoverArea(hoverPointIndex, traceStart, xAxis.getScale(), yAxes[0].getScale());
-        BRectangle hoverAreaEnd = tracePointHoverArea(hoverPointIndex, traceEnd, xAxis.getScale(), yAxes[yAxes.length - 1].getScale());
-
-        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
-        crosshairs.add(new Crosshair(xAxis, xPosition));
-
         for (int trace = traceStart; trace <= traceEnd; trace++) {
             AxisWrapper yAxis = yAxes[trace];
             BRectangle traceArea = tracePointHoverArea(hoverPointIndex, trace, xAxis.getScale(), yAxis.getScale());
@@ -257,33 +214,28 @@ class DataPainter {
         return crosshairs;
     }
 
-    public Tooltip createTooltip(TooltipConfig tooltipConfig, int hoverPointIndex, int hoverTrace, boolean isMultiTrace, Scale xScale, Scale[] yScales) {
+    Tooltip createTooltip(TooltipConfig tooltipConfig, int hoverPointIndex, int hoverTrace, boolean isMultiTrace, Scale xScale, Scale[] yScales) {
         int tooltipYPosition = 0;
-        NamedValue xValue = xValue(hoverPointIndex, xScale);
 
-        int xPosition;
+        double argumentValue = argumentValue(hoverPointIndex, xScale);
+        int xPosition = (int)xScale.scale(argumentValue);
+        Tooltip tooltip = new Tooltip(tooltipConfig, xPosition, tooltipYPosition);
+        tooltip.setHeader(null, null, xScale.formatDomainValue(argumentValue));
+
         int traceStart;
         int traceEnd;
-        if (isMultiTrace) { // all trace traces
+        if (isMultiTrace) { // all traces
             traceStart = 0;
             traceEnd = traceCount() - 1;
         } else { // only hover trace
             traceStart = hoverTrace;
             traceEnd = hoverTrace;
         }
-
-        BRectangle hoverAreaStart = tracePointHoverArea(hoverPointIndex, traceStart, xScale, yScales[0]);
-        BRectangle hoverAreaEnd = tracePointHoverArea(hoverPointIndex, traceEnd, xScale, yScales[yScales.length - 1]);
-
-        xPosition = (hoverAreaEnd.x + hoverAreaEnd.width + hoverAreaStart.x) / 2;
-        Tooltip tooltip = new Tooltip(tooltipConfig, xPosition, tooltipYPosition);
-        tooltip.setHeader(null, null, xValue.getValue());
-
         for (int trace = traceStart; trace <= traceEnd; trace++) {
             Scale yScale = yScales[trace];
             NamedValue[] traceValues = traceValues(hoverPointIndex, trace, xScale, yScale);
-            if (traceValues.length == 2) {
-                tooltip.addLine(getTraceColor(trace), getTraceName(trace), traceValues[1].getValue());
+            if (traceValues.length == 1) {
+                tooltip.addLine(getTraceColor(trace), getTraceName(trace), traceValues[0].getValue());
             } else {
                 tooltip.addLine(getTraceColor(trace), getTraceName(trace), "");
                 for (NamedValue traceValue : traceValues) {
@@ -319,9 +271,42 @@ class DataPainter {
         }
     }
 
-    NamedValue xValue(int dataIndex, Scale xScale) {
-        double xValue = getData(xScale).value(dataIndex, 0);
-        return new NamedValue("x: ", xScale.formatDomainValue(xValue));
+    private ChartData getData(Scale xScale) {
+        if(tracePainter.traceType() == TraceType.DIMENSIONAL2) {
+            dataManager.getData();
+        }
+        return dataManager.getProcessedData(xScale, tracePainter.markWidth());
     }
 
+    private double argumentValue(int dataIndex, Scale argumentScale) {
+        return  getData(argumentScale).value(dataIndex, 0);
+    }
+
+    private int distanceSqw(int pointIndex, int trace, int x, int y, Scale xScale, Scale yScale) {
+        checkTraceNumber(trace);
+        BRectangle hoverRect = tracePainter.tracePointHoverArea(getData(xScale), pointIndex, trace, xScale, yScale);
+        if (hoverRect.width > 0 && hoverRect.height > 0) {
+            if (hoverRect.contains(x, y)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else if (hoverRect.width > 0) {
+            if (hoverRect.containsX(x)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else if (hoverRect.height > 0) {
+            if (hoverRect.containsY(y)) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+
+        int dy = hoverRect.y - y;
+        int dx = hoverRect.x - x;
+        return dy * dy + dx * dx;
+    }
 }

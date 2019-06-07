@@ -62,8 +62,7 @@ public class LineTrace implements Trace {
 
     @Override
     public NamedValue[] tracePointValues(ChartData data, int dataIndex, int trace, Scale argumentScale, Scale valueScale) {
-        NamedValue[] traceValues = {new NamedValue("",  argumentScale.formatDomainValue(data.value(dataIndex, 0))),
-                new NamedValue("",  valueScale.formatDomainValue(data.value(dataIndex, trace + 1)))};
+        NamedValue[] traceValues = {new NamedValue("",  valueScale.formatDomainValue(data.value(dataIndex, trace + 1)))};
         return traceValues;
     }
 

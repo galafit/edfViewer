@@ -393,6 +393,21 @@ public class Chart {
         }
     }
 
+    private void updateTooltipAndCrosshairs(DataPainterTracePoint hoverPoint, boolean isMultiTrace) {
+        DataPainter dataPainter = hoverPoint.getDataPainter();
+        AxisWrapper xAxis = xAxisList.get(dataPainter.getXIndex());
+        AxisWrapper[] traceYAxes = new AxisWrapper[dataPainter.traceCount()];
+        for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
+            traceYAxes[trace] = yAxisList.get(getTraceYIndex(dataPainter,  trace));
+        }
+        Scale[] traceYScales = new Scale[traceYAxes.length];
+        for (int i = 0; i < traceYAxes.length; i++) {
+            traceYScales[i] = traceYAxes[i].getScale();
+        }
+        tooltip = dataPainter.createTooltip(config.getTooltipConfig(), hoverPoint.getPointIndex(), hoverPoint.getTrace(), isMultiTrace, xAxis.getScale(), traceYScales);
+        crosshairs = dataPainter.createCrosshairs(hoverPoint.getPointIndex(), hoverPoint.getTrace(), isMultiTrace, xAxis, traceYAxes);
+    }
+
     /**
      * =============================================================*
      * Protected method for careful use                            *
@@ -634,25 +649,6 @@ public class Chart {
         return false;
     }
 
-    private void updateTooltipAndCrosshairs(DataPainterTracePoint hoverPoint) {
-        DataPainter dataPainter = hoverPoint.getDataPainter();
-
-        AxisWrapper xAxis = xAxisList.get(dataPainter.getXIndex());
-        AxisWrapper[] traceYAxes = new AxisWrapper[dataPainter.traceCount()];
-        for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
-            traceYAxes[trace] = yAxisList.get(getTraceYIndex(dataPainter,  trace));
-        }
-        Scale[] traceYScales = new Scale[traceYAxes.length];
-        for (int i = 0; i < traceYAxes.length; i++) {
-            traceYScales[i] = traceYAxes[i].getScale();
-        }
-
-        tooltip = dataPainter.createTooltip(config.getTooltipConfig(), hoverPoint.getPointIndex(), hoverPoint.getTrace(), config.isMultiTraceTooltip(), xAxis.getScale(), traceYScales);
-        crosshairs = dataPainter.createCrosshairs(hoverPoint.getPointIndex(), hoverPoint.getTrace(), config.isMultiTraceTooltip(), xAxis, traceYAxes);
-
-    }
-
-
     boolean hoverOn(int x, int y) {
         if (!graphArea.contains(x, y)) {
             return hoverOff();
@@ -661,14 +657,13 @@ public class Chart {
         if (selectedTrace != null) {
             Scale xScale = xAxisList.get(selectedTrace.getDataPainter().getXIndex()).getScale();
             Scale yScale = yAxisList.get(getTraceYIndex(selectedTrace.getDataPainter(), selectedTrace.getTrace())).getScale();
-
             NearestTracePoint nearestTracePoint = selectedTrace.getDataPainter().nearest(x, y, selectedTrace.getTrace(), xScale, yScale);
             if (nearestTracePoint != null) {
                 if (nearestTracePoint.getTracePoint().equals(hoverPoint)) {
                     return false;
                 } else {
                     hoverPoint = nearestTracePoint.getTracePoint();
-                    updateTooltipAndCrosshairs(hoverPoint);
+                    updateTooltipAndCrosshairs(hoverPoint, false);
                     return true;
                 }
             } else if (hoverPoint == null) {
@@ -686,7 +681,7 @@ public class Chart {
                     return false;
                 } else {
                     hoverPoint = nearestTracePoint.getTracePoint();
-                    updateTooltipAndCrosshairs(hoverPoint);
+                    updateTooltipAndCrosshairs(hoverPoint, config.isMultiTraceTooltip());
                     return true;
                 }
             }
@@ -716,58 +711,47 @@ public class Chart {
 
         if (closestTracePoint != null) {
             hoverPoint = closestTracePoint.getTracePoint();
-            updateTooltipAndCrosshairs(hoverPoint);
+            updateTooltipAndCrosshairs(hoverPoint, config.isMultiTraceTooltip());
             return true;
         }
 
         return false;
     }
 
-
     /**
      * =================================================*
-     * Base methods to interact        *
+     *           Base methods to interact               *
      * ==================================================
      */
     public void draw(BCanvas canvas) {
         if (fullArea == null) {
             setArea(canvas.getBounds());
         }
-
         if (fullArea.width == 0 || fullArea.height == 0) {
             return;
         }
-
         if (isDirty) {
             doCalculations(canvas);
         }
-
         canvas.enableAntiAliasAndHinting();
-
         canvas.setColor(config.getMarginColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
-
         // fill stacks
         int stackCount = yAxisList.size() / 2;
-
         canvas.setColor(config.getBackgroundColor());
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper yAxis = yAxisList.get(i * 2);
             BRectangle stackArea = new BRectangle(graphArea.x, (int) yAxis.getEnd(), graphArea.width, (int) yAxis.length());
             canvas.fillRect(stackArea.x, stackArea.y, stackArea.width, stackArea.height);
         }
-
         // draw X axes grids separately for every stack
-
         for (int stack = 0; stack < stackCount; stack++) {
             AxisWrapper yAxis = yAxisList.get(2 * stack);
             BRectangle stackArea = new BRectangle(graphArea.x, (int) yAxis.getEnd(), graphArea.width, (int) yAxis.length());
-
             int bottomAxisIndex = getXIndex(XAxisPosition.BOTTOM);
             int topAxisIndex = getXIndex(XAxisPosition.TOP);;
             AxisWrapper bottomAxis = xAxisList.get(bottomAxisIndex);
             AxisWrapper topAxis = xAxisList.get(topAxisIndex);
-
             if(!bottomAxis.isUsed() && !topAxis.isUsed()) {
                 // do nothing
             } else if(!bottomAxis.isUsed()) {
@@ -781,12 +765,10 @@ public class Chart {
                 }
             }
         }
-
         // draw Y axes grids
         for (int i = 0; i < stackCount; i++) {
             AxisWrapper leftAxis = yAxisList.get(getYIndex(i, YAxisPosition.LEFT));
             AxisWrapper rightAxis = yAxisList.get(getYIndex(i, YAxisPosition.RIGHT));
-
             if(!rightAxis.isUsed() && !leftAxis.isUsed()) {
                // do nothing
             } else if (!leftAxis.isUsed()) {
@@ -801,14 +783,12 @@ public class Chart {
                 }
             }
         }
-
         // draw X axes
         for (AxisWrapper axis : xAxisList) {
             if(axis.isUsed()) {
                 axis.drawAxis(canvas, graphArea);
             }
         }
-
         // draw Y axes
         for (AxisWrapper axis : yAxisList) {
             if(axis.isUsed()) {
@@ -817,20 +797,16 @@ public class Chart {
         }
         canvas.save();
         canvas.setClip(graphArea.x, graphArea.y, graphArea.width, graphArea.height);
-
         for (DataPainter dataPainter : dataPainters) {
             for (int trace = 0; trace < dataPainter.traceCount(); trace++) {
                 dataPainter.drawTrace(canvas, trace, xAxisList.get(dataPainter.getXIndex()).getScale(), yAxisList.get(getTraceYIndex(dataPainter,  trace)).getScale());
             }
         }
         canvas.restore();
-
         title.draw(canvas);
-
         if (isLegendEnabled()) {
             legend.draw(canvas);
         }
-
         if (tooltip != null) {
             tooltip.draw(canvas, fullArea);
         }
@@ -860,10 +836,6 @@ public class Chart {
         }
         String[] namesArr = new String[names.size()];
         return names.toArray(namesArr);
-    }
-
-    public int dataPainterTraceCount(int traceNumber) {
-        return dataPainters.get(traceNumber).traceCount();
     }
 
     private int dataPainterTraceToGeneralTraceNumber(DataPainterTrace dataPainterTrace) throws IllegalArgumentException {
