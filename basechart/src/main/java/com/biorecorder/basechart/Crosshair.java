@@ -1,22 +1,19 @@
 package com.biorecorder.basechart;
 
-import com.biorecorder.basechart.axis.AxisWrapper;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BRectangle;
+class Crosshair {
+    int position;
+    int axisIndex;
 
-/**
- * Created by galafit on 7/6/19.
- */
-public class Crosshair {
-     int position;
-     AxisWrapper axis;
+    public Crosshair(int axisIndex, int position) {
+        this.position = position;
+        this.axisIndex = axisIndex;
+    }
 
-     public Crosshair(AxisWrapper axis, int position) {
-          this.position = position;
-          this.axis = axis;
-     }
+    public int getPosition() {
+        return position;
+    }
 
-     public void draw(BCanvas canvas, BRectangle area) {
-          axis.drawCrosshair(canvas, area, position);
-     }
+    public int getAxisIndex() {
+        return axisIndex;
+    }
 }

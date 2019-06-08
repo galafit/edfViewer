@@ -86,7 +86,7 @@ public class ChartTest extends JFrame {
         timeData.addColumn("time", timeArray);
         timeData.addColumn("y", list1);
 
-        chart = new Chart(new CategoryScale());
+        chart = new Chart();
         //chart.addTraces(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);

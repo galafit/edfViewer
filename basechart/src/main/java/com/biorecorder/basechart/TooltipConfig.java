@@ -8,6 +8,7 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 19/8/17.
  */
 public class TooltipConfig {
+    private boolean isShared = true;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
     private BColor color = BColor.BLACK_LIGHT;
     private BColor backgroundColor = BColor.BEIGE_WHITE;
@@ -27,6 +28,15 @@ public class TooltipConfig {
         borderColor = config.borderColor;
         borderWidth = config.borderWidth;
         margin = config.margin;
+        isShared = config.isShared;
+    }
+
+    public boolean isShared() {
+        return isShared;
+    }
+
+    public void setShared(boolean shared) {
+        isShared = shared;
     }
 
     public BColor getColor() {

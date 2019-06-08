@@ -23,7 +23,7 @@ public class DataManager {
 
     private ChartData processedData;
     private List<ChartData> groupedDataList = new ArrayList<>(1);
-    private Scale prevXScale;
+    private Scale prevScale;
     private int prevPixelsPerDataPoint = -1;
     private int prevDataSize;
     private List<? extends GroupInterval> groupingIntervals;
@@ -58,26 +58,6 @@ public class DataManager {
         data.appendData();
         isSorterNeedUpdate = true;
     }
-
-
-    public StringSequence getLabelsIfXColumnIsString() {
-        if (!data.isNumberColumn(0)) {
-            return new StringSequence() {
-                @Override
-                public int size() {
-                    return data.rowCount();
-                }
-
-                @Override
-                public String get(int index) {
-                    return data.label(index, 0);
-                }
-            };
-        }
-
-        return null;
-    }
-
 
     public int nearest(double xValue) {
         // "lazy" sorting solo when "nearest" is called
@@ -150,14 +130,14 @@ public class DataManager {
         if (markSize > 0) {
             pixelsPerDataPoint = markSize;
         }
-        if (prevXScale == null || !prevXScale.getClass().equals(xScale.getClass()) &&
-                prevXScale instanceof TimeScale || xScale instanceof TimeScale) {
+        if (prevScale == null || !prevScale.getClass().equals(xScale.getClass()) &&
+                prevScale instanceof TimeScale || xScale instanceof TimeScale) {
             createGroupingIntervals(xScale);
         }
 
         if (!isProcessedDataOk(xScale, pixelsPerDataPoint)) {
             processedData = processData(xScale, pixelsPerDataPoint);
-            prevXScale = xScale.copy();
+            prevScale = xScale.copy();
             prevPixelsPerDataPoint = pixelsPerDataPoint;
             prevDataSize = data.rowCount();
         }
@@ -171,18 +151,18 @@ public class DataManager {
         if (prevPixelsPerDataPoint != pixelsPerDataPoint) {
             return false;
         }
-        if (prevXScale == null) {
+        if (prevScale == null) {
             return false;
         }
-        if (!prevXScale.getClass().equals(xScale.getClass())) {
-            return false;
-        }
-
-        if (prevXScale.getMin() != xScale.getMin() || prevXScale.getMax() != xScale.getMax()) {
+        if (!prevScale.getClass().equals(xScale.getClass())) {
             return false;
         }
 
-        int prevLength = length(prevXScale);
+        if (prevScale.getMin() != xScale.getMin() || prevScale.getMax() != xScale.getMax()) {
+            return false;
+        }
+
+        int prevLength = length(prevScale);
         int length = length(xScale);
         if (prevLength == 0 || length == 0) {
             return false;
@@ -308,27 +288,39 @@ public class DataManager {
     }
 
 
-    public ChartData processData(Scale xScale, int pixelsPerDataPoint) {
+    public ChartData processData(Scale argumentScale, int pixelsPerDataPoint) {
         if (data.rowCount() <= 1) {
             return data;
         }
 
-        Double xMin = xScale.getMin();
-        Double xMax = xScale.getMax();
+        Double scaleMin = argumentScale.getMin();
+        Double scaleMax = argumentScale.getMax();
 
         Range dataMinMax = data.columnMinMax(ARGUMENT_COLUMN);
-        //dataMinMax = getFullXMinMax(xScale);
-        Range minMax = Range.intersect(dataMinMax, new Range(xMin, xMax));
+        Range minMax = Range.intersect(dataMinMax, new Range(scaleMin, scaleMax));
 
         if (minMax == null) {
             return data.view(0, 0);
         }
 
-        double dataStart = xScale.scale(dataMinMax.getMin());
-        double dataEnd = xScale.scale(dataMinMax.getMax());
+        double dataStart = argumentScale.scale(dataMinMax.getMin());
+        double dataEnd = argumentScale.scale(dataMinMax.getMax());
 
         int drawingAreaWidth = 0;
-        Range intersection = Range.intersect(new Range(xScale.getStart(), xScale.getEnd()), new Range(dataStart, dataEnd));
+        Range dataRange;
+        if(dataEnd > dataStart) {
+            dataRange = new Range(dataStart, dataEnd);
+        } else {
+            dataRange = new Range(dataEnd, dataStart);
+        }
+        Range scaleRange;
+        if(argumentScale.getEnd() > argumentScale.getStart()) {
+            scaleRange = new Range(argumentScale.getStart(), argumentScale.getEnd());
+        } else {
+            scaleRange = new Range(argumentScale.getEnd(), argumentScale.getStart());
+        }
+
+        Range intersection = Range.intersect(scaleRange, dataRange);
         if (intersection != null) {
             drawingAreaWidth = (int)intersection.length();
         }
@@ -361,22 +353,22 @@ public class DataManager {
                 isAlreadyGrouped = true;
             }
         }
-        boolean isCropEnabled = processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < xMin || dataMinMax.getMax() > xMax);
+        boolean isCropEnabled = processingConfig.isCropEnabled() &&  (dataMinMax.getMin() < scaleMin || dataMinMax.getMax() > scaleMax);
 
         if (processedData.rowCount() > 1 &&  isCropEnabled) {
             long minIndex = 0;
-            if (dataMinMax.getMin() < xMin) {
-                minIndex = processedData.bisect( xMin, null);
-                if(minIndex > 0 && processedData.value((int)minIndex, ARGUMENT_COLUMN) < xMin) {
+            if (dataMinMax.getMin() < scaleMin) {
+                minIndex = processedData.bisect( scaleMin, null);
+                if(minIndex > 0 && processedData.value((int)minIndex, ARGUMENT_COLUMN) < scaleMin) {
                     minIndex++;
                 }
                 minIndex -= cropShoulder;
             }
 
             long maxIndex = processedData.rowCount() - 1;
-            if (dataMinMax.getMax() > xMax) {
-                maxIndex = processedData.bisect(xMax, null);
-                if(maxIndex < processedData.rowCount() - 1 && processedData.value((int)maxIndex, ARGUMENT_COLUMN) > xMax) {
+            if (dataMinMax.getMax() > scaleMax) {
+                maxIndex = processedData.bisect(scaleMax, null);
+                if(maxIndex < processedData.rowCount() - 1 && processedData.value((int)maxIndex, ARGUMENT_COLUMN) > scaleMax) {
                     maxIndex--;
                 }
                 maxIndex += cropShoulder;

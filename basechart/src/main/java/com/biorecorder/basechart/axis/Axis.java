@@ -82,7 +82,7 @@ public abstract class Axis {
      * @param scale
      */
     public void setScale(Scale scale) {
-        this.scale = scale;
+        this.scale = scale.copy();
         setDirty();
     }
 
@@ -92,7 +92,7 @@ public abstract class Axis {
      * @return copy of inner scale
      */
     public Scale getScale() {
-        return scale;
+        return scale.copy();
     }
 
     /**

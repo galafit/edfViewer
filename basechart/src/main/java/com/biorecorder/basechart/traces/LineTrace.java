@@ -51,12 +51,12 @@ public class LineTrace implements Trace {
     }
 
     @Override
-    public Range traceMinMax(ChartData data, int trace) {
+    public Range traceYMinMax(ChartData data, int trace) {
         return data.columnMinMax(trace + 1);
     }
 
     @Override
-    public Range argumentMinMax(ChartData data) {
+    public Range xMinMax(ChartData data) {
         return data.columnMinMax(0);
     }
 

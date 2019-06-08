@@ -5,6 +5,7 @@ import com.biorecorder.basechart.graphics.*;
 import com.sun.istack.internal.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by hdablin on 02.08.17.
@@ -17,10 +18,30 @@ public class Tooltip {
     private TooltipItem header;
     private ArrayList<TooltipItem> items = new ArrayList<TooltipItem>();
 
+    private List<Crosshair> xCrosshairs = new ArrayList<>();
+    private List<Crosshair> yCrosshairs = new ArrayList<>();
+
     public Tooltip(TooltipConfig tooltipConfig, int x, int y) {
         this.tooltipConfig = tooltipConfig;
         this.x = x;
         this.y = y;
+    }
+
+    public void addXCrosshair(int xAxisIndex, int position) {
+        xCrosshairs.add(new Crosshair(xAxisIndex, position));
+    }
+
+    public void addYCrosshair(int yAxisIndex, int position) {
+        yCrosshairs.add(new Crosshair(yAxisIndex, position));
+    }
+
+
+    public List<Crosshair> getXCrosshairs() {
+        return xCrosshairs;
+    }
+
+    public List<Crosshair> getYCrosshairs() {
+        return yCrosshairs;
     }
 
     public void setHeader(@Nullable BColor markColor, @Nullable String label, @Nullable String value) {
