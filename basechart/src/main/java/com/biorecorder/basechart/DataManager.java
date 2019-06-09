@@ -1,9 +1,12 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.data.ChartData;
+import com.biorecorder.basechart.data.DataProcessingConfig;
+import com.biorecorder.basechart.graphics.Range;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scales.TimeScale;
+import com.biorecorder.basechart.traces.TraceType;
 import com.biorecorder.data.frame.TimeInterval;
-import com.biorecorder.data.sequence.StringSequence;
 import com.biorecorder.data.utils.PrimitiveUtils;
 
 import java.util.ArrayList;
@@ -12,7 +15,7 @@ import java.util.List;
 /**
  * Created by galafit on 9/7/18.
  */
-public class DataManager {
+class DataManager {
     // NO REGROUPING if axis length change less then GROUPING_STABILITY
     private static final int GROUPING_STABILITY = 20; // percents
     private static final int ARGUMENT_COLUMN = 0;
@@ -25,11 +28,11 @@ public class DataManager {
     private List<ChartData> groupedDataList = new ArrayList<>(1);
     private Scale prevScale;
     private int prevPixelsPerDataPoint = -1;
-    private int prevDataSize;
+    private int prevDataSize = -1;
     private List<? extends GroupInterval> groupingIntervals;
 
     private int[] sorter;
-    private boolean isSorterNeedUpdate;
+    private boolean isSorterNeedUpdate = true;
 
     public DataManager(ChartData data, DataProcessingConfig dataProcessingConfig) {
         this.data = data;

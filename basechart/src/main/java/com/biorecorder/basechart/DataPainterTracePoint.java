@@ -3,7 +3,7 @@ package com.biorecorder.basechart;
 /**
  * Created by galafit on 15/2/19.
  */
-public class DataPainterTracePoint extends DataPainterTrace {
+class DataPainterTracePoint extends DataPainterTrace {
     protected final int pointIndex;
 
     public DataPainterTracePoint(DataPainter trace, int curveNumber, int pointIndex) {

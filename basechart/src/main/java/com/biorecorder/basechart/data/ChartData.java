@@ -1,8 +1,8 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.data;
 
 
+import com.biorecorder.basechart.graphics.Range;
 import com.biorecorder.data.frame.TimeInterval;
-import com.biorecorder.data.frame.TimeUnit;
 
 /**
  * Simplified analogue of data table which

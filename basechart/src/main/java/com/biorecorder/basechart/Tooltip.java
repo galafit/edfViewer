@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by hdablin on 02.08.17.
  */
-public class Tooltip {
+class Tooltip {
     private TooltipConfig tooltipConfig;
     private int x, y;
     private int y_offset = 2;

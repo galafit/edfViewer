@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by hdablin on 17.08.17.
  */
-public class Title {
+class Title {
     private String title;
     private TitleConfig config;
     private ArrayList<BText> lines = new ArrayList<BText>();

@@ -1,7 +1,5 @@
 package com.biorecorder.basechart.graphics;
 
-import com.biorecorder.basechart.TextStyle;
-
 /**
  * Created by galafit on 29/12/17.
  */

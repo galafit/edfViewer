@@ -1,6 +1,8 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.graphics.BColor;
+import com.biorecorder.basechart.graphics.Insets;
+import com.biorecorder.basechart.graphics.TextStyle;
 import com.sun.istack.internal.Nullable;
 
 

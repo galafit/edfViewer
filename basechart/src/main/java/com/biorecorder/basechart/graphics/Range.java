@@ -1,4 +1,4 @@
-package com.biorecorder.basechart;
+package com.biorecorder.basechart.graphics;
 
 import com.sun.istack.internal.Nullable;
 

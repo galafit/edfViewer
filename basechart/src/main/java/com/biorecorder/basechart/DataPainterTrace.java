@@ -4,7 +4,7 @@ package com.biorecorder.basechart;
 /**
  * Created by galafit on 14/2/19.
  */
-public class DataPainterTrace {
+class DataPainterTrace {
     protected final DataPainter dataPainter;
     protected final int trace;
 

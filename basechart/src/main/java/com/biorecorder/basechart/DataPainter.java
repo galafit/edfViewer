@@ -1,9 +1,16 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.data.ChartData;
+import com.biorecorder.basechart.data.DataProcessingConfig;
+import com.biorecorder.basechart.data.GroupApproximation;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.graphics.Range;
 import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.traces.NamedValue;
+import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.traces.TraceType;
 import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
 
@@ -13,11 +20,6 @@ import java.util.List;
 
 /**
  * TODO implement XY search nearest point (QuadTree)
- * удаление неиспользуемых скролов в чарте с навигацией
- *
- * задавать префикс и суффикс осей
- *
- * задавать где то DataProcessingConfig
  */
 class DataPainter {
     private int xIndex;

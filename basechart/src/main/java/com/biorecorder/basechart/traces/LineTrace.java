@@ -1,11 +1,10 @@
 package com.biorecorder.basechart.traces;
 
 
-import com.biorecorder.basechart.*;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BPath;
-import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.data.ChartData;
+import com.biorecorder.basechart.data.XYViewer;
+import com.biorecorder.basechart.data.GroupApproximation;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 
 /**

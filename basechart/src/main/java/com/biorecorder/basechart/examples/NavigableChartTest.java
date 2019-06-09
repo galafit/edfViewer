@@ -1,6 +1,7 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.data.XYData;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.themes.DarkTheme;
@@ -22,6 +23,7 @@ public class NavigableChartTest extends JFrame{
     ChartPanel chartPanel;
     NavigableChart chart;
     XYData xyData;
+    XYData xyData1;
 
     public NavigableChartTest() {
         int width = 400;
@@ -39,9 +41,14 @@ public class NavigableChartTest extends JFrame{
         }*/
 
 
-        xyData = new XYData(labels, true);
+        xyData = new XYData(true);
+        xyData.addColumn("x", xData);
         //xyData.addColumn(xData);
         xyData.addColumn("y", yData);
+
+        xyData1 = new XYData(0, 1.5, true);
+        xyData1.addColumn("regular1", xData);
+        xyData1.addColumn("regular2", yData);
 
         chart = new NavigableChart(new CategoryScale());
 
@@ -96,7 +103,7 @@ public class NavigableChartTest extends JFrame{
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 1; count++) {
+                for (int count = 0; count < 5; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -120,6 +127,15 @@ public class NavigableChartTest extends JFrame{
 
                     }
                     System.out.println("\ndata size: "+yData.size());
+
+                    if(count == 2) {
+                        chart.addChartStack();
+                        chart.addChartTrace(xyData1, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.LEFT);
+                    }
+
+                    if(count == 4) {
+                        chart.removeChartTrace(0);
+                    }
 
                     chart.appendData();
                     chartPanel.repaint();

@@ -3,11 +3,14 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.axis.*;
 import com.biorecorder.basechart.button.ButtonGroup;
 import com.biorecorder.basechart.button.SwitchButton;
+import com.biorecorder.basechart.data.ChartData;
+import com.biorecorder.basechart.data.DataProcessingConfig;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.traces.Trace;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
@@ -56,7 +59,11 @@ public class Chart {
     }
 
     public Chart(Scale xScale, Scale yScale) {
-        this.dataProcessingConfig = new DataProcessingConfig();
+        this(xScale, yScale, new DataProcessingConfig());
+    }
+
+    public Chart(Scale xScale, Scale yScale, DataProcessingConfig dataProcessingConfig) {
+        this.dataProcessingConfig = dataProcessingConfig;
         this.config = new DarkTheme(false).getChartConfig();
         this.yScale = yScale;
 
@@ -1101,6 +1108,33 @@ public class Chart {
         } catch (IllegalStateException ex) {
             // do nothing;
         }
+        // hide unused axis
+        for (int i = 0; i < xAxisList.size(); i++) {
+            boolean isUsed = false;
+            for (DataPainter painter : dataPainters) {
+                if(painter.traceCount() > 0 && painter.getXIndex() == i) {
+                    isUsed = true;
+                    break;
+                }
+            }
+            if(!isUsed) {
+                xAxisList.get(i).setUsed(false);
+            }
+        }
+        for (int i = 0; i < yAxisList.size(); i++) {
+            boolean isUsed = false;
+            for (DataPainter painter : dataPainters) {
+                for (int painterTrace = 0; painterTrace < painter.traceCount(); painterTrace++) {
+                   if(getTraceYIndex(painter, painterTrace)  == i) {
+                       isUsed = true;
+                       break;
+                   }
+                }
+            }
+            if(!isUsed) {
+                yAxisList.get(i).setUsed(false);
+            }
+        }
         isDirty = true;
     }
 
@@ -1114,15 +1148,6 @@ public class Chart {
         return dataPainters.size();
     }
 
-    public void setXConfig(XAxisPosition xPosition, AxisConfig axisConfig) {
-        xAxisList.get(getXIndex(xPosition)).setConfig(axisConfig);
-        isDirty = true;
-    }
-
-    public void setYConfig(int stack, YAxisPosition yPosition, AxisConfig axisConfig) {
-        yAxisList.get(getYIndex(stack, yPosition)).setConfig(axisConfig);
-        isDirty = true;
-    }
 
     /**
      * return COPY of X axis legendConfig. To change axis legendConfig use setXConfig
@@ -1136,6 +1161,28 @@ public class Chart {
      */
     public AxisConfig getYConfig(int stack, YAxisPosition yPosition) {
         return yAxisList.get(getYIndex(stack, yPosition)).getConfig();
+    }
+
+    public void setXConfig(XAxisPosition xPosition, AxisConfig axisConfig) {
+        xAxisList.get(getXIndex(xPosition)).setConfig(axisConfig);
+        isDirty = true;
+    }
+
+    public void setYConfig(int stack, YAxisPosition yPosition, AxisConfig axisConfig) {
+        yAxisList.get(getYIndex(stack, yPosition)).setConfig(axisConfig);
+        isDirty = true;
+    }
+
+    public void setXPrefixAndSuffix(XAxisPosition xPosition, @Nullable String prefix, @Nullable String suffix) {
+        AxisConfig axisConfig = getXConfig(xPosition);
+        axisConfig.setTickLabelPrefixAndSuffix(prefix, suffix);
+        setXConfig(xPosition, axisConfig);
+    }
+
+    public void setYPrefixAndSuffix(int stack, YAxisPosition yPosition, @Nullable String prefix, @Nullable String suffix) {
+        AxisConfig axisConfig = getYConfig(stack, yPosition);
+        axisConfig.setTickLabelPrefixAndSuffix(prefix, suffix);
+        setYConfig(stack, yPosition, axisConfig);
     }
 
     public void setXTitle(XAxisPosition xPosition, @Nullable String title) {
@@ -1171,14 +1218,12 @@ public class Chart {
     }
 
     public void setXScale(XAxisPosition xPosition, Scale scale) {
-        AxisWrapper axis = xAxisList.get(getXIndex(xPosition));
-        axis.setScale(scale);
+        xAxisList.get(getXIndex(xPosition)).setScale(scale);
         isDirty = true;
     }
 
     public void setYScale(int stack, YAxisPosition yPosition, Scale scale) {
-        AxisWrapper axis = yAxisList.get(getYIndex(stack, yPosition));
-        axis.setScale(scale);
+        yAxisList.get(getYIndex(stack, yPosition)).setScale(scale);
         isDirty = true;
     }
 

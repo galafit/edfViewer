@@ -1,7 +1,6 @@
 package com.biorecorder.basechart.axis;
 
 
-import com.biorecorder.basechart.Range;
 import com.biorecorder.basechart.graphics.BText;
 import com.biorecorder.basechart.graphics.TextAnchor;
 import com.biorecorder.basechart.graphics.TextMetric;

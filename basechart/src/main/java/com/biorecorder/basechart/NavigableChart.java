@@ -1,14 +1,17 @@
 package com.biorecorder.basechart;
 
 import com.biorecorder.basechart.axis.AxisConfig;
+import com.biorecorder.basechart.data.ChartData;
+import com.biorecorder.basechart.data.DataProcessingConfig;
 import com.biorecorder.basechart.graphics.*;
-import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.scroll.Scroll;
 import com.biorecorder.basechart.scroll.ScrollConfig;
 import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.traces.Trace;
+import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 
@@ -41,12 +44,22 @@ public class NavigableChart {
     }
 
     public NavigableChart(Scale xScale, Scale yScale) {
+        this(xScale, yScale, new DataProcessingConfig());
+    }
+
+    public NavigableChart(Scale xScale, Scale yScale, DataProcessingConfig dataProcessingConfig) {
+        this(xScale, yScale, dataProcessingConfig, dataProcessingConfig);
+    }
+
+    public NavigableChart(Scale xScale, Scale yScale, DataProcessingConfig chartDataProcessingConfig, DataProcessingConfig navegatorDataProcessingConfig) {
         this.config = new DarkTheme(false).getNavigableChartConfig();
         if (!config.isAutoScaleEnabled()) {
             isChartAutoscaleNeedDisable = true;
         }
-        chart = new Chart(xScale, yScale);
-        navigator = new Chart(xScale, yScale);
+        chart = new Chart(xScale, yScale, chartDataProcessingConfig);
+        DataProcessingConfig copyProcessingConfig = new DataProcessingConfig(navegatorDataProcessingConfig);
+        copyProcessingConfig.setGroupAll(true);
+        navigator = new Chart(xScale, yScale, copyProcessingConfig);
 
         chart.setConfig(config.getChartConfig(), true);
         navigator.setConfig(config.getNavigatorConfig(), true);
@@ -84,6 +97,7 @@ public class NavigableChart {
 
         // create, remove and update scrolls
         xAxisPositions = chart.getXAxes();
+
         for (int i = 0; i < xAxisPositions.length; i++) {
             Range scrollRange = chartDataMinMax;
             XAxisPosition xAxisPosition = xAxisPositions[i];
@@ -91,6 +105,7 @@ public class NavigableChart {
             if (extent > scrollRange.length()) {
                 scrollRange = new Range(scrollRange.getMin(), scrollRange.getMin() + extent);
             }
+            // create scrolls
             if (scrolls.get(xAxisPosition) == null) {
                 if (extent > 0) {
                     Scroll scroll = new Scroll(scrollRange.getMin(), scrollRange.getMax(), extent);
@@ -98,7 +113,7 @@ public class NavigableChart {
                     for (int stack = 0; stack < chart.stackCount(); stack++) {
                         YAxisPosition[] yAxisPositions = chart.getYAxes(stack);
                         for (int j = 0; j < yAxisPositions.length; j++) {
-                            chart.autoScaleY(stack, yAxisPositions[stack]);
+                            chart.autoScaleY(stack, yAxisPositions[j]);
                         }
 
                     }
@@ -117,8 +132,23 @@ public class NavigableChart {
                 }
             }
 
-            if (scrolls.get(xAxisPosition) != null) {
-                scrolls.get(xAxisPosition).setMinMax(scrollRange.getMin(), scrollRange.getMax());
+            // update scrolls
+            scrolls.get(xAxisPosition).setMinMax(scrollRange.getMin(), scrollRange.getMax());
+
+        }
+        // remove unused scrolls
+        if(scrolls.keySet().size() > xAxisPositions.length) {
+            for (XAxisPosition scrollKey : scrolls.keySet()) {
+                boolean needDeleat = true;
+                for (XAxisPosition axisPosition : xAxisPositions) {
+                    if(axisPosition == scrollKey) {
+                        needDeleat = false;
+                        break;
+                    }
+                }
+                if(needDeleat) {
+                    scrolls.remove(scrollKey);
+                }
             }
         }
     }
@@ -674,6 +704,14 @@ public class NavigableChart {
         isScrollsDirty = true;
     }
 
+    public void setChartXPrefixAndSuffix(XAxisPosition xPosition, @Nullable String prefix, @Nullable String suffix) {
+        navigator.setXPrefixAndSuffix(xPosition, prefix, suffix);
+    }
+
+    public void setChartYPrefixAndSuffix(int stack, YAxisPosition yPosition, @Nullable String prefix, @Nullable String suffix) {
+        navigator.setYPrefixAndSuffix(stack, yPosition, prefix, suffix);
+    }
+
     public void setChartYScale(int stack, YAxisPosition yPosition, Scale scale) {
         chart.setYScale(stack, yPosition, scale);
     }
@@ -824,6 +862,14 @@ public class NavigableChart {
 
     public void setNavigatorYConfig(int stack, YAxisPosition yPosition, AxisConfig axisConfig) {
         navigator.setYConfig(stack, yPosition, axisConfig);
+    }
+
+    public void setNavigatorXPrefixAndSuffix(XAxisPosition xPosition, @Nullable String prefix, @Nullable String suffix) {
+        navigator.setXPrefixAndSuffix(xPosition, prefix, suffix);
+    }
+
+    public void setNavigatorYPrefixAndSuffix(int stack, YAxisPosition yPosition, @Nullable String prefix, @Nullable String suffix) {
+        navigator.setYPrefixAndSuffix(stack, yPosition, prefix, suffix);
     }
 
     public AxisConfig getNavigatorXConfig(XAxisPosition xPosition) {

@@ -1,7 +1,7 @@
 package com.biorecorder.basechart.axis;
 
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.TextStyle;
+import com.biorecorder.basechart.graphics.TextStyle;
 import com.biorecorder.basechart.graphics.DashStyle;
 import com.sun.istack.internal.Nullable;
 

@@ -3,7 +3,7 @@ package com.biorecorder.basechart;
 /**
  * Created by galafit on 26/5/19.
  */
-public class NearestTracePoint {
+class NearestTracePoint {
     private DataPainterTracePoint tracePoint;
     private int distanceSqw;
 
