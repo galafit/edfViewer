@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.XAxisPosition;
+import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.Insets;
 import com.biorecorder.basechart.scroll.ScrollConfig;

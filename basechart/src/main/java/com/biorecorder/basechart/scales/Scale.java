@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.basechart.axis.AxisPrefixAndSuffix;
 import com.sun.istack.internal.Nullable;
 
 import java.util.Arrays;
@@ -108,9 +108,9 @@ public abstract class Scale {
      */
     public abstract String formatDomainValue(double value);
 
-    public abstract TickProvider getTickProviderByIntervalCount(int tickIntervalCount, @Nullable LabelPrefixAndSuffix formatInfo);
+    public abstract TickProvider getTickProviderByIntervalCount(int tickIntervalCount, @Nullable AxisPrefixAndSuffix formatInfo);
 
-    public abstract TickProvider getTickProviderByInterval(double tickInterval, @Nullable LabelPrefixAndSuffix formatInfo);
+    public abstract TickProvider getTickProviderByInterval(double tickInterval, @Nullable AxisPrefixAndSuffix formatInfo);
 
     public abstract Scale copy();
 

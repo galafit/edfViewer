@@ -10,7 +10,7 @@ import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.traces.TracePainter;
 import com.biorecorder.basechart.utils.StringUtils;
 import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
@@ -67,8 +67,8 @@ public class Chart {
         this.config = new DarkTheme(false).getChartConfig();
         this.yScale = yScale;
 
-        AxisWrapper bottomAxis = new AxisWrapper(new AxisBottom(xScale.copy(), config.getXAxisConfig()));
-        AxisWrapper topAxis = new AxisWrapper(new AxisTop(xScale.copy(), config.getXAxisConfig()));
+        AxisWrapper bottomAxis = new AxisWrapper(new Axis(xScale.copy(), config.getXAxisConfig(), XAxisPosition.BOTTOM));
+        AxisWrapper topAxis = new AxisWrapper(new Axis(xScale.copy(), config.getXAxisConfig(), XAxisPosition.TOP));
 
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
@@ -961,8 +961,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new AxisLeft(yScale.copy(), config.getYAxisConfig()));
-        AxisWrapper rightAxis = new AxisWrapper(new AxisRight(yScale.copy(), config.getYAxisConfig()));
+        AxisWrapper leftAxis = new AxisWrapper(new Axis(yScale.copy(), config.getYAxisConfig(), YAxisPosition.LEFT));
+        AxisWrapper rightAxis = new AxisWrapper(new Axis(yScale.copy(), config.getYAxisConfig(), YAxisPosition.RIGHT));
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);
@@ -1002,14 +1002,14 @@ public class Chart {
     /**
      * add trace to the last stack
      */
-    public void addTraces(ChartData data, Trace tracePainter) {
+    public void addTraces(ChartData data, TracePainter tracePainter) {
         addTraces(data, tracePainter, true);
     }
 
     /**
      * add trace to the last stack
      */
-    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit) {
+    public void addTraces(ChartData data, TracePainter tracePainter, boolean isSplit) {
         int stack = Math.max(0, yAxisList.size() / 2 - 1);
         addTraces(data, tracePainter, isSplit, stack);
     }
@@ -1017,11 +1017,11 @@ public class Chart {
     /**
      * add trace to the stack with the given number
      */
-    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, int stack) {
+    public void addTraces(ChartData data, TracePainter tracePainter, boolean isSplit, int stack) {
         addTraces(data, tracePainter, isSplit, stack, config.getPrimaryXPosition(), config.getPrimaryYPosition());
     }
 
-    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
+    public void addTraces(ChartData data, TracePainter tracePainter, boolean isSplit, XAxisPosition xPosition, YAxisPosition yPosition) {
         int stack = Math.max(0, yAxisList.size() / 2 - 1);
         addTraces(data, tracePainter, isSplit, stack, xPosition, yPosition);
     }
@@ -1029,7 +1029,7 @@ public class Chart {
     /**
      * add trace to the stack with the given number
      */
-    public void addTraces(ChartData data, Trace tracePainter, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
+    public void addTraces(ChartData data, TracePainter tracePainter, boolean isSplit, int stack, XAxisPosition xPosition, YAxisPosition yPosition) throws IllegalArgumentException {
         DataPainter dataPainter = new DataPainter(data, tracePainter, isSplit, dataProcessingConfig, getXIndex(xPosition), getYIndex(stack, yPosition));
         if (dataPainter.traceCount() < 1) {
             String errMsg = "Number of trace traces: " + dataPainter.traceCount() + ". Please specify valid trace data";
@@ -1365,13 +1365,17 @@ public class Chart {
         }
 
         public void remove(DataPainterTrace dataPainterTrace) {
+            SwitchButton buttonToRemove = null;
             for (SwitchButton button : buttonsToDataPainterTraces.keySet()){
                 DataPainterTrace buttonDataPainterTrace = buttonsToDataPainterTraces.get(button);
                 if(buttonDataPainterTrace.equals(dataPainterTrace)) {
-                    buttonGroup.remove(button);
-                    buttonsToDataPainterTraces.remove(button);
+                    buttonToRemove = button;
                     break;
                 }
+            }
+            if(buttonToRemove != null) {
+                buttonGroup.remove(buttonToRemove);
+                buttonsToDataPainterTraces.remove(buttonToRemove);
             }
             isLegendDirty = true;
         }

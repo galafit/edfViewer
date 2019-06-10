@@ -16,13 +16,9 @@ import java.util.List;
 /**
  * Created by galafit on 29/8/18.
  */
-abstract class AxisVertical extends Axis {
-
+abstract class VerticalAxisPainter implements AxisPainter {
     @Override
-    protected int labelSizeForWidth(TextMetric tm) {
-        if(ticks == null) {
-            createTicks(tm);
-        }
+    public int labelSizeForWidth(TextMetric tm,  List<Tick> ticks) {
         String longestLabel = "";
         for (Tick tick : ticks) {
             if(tick.getLabel().length() > longestLabel.length()) {
@@ -32,22 +28,21 @@ abstract class AxisVertical extends Axis {
         return tm.stringWidth(longestLabel);
     }
 
-
     @Override
-    protected BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval) {
+    public BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int start, int end, int tickPixelInterval, AxisConfig config, int interLabelGap, boolean isCategory) {
         int space = 2;// px
         int labelHeight = tm.ascent();
-        int x = getLabelX();
-        TextAnchor labelHAnchor = getLabelHTextAnchor();
+        int x = getLabelX(config);
+        TextAnchor labelHAnchor = getLabelHTextAnchor(config);
 
         if(config.isTickLabelOutside()) {
             int y = tickPosition;
-            if(y + labelHeight/2 + 1 > getStart()) {
-                y = (int)getStart() - space;
+            if(y + labelHeight/2 + 1 > start) {
+                y = start - space;
                 return new BText(tickLabel, x, y, labelHAnchor, TextAnchor.START, tm);
             }
-            if(y - labelHeight/2 - 1 < getEnd()) {
-                y = (int)getEnd();
+            if(y - labelHeight/2 - 1 < end) {
+                y = end;
                 return new BText(tickLabel, x, y, labelHAnchor, TextAnchor.END, tm);
             }
             return new BText(tickLabel, x, y, labelHAnchor, TextAnchor.MIDDLE, tm);
@@ -55,7 +50,7 @@ abstract class AxisVertical extends Axis {
         } else {
             int y = tickPosition;
 
-            if(y - labelHeight - 1 < getEnd()) {
+            if(y - labelHeight - 1 < end) {
                 //y = (int)getEnd();
                 return new BText(tickLabel, x, y, labelHAnchor, TextAnchor.END , tm);
             }
@@ -64,26 +59,21 @@ abstract class AxisVertical extends Axis {
         }
     }
 
-    protected abstract int getLabelX();
-
-    protected abstract TextAnchor getLabelHTextAnchor();
-
-    public AxisVertical(Scale scale, AxisConfig axisConfig) {
-        super(scale, axisConfig);
-    }
-
     @Override
-    protected int labelSizeForOverlap(TextMetric tm, List<Tick> ticks) {
+    public int labelSizeForOverlap(TextMetric tm, List<Tick> ticks) {
         return tm.height();
     }
 
     @Override
-    protected void drawAxisLine(BCanvas canvas) {
-        canvas.drawLine(0, (int)getStart(), 0, (int)getEnd());
+    public void drawAxisLine(BCanvas canvas, int start, int end) {
+        canvas.drawLine(0, start, 0, end);
     }
 
     @Override
-    protected boolean contains(int point) {
-        return point >= Math.round(getEnd()) && point <= Math.round(getStart());
+    public boolean contains(int point, int start, int end) {
+        return point <= start && point >= end;
     }
+
+    protected abstract int getLabelX(AxisConfig config);
+    protected abstract TextAnchor getLabelHTextAnchor(AxisConfig config);
 }

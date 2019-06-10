@@ -1,5 +1,7 @@
 package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.XAxisPosition;
+import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BPoint;
 import com.biorecorder.basechart.graphics.BRectangle;

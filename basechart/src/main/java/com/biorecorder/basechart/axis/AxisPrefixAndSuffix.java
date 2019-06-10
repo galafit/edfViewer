@@ -5,7 +5,7 @@ import com.sun.istack.internal.Nullable;
 /**
  * Created by galafit on 5/9/17.
  */
-public class LabelPrefixAndSuffix {
+public class AxisPrefixAndSuffix {
     /**
      * At the moment not used
      tera 	T 	1,000,000,000,000 	10x12
@@ -20,7 +20,7 @@ public class LabelPrefixAndSuffix {
     private String prefix;
     private String suffix;
 
-    public LabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
+    public AxisPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
         this.prefix = prefix;
         this.suffix = suffix;
     }

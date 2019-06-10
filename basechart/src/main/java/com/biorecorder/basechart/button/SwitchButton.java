@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class SwitchButton {
     private ButtonGroup group;
-    private List<StateListener> selectionListeners = new ArrayList<StateListener>();
+    private List<ButtonStateListener> selectionListeners = new ArrayList<ButtonStateListener>();
 
     private BColor color = BColor.BLACK_LIGHT;
     private String label = "";
@@ -32,7 +32,7 @@ public class SwitchButton {
         }
     }
 
-    public void addListener(StateListener listener) {
+    public void addListener(ButtonStateListener listener) {
         selectionListeners.add(listener);
     }
 
@@ -55,7 +55,7 @@ public class SwitchButton {
                 group.setSelected(this, isSelected);
             }
             if (oldSelection != isSelected()) {
-                for (StateListener listener : selectionListeners) {
+                for (ButtonStateListener listener : selectionListeners) {
                     listener.stateChanged(isSelected);
                 }
             }

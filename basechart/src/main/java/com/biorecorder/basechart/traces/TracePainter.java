@@ -14,7 +14,11 @@ import com.sun.istack.internal.Nullable;
  * Normally xAxis is argument axis and yAxis - value axis.
  * And only for inverted traces vice versa
  */
-public interface Trace {
+public interface TracePainter {
+      /**
+       * LineTrace, AreaTrace, ColumnTrace... - TraceType.LINEAR
+       * ScatterTrace, BubblePrice... - TraceType.SCATTER
+       */
       TraceType traceType();
 
       GroupApproximation[] groupApproximations();

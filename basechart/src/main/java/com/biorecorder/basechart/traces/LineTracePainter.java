@@ -10,20 +10,20 @@ import com.biorecorder.basechart.scales.Scale;
 /**
  * Created by galafit on 11/10/17.
  */
-public class LineTrace implements Trace {
+public class LineTracePainter implements TracePainter {
     private LineTraceConfig traceConfig;
 
-    public LineTrace() {
+    public LineTracePainter() {
         this(new LineTraceConfig());
     }
     
-    public LineTrace(LineTraceConfig config) {
+    public LineTracePainter(LineTraceConfig config) {
         traceConfig = config;
     }
 
     @Override
     public TraceType traceType() {
-        return TraceType.LINE;
+        return TraceType.LINEAR;
     }
 
     @Override

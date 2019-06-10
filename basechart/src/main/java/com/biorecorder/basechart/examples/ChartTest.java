@@ -1,8 +1,11 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.axis.XAxisPosition;
+import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.data.XYData;
-import com.biorecorder.basechart.traces.LineTrace;
+import com.biorecorder.basechart.themes.WhiteTheme;
+import com.biorecorder.basechart.traces.LineTracePainter;
 import com.biorecorder.data.frame.SquareFunction;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
@@ -85,6 +88,7 @@ public class ChartTest extends JFrame {
         timeData.addColumn("y", list1);
 
         chart = new Chart();
+        chart.setConfig(new WhiteTheme(true).getChartConfig());
         //chart.addTraces(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);
@@ -98,10 +102,10 @@ public class ChartTest extends JFrame {
         setVisible(true);
         try {
             Thread.sleep(1000);
-            chart.addTraces(unsortedData, new LineTrace(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
+            chart.addTraces(unsortedData, new LineTracePainter(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
             chart.addStack();
-            chart.addTraces(noRegularData, new LineTrace(), true);
-            chart.addTraces(regularData, new LineTrace(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
+            chart.addTraces(noRegularData, new LineTracePainter(), true);
+            chart.addTraces(regularData, new LineTracePainter(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
 
             chartPanel.repaint();
 

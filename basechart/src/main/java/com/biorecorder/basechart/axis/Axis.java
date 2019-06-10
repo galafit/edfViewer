@@ -18,7 +18,7 @@ import java.util.List;
  * and some advanced functionality such as Zooming and Translating. See
  * {@link #setConfig(AxisConfig)}
  */
-public abstract class Axis {
+public class Axis {
     public static int MIN_TICK_COUNT = 11;
     private static final int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
 
@@ -31,13 +31,33 @@ public abstract class Axis {
     private IntArrayList tickPositions = new IntArrayList();
     private IntArrayList minorTickPositions = new IntArrayList();
     private BText titleText;
+    private AxisPainter axisPainter;
 
     private boolean isDirty = true;
     private int width = -1;
 
-    public Axis(Scale scale, AxisConfig axisConfig) {
+    public Axis(Scale scale, AxisConfig axisConfig, XAxisPosition xAxisPosition) {
         this.scale = scale.copy();
         this.config = axisConfig;
+        switch (xAxisPosition) {
+            case TOP:
+                axisPainter = new TopAxisPainter();
+                break;
+            case BOTTOM:
+                axisPainter = new BottomAxisPainter();
+        }
+    }
+
+    public Axis(Scale scale, AxisConfig axisConfig, YAxisPosition yAxisPosition) {
+        this.scale = scale.copy();
+        this.config = axisConfig;
+        switch (yAxisPosition) {
+            case LEFT:
+                axisPainter = new LeftAxisPainter();
+                break;
+            case RIGHT:
+                axisPainter = new RightAxisPainter();
+        }
     }
 
     public int getWidth(BCanvas canvas) {
@@ -261,15 +281,15 @@ public abstract class Axis {
 
     public void drawCrosshair(BCanvas canvas, BRectangle area, int position) {
         canvas.save();
-        translateCanvas(canvas, area);
+        axisPainter.translateCanvas(canvas, area);
         canvas.setColor(config.getCrosshairLineColor());
         canvas.setStroke(config.getCrosshairLineWidth(), config.getCrosshairLineDashStyle());
-        drawGridLine(canvas, position, area);
+        axisPainter.drawGridLine(canvas, position, area);
         canvas.restore();
     }
 
     public void drawGrid(BCanvas canvas, BRectangle area) {
-        if (isTooShort() || config.getGridLineWidth() == 0) {
+        if (isTooShort()) {
             return;
         }
         canvas.save();
@@ -277,18 +297,18 @@ public abstract class Axis {
             createTicksElements(canvas);
         }
 
-        translateCanvas(canvas, area);
+        axisPainter.translateCanvas(canvas, area);
 
         canvas.setColor(config.getGridColor());
         canvas.setStroke(config.getGridLineWidth(), config.getGridLineDashStyle());
         for (int i = 0; i < tickPositions.size(); i++) {
-            drawGridLine(canvas, tickPositions.get(i), area);
+            axisPainter.drawGridLine(canvas, tickPositions.get(i), area);
         }
 
         canvas.setColor(config.getMinorGridColor());
         canvas.setStroke(config.getMinorGridLineWidth(), config.getMinorGridLineDashStyle());
         for (int i = 0; i < minorTickPositions.size(); i++) {
-            drawGridLine(canvas, minorTickPositions.get(i), area);
+            axisPainter.drawGridLine(canvas, minorTickPositions.get(i), area);
         }
 
         canvas.restore();
@@ -300,14 +320,14 @@ public abstract class Axis {
         if (isDirty()) {
             createTicksElements(canvas);
         }
-        translateCanvas(canvas, area);
+        axisPainter.translateCanvas(canvas, area);
 
         if (!isTooShort()) {
             if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
                 canvas.setColor(config.getTickMarkColor());
                 canvas.setStroke(config.getTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < tickPositions.size(); i++) {
-                    drawTickMark(canvas, tickPositions.get(i), config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
+                    axisPainter.drawTickMark(canvas, tickPositions.get(i), config.getAxisLineWidth(),config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
                 }
             }
 
@@ -315,7 +335,7 @@ public abstract class Axis {
                 canvas.setColor(config.getMinorTickMarkColor());
                 canvas.setStroke(config.getMinorTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < minorTickPositions.size(); i++) {
-                    drawTickMark(canvas, minorTickPositions.get(i), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
+                    axisPainter.drawTickMark(canvas, minorTickPositions.get(i), config.getAxisLineWidth(), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
                 }
             }
 
@@ -328,7 +348,7 @@ public abstract class Axis {
 
             if (!StringUtils.isNullOrBlank(title)) {
                 if (titleText == null) {
-                    titleText = createTitle(canvas);
+                    titleText = axisPainter.createTitle(canvas, title, (int)Math.round(getStart()), (int)Math.round(getEnd()), getWidth(canvas), config.getTitleTextStyle());
                 }
                 canvas.setColor(config.getTitleColor());
                 canvas.setTextStyle(config.getTitleTextStyle());
@@ -339,7 +359,7 @@ public abstract class Axis {
         if (config.getAxisLineWidth() > 0) {
             canvas.setColor(config.getAxisLineColor());
             canvas.setStroke(config.getAxisLineWidth(), config.getAxisLineDashStyle());
-            drawAxisLine(canvas);
+            axisPainter.drawAxisLine(canvas, (int)Math.round(getStart()), (int)Math.round(getEnd()));
         }
 
         canvas.restore();
@@ -352,7 +372,10 @@ public abstract class Axis {
 
         if (config.isTickLabelOutside()) {
             TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-            width += config.getTickPadding() + labelSizeForWidth(tm);
+            if(ticks == null) {
+                createTicks(tm);
+            }
+            width += config.getTickPadding() + axisPainter.labelSizeForWidth(tm, ticks);
 
         }
         if (! StringUtils.isNullOrBlank(title)) {
@@ -531,6 +554,7 @@ public abstract class Axis {
         if (ticks == null) {
             createTicks(tm);
         }
+
         if(ticks.size() == 0) {
             return;
         }
@@ -539,9 +563,7 @@ public abstract class Axis {
         Tick currentTick = ticks.get(0);
         Tick nextTick = ticks.get(1);
         int tickPixelInterval = (int) Math.abs(scale(currentTick.getValue()) - scale(nextTick.getValue()));
-
         for (int tickNumber = 2; tickNumber <= ticks.size(); tickNumber++) {
-
             if (minorTickIntervalCount > 0) {
                 // minor tick positions
                 double minorTickInterval = (nextTick.getValue() - currentTick.getValue()) / minorTickIntervalCount;
@@ -549,7 +571,7 @@ public abstract class Axis {
                 for (int i = 1; i < minorTickIntervalCount; i++) {
                     minorTickValue += minorTickInterval;
                     int minorTickPosition = (int) Math.round(scale(minorTickValue));
-                    if (contains(minorTickPosition)) {
+                    if (axisPainter.contains(minorTickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
                         minorTickPositions.add(minorTickPosition);
                     }
                 }
@@ -558,40 +580,23 @@ public abstract class Axis {
                 currentTick = nextTick;
                 nextTick = ticks.get(tickNumber);
                 int tickPosition = (int) Math.round(scale(currentTick.getValue()));
-                if(contains(tickPosition)) {
+                if(axisPainter.contains(tickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
                     // tick position
                     tickPositions.add(tickPosition);
                     // tick label
-                    tickLabels.add(tickToLabel(tm, tickPosition, currentTick.getLabel(), tickPixelInterval));
+                    tickLabels.add(axisPainter.tickToLabel(tm, tickPosition, currentTick.getLabel(), (int)Math.round(getStart()), (int)Math.round(getEnd()), tickPixelInterval, config, getInterLabelGap(), scale instanceof CategoryScale));
                 }
             }
         }
+
         isDirty = false;
     }
 
-    protected int getInterLabelGap() {
+    private int getInterLabelGap() {
         return  (int)(2 * config.getTickLabelTextStyle().getSize());
     }
 
-    protected int getRequiredSpaceForTickLabel(TextMetric tm, List<Tick> ticks) {
-        return  labelSizeForOverlap(tm, ticks) + getInterLabelGap();
+    private int getRequiredSpaceForTickLabel(TextMetric tm, List<Tick> ticks) {
+        return  axisPainter.labelSizeForOverlap(tm, ticks) + getInterLabelGap();
     }
-
-    protected abstract void translateCanvas(BCanvas canvas, BRectangle area);
-
-    protected abstract int labelSizeForOverlap(TextMetric tm, List<Tick> ticks);
-
-    protected abstract int labelSizeForWidth(TextMetric tm);
-
-    protected abstract BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int tickPixelInterval);
-
-    protected abstract void drawTickMark(BCanvas canvas, int tickPosition, int insideSize, int outsideSize);
-
-    protected abstract void drawGridLine(BCanvas canvas, int tickPosition, BRectangle area);
-
-    protected abstract void drawAxisLine(BCanvas canvas);
-
-    protected abstract BText createTitle(BCanvas canvas);
-
-    protected abstract boolean contains(int point);
 }

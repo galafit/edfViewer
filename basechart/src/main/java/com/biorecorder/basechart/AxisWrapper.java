@@ -1,5 +1,7 @@
-package com.biorecorder.basechart.axis;
+package com.biorecorder.basechart;
 
+import com.biorecorder.basechart.axis.Axis;
+import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.scales.Scale;
@@ -10,7 +12,7 @@ import com.biorecorder.basechart.scales.Scale;
  * Implement axis rounding when methods:
  * drawAxis or drawGrid or getWidth is invoked !!!
  */
-public class AxisWrapper {
+class AxisWrapper {
     private Axis axis;
     private boolean isUsed = false;
     // need this field to implement smooth zooming and translate when minMaxRounding enabled

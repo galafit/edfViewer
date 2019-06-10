@@ -29,7 +29,7 @@ public class AxisConfig {
     private BColor tickLabelColor = BColor.GRAY;
     private boolean isTickLabelCentered = true;
 
-    private LabelPrefixAndSuffix tickLabelPrefixAndSuffix;
+    private AxisPrefixAndSuffix tickLabelPrefixAndSuffix;
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
@@ -137,7 +137,7 @@ public class AxisConfig {
     }
 
     public void setTickLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
-        tickLabelPrefixAndSuffix = new LabelPrefixAndSuffix(prefix, suffix);
+        tickLabelPrefixAndSuffix = new AxisPrefixAndSuffix(prefix, suffix);
     }
 
     public boolean isTickLabelCentered() {
@@ -152,7 +152,7 @@ public class AxisConfig {
         return tickInterval;
     }
 
-    public LabelPrefixAndSuffix getTickLabelPrefixAndSuffix() {
+    public AxisPrefixAndSuffix getTickLabelPrefixAndSuffix() {
         return tickLabelPrefixAndSuffix;
     }
 

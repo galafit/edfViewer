@@ -1,11 +1,13 @@
 package com.biorecorder.basechart.examples;
 
 import com.biorecorder.basechart.*;
+import com.biorecorder.basechart.axis.XAxisPosition;
+import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.data.XYData;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.themes.DarkTheme;
-import com.biorecorder.basechart.traces.LineTrace;
+import com.biorecorder.basechart.traces.LineTracePainter;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
 
@@ -57,9 +59,9 @@ public class NavigableChartTest extends JFrame{
         navigatorProcessing.setGroupingIntervals(groupingIntervals);
         navigatorProcessing.setGroupingForced(true);
        */
-        chart.addChartTrace(xyData, new LineTrace(), true);
+        chart.addChartTrace(xyData, new LineTracePainter(), true);
 
-        chart.addNavigatorTrace(xyData, new LineTrace(), true);
+        chart.addNavigatorTrace(xyData, new LineTracePainter(), true);
 
         chartPanel = new ChartPanel(chart);
 
@@ -130,7 +132,7 @@ public class NavigableChartTest extends JFrame{
 
                     if(count == 2) {
                         chart.addChartStack();
-                        chart.addChartTrace(xyData1, new LineTrace(), true, XAxisPosition.BOTTOM, YAxisPosition.LEFT);
+                        chart.addChartTrace(xyData1, new LineTracePainter(), true, XAxisPosition.BOTTOM, YAxisPosition.LEFT);
                     }
 
                     if(count == 4) {

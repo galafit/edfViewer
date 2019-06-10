@@ -1,12 +1,11 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.basechart.axis.AxisPrefixAndSuffix;
 import com.biorecorder.basechart.utils.NormalizedNumber;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
 /**
  * Created by galafit on 6/9/17.
@@ -60,14 +59,14 @@ public class LinearScale extends Scale {
     }
 
     @Override
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix formatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, AxisPrefixAndSuffix formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
         provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix formatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, AxisPrefixAndSuffix formatInfo) {
         LinearTickProvider provider = new LinearTickProvider(formatInfo);
         provider.setTickInterval(tickInterval);
         return provider;
@@ -89,7 +88,7 @@ public class LinearScale extends Scale {
     }
 
     // TODO: use metric shortcuts - k, M, G... from formatInfo
-    private DecimalFormat getNumberFormat(int power, LabelPrefixAndSuffix labelFormatInfo) {
+    private DecimalFormat getNumberFormat(int power, AxisPrefixAndSuffix labelFormatInfo) {
         DecimalFormat dfNeg4 = new DecimalFormat("0.0000");
         DecimalFormat dfNeg3 = new DecimalFormat("0.000");
         DecimalFormat dfNeg2 = new DecimalFormat("0.00");
@@ -130,11 +129,11 @@ public class LinearScale extends Scale {
 
     class LinearTickProvider implements TickProvider {
         private NormalizedNumber tickInterval;
-        private LabelPrefixAndSuffix labelFormatInfo;
+        private AxisPrefixAndSuffix labelFormatInfo;
         private DecimalFormat labelFormat = new DecimalFormat();
         private double currentTick;
 
-        public LinearTickProvider(LabelPrefixAndSuffix labelFormatInfo) {
+        public LinearTickProvider(AxisPrefixAndSuffix labelFormatInfo) {
             this.labelFormatInfo = labelFormatInfo;
         }
 

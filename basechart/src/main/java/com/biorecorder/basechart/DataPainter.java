@@ -9,7 +9,7 @@ import com.biorecorder.basechart.graphics.BRectangle;
 import com.biorecorder.basechart.graphics.Range;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.traces.NamedValue;
-import com.biorecorder.basechart.traces.Trace;
+import com.biorecorder.basechart.traces.TracePainter;
 import com.biorecorder.basechart.traces.TraceType;
 import com.biorecorder.data.sequence.StringSequence;
 import com.sun.istack.internal.Nullable;
@@ -28,7 +28,7 @@ class DataPainter {
 
     private boolean isSplit;
     private DataManager dataManager;
-    private Trace tracePainter;
+    private TracePainter tracePainter;
     private NearestSearchType nearestSearchType;
     private int traceCount;
     private String[] traceNames;
@@ -36,11 +36,11 @@ class DataPainter {
     private boolean[] tracesVisibleMask;
     private int hiddenTraceCount = 0;
 
-    DataPainter(ChartData data1, Trace tracePainter, boolean isSplit, DataProcessingConfig dataProcessingConfig1, int xAxisIndex, int yAxesStartIndex) {
+    DataPainter(ChartData data1, TracePainter tracePainter, boolean isSplit, DataProcessingConfig dataProcessingConfig1, int xAxisIndex, int yAxesStartIndex) {
         ChartData data = data1.view(0);
         DataProcessingConfig dataProcessingConfig = new DataProcessingConfig(dataProcessingConfig1);
 
-        if (tracePainter.traceType() == TraceType.LINE) {
+        if (tracePainter.traceType() == TraceType.LINEAR) {
             nearestSearchType = NearestSearchType.X;
         } else {
             nearestSearchType = NearestSearchType.XY;
@@ -265,7 +265,7 @@ class DataPainter {
     }
 
     private ChartData getProcessedData(Scale xScale) {
-        if(tracePainter.traceType() == TraceType.DIMENSIONAL2) {
+        if(tracePainter.traceType() == TraceType.SCATTER) {
             dataManager.getData();
         }
         return dataManager.getProcessedData(xScale, tracePainter.markWidth());

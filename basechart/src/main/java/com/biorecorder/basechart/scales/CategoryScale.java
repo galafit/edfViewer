@@ -1,6 +1,6 @@
 package com.biorecorder.basechart.scales;
 
-import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.basechart.axis.AxisPrefixAndSuffix;
 import com.biorecorder.data.sequence.StringSequence;
 
 import java.text.MessageFormat;
@@ -87,14 +87,14 @@ public class CategoryScale extends LinearScale {
     }
 
     @Override
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix formatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, AxisPrefixAndSuffix formatInfo) {
         CategoryTickProvider tickProvider =  new CategoryTickProvider();
         tickProvider.setTickIntervalCount(tickIntervalCount);
         return tickProvider;
     }
 
     @Override
-    public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix formatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, AxisPrefixAndSuffix formatInfo) {
         CategoryTickProvider tickProvider =  new CategoryTickProvider();
         tickProvider.setTickInterval(tickInterval);
         return tickProvider;

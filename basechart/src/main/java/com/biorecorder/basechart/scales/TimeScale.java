@@ -1,11 +1,10 @@
 package com.biorecorder.basechart.scales;
 
 import com.biorecorder.data.frame.TimeInterval;
-import com.biorecorder.basechart.axis.LabelPrefixAndSuffix;
+import com.biorecorder.basechart.axis.AxisPrefixAndSuffix;
 import com.biorecorder.data.frame.TimeIntervalProvider;
 import com.biorecorder.data.frame.TimeUnit;
 
-import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -33,14 +32,14 @@ public class TimeScale extends LinearScale {
     }
 
     @Override
-    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, LabelPrefixAndSuffix labelFormatInfo) {
+    public TickProvider getTickProviderByIntervalCount(int tickIntervalCount, AxisPrefixAndSuffix labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
         provider.setTickIntervalCount(tickIntervalCount);
         return provider;
     }
 
     @Override
-    public TickProvider getTickProviderByInterval(double tickInterval, LabelPrefixAndSuffix labelFormatInfo) {
+    public TickProvider getTickProviderByInterval(double tickInterval, AxisPrefixAndSuffix labelFormatInfo) {
         TimeTickProvider provider = new TimeTickProvider();
         provider.setTickInterval(tickInterval);
         return provider;

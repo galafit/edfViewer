@@ -2,8 +2,8 @@ package com.biorecorder.basechart.themes;
 
 import com.biorecorder.basechart.ChartConfig;
 import com.biorecorder.basechart.NavigableChartConfig;
-import com.biorecorder.basechart.XAxisPosition;
-import com.biorecorder.basechart.YAxisPosition;
+import com.biorecorder.basechart.axis.XAxisPosition;
+import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scroll.ScrollConfig;

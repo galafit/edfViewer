@@ -530,10 +530,7 @@ class DataManager {
         int pointsInGroupInOriginalData = roundPoints(groupIntervalToPoints(data, groupIntervalRound));
         ChartData data = group(this.data.view(slicedDataLength * pointsInGroupInOriginalData), new NumberGroupInterval(groupIntervalRound));
         ChartData resultantData = slicedGroupedData.concat(data);
-        System.out.println(reGroupedData.isDataAppendMode() + " isAppendMode regroup isRegular: " + resultantData.isRegular());
         return resultantData;
-        //return groupedData.resampleByEqualPointsNumber(pointsInGroupOnGroupedData);
-
     }
 
     private ChartData group(ChartData data, GroupInterval groupInterval) {
@@ -542,8 +539,6 @@ class DataManager {
             int points = roundPoints(groupIntervalToPoints(data, groupInterval.intervalLength()));
             if (points > 1) {
                 groupedData = data.resampleByEqualPointsNumber(points);
-                System.out.println("group by points "+ points);
-
             } else {
                 groupedData = data;
             }
@@ -551,12 +546,9 @@ class DataManager {
             if (groupInterval instanceof TimeGroupInterval) {
                 TimeGroupInterval timeGroupInterval = (TimeGroupInterval) groupInterval;
                 groupedData = data.resampleByEqualTimeInterval(0, timeGroupInterval.getTimeInterval());
-                System.out.println("Time interval grouping: "+timeGroupInterval.getTimeInterval());
             } else {
                 double interval = groupInterval.intervalLength();
                 groupedData = data.resampleByEqualInterval(0, interval);
-                System.out.println(this.data.isDataAppendMode() +" Number interval "+groupInterval.intervalLength());
-
             }
         }
         return groupedData;
@@ -579,7 +571,7 @@ class DataManager {
                     }
                 }
             }
-            if(traceType == TraceType.DIMENSIONAL2) {
+            if(traceType == TraceType.SCATTER) {
                 traceExtent = Math.sqrt(traceExtent);
             }
             return traceExtent;
