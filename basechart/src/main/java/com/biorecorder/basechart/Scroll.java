@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.scroll;
+package com.biorecorder.basechart;
 
 import java.util.*;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by galafit on 21/7/17.
  */
-public class Scroll {
+class Scroll {
     private double max = 1;
     private double min = 0;
     private double value = 0; // viewportPosition

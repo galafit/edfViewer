@@ -900,16 +900,8 @@ public class Chart {
         return new ChartConfig(config);
     }
 
-    public void setConfig(ChartConfig chartConfig) {
-        setConfig(chartConfig, true);
-    }
 
-    /**
-     * if isTraceColorChangeEnabled is true all traces colors will be
-     * changed according with the legendConfig traceColors.
-     * Otherwise trace colors will stay as they are.
-     */
-    public void setConfig(ChartConfig chartConfig, boolean isTraceColorChangeEnabled) {
+    public void setConfig(ChartConfig chartConfig) {
         this.config = new ChartConfig(chartConfig);
         title.setConfig(config.getTitleConfig());
         for (int i = 0; i < xAxisList.size(); i++) {
@@ -921,13 +913,11 @@ public class Chart {
         legend.setConfig(config.getLegendConfig());
 
         BColor[] colors = this.config.getTraceColors();
-        if (isTraceColorChangeEnabled) {
-            int trace = 0;
-            for (DataPainter dataPainter : dataPainters) {
-                for (int i = 0; i < dataPainter.traceCount(); i++) {
-                    dataPainter.setTraceColor(i, colors[(trace + i) % colors.length]);
-                    trace++;
-                }
+        int trace = 0;
+        for (DataPainter dataPainter : dataPainters) {
+            for (int i = 0; i < dataPainter.traceCount(); i++) {
+                dataPainter.setTraceColor(i, colors[(trace + i) % colors.length]);
+                trace++;
             }
         }
         isDirty = true;

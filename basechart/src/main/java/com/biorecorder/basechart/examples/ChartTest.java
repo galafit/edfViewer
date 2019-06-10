@@ -4,6 +4,7 @@ import com.biorecorder.basechart.*;
 import com.biorecorder.basechart.axis.XAxisPosition;
 import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.data.XYData;
+import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.traces.LineTracePainter;
 import com.biorecorder.data.frame.SquareFunction;
@@ -88,7 +89,7 @@ public class ChartTest extends JFrame {
         timeData.addColumn("y", list1);
 
         chart = new Chart();
-        chart.setConfig(new WhiteTheme(true).getChartConfig());
+        chart.setConfig(new WhiteTheme(false).getChartConfig());
         //chart.addTraces(new LineTrace(regularData), true);
 
         chartPanel = new ChartPanel(chart);

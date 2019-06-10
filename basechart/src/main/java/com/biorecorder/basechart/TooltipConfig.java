@@ -13,9 +13,9 @@ public class TooltipConfig {
     private boolean isShared = true;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
     private BColor color = BColor.BLACK_LIGHT;
-    private BColor backgroundColor = BColor.BEIGE_WHITE;
-    private BColor headerBackgroundColor = new BColor(220, 215, 215);
-    private BColor borderColor = new BColor(150, 150, 150);
+    private BColor backgroundColor = BColor.WHITE_OBSCURE_LIGHT;
+    private BColor headerBackgroundColor = BColor.WHITE_OBSCURE;
+    private BColor borderColor = new BColor(180, 180, 180);
     private int borderWidth = 1;
     private Insets margin;
 

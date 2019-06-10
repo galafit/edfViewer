@@ -51,29 +51,26 @@ public class ChartConfig {
         //final BColor[] colors = {BLUE, ORANGE, RED, GREEN_DARK, MAGENTA, BLUE_DARK, PINK, RED_DARK, CYAN, GRAY};
         final BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
 
-        BColor bgColor = BColor.WHITE_DARK;
-        BColor marginBgColor = BColor.BEIGE_WHITE;
+        BColor bgColor = BColor.WHITE_OBSCURE_LIGHT;
+        BColor marginBgColor = BColor.WHITE_OBSCURE;
 
-        BColor titleColor = BColor.GRAY;
-        BColor axisColor = titleColor;
+        BColor labelColor = BColor.GRAY;
+        BColor axisColor = new BColor(105, 105, 105);
         BColor gridColor = BColor.GRAY_LIGHT;
 
-        BColor crosshairColor = axisColor;
+        BColor crosshairColor = labelColor;
 
-        xAxisConfig.setColors(axisColor, gridColor, gridColor);
+        xAxisConfig = new AxisConfig();
+        xAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
         xAxisConfig.setCrosshairLineColor(crosshairColor);
 
-        yAxisConfig.setColors(axisColor, gridColor, gridColor);
-        yAxisConfig.setTickMarkSize(4, 0);
-        yAxisConfig.setCrosshairLineColor(crosshairColor);
+        yAxisConfig = xAxisConfig;
         
         traceColors = colors;
         backgroundColor = bgColor;
         marginColor = marginBgColor;
-        titleConfig.setTextColor(titleColor);
-        yAxisConfig = new AxisConfig(yAxisConfig);
-        xAxisConfig = new AxisConfig(yAxisConfig);
+        titleConfig.setTextColor(labelColor);
 
         legendConfig.setBackgroundColor(bgColor);
         legendConfig.setMargin(new Insets(1));

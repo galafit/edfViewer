@@ -8,9 +8,6 @@ import com.biorecorder.basechart.data.DataProcessingConfig;
 import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.LinearScale;
 import com.biorecorder.basechart.scales.Scale;
-import com.biorecorder.basechart.scroll.Scroll;
-import com.biorecorder.basechart.scroll.ScrollConfig;
-import com.biorecorder.basechart.scroll.ScrollListener;
 import com.biorecorder.basechart.themes.DarkTheme;
 import com.biorecorder.basechart.traces.TracePainter;
 import com.sun.istack.internal.Nullable;
@@ -63,8 +60,8 @@ public class NavigableChart {
         copyProcessingConfig.setGroupAll(true);
         navigator = new Chart(xScale, yScale, copyProcessingConfig);
 
-        chart.setConfig(config.getChartConfig(), true);
-        navigator.setConfig(config.getNavigatorConfig(), true);
+        chart.setConfig(config.getChartConfig());
+        navigator.setConfig(config.getNavigatorConfig());
     }
 
     private void autoScaleChartY() {
@@ -493,14 +490,10 @@ public class NavigableChart {
         isScrollsDirty = true;
     }
 
-    public void setConfig(NavigableChartConfig config) {
-        setConfig(config, true);
-    }
-
-    public void setConfig(NavigableChartConfig config1, boolean isTraceColorChangeEnabled) {
+    public void setConfig(NavigableChartConfig config1) {
         this.config = new NavigableChartConfig(config1);
-        chart.setConfig(config.getChartConfig(), isTraceColorChangeEnabled);
-        navigator.setConfig(config.getNavigatorConfig(), isTraceColorChangeEnabled);
+        chart.setConfig(config.getChartConfig());
+        navigator.setConfig(config.getNavigatorConfig());
         scrolls.clear();
         isAreasDirty = true;
         isScrollsDirty = true;

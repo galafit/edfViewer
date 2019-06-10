@@ -6,7 +6,7 @@ import com.biorecorder.basechart.axis.XAxisPosition;
 import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.scroll.ScrollConfig;
+import com.biorecorder.basechart.ScrollConfig;
 
 /**
  * Created by galafit on 24/2/19.
@@ -34,32 +34,34 @@ public class DarkTheme implements Theme {
         final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
 
         /**========================== CHART ==========================**/
-        BColor chartBgColor =  BColor.STEEL_DARK; // new BColor(18, 15, 18);
-        BColor chartMarginColor = BColor.BLACK_LIGHT;
-        BColor titleColor = BColor.BEIGE;
-        BColor axisColor = titleColor;
-        BColor gridColor = BColor.BEIGE_LIGHT;
+        BColor chartBgColor =  new BColor(30, 30, 40);  // new BColor(18, 15, 18);
+        BColor chartMarginColor = new BColor(20, 20, 20);
+        BColor labelColor = new BColor(160, 140, 110);
+        BColor axisColor = new BColor(100, 86, 60);
+        BColor gridColor = new BColor(70, 65, 45);
 
-        BColor crosshairColor = BColor.WHITE_DARK;
+        BColor crosshairColor = BColor.WHITE_OBSCURE;
 
         AxisConfig xAxisConfig = new AxisConfig();
-        xAxisConfig.setColors(axisColor, gridColor, gridColor);
+        xAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
         xAxisConfig.setCrosshairLineColor(crosshairColor);
+        xAxisConfig.setAxisLineWidth(0);
         //xAxisConfig.setMinorTickIntervalCount(3);
 
         AxisConfig yAxisConfig = new AxisConfig();
-        yAxisConfig.setColors(axisColor, gridColor, gridColor);
+        yAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
         yAxisConfig.setTickMarkSize(6, 0);
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
         yAxisConfig.setCrosshairLineColor(crosshairColor);
+        yAxisConfig.setAxisLineWidth(0);
         //yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
         chartConfig.setTraceColors(colors);
         chartConfig.setBackgroundColor(chartBgColor);
         chartConfig.setMarginColor(chartMarginColor);
-        chartConfig.getTitleConfig().setTextColor(titleColor);
+        chartConfig.getTitleConfig().setTextColor(labelColor);
         chartConfig.setYAxisConfig(yAxisConfig);
         chartConfig.setXAxisConfig(xAxisConfig);
         chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
@@ -71,16 +73,16 @@ public class DarkTheme implements Theme {
 
         /**========================== NAVIGATOR ==========================**/
 
-        BColor navigatorBgColor = BColor.BLACK_LIGHT;
+        BColor navigatorBgColor = chartMarginColor;
         BColor navigatorMarginColor = navigatorBgColor;
         BColor scrollColor = crosshairColor;
-        BColor bgColor = BColor.BLACK_LIGHT;
+        BColor bgColor = navigatorBgColor;
 
 
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
-        navigatorConfig.getTitleConfig().setTextColor(titleColor);
+        navigatorConfig.getTitleConfig().setTextColor(labelColor);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
         navigatorConfig.setDefaultStackWeight(2);
         navigatorConfig.setStackGap(0);

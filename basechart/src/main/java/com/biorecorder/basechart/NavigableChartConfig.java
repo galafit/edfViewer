@@ -4,7 +4,6 @@ import com.biorecorder.basechart.axis.XAxisPosition;
 import com.biorecorder.basechart.axis.YAxisPosition;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.Insets;
-import com.biorecorder.basechart.scroll.ScrollConfig;
 
 /**
  * Created by galafit on 31/8/18.
@@ -14,7 +13,7 @@ public class NavigableChartConfig {
     private ChartConfig navigatorConfig;
     private ScrollConfig scrollConfig;
 
-    private BColor backgroundColor = BColor.BEIGE_WHITE;
+    private BColor backgroundColor = BColor.WHITE_OBSCURE;
     private int gap = 0; // between Chart and Preview px
     private Insets spacing = new Insets(0);
     private int navigatorHeightMin = 16; // px
@@ -23,7 +22,7 @@ public class NavigableChartConfig {
     private boolean autoScaleEnabled = true; // chart Y auto scale during scrolling
 
     public NavigableChartConfig() {
-        BColor navigatorBgColor = BColor.BEIGE_WHITE;
+        BColor navigatorBgColor = BColor.WHITE_OBSCURE;
         BColor navigatorMarginColor = navigatorBgColor;
 
         chartConfig = new ChartConfig();

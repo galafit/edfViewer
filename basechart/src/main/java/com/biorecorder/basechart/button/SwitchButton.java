@@ -17,7 +17,7 @@ public class SwitchButton {
 
     private BColor color = BColor.BLACK_LIGHT;
     private String label = "";
-    private BColor backgroundColor = BColor.WHITE_DARK;
+    private BColor backgroundColor = BColor.WHITE_OBSCURE_LIGHT;
     private TextStyle textStyle = new TextStyle(TextStyle.DEFAULT, TextStyle.NORMAL, 12);
     private Insets margin = new Insets((int)(textStyle.getSize() * 0.2),
             (int)(textStyle.getSize() * 0.2),

@@ -164,12 +164,12 @@ public class AxisConfig {
         this.minorTickIntervalCount = minorTickIntervalCount;
     }
 
-    public void setColors(BColor axisColor, BColor gridColor, BColor minorGridColor) {
+    public void setColors(BColor axisColor, BColor labelColor, BColor gridColor, BColor minorGridColor) {
         axisLineColor = axisColor;
-        tickLabelColor = axisColor;
         tickMarkColor = axisColor;
         minorTickMarkColor = axisColor;
-        titleColor = axisColor;
+        titleColor = labelColor;
+        tickLabelColor = labelColor;
         this.gridColor = gridColor;
         this.minorGridColor = minorGridColor;
     }

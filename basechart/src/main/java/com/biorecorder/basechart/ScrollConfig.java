@@ -1,4 +1,4 @@
-package com.biorecorder.basechart.scroll;
+package com.biorecorder.basechart;
 
 
 import com.biorecorder.basechart.graphics.BColor;
@@ -26,7 +26,7 @@ public class ScrollConfig {
         if(fillColor != null) {
             return fillColor;
         }
-        return new BColor(color.getRed(), color.getGreen(), color.getBlue(), 50);
+        return new BColor(color.getRed(), color.getGreen(), color.getBlue(), 40);
     }
 
     public void setFillColor(BColor fillColor) {

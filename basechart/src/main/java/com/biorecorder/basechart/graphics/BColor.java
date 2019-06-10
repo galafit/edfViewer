@@ -4,14 +4,9 @@ package com.biorecorder.basechart.graphics;
  * Created by galafit on 29/12/17.
  */
 public class BColor {
-    public static final BColor STEEL_LIGHT = new BColor(240, 241, 245);
-    public static final BColor STEEL_DARK = new BColor(20, 20, 25);
-    public static final BColor BEIGE_INTENSE = new BColor(245, 226, 208);
-    public static final BColor BEIGE = new BColor(160, 140, 110);
-    public static final BColor BEIGE_LIGHT = new BColor(70, 65, 45);
-    public static final BColor BEIGE_WHITE =  new BColor(245, 240, 238);
-    public static final BColor WHITE_DARK = new BColor(250, 250, 250);
-    public static final BColor BLACK_LIGHT = new BColor(8, 8, 10);
+    public static final BColor WHITE_OBSCURE = new BColor(237, 235, 235);//new BColor(245, 240, 238);
+    public static final BColor WHITE_OBSCURE_LIGHT = new BColor(247, 247, 247);
+    public static final BColor BLACK_LIGHT = new BColor(35, 30, 30);
     public static final BColor BLACK = new BColor(0, 0, 0);
     public static final BColor WHITE = new BColor(255, 255, 255);
     public static final BColor RED = new BColor(255, 0, 0);
@@ -21,7 +16,7 @@ public class BColor {
     public static final BColor YELLOW = new BColor(255, 255, 0);
     public static final BColor MAGENTA = new BColor(255, 0, 255);
     public static final BColor PINK = new BColor(255, 175, 175);
-    public static final BColor GRAY = new BColor(90, 90, 90);
+    public static final BColor GRAY = new BColor(50, 50, 50);
     public static final BColor GRAY_LIGHT = new BColor(220, 220, 220);
 
     private int r;

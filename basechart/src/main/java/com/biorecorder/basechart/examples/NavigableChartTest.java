@@ -7,6 +7,7 @@ import com.biorecorder.basechart.data.XYData;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.scales.CategoryScale;
 import com.biorecorder.basechart.themes.DarkTheme;
+import com.biorecorder.basechart.themes.WhiteTheme;
 import com.biorecorder.basechart.traces.LineTracePainter;
 import com.biorecorder.data.list.IntArrayList;
 import com.biorecorder.basechart.swing.ChartPanel;
@@ -48,11 +49,12 @@ public class NavigableChartTest extends JFrame{
         //xyData.addColumn(xData);
         xyData.addColumn("y", yData);
 
-        xyData1 = new XYData(0, 1.5, true);
+        xyData1 = new XYData(0, 1, true);
         xyData1.addColumn("regular1", xData);
         xyData1.addColumn("regular2", yData);
 
         chart = new NavigableChart(new CategoryScale());
+        chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};
@@ -95,7 +97,7 @@ public class NavigableChartTest extends JFrame{
                 }
                 NavigableChartConfig config = new DarkTheme().getNavigableChartConfig();
                 config.setGap(20);
-                chart.setConfig(config, false);
+                chart.setConfig(config);
                 chartPanel.repaint();
             }
         });
@@ -105,7 +107,7 @@ public class NavigableChartTest extends JFrame{
             int interval = 1000;
             @Override
             public void run() {
-                for (int count = 0; count < 5; count++) {
+                for (int count = 0; count < 2; count++) {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
@@ -122,7 +124,7 @@ public class NavigableChartTest extends JFrame{
 
                     }
 
-                    for (int i = 1; i <= 20; i++) {
+                    for (int i = 1; i <= 1000; i++) {
                         yData.add(i + yDataLast);
                         xData.add(i + xDataLast);
                         labels.add("label_"+(i + xDataLast));
@@ -130,9 +132,9 @@ public class NavigableChartTest extends JFrame{
                     }
                     System.out.println("\ndata size: "+yData.size());
 
-                    if(count == 2) {
+                    if(count == 1) {
                         chart.addChartStack();
-                        chart.addChartTrace(xyData1, new LineTracePainter(), true, XAxisPosition.BOTTOM, YAxisPosition.LEFT);
+                        chart.addChartTrace(xyData1, new LineTracePainter(), true);
                     }
 
                     if(count == 4) {
