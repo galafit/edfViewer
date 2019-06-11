@@ -12,6 +12,17 @@ import com.biorecorder.basechart.ScrollConfig;
  * Created by galafit on 24/2/19.
  */
 public class DarkTheme implements Theme {
+    public static final BColor CYAN = new BColor(0, 200, 220);
+    public static final BColor BLUE = new BColor(100, 120, 250);
+    public static final BColor MAGENTA = new BColor(165, 80, 220);
+    public static final BColor GREEN = new BColor(110, 250, 110);
+    public static final BColor RED = new BColor(250, 64, 82);
+    public static final BColor ORANGE = new BColor(200, 80, 0);//new BColor(173, 105, 49);
+    public static final BColor YELLOW = new BColor(252, 177, 48);
+    public static final BColor GRAY = new BColor(180, 180, 200);
+    public static final BColor PINK = new BColor(255, 50, 200);//new BColor(255, 60, 130); //new BColor(250, 0, 200);
+    public static final BColor GOLD = new BColor(190, 140, 110);
+
     private final ChartConfig chartConfig;
     private final NavigableChartConfig navigableChartConfig;
 
@@ -20,17 +31,6 @@ public class DarkTheme implements Theme {
     }
 
     public DarkTheme(boolean isYRoundingEnabled) {
-        final BColor CYAN = new BColor(0, 200, 220);
-        final BColor BLUE = new BColor(100, 120, 250);
-        final BColor MAGENTA = new BColor(165, 80, 220);
-        final BColor GREEN = new BColor(110, 250, 110);
-        final BColor RED = new BColor(250, 64, 82);
-        final BColor ORANGE = new BColor(200, 80, 0);//new BColor(173, 105, 49);
-        final BColor YELLOW = new BColor(252, 177, 48);
-        final BColor GRAY = new BColor(180, 180, 200);
-        final BColor PINK = new BColor(255, 50, 200);//new BColor(255, 60, 130); //new BColor(250, 0, 200);
-        final BColor GOLD = new BColor(190, 140, 110);
-
         final BColor[] colors = {BLUE, RED, GRAY, MAGENTA, ORANGE, YELLOW, GREEN, CYAN, PINK, GOLD};
 
         /**========================== CHART ==========================**/
@@ -78,7 +78,6 @@ public class DarkTheme implements Theme {
         BColor scrollColor = crosshairColor;
         BColor bgColor = navigatorBgColor;
 
-
         ChartConfig navigatorConfig = new ChartConfig(chartConfig);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
@@ -88,6 +87,9 @@ public class DarkTheme implements Theme {
         navigatorConfig.setStackGap(0);
         navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
+        navigatorConfig.setPrimaryYPosition(YAxisPosition.RIGHT);
+        navigatorConfig.setPrimaryXPosition(XAxisPosition.BOTTOM);
+
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);

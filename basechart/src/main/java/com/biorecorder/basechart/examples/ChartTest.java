@@ -64,18 +64,16 @@ public class ChartTest extends JFrame {
 
 
         XYData regularData = new XYData(labels, true);
-        regularData.addColumn("reg", list1);
+        regularData.addYColumn("reg", list1);
 
 
-        XYData noRegularData = new XYData(true);
-        noRegularData.addColumn("x", list1);
-        noRegularData.addColumn("non-reg", list1);
-        noRegularData.addColumn("function", new SquareFunction(), 0);
+        XYData noRegularData = new XYData(list1, true);
+        noRegularData.addYColumn("non-reg", list1);
+        noRegularData.addYColumn("function", new SquareFunction());
 
 
-        XYData unsortedData = new XYData(false);
-        unsortedData.addColumn("x", xUnsort);
-        unsortedData.addColumn("unsort", yUnsort);
+        XYData unsortedData = new XYData(xUnsort, false);
+        unsortedData.addYColumn("unsort", yUnsort);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(0);
@@ -84,9 +82,8 @@ public class ChartTest extends JFrame {
             timeArray.add(calendar.getTimeInMillis());
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
-        XYData timeData = new XYData(false);
-        timeData.addColumn("time", timeArray);
-        timeData.addColumn("y", list1);
+        XYData timeData = new XYData(timeArray, false);
+        timeData.addYColumn("y", list1);
 
         chart = new Chart();
         chart.setConfig(new WhiteTheme(false).getChartConfig());

@@ -12,15 +12,26 @@ import com.biorecorder.basechart.ScrollConfig;
  * Created by galafit on 24/2/19.
  */
 public class WhiteTheme implements Theme {
+    public static final BColor BLUE = new BColor(32, 120, 179);
+    public static final BColor ORANGE = new BColor(255, 127, 15);
+    public static final BColor GREEN = new BColor(44, 158, 44);
+    public static final BColor VIOLET = new BColor(148, 104, 189);
+    public static final BColor BROWN = new BColor(138, 85, 74);
+    public static final BColor ROSE = new BColor(227, 120, 193);
+    public static final BColor GRAY = new BColor(125, 125, 125);
+    public static final BColor KHAKI = new BColor(189, 189, 34);
+    public static final BColor EMERALD = new BColor(25, 191, 207);
+
     private final ChartConfig chartConfig;
     private final NavigableChartConfig navigableChartConfig;
+
 
     public WhiteTheme() {
         this(false);
     }
 
     public WhiteTheme(boolean isYRoundingEnabled) {
-        final BColor BLUE = new BColor(0, 130, 230);
+ /*     final BColor BLUE = new BColor(0, 130, 230);
         final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
         final BColor GREEN_DARK = new BColor(0, 130, 0);
         final BColor MAGENTA = new BColor(150, 50, 185);
@@ -30,33 +41,9 @@ public class WhiteTheme implements Theme {
         final BColor RED_DARK = new BColor(180, 0, 0);
         final BColor CYAN = new BColor(0, 160, 160);
         final BColor GRAY = new BColor(120, 56, 7); //new BColor(60, 70, 100);
+        */
 
-
-        final BColor[] fujiColors = {
-                new BColor(82, 89, 179),
-                new BColor(43, 194, 189),
-                new BColor(240, 98, 96),
-                new BColor(255, 194, 51),
-                new BColor(79, 179, 132),
-                new BColor(177, 129, 222),
-                new BColor(17, 186, 240)
-        };
-
-        final BColor[] plotlyColors = {
-                new BColor(32, 120, 179),
-                new BColor(255, 127, 15),
-                new BColor(44, 158, 44),
-                new BColor(148, 104, 189),
-                new BColor(138, 85, 74),
-                new BColor(227, 120, 193),
-                new BColor(125, 125, 125),
-                new BColor(189, 189, 34),
-                new BColor(25, 191, 207),
-
-        };
-
-        BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
-        colors = plotlyColors;
+        BColor[] colors = {BLUE, ORANGE, GREEN, VIOLET, BROWN, ROSE, GRAY, KHAKI, EMERALD};
 
         /**========================== CHART ==========================**/
         BColor chartBgColor = BColor.WHITE_OBSCURE_LIGHT;
@@ -111,6 +98,8 @@ public class WhiteTheme implements Theme {
         navigatorConfig.setStackGap(0);
         navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
+        navigatorConfig.setPrimaryYPosition(YAxisPosition.RIGHT);
+        navigatorConfig.setPrimaryXPosition(XAxisPosition.BOTTOM);
 
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);

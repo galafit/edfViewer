@@ -44,17 +44,14 @@ public class NavigableChartTest extends JFrame{
         }*/
 
 
-        xyData = new XYData(true);
-        xyData.addColumn("x", xData);
-        //xyData.addColumn(xData);
-        xyData.addColumn("y", yData);
+        xyData = new XYData(xData, true);
+        xyData.addYColumn("y", yData);
 
         xyData1 = new XYData(0, 1, true);
-        xyData1.addColumn("regular1", xData);
-        xyData1.addColumn("regular2", yData);
+        xyData1.addYColumn("regular1", xData);
+        xyData1.addYColumn("regular2", yData);
 
-        chart = new NavigableChart(new CategoryScale());
-        chart.setConfig(new WhiteTheme(false).getNavigableChartConfig());
+        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};

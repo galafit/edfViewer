@@ -46,36 +46,33 @@ public class Chart {
 
     private DataPainterTracePoint hoverPoint;
     private DataProcessingConfig dataProcessingConfig;
-    private Scale yScale;
 
     private boolean isDirty = true;
 
     public Chart() {
-        this(new LinearScale(), new LinearScale());
+        this(new DataProcessingConfig());
     }
 
-    public Chart(Scale xScale) {
-        this(xScale, new LinearScale());
+    public Chart(ChartConfig config) {
+        this(config, new DataProcessingConfig());
     }
 
-    public Chart(Scale xScale, Scale yScale) {
-        this(xScale, yScale, new DataProcessingConfig());
+    public Chart(DataProcessingConfig dataProcessingConfig) {
+        this(new DarkTheme(false).getChartConfig(), dataProcessingConfig);
     }
 
-    public Chart(Scale xScale, Scale yScale, DataProcessingConfig dataProcessingConfig) {
-        this.dataProcessingConfig = dataProcessingConfig;
-        this.config = new DarkTheme(false).getChartConfig();
-        this.yScale = yScale;
+    public Chart(ChartConfig config, DataProcessingConfig dataProcessingConfig) {
+        this.dataProcessingConfig = new DataProcessingConfig(dataProcessingConfig);
+        this.config = new ChartConfig(config);
 
-        AxisWrapper bottomAxis = new AxisWrapper(new Axis(xScale.copy(), config.getXAxisConfig(), XAxisPosition.BOTTOM));
-        AxisWrapper topAxis = new AxisWrapper(new Axis(xScale.copy(), config.getXAxisConfig(), XAxisPosition.TOP));
-
+        AxisWrapper bottomAxis = new AxisWrapper(new Axis(new LinearScale(), config.getXAxisConfig(), XAxisPosition.BOTTOM));
+        AxisWrapper topAxis = new AxisWrapper(new Axis(new LinearScale(), config.getXAxisConfig(), XAxisPosition.TOP));
         xAxisList.add(bottomAxis);
         xAxisList.add(topAxis);
 
+        addStack();
         //legend
         legend = new Legend(config.getLegendConfig());
-
         //title
         title = new Title(config.getTitleConfig());
     }
@@ -951,8 +948,8 @@ public class Chart {
     }
 
     public void addStack(int weight) {
-        AxisWrapper leftAxis = new AxisWrapper(new Axis(yScale.copy(), config.getYAxisConfig(), YAxisPosition.LEFT));
-        AxisWrapper rightAxis = new AxisWrapper(new Axis(yScale.copy(), config.getYAxisConfig(), YAxisPosition.RIGHT));
+        AxisWrapper leftAxis = new AxisWrapper(new Axis(new LinearScale(), config.getYAxisConfig(), YAxisPosition.LEFT));
+        AxisWrapper rightAxis = new AxisWrapper(new Axis(new LinearScale(), config.getYAxisConfig(), YAxisPosition.RIGHT));
         yAxisList.add(leftAxis);
         yAxisList.add(rightAxis);
         stackWeights.add(weight);

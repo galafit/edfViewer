@@ -36,7 +36,7 @@ class DataManager {
 
     public DataManager(ChartData data, DataProcessingConfig dataProcessingConfig) {
         this.data = data;
-        this.processingConfig = new DataProcessingConfig(dataProcessingConfig);
+        this.processingConfig = dataProcessingConfig;
         switch (processingConfig.getGroupingType()) {
             case EQUAL_POINTS_NUMBER:
                 isEqualFrequencyGrouping = true;

@@ -11,9 +11,7 @@ import com.sun.istack.internal.Nullable;
  * Created by galafit on 18/8/17.
  */
 public class ChartConfig {
-
     private BColor[] traceColors;
-
     private BColor backgroundColor;
     private BColor marginColor;
 
@@ -27,7 +25,6 @@ public class ChartConfig {
 
     private int stackGap = 4; //px
 
-
     private AxisConfig yAxisConfig = new AxisConfig();
     private AxisConfig xAxisConfig = new AxisConfig();
 
@@ -37,36 +34,19 @@ public class ChartConfig {
     private int defaultStackWeight = 4;
 
     public ChartConfig() {
-        final BColor BLUE = new BColor(0, 130, 230);
-        final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
-        final BColor GREEN_DARK = new BColor(0, 130, 0);
-        final BColor MAGENTA = new BColor(150, 50, 185);
-        final BColor RED = new BColor(250, 60, 90); //new BColor(230, 10, 60);
-        final BColor BLUE_DARK = new BColor(30, 30, 180);
-        final BColor PINK = new BColor(230, 0, 230);
-        final BColor RED_DARK = new BColor(180, 0, 0);
-        final BColor CYAN = new BColor(0, 160, 160);
-        final BColor GRAY = new BColor(120, 56, 7); //new BColor(60, 70, 100);
-
-        //final BColor[] colors = {BLUE, ORANGE, RED, GREEN_DARK, MAGENTA, BLUE_DARK, PINK, RED_DARK, CYAN, GRAY};
-        final BColor[] colors = {BLUE_DARK, RED_DARK, GRAY, MAGENTA, CYAN, ORANGE, BLUE, PINK, GREEN_DARK, RED};
-
-        BColor bgColor = BColor.WHITE_OBSCURE_LIGHT;
-        BColor marginBgColor = BColor.WHITE_OBSCURE;
-
+        final BColor[] colors = {BColor.BLUE, BColor.RED, BColor.GRAY};
+        BColor bgColor = BColor.WHITE;
+        BColor marginBgColor = BColor.WHITE;
         BColor labelColor = BColor.GRAY;
-        BColor axisColor = new BColor(105, 105, 105);
+        BColor axisColor = BColor.GRAY_LIGHT;;
         BColor gridColor = BColor.GRAY_LIGHT;
-
         BColor crosshairColor = labelColor;
 
         xAxisConfig = new AxisConfig();
         xAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
         xAxisConfig.setTickMarkSize(4, 0);
         xAxisConfig.setCrosshairLineColor(crosshairColor);
-
         yAxisConfig = xAxisConfig;
-        
         traceColors = colors;
         backgroundColor = bgColor;
         marginColor = marginBgColor;

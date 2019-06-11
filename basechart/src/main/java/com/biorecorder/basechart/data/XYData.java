@@ -11,100 +11,120 @@ import java.util.List;
  */
 public class XYData implements ChartData {
     private DataFrame dataFrame;
+    private String xColumnName = "x";
 
     private XYData(DataFrame dataFrame) {
         this.dataFrame = dataFrame;
     }
 
-    public XYData(boolean isDataAppendMode) {
-        dataFrame = new DataFrame(isDataAppendMode);
-    }
-
-    public XYData(String name, double xStart, double xStep, boolean isDataAppendMode) {
-        dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn(name, xStart, xStep);
-        onColumnAdded();
-    }
-
     public XYData(double xStart, double xStep, boolean isDataAppendMode) {
         dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn("x", xStart, xStep);
-        onColumnAdded();
+        dataFrame.addColumn(xColumnName, xStart, xStep);
     }
 
-    public XYData(String name, List<String> xData, boolean isDataAppendMode) {
-        dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn(name, xData);
-        onColumnAdded();
+    public XYData(double xStart, double xStep, int length) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xStart, xStep);
     }
 
     public XYData(List<String> xData, boolean isDataAppendMode) {
         dataFrame = new DataFrame(isDataAppendMode);
-        dataFrame.addColumn("x", xData);
-        onColumnAdded();
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    private void onColumnAdded() {
-        onColumnAdded(dataFrame.columnCount() - 1);
+    public XYData(ShortSequence xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xColumnName, xData);
+
     }
 
-    private void onColumnAdded(int columnNumber) {
-       // do nothing
+    public XYData(short[] xData) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, Function function, int argColumnNumber) {
-        dataFrame.addColumn(name, function, argColumnNumber);
-        onColumnAdded();
+    public XYData(IntSequence xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, ShortSequence columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(int[] xData) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, short[] columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(LongSequence xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, IntSequence columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(long[] xData) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, int[] columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(FloatSequence xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, LongSequence columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(float[] xData) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, long[] columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(DoubleSequence xData, boolean isDataAppendMode) {
+        dataFrame = new DataFrame(isDataAppendMode);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, FloatSequence columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public XYData(double[] xData) {
+        dataFrame = new DataFrame(false);
+        dataFrame.addColumn(xColumnName, xData);
     }
 
-    public void addColumn(String name, float[] columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public void addYColumn(String name, Function function) {
+        dataFrame.addColumn(name, function, 0);
     }
 
-    public void addColumn(String name, DoubleSequence columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public void addYColumn(String name, ShortSequence yData) {
+        dataFrame.addColumn(name, yData);
     }
 
-    public void addColumn(String name, double[] columnData) {
-        dataFrame.addColumn(name, columnData);
-        onColumnAdded();
+    public void addYColumn(String name, short[] yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, IntSequence yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, int[] yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, LongSequence yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, long[] yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, FloatSequence yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, float[] yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, DoubleSequence yData) {
+        dataFrame.addColumn(name, yData);
+    }
+
+    public void addYColumn(String name, double[] yData) {
+        dataFrame.addColumn(name, yData);
     }
 
     public void setColumnName(int columnNumber, String columnName) {
