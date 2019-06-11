@@ -3,10 +3,7 @@ package com.biorecorder.basechart;
 import com.biorecorder.basechart.data.ChartData;
 import com.biorecorder.basechart.data.DataProcessingConfig;
 import com.biorecorder.basechart.data.GroupApproximation;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.graphics.Range;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 import com.biorecorder.basechart.traces.NamedValue;
 import com.biorecorder.basechart.traces.TracePainter;
@@ -136,17 +133,6 @@ class DataPainter {
         return dataManager.getBestExtent(drawingAreaWidth, tracePainter.markWidth(), tracePainter.traceType());
     }
 
-    NamedValue[] traceValues(int dataIndex, int trace, Scale xScale, Scale yScale) {
-        checkTraceNumber(trace);
-        return tracePainter.tracePointValues(getProcessedData(xScale), dataIndex, trace, xScale, yScale);
-    }
-
-    BRectangle tracePointHoverArea(int dataIndex, int trace, Scale xScale, Scale yScale) {
-        checkTraceNumber(trace);
-        return tracePainter.tracePointHoverArea(getProcessedData(xScale), dataIndex, trace, xScale, yScale);
-    }
-
-
     Range traceYMinMax(int trace, Scale xScale) {
         checkTraceNumber(trace);
         return tracePainter.traceYMinMax(getProcessedData(xScale), trace);
@@ -224,7 +210,8 @@ class DataPainter {
         }
         for (int trace = traceStart; trace <= traceEnd; trace++) {
             Scale yScale = yScales[trace];
-            NamedValue[] traceValues = traceValues(hoverPointIndex, trace, xScale, yScale);
+            NamedValue[] traceValues = tracePainter.tracePointValues(getProcessedData(xScale), hoverPointIndex, trace, xScale, yScale);
+
             if (traceValues.length == 1) {
                 tooltip.addLine(getTraceColor(trace), getTraceName(trace), traceValues[0].getValue());
             } else {
@@ -233,8 +220,8 @@ class DataPainter {
                     tooltip.addLine(null, traceValue.getValueName(), traceValue.getValue());
                 }
             }
-            BRectangle traceArea = tracePointHoverArea(hoverPointIndex, trace, xScale, yScale);
-            tooltip.addYCrosshair(yStartIndex + trace, traceArea.y);
+            BPoint crosshairPosition = tracePainter.tracePointCrosshair(getProcessedData(xScale), hoverPointIndex, trace, xScale, yScale);
+            tooltip.addYCrosshair(yStartIndex + trace, crosshairPosition.getY());
         }
         return tooltip;
     }

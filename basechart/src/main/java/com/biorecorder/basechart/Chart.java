@@ -58,7 +58,7 @@ public class Chart {
     }
 
     public Chart(DataProcessingConfig dataProcessingConfig) {
-        this(new DarkTheme(false).getChartConfig(), dataProcessingConfig);
+        this(DarkTheme.getChartConfig(), dataProcessingConfig);
     }
 
     public Chart(ChartConfig config, DataProcessingConfig dataProcessingConfig) {

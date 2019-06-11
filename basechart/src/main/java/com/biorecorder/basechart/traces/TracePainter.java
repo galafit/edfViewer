@@ -2,10 +2,7 @@ package com.biorecorder.basechart.traces;
 
 import com.biorecorder.basechart.data.ChartData;
 import com.biorecorder.basechart.data.GroupApproximation;
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BColor;
-import com.biorecorder.basechart.graphics.BRectangle;
-import com.biorecorder.basechart.graphics.Range;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Scale;
 import com.sun.istack.internal.Nullable;
 
@@ -28,6 +25,8 @@ public interface TracePainter {
       String traceName(ChartData data, int trace);
 
       int markWidth();
+
+      BPoint tracePointCrosshair(ChartData data, int dataIndex, int trace,  Scale xScale, Scale yScale);
 
       BRectangle tracePointHoverArea(ChartData data, int dataIndex, int trace,  Scale xScale, Scale yScale);
 

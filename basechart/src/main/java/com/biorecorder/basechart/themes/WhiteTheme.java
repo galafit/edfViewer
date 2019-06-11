@@ -11,7 +11,7 @@ import com.biorecorder.basechart.ScrollConfig;
 /**
  * Created by galafit on 24/2/19.
  */
-public class WhiteTheme implements Theme {
+public class WhiteTheme {
     public static final BColor BLUE = new BColor(32, 120, 179);
     public static final BColor ORANGE = new BColor(255, 127, 15);
     public static final BColor GREEN = new BColor(44, 158, 44);
@@ -21,80 +21,80 @@ public class WhiteTheme implements Theme {
     public static final BColor GRAY = new BColor(125, 125, 125);
     public static final BColor KHAKI = new BColor(189, 189, 34);
     public static final BColor EMERALD = new BColor(25, 191, 207);
+    private static final BColor[] COLORS = {BLUE, ORANGE, GREEN, VIOLET, BROWN, ROSE, GRAY, KHAKI, EMERALD};
 
-    private final ChartConfig chartConfig;
-    private final NavigableChartConfig navigableChartConfig;
+    private static final int X_MARK_SIZE = 4;
+    private static final int Y_MARK_SIZE = 6;
 
+    private static final int CHART_STACK_WEIGHT = 4;
+    private static final int NAVIGATOR_STACK_WEIGHT = 2;
 
-    public WhiteTheme() {
-        this(false);
+    private static final BColor BG_COLOR = BColor.WHITE_OBSCURE_LIGHT;
+    private static final BColor MARGIN_COLOR = BColor.WHITE_OBSCURE;
+
+    private static final BColor TEXT_COLOR = new BColor(70, 60, 60);
+    private static final BColor AXIS_COLOR = new BColor(160, 160, 160);
+    private static final BColor GRID_COLOR = new BColor(215, 215, 215);
+    private static final BColor CROSSHAIR_COLOR = new BColor(100, 95, 95);
+
+    /*     final BColor BLUE = new BColor(0, 130, 230);
+           final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
+           final BColor GREEN_DARK = new BColor(0, 130, 0);
+           final BColor MAGENTA = new BColor(150, 50, 185);
+           final BColor RED = new BColor(250, 60, 90); //new BColor(230, 10, 60);
+           final BColor BLUE_DARK = new BColor(30, 30, 180);
+           final BColor PINK = new BColor(230, 0, 230);
+           final BColor RED_DARK = new BColor(180, 0, 0);
+           final BColor CYAN = new BColor(0, 160, 160);
+           final BColor GRAY = new BColor(120, 56, 7); //new BColor(60, 70, 100);
+           */
+    public static ChartConfig getChartConfig() {
+        return getChartConfig(false);
     }
 
-    public WhiteTheme(boolean isYRoundingEnabled) {
- /*     final BColor BLUE = new BColor(0, 130, 230);
-        final BColor ORANGE = new BColor(235, 80, 0); //new BColor(250, 100, 30);
-        final BColor GREEN_DARK = new BColor(0, 130, 0);
-        final BColor MAGENTA = new BColor(150, 50, 185);
-        final BColor RED = new BColor(250, 60, 90); //new BColor(230, 10, 60);
-        final BColor BLUE_DARK = new BColor(30, 30, 180);
-        final BColor PINK = new BColor(230, 0, 230);
-        final BColor RED_DARK = new BColor(180, 0, 0);
-        final BColor CYAN = new BColor(0, 160, 160);
-        final BColor GRAY = new BColor(120, 56, 7); //new BColor(60, 70, 100);
-        */
-
-        BColor[] colors = {BLUE, ORANGE, GREEN, VIOLET, BROWN, ROSE, GRAY, KHAKI, EMERALD};
-
-        /**========================== CHART ==========================**/
-        BColor chartBgColor = BColor.WHITE_OBSCURE_LIGHT;
-        BColor chartMarginColor = BColor.WHITE_OBSCURE;
-
-        BColor labelColor = new BColor(70, 60, 60);
-        BColor axisColor = new BColor(160, 160, 160);
-        BColor gridColor = new BColor(215, 215, 215);
-
-        BColor crosshairColor = new BColor(100, 95, 95);
-
+    public static ChartConfig getChartConfig(boolean isYRoundingEnabled) {
         AxisConfig xAxisConfig = new AxisConfig();
-        xAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
-        xAxisConfig.setTickMarkSize(4, 0);
-        xAxisConfig.setCrosshairLineColor(crosshairColor);
+        xAxisConfig.setColors(AXIS_COLOR, TEXT_COLOR, GRID_COLOR, GRID_COLOR);
+        xAxisConfig.setTickMarkSize(X_MARK_SIZE, 0);
+        xAxisConfig.setCrosshairLineColor(CROSSHAIR_COLOR);
         xAxisConfig.setAxisLineWidth(0);
+        //xAxisConfig.setMinorTickIntervalCount(3);
 
         AxisConfig yAxisConfig = new AxisConfig();
-        yAxisConfig.setColors(axisColor, labelColor, gridColor, gridColor);
-        yAxisConfig.setTickMarkSize(6, 0);
+        yAxisConfig.setColors(AXIS_COLOR, TEXT_COLOR, GRID_COLOR, GRID_COLOR);
+        yAxisConfig.setTickMarkSize(Y_MARK_SIZE, 0);
         yAxisConfig.setRoundingEnabled(isYRoundingEnabled);
-        yAxisConfig.setCrosshairLineColor(crosshairColor);
+        yAxisConfig.setCrosshairLineColor(CROSSHAIR_COLOR);
         yAxisConfig.setAxisLineWidth(0);
+        //yAxisConfig.setMinorTickIntervalCount(3);
 
         ChartConfig chartConfig = new ChartConfig();
-        chartConfig.setTraceColors(colors);
-        chartConfig.setBackgroundColor(chartBgColor);
-        chartConfig.setMarginColor(chartMarginColor);
-        chartConfig.getTitleConfig().setTextColor(labelColor);
+        chartConfig.setTraceColors(COLORS);
+        chartConfig.setBackgroundColor(BG_COLOR);
+        chartConfig.setMarginColor(MARGIN_COLOR);
+        chartConfig.getTitleConfig().setTextColor(TEXT_COLOR);
         chartConfig.setYAxisConfig(yAxisConfig);
         chartConfig.setXAxisConfig(xAxisConfig);
-        chartConfig.getLegendConfig().setBackgroundColor(chartBgColor);
-        chartConfig.setDefaultStackWeight(4);
+        chartConfig.getLegendConfig().setBackgroundColor(BG_COLOR);
+        chartConfig.setDefaultStackWeight(CHART_STACK_WEIGHT);
         chartConfig.setPrimaryYPosition(YAxisPosition.LEFT);
         chartConfig.setPrimaryXPosition(XAxisPosition.BOTTOM);
-        this.chartConfig = chartConfig;
 
-        /**========================== NAVIGATOR ==========================**/
+        return chartConfig;
+    }
 
-        BColor navigatorBgColor = chartMarginColor;
+    public static NavigableChartConfig getNavigableChartConfig(boolean isYRoundingEnabled) {
+        BColor navigatorBgColor = MARGIN_COLOR;
         BColor navigatorMarginColor = navigatorBgColor;
-        BColor bgColor = chartBgColor;
-        BColor scrollColor = crosshairColor;
+        BColor scrollColor = CROSSHAIR_COLOR;
+        BColor bgColor = navigatorBgColor;
 
-
-        ChartConfig navigatorConfig = new ChartConfig(chartConfig);
+        ChartConfig navigatorConfig = getChartConfig(true);
         navigatorConfig.setBackgroundColor(navigatorBgColor);
         navigatorConfig.setMarginColor(navigatorMarginColor);
-        navigatorConfig.getTitleConfig().setTextColor(labelColor);
+        navigatorConfig.getTitleConfig().setTextColor(TEXT_COLOR);
         navigatorConfig.getLegendConfig().setBackgroundColor(navigatorBgColor);
-        navigatorConfig.setDefaultStackWeight(2);
+        navigatorConfig.setDefaultStackWeight(NAVIGATOR_STACK_WEIGHT);
         navigatorConfig.setStackGap(0);
         navigatorConfig.getYAxisConfig().setTickLabelOutside(false);
         navigatorConfig.getYAxisConfig().setRoundingEnabled(true);
@@ -104,23 +104,17 @@ public class WhiteTheme implements Theme {
         ScrollConfig scrollConfig = new ScrollConfig();
         scrollConfig.setColor(scrollColor);
 
-        ChartConfig chartConfig1 = new ChartConfig(chartConfig);
+        ChartConfig chartConfig1 = getChartConfig(isYRoundingEnabled);
         chartConfig1.getYAxisConfig().setTickLabelOutside(false);
         chartConfig1.setPrimaryYPosition(YAxisPosition.RIGHT);
         chartConfig1.setPrimaryXPosition(XAxisPosition.TOP);
 
-        navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);
+        NavigableChartConfig navigableChartConfig = new NavigableChartConfig(chartConfig1, navigatorConfig, scrollConfig);
         navigableChartConfig.setBackgroundColor(bgColor);
-
-    }
-
-    @Override
-    public ChartConfig getChartConfig() {
-        return chartConfig;
-    }
-
-    @Override
-    public NavigableChartConfig getNavigableChartConfig() {
         return navigableChartConfig;
+    }
+
+    public static NavigableChartConfig getNavigableChartConfig() {
+        return getNavigableChartConfig(false);
     }
 }

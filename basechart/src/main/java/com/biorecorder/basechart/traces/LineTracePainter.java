@@ -43,6 +43,13 @@ public class LineTracePainter implements TracePainter {
     }
 
     @Override
+    public BPoint tracePointCrosshair(ChartData data, int dataIndex, int trace, Scale xScale, Scale yScale) {
+        int x = (int) xScale.scale(data.value(dataIndex, 0));
+        int y = (int) yScale.scale(data.value(dataIndex, trace + 1));
+        return new BPoint(x, y);
+    }
+
+    @Override
     public BRectangle tracePointHoverArea(ChartData data, int dataIndex, int trace, Scale xScale, Scale yScale) {
         int x = (int) xScale.scale(data.value(dataIndex, 0));
         int y = (int) yScale.scale(data.value(dataIndex, trace + 1));

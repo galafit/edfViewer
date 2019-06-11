@@ -51,7 +51,7 @@ public class NavigableChartTest extends JFrame{
         xyData1.addYColumn("regular1", xData);
         xyData1.addYColumn("regular2", yData);
 
-        chart = new NavigableChart(new WhiteTheme(true).getNavigableChartConfig());
+        chart = new NavigableChart(WhiteTheme.getNavigableChartConfig(true));
 
        /* DataProcessingConfig navigatorProcessing = new DataProcessingConfig();
         double[] groupingIntervals = {20, 40};

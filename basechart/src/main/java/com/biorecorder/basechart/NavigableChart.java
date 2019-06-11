@@ -25,7 +25,7 @@ public class NavigableChart {
 
     private int navigatorMaxZoomFactor = -1;
     private boolean isAutoScrollEnabled = true;
-    private boolean isAutoScaleEnabled = false; // chart Y auto scale during scrolling
+    private boolean isAutoScaleEnabled = true; // chart Y auto scale during scrolling
 
     private boolean isChartAutoscaleNeedDisable;
     private BRectangle fullArea;
@@ -56,7 +56,7 @@ public class NavigableChart {
     }
 
     public NavigableChart(DataProcessingConfig chartDataProcessingConfig, DataProcessingConfig navigatorDataProcessingConfig) {
-        this(new DarkTheme(false).getNavigableChartConfig(), chartDataProcessingConfig, navigatorDataProcessingConfig);
+        this(DarkTheme.getNavigableChartConfig(), chartDataProcessingConfig, navigatorDataProcessingConfig);
     }
 
     public NavigableChart(NavigableChartConfig config, DataProcessingConfig chartDataProcessingConfig, DataProcessingConfig navigatorDataProcessingConfig) {
@@ -488,14 +488,26 @@ public class NavigableChart {
      */
     public void setNavigatorMaxZoomFactor(int navigatorMaxZoomFactor) {
         this.navigatorMaxZoomFactor = navigatorMaxZoomFactor;
+        scrolls.clear();
+        isScrollsDirty = true;
     }
 
     public void setAutoScrollEnabled(boolean autoScrollEnabled) {
         isAutoScrollEnabled = autoScrollEnabled;
+        scrolls.clear();
+        isScrollsDirty = true;
+        if (!isAutoScaleEnabled) {
+            isChartAutoscaleNeedDisable = true;
+        }
     }
 
     public void setAutoScaleEnabled(boolean autoScaleEnabled) {
         isAutoScaleEnabled = autoScaleEnabled;
+        if (!isAutoScaleEnabled) {
+            isChartAutoscaleNeedDisable = true;
+        } else {
+            autoScaleChartY();
+        }
     }
 
     public void appendData() {
@@ -519,6 +531,8 @@ public class NavigableChart {
         isScrollsDirty = true;
         if (!isAutoScaleEnabled) {
             isChartAutoscaleNeedDisable = true;
+        } else {
+            autoScaleChartY();
         }
     }
 
@@ -657,6 +671,9 @@ public class NavigableChart {
     public void addChartStack() {
         chart.addStack();
         isAreasDirty = true;
+        if (!isAutoScaleEnabled) {
+            isChartAutoscaleNeedDisable = true;
+        }
     }
 
     public void setChartStackWeigt(int stack, int weight) {
