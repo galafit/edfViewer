@@ -4,13 +4,14 @@ import com.biorecorder.basechart.axis.Axis;
 import com.biorecorder.basechart.axis.AxisConfig;
 import com.biorecorder.basechart.graphics.BCanvas;
 import com.biorecorder.basechart.graphics.BRectangle;
+import com.biorecorder.basechart.graphics.RenderContext;
 import com.biorecorder.basechart.scales.Scale;
 
 /**
  * This class do axis rounding and add isUsed property.
  * <p>
  * Implement axis rounding when methods:
- * drawAxis or drawGrid or getWidth is invoked !!!
+ * drawAxis or drawGrid or getWidthOut is invoked !!!
  */
 class AxisWrapper {
     private Axis axis;
@@ -18,7 +19,6 @@ class AxisWrapper {
     // need this field to implement smooth zooming and translate when minMaxRounding enabled
     private double rowMin; // without rounding
     private double rowMax; // without rounding
-    private boolean roundingDirty = true;
 
 
     public AxisWrapper(Axis axis) {
@@ -27,13 +27,12 @@ class AxisWrapper {
         rowMax = axis.getMax();
     }
 
-    public double getBestExtent(BCanvas canvas, int length) {
-        return axis.getBestExtent(canvas, length);
+    public double getBestExtent(RenderContext renderContext, int length) {
+        return axis.getBestExtent(renderContext, length);
     }
 
-    private void setRoundingDirty() {
+    private void setRowMinMax() {
         if(axis.isRoundingEnabled()) {
-            roundingDirty = true;
             axis.setMinMax(rowMin, rowMax);
         }
     }
@@ -42,12 +41,6 @@ class AxisWrapper {
         return axis.isRoundingEnabled();
     }
 
-    private boolean isDirty() {
-        if (axis.isRoundingEnabled() && roundingDirty) {
-            return true;
-        }
-        return false;
-    }
 
     public AxisConfig getConfig() {
         return axis.getConfig();
@@ -62,7 +55,6 @@ class AxisWrapper {
         axis.setScale(scale);
         rowMin = axis.getMin();
         rowMax = axis.getMax();
-        roundingDirty = true;
     }
 
     public double scale(double value) {
@@ -96,19 +88,19 @@ class AxisWrapper {
 
     public void setConfig(AxisConfig config) {
         axis.setConfig(config);
-        setRoundingDirty();
+        setRowMinMax();
     }
 
     public Scale zoom(double zoomFactor) {
         // to have smooth zooming we do it on row domain values instead of rounded ones !!!
-        setRoundingDirty();
+        setRowMinMax();
         return axis.zoom(zoomFactor);
     }
 
 
     public Scale translate(int translation) {
         // to have smooth translating we do it on row domain values instead of rounded ones !!!
-        setRoundingDirty();
+        setRowMinMax();
         Scale scale = axis.translate(translation);
         return scale;
     }
@@ -133,7 +125,6 @@ class AxisWrapper {
             rowMin = minNew;
             rowMax = maxNew;
             axis.setMinMax(minNew, maxNew);
-            setRoundingDirty();
             return true;
         }
         return false;
@@ -144,7 +135,7 @@ class AxisWrapper {
      */
     public boolean setStartEnd(double start, double end) {
         if (start != end && (axis.getStart() != start || axis.getEnd() != end)) {
-            setRoundingDirty();
+            setRowMinMax();
             axis.setStartEnd(start, end);
             return true;
         }
@@ -174,15 +165,12 @@ class AxisWrapper {
     /**
      * this method DO AXIS ROUNDING
      */
-    public int getWidth(BCanvas canvas) {
-        return axis.getWidth(canvas);
+    public int getWidth() {
+        return axis.getWidthOut();
     }
 
-    public void roundMinMax(BCanvas canvas) {
-        if (isDirty()) {
-            axis.roundMinMax(canvas);
-            roundingDirty = false;
-        }
+    public void update(RenderContext renderContext) {
+        axis.update(renderContext);
     }
 
     public void drawCrosshair(BCanvas canvas, BRectangle area, int position) {

@@ -1,14 +1,7 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BText;
-import com.biorecorder.basechart.graphics.TextAnchor;
-import com.biorecorder.basechart.graphics.TextMetric;
-import com.biorecorder.basechart.scales.CategoryScale;
-import com.biorecorder.basechart.scales.Scale;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Tick;
-import com.biorecorder.basechart.utils.StringUtils;
-import com.biorecorder.data.sequence.StringSequence;
 
 import java.util.List;
 
@@ -16,7 +9,7 @@ import java.util.List;
 /**
  * Created by galafit on 29/8/18.
  */
-abstract class VerticalAxisPainter implements AxisPainter {
+abstract class VerticalOrientation implements Orientation {
     @Override
     public int labelSizeForWidth(TextMetric tm,  List<Tick> ticks) {
         String longestLabel = "";
@@ -29,7 +22,7 @@ abstract class VerticalAxisPainter implements AxisPainter {
     }
 
     @Override
-    public BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int start, int end, int tickPixelInterval, AxisConfig config, int interLabelGap, boolean isCategory) {
+    public BText createTickLabel(TextMetric tm, int tickPosition, String tickLabel, int start, int end, int tickPixelInterval, AxisConfig config, int interLabelGap, boolean isCategory) {
         int space = 2;// px
         int labelHeight = tm.ascent();
         int x = getLabelX(config);
@@ -65,8 +58,8 @@ abstract class VerticalAxisPainter implements AxisPainter {
     }
 
     @Override
-    public void drawAxisLine(BCanvas canvas, int start, int end) {
-        canvas.drawLine(0, start, 0, end);
+    public BLine createAxisLine(int start, int end) {
+        return new BLine(0, start, 0, end);
     }
 
     @Override

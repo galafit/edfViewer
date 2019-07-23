@@ -86,7 +86,7 @@ class Tooltip {
      */
     private void drawTooltipInfo(BCanvas canvas, BRectangle area) {
         Insets margin = tooltipConfig.getMargin();
-        int stringHeight = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
+        int stringHeight = canvas.getRenderContext().getTextMetric(tooltipConfig.getTextStyle()).height();
         int lineSpace = getInterLineSpace();
         int x = area.x + margin.left();
         int y = area.y + margin.top();
@@ -108,7 +108,7 @@ class Tooltip {
     }
 
     private int itemWidth(BCanvas canvas, TooltipItem infoItem) {
-        TextMetric tm = canvas.getTextMetric(tooltipConfig.getTextStyle());
+        TextMetric tm = canvas.getRenderContext().getTextMetric(tooltipConfig.getTextStyle());
         int width = 0;
         if (infoItem.getMarkColor() != null) {
             width += getColorMarkerSize() + getColorMarkerPadding();
@@ -125,7 +125,7 @@ class Tooltip {
 
 
     private void drawItem(BCanvas canvas, int x, int y, TooltipItem infoItem) {
-        TextMetric tm = canvas.getTextMetric(tooltipConfig.getTextStyle());
+        TextMetric tm = canvas.getRenderContext().getTextMetric(tooltipConfig.getTextStyle());
         int string_y = y + tm.ascent();
         if (infoItem.getMarkColor() != null) {
             canvas.setColor(infoItem.getMarkColor());
@@ -170,7 +170,7 @@ class Tooltip {
         }
         Insets margin = tooltipConfig.getMargin();
         textWidth += margin.left() + margin.right();
-        int strHeight = canvas.getTextMetric(tooltipConfig.getTextStyle()).height();
+        int strHeight = canvas.getRenderContext().getTextMetric(tooltipConfig.getTextStyle()).height();
         int textHeight = margin.top() + margin.bottom() + items.size() * strHeight;
         textHeight += getInterLineSpace() * (items.size() - 1);
         if (header != null) {

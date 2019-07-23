@@ -14,70 +14,59 @@ class Title {
     private String title;
     private TitleConfig config;
     private ArrayList<BText> lines = new ArrayList<BText>();
-    private BRectangle area;
-    private BRectangle bounds;
+    private int height;
+    private boolean isDirty;
 
     public Title(TitleConfig config) {
         this.config = config;
     }
-
-    private void setDirty() {
-        lines.clear();
-        bounds = null;
+    
+    private void invalidate() {
+        isDirty = true;
     }
-
-    private boolean isDirty() {
-        return bounds == null;
-    }
-
-    public BRectangle getBounds(BCanvas canvas) {
-        if(isDirty()) {
-            formLines(canvas);
+    
+    public int getHeight(RenderContext renderContext, int width) {
+        if(isDirty) {
+            validate(renderContext, width);
         }
-        return bounds;
+        return height;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        invalidate();
+    }
+
+    public void setConfig(TitleConfig config) {
+        this.config = config;
+        invalidate();
     }
 
     public boolean isNullOrBlank() {
         return StringUtils.isNullOrBlank(title);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-        setDirty();
-    }
 
-    public void setConfig(TitleConfig config) {
-        this.config = config;
-        setDirty();
-    }
-
-
-    public void setArea(BRectangle area) {
-        this.area = area;
-        setDirty();
-    }
-
-    private void formLines(BCanvas canvas){
-        if(title == null || StringUtils.isNullOrBlank(title)) {
-            bounds = new BRectangle(0, 0, 0, 0);
+    public void validate(RenderContext renderContext, int width){
+        lines = new ArrayList<BText>();
+        height = 0;
+        if(StringUtils.isNullOrBlank(title)) {
             return;
         }
-        if(area == null) {
-            area = canvas.getBounds();
-        }
+
         String[] words = title.split(" ");
         StringBuilder stringBuilder = new StringBuilder(words[0]);
-        TextMetric tm = canvas.getTextMetric(config.getTextStyle());
+        TextMetric tm = renderContext.getTextMetric(config.getTextStyle());
         Insets margin = config.getMargin();
-        int y = area.y + margin.top();
+        int y = margin.top();
         int x;
         for (int i = 1; i < words.length; i++) {
             int strWidth = tm.stringWidth(stringBuilder + " "+ words[i]);
-            if ( strWidth + margin.left() + margin.right() > area.width ){
+            if ( strWidth + margin.left() + margin.right() > width ){
                 String lineString = stringBuilder.toString();
-                x = (area.x + area.width) / 2 - tm.stringWidth(lineString) / 2;
-                if (x < area.x + margin.left()) {
-                    x = area.x + margin.left();
+                x = width / 2 - tm.stringWidth(lineString) / 2;
+                if (x < margin.left()) {
+                    x = margin.left();
                 }
                 lines.add(new BText(lineString, x, y + tm.ascent()));
 
@@ -90,24 +79,20 @@ class Title {
 
         // last line
         String lineString = stringBuilder.toString();
-        x = (area.x + area.width) / 2 - tm.stringWidth(lineString) / 2;
-        if (x < area.x + margin.left()) {
-            x = area.x + margin.left();
+        x = width / 2 - tm.stringWidth(lineString) / 2;
+        if (x <  margin.left()) {
+            x = margin.left();
         }
 
         lines.add(new BText(lineString, x, y + tm.ascent()));
 
-        int height = tm.height() * lines.size()
+        height = tm.height() * lines.size()
                 + config.getInterLineSpace() * (lines.size() - 1)
                 + margin.top() + margin.bottom();
-
-        bounds = new BRectangle(area.x, area.y, area.width, height);
-    }
+        isDirty = false;
+     }
 
     public void draw(BCanvas canvas){
-        if(isDirty()) {
-            formLines(canvas);
-        }
         if (lines.size() == 0){
             return;
         }

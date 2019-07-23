@@ -22,29 +22,27 @@ public class Axis {
     public static int MIN_TICK_COUNT = 11;
     private static final int MAX_TICKS_COUNT = 500; // if bigger it means that there is some error
 
-    protected Scale scale;
-    protected String title;
-    protected AxisConfig config;
+    private Scale scale;
+    private String title;
+    private AxisConfig config;
+    private Orientation orientation;
 
-    protected List<Tick> ticks;
-    protected List<BText> tickLabels = new ArrayList<>();
+    private List<BText> tickLabels = new ArrayList<>();
     private IntArrayList tickPositions = new IntArrayList();
     private IntArrayList minorTickPositions = new IntArrayList();
     private BText titleText;
-    private AxisPainter axisPainter;
-
     private boolean isDirty = true;
-    private int width = -1;
+    private int widthOut;
 
     public Axis(Scale scale, AxisConfig axisConfig, XAxisPosition xAxisPosition) {
         this.scale = scale.copy();
         this.config = axisConfig;
         switch (xAxisPosition) {
             case TOP:
-                axisPainter = new TopAxisPainter();
+                orientation = new TopOrientation();
                 break;
             case BOTTOM:
-                axisPainter = new BottomAxisPainter();
+                orientation = new BottomOrientation();
         }
     }
 
@@ -53,31 +51,19 @@ public class Axis {
         this.config = axisConfig;
         switch (yAxisPosition) {
             case LEFT:
-                axisPainter = new LeftAxisPainter();
+                orientation = new LeftOrientation();
                 break;
             case RIGHT:
-                axisPainter = new RightAxisPainter();
+                orientation = new RightOrientation();
         }
     }
 
-    public int getWidth(BCanvas canvas) {
-        if (isTooShort()) {
-            return config.getAxisLineWidth() / 2;
-        }
-        if (width < 0) { // calculateStats width
-            width = calculateWidth(canvas);
-        }
-        return width;
+    public int getWidthOut() {
+        return widthOut;
     }
 
-    private void setDirty() {
-        ticks = null;
+    public void invalidate() {
         isDirty = true;
-        width = -1;
-    }
-
-    protected boolean isDirty() {
-        return isDirty;
     }
 
     private boolean isTooShort() {
@@ -91,8 +77,7 @@ public class Axis {
 
     public void setTitle(String title) {
         this.title = title;
-        width = -1;
-        titleText = null;
+        invalidate();
     }
 
     /**
@@ -103,7 +88,7 @@ public class Axis {
      */
     public void setScale(Scale scale) {
         this.scale = scale.copy();
-        setDirty();
+        invalidate();
     }
 
     /**
@@ -135,7 +120,7 @@ public class Axis {
         // set a copy to safely change
         this.config = new AxisConfig(config);
         titleText = null;
-        setDirty();
+        invalidate();
     }
 
     public boolean isTickLabelOutside() {
@@ -206,13 +191,13 @@ public class Axis {
 
     public boolean setMinMax(double min, double max) {
         scale.setMinMax(min, max);
-        setDirty();
+        invalidate();
         return true;
     }
 
     public boolean setStartEnd(double start, double end) {
         scale.setStartEnd(start, end);
-        setDirty();
+        invalidate();
         return true;
     }
 
@@ -244,9 +229,9 @@ public class Axis {
         return Math.abs(getEnd() - getStart());
     }
 
-    public double getBestExtent(BCanvas canvas, int length) {
+    public double getBestExtent(RenderContext renderContext, int length) {
         if (scale instanceof CategoryScale) {
-            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
+            TextMetric tm = renderContext.getTextMetric(config.getTickLabelTextStyle());
             StringSequence labels = ((CategoryScale) scale).getLabels();
             if(labels != null && labels.size() > 0) {
                 List<Tick> ticks = new ArrayList<>(labels.size());
@@ -266,25 +251,13 @@ public class Axis {
         return -1;
     }
 
-    public void roundMinMax(BCanvas canvas) {
-        TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-        if (ticks == null) {
-            createTicks(tm);
-        }
-        if(ticks.size() == 0) {
-            return;
-        }
-        Tick tickMin = ticks.get(1);
-        Tick tickMax = ticks.get(ticks.size() - 2);
-        scale.setMinMax(tickMin.getValue(), tickMax.getValue());
-    }
 
     public void drawCrosshair(BCanvas canvas, BRectangle area, int position) {
         canvas.save();
-        axisPainter.translateCanvas(canvas, area);
+        orientation.translateCanvas(canvas, area);
         canvas.setColor(config.getCrosshairLineColor());
         canvas.setStroke(config.getCrosshairLineWidth(), config.getCrosshairLineDashStyle());
-        axisPainter.drawGridLine(canvas, position, area);
+        canvas.drawLine(orientation.createGridLine(position, area));
         canvas.restore();
     }
 
@@ -293,22 +266,18 @@ public class Axis {
             return;
         }
         canvas.save();
-        if (isDirty()) {
-            createTicksElements(canvas);
-        }
-
-        axisPainter.translateCanvas(canvas, area);
+        orientation.translateCanvas(canvas, area);
 
         canvas.setColor(config.getGridColor());
         canvas.setStroke(config.getGridLineWidth(), config.getGridLineDashStyle());
         for (int i = 0; i < tickPositions.size(); i++) {
-            axisPainter.drawGridLine(canvas, tickPositions.get(i), area);
+            canvas.drawLine(orientation.createGridLine(tickPositions.get(i), area));
         }
 
         canvas.setColor(config.getMinorGridColor());
         canvas.setStroke(config.getMinorGridLineWidth(), config.getMinorGridLineDashStyle());
         for (int i = 0; i < minorTickPositions.size(); i++) {
-            axisPainter.drawGridLine(canvas, minorTickPositions.get(i), area);
+            canvas.drawLine(orientation.createGridLine(minorTickPositions.get(i), area));
         }
 
         canvas.restore();
@@ -316,18 +285,14 @@ public class Axis {
 
     public void drawAxis(BCanvas canvas, BRectangle area) {
         canvas.save();
-
-        if (isDirty()) {
-            createTicksElements(canvas);
-        }
-        axisPainter.translateCanvas(canvas, area);
+        orientation.translateCanvas(canvas, area);
 
         if (!isTooShort()) {
             if (config.getTickMarkInsideSize() > 0 || config.getTickMarkOutsideSize() > 0) {
                 canvas.setColor(config.getTickMarkColor());
                 canvas.setStroke(config.getTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < tickPositions.size(); i++) {
-                    axisPainter.drawTickMark(canvas, tickPositions.get(i), config.getAxisLineWidth(),config.getTickMarkInsideSize(), config.getTickMarkOutsideSize());
+                    canvas.drawLine(orientation.createTickLine(tickPositions.get(i), config.getAxisLineWidth(),config.getTickMarkInsideSize(), config.getTickMarkOutsideSize()));
                 }
             }
 
@@ -335,7 +300,7 @@ public class Axis {
                 canvas.setColor(config.getMinorTickMarkColor());
                 canvas.setStroke(config.getMinorTickMarkWidth(), DashStyle.SOLID);
                 for (int i = 0; i < minorTickPositions.size(); i++) {
-                    axisPainter.drawTickMark(canvas, minorTickPositions.get(i), config.getAxisLineWidth(), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize());
+                    canvas.drawLine(orientation.createTickLine(minorTickPositions.get(i), config.getAxisLineWidth(), config.getMinorTickMarkInsideSize(), config.getMinorTickMarkOutsideSize()));
                 }
             }
 
@@ -346,10 +311,7 @@ public class Axis {
                 tickLabel.draw(canvas);
             }
 
-            if (!StringUtils.isNullOrBlank(title)) {
-                if (titleText == null) {
-                    titleText = axisPainter.createTitle(canvas, title, (int)Math.round(getStart()), (int)Math.round(getEnd()), getWidth(canvas), config.getTitleTextStyle());
-                }
+            if(titleText != null) {
                 canvas.setColor(config.getTitleColor());
                 canvas.setTextStyle(config.getTitleTextStyle());
                 titleText.draw(canvas);
@@ -359,31 +321,12 @@ public class Axis {
         if (config.getAxisLineWidth() > 0) {
             canvas.setColor(config.getAxisLineColor());
             canvas.setStroke(config.getAxisLineWidth(), config.getAxisLineDashStyle());
-            axisPainter.drawAxisLine(canvas, (int)Math.round(getStart()), (int)Math.round(getEnd()));
+            canvas.drawLine(orientation.createAxisLine((int)Math.round(getStart()), (int)Math.round(getEnd())));
         }
 
         canvas.restore();
     }
 
-    private int calculateWidth(BCanvas canvas) {
-        int width = 0;
-        width += config.getAxisLineWidth() / 2;
-        width += config.getTickMarkOutsideSize();
-
-        if (config.isTickLabelOutside()) {
-            TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-            if(ticks == null) {
-                createTicks(tm);
-            }
-            width += config.getTickPadding() + axisPainter.labelSizeForWidth(tm, ticks);
-
-        }
-        if (! StringUtils.isNullOrBlank(title)) {
-            TextMetric tm = canvas.getTextMetric(config.getTitleTextStyle());
-            width += config.getTitlePadding() + tm.height();
-        }
-        return width;
-    }
 
     private boolean isTickIntervalSpecified() {
         return config.getTickInterval() > 0;
@@ -428,10 +371,10 @@ public class Axis {
         return ticks;
     }
 
-    protected void createTicks(TextMetric tm) {
+    // create ticks and fix overlapping
+    private List<Tick> createValidTicks(TextMetric tm) {
         if (isTooShort()) {
-            ticks = new ArrayList<>(0);
-            return;
+            return new ArrayList<>(0);
         }
 
         TickProvider tickProvider;
@@ -448,7 +391,7 @@ public class Axis {
 
         double min = getMin();
         double max = getMax();
-        ticks = generateTicks(tickProvider);
+        List<Tick> ticks = generateTicks(tickProvider);
 
         // Calculate how many ticks need to be skipped to avoid labels overlapping.
         // When ticksSkipStep = n, only every n'th label on the axis will be shown.
@@ -543,20 +486,31 @@ public class Axis {
             }
             ticks.add(0, extraTick);
         }
+        return ticks;
     }
 
 
-    private void createTicksElements(BCanvas canvas) {
-        tickPositions.clear();
-        minorTickPositions.clear();
-        tickLabels.clear();
-        TextMetric tm = canvas.getTextMetric(config.getTickLabelTextStyle());
-        if (ticks == null) {
-            createTicks(tm);
-        }
+    public void update(RenderContext renderContext) {
+        tickPositions = new IntArrayList();
+        minorTickPositions = new IntArrayList();
+        tickLabels = new ArrayList<>();
+        TextMetric labelTM = renderContext.getTextMetric(config.getTickLabelTextStyle());
+        List<Tick> ticks = createValidTicks(labelTM);
 
+        widthOut = config.getAxisLineWidth() / 2;
         if(ticks.size() == 0) {
             return;
+        }
+
+        widthOut += config.getTickMarkOutsideSize();
+        if (config.isTickLabelOutside()) {
+            widthOut += config.getTickPadding() + orientation.labelSizeForWidth(labelTM, ticks);
+
+        }
+        if (! StringUtils.isNullOrBlank(title)) {
+            TextMetric titleTM = renderContext.getTextMetric(config.getTitleTextStyle());
+            widthOut += config.getTitlePadding() + titleTM.height();
+            titleText = orientation.createTitle(title,  titleTM, (int)Math.round(getStart()), (int)Math.round(getEnd()), widthOut);
         }
 
         int minorTickIntervalCount = config.getMinorTickIntervalCount();
@@ -571,7 +525,7 @@ public class Axis {
                 for (int i = 1; i < minorTickIntervalCount; i++) {
                     minorTickValue += minorTickInterval;
                     int minorTickPosition = (int) Math.round(scale(minorTickValue));
-                    if (axisPainter.contains(minorTickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
+                    if (orientation.contains(minorTickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
                         minorTickPositions.add(minorTickPosition);
                     }
                 }
@@ -580,13 +534,19 @@ public class Axis {
                 currentTick = nextTick;
                 nextTick = ticks.get(tickNumber);
                 int tickPosition = (int) Math.round(scale(currentTick.getValue()));
-                if(axisPainter.contains(tickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
+                if(orientation.contains(tickPosition, (int)Math.round(getStart()), (int)Math.round(getEnd()))) {
                     // tick position
                     tickPositions.add(tickPosition);
                     // tick label
-                    tickLabels.add(axisPainter.tickToLabel(tm, tickPosition, currentTick.getLabel(), (int)Math.round(getStart()), (int)Math.round(getEnd()), tickPixelInterval, config, getInterLabelGap(), scale instanceof CategoryScale));
+                    tickLabels.add(orientation.createTickLabel(labelTM, tickPosition, currentTick.getLabel(), (int)Math.round(getStart()), (int)Math.round(getEnd()), tickPixelInterval, config, getInterLabelGap(), scale instanceof CategoryScale));
                 }
             }
+        }
+
+        if(isRoundingEnabled()) {
+            Tick tickMin = ticks.get(1);
+            Tick tickMax = ticks.get(ticks.size() - 2);
+            scale.setMinMax(tickMin.getValue(), tickMax.getValue());
         }
 
         isDirty = false;
@@ -597,6 +557,6 @@ public class Axis {
     }
 
     private int getRequiredSpaceForTickLabel(TextMetric tm, List<Tick> ticks) {
-        return  axisPainter.labelSizeForOverlap(tm, ticks) + getInterLabelGap();
+        return  orientation.labelSizeForOverlap(tm, ticks) + getInterLabelGap();
     }
 }

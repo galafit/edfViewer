@@ -4,10 +4,10 @@ package com.biorecorder.basechart.graphics;
  * Created by galafit on 29/12/17.
  */
 public class BRectangle {
-    public  int x;
-    public  int y;
-    public  int width;
-    public  int height;
+    public final int x;
+    public final int y;
+    public final int width;
+    public final int height;
 
     public BRectangle(int x, int y, int width, int height) {
         if(width < 0) {
@@ -23,6 +23,7 @@ public class BRectangle {
         this.width = width;
         this.height = height;
     }
+
 
     // taken from
     // http://hg.openjdk.java.net/jdk7/jdk7/jdk/file/00cd9dc3c2b5/src/share/classes/java/awt/Rectangle.java

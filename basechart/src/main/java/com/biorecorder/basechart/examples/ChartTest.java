@@ -88,6 +88,10 @@ public class ChartTest extends JFrame {
         chart = new Chart();
         chart.setConfig(WhiteTheme.getChartConfig());
         //chart.addTraces(new LineTrace(regularData), true);
+        chart.addTraces(unsortedData, new LineTracePainter(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
+        chart.addStack();
+        chart.addTraces(noRegularData, new LineTracePainter(), true);
+        chart.addTraces(regularData, new LineTracePainter(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
 
         chartPanel = new ChartPanel(chart);
 
@@ -98,19 +102,6 @@ public class ChartTest extends JFrame {
         addKeyListener(chartPanel);
         setLocationRelativeTo(null);
         setVisible(true);
-        try {
-            Thread.sleep(1000);
-            chart.addTraces(unsortedData, new LineTracePainter(), true, XAxisPosition.TOP, YAxisPosition.RIGHT);
-            chart.addStack();
-            chart.addTraces(noRegularData, new LineTracePainter(), true);
-            chart.addTraces(regularData, new LineTracePainter(), false, XAxisPosition.BOTTOM, YAxisPosition.RIGHT);
-
-            chartPanel.repaint();
-
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         Thread t = new Thread(new Runnable() {
             int interval = 100;

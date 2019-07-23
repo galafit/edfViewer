@@ -13,12 +13,10 @@ public class LegendConfig {
     private HorizontalAlign horizontalAlign = HorizontalAlign.LEFT;
     private VerticalAlign verticalAlign = VerticalAlign.TOP;
 
-  //  private int borderWidth = 1;
- //   private BColor borderColor = BColor.GRAY_LIGHT;
+    private int borderWidth = 1;
     private BColor backgroundColor = BColor.WHITE;
-    private Insets padding;
-    private Insets margin;
-    private boolean isAttachedToStacks = true;
+    private Insets buttonsMargin;
+    private boolean isAttachedToStacks = false;
 
     private int interItemSpace = 0;
     private int interLineSpace = 1;
@@ -28,8 +26,7 @@ public class LegendConfig {
 
     public LegendConfig(LegendConfig legendConfig) {
         backgroundColor = legendConfig.backgroundColor;
-        padding = legendConfig.padding;
-        margin = legendConfig.margin;
+        buttonsMargin = legendConfig.buttonsMargin;
         isAttachedToStacks = legendConfig.isAttachedToStacks;
         textStyle = legendConfig.textStyle;
         verticalAlign = legendConfig.verticalAlign;
@@ -37,6 +34,15 @@ public class LegendConfig {
         interItemSpace = legendConfig.interItemSpace;
         interLineSpace = legendConfig.interLineSpace;
         isEnabled = legendConfig.isEnabled;
+        borderWidth = legendConfig.borderWidth;
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public void setBorderWidth(int borderWidth) {
+        this.borderWidth = borderWidth;
     }
 
     public boolean isEnabled() {
@@ -103,26 +109,15 @@ public class LegendConfig {
         this.backgroundColor = backgroundColor;
     }
 
-    public Insets getPadding() {
-        if(padding != null) {
-            return padding;
+    public Insets getButtonsMargin() {
+        if(buttonsMargin != null) {
+            return buttonsMargin;
         }
 
-        return new Insets(textStyle.getSize()/5);
+        return new Insets(textStyle.getSize()/2);
     }
 
-    public Insets getMargin() {
-        if(margin != null) {
-            return margin;
-        }
-        return new Insets(textStyle.getSize() / 3);
-    }
-
-    public void setMargin(Insets margin) {
-        this.margin = margin;
-    }
-
-    public void setPadding(@Nullable Insets padding) {
-        this.padding = padding;
+    public void setButtonsMargin(@Nullable Insets buttonsMargin) {
+        this.buttonsMargin = buttonsMargin;
     }
 }

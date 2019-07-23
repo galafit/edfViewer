@@ -90,7 +90,7 @@ public class NavigableChart {
         if (chartDataMinMax == null) {
             return;
         }
-        double navigatorBestExtent = navigator.getBestExtent(XAxisPosition.BOTTOM, canvas);
+        double navigatorBestExtent = navigator.getBestExtent(XAxisPosition.BOTTOM, canvas.getRenderContext());
         Range navigatorRange = chartDataMinMax;
         if (navigatorBestExtent > chartDataMinMax.length()) {
             navigatorRange = new Range(chartDataMinMax.getMin(), chartDataMinMax.getMin() + navigatorBestExtent);
@@ -106,7 +106,7 @@ public class NavigableChart {
         for (int i = 0; i < xAxisPositions.length; i++) {
             Range scrollRange = chartDataMinMax;
             XAxisPosition xAxisPosition = xAxisPositions[i];
-            double extent = chart.getBestExtent(xAxisPosition, canvas);
+            double extent = chart.getBestExtent(xAxisPosition, canvas.getRenderContext());
             if (extent > scrollRange.length()) {
                 scrollRange = new Range(scrollRange.getMin(), scrollRange.getMin() + extent);
             }
@@ -264,7 +264,8 @@ public class NavigableChart {
     }
 
     private void drawScroll(BCanvas canvas, Scroll scroll) {
-        BRectangle area = navigator.getGraphArea(canvas);
+        //BRectangle area = navigator.getGraphArea(canvas.getRenderContext());
+        BRectangle area = navigatorArea;
         ScrollConfig scrollConfig = config.getScrollConfig();
 
         int borderWidth = scrollConfig.getBorderWidth();
@@ -448,23 +449,13 @@ public class NavigableChart {
             XAxisPosition xAxisPosition = scrollsToAutoscale.get(i);
             Scroll scroll = scrolls.get(xAxisPosition);
             if (scroll != null) {
-                scroll.setExtent(chart.getBestExtent(xAxisPosition, canvas));
+                scroll.setExtent(chart.getBestExtent(xAxisPosition, canvas.getRenderContext()));
             }
         }
         scrollsToAutoscale.clear();
 
         canvas.setColor(config.getBackgroundColor());
         canvas.fillRect(fullArea.x, fullArea.y, fullArea.width, fullArea.height);
-        Insets chartMargin = chart.getMargin(canvas);
-        Insets previewMargin = navigator.getMargin(canvas);
-        if (chartMargin.left() != previewMargin.left() || chartMargin.right() != previewMargin.right()) {
-            int left = Math.max(chartMargin.left(), previewMargin.left());
-            int right = Math.max(chartMargin.right(), previewMargin.right());
-            chartMargin = new Insets(chartMargin.top(), right, chartMargin.bottom(), left);
-            previewMargin = new Insets(previewMargin.top(), right, previewMargin.bottom(), left);
-            chart.setMargin(chartMargin, canvas);
-            navigator.setMargin(previewMargin, canvas);
-        }
         navigator.draw(canvas);
         chart.draw(canvas);
         for (XAxisPosition key : scrolls.keySet()) {

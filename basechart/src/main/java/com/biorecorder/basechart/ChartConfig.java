@@ -53,7 +53,6 @@ public class ChartConfig {
         titleConfig.setTextColor(labelColor);
 
         legendConfig.setBackgroundColor(bgColor);
-        legendConfig.setMargin(new Insets(1));
     }
 
     public ChartConfig(ChartConfig chartConfig) {

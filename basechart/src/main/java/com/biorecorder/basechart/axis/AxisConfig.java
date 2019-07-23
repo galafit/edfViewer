@@ -3,6 +3,7 @@ package com.biorecorder.basechart.axis;
 import com.biorecorder.basechart.graphics.BColor;
 import com.biorecorder.basechart.graphics.TextStyle;
 import com.biorecorder.basechart.graphics.DashStyle;
+import com.biorecorder.basechart.scales.TickLabelFormat;
 import com.sun.istack.internal.Nullable;
 
 /**
@@ -29,7 +30,7 @@ public class AxisConfig {
     private BColor tickLabelColor = BColor.GRAY;
     private boolean isTickLabelCentered = true;
 
-    private AxisPrefixAndSuffix tickLabelPrefixAndSuffix;
+    private TickLabelFormat tickLabelPrefixAndSuffix;
 
     private int minorTickMarkWidth = 1; // px
     private BColor minorTickMarkColor = BColor.GRAY;
@@ -137,7 +138,7 @@ public class AxisConfig {
     }
 
     public void setTickLabelPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
-        tickLabelPrefixAndSuffix = new AxisPrefixAndSuffix(prefix, suffix);
+        tickLabelPrefixAndSuffix = new TickLabelFormat(prefix, suffix);
     }
 
     public boolean isTickLabelCentered() {
@@ -152,7 +153,7 @@ public class AxisConfig {
         return tickInterval;
     }
 
-    public AxisPrefixAndSuffix getTickLabelPrefixAndSuffix() {
+    public TickLabelFormat getTickLabelPrefixAndSuffix() {
         return tickLabelPrefixAndSuffix;
     }
 

@@ -1,11 +1,11 @@
-package com.biorecorder.basechart.axis;
+package com.biorecorder.basechart.scales;
 
 import com.sun.istack.internal.Nullable;
 
 /**
  * Created by galafit on 5/9/17.
  */
-public class AxisPrefixAndSuffix {
+public class TickLabelFormat {
     /**
      * At the moment not used
      tera 	T 	1,000,000,000,000 	10x12
@@ -20,7 +20,7 @@ public class AxisPrefixAndSuffix {
     private String prefix;
     private String suffix;
 
-    public AxisPrefixAndSuffix(@Nullable String prefix, @Nullable String suffix) {
+    public TickLabelFormat(@Nullable String prefix, @Nullable String suffix) {
         this.prefix = prefix;
         this.suffix = suffix;
     }

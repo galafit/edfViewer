@@ -28,8 +28,8 @@ public class SwingCanvas implements BCanvas {
     }
 
     @Override
-    public void translate(int x, int y) {
-        g2.translate(x, y);
+    public void translate(int dx, int dy) {
+        g2.translate(dx, dy);
     }
 
     @Override
@@ -72,86 +72,13 @@ public class SwingCanvas implements BCanvas {
 
     @Override
     public void setTextStyle(TextStyle textStyle) {
-        g2.setFont(getFont(textStyle));
-    }
-
-
-    private Font getFont(TextStyle textStyle) {
-        String fontName = textStyle.getFontName();
-        if (fontName == TextStyle.DEFAULT) {
-            fontName = new JLabel().getFont().getFontName();
-        }
-        int style = Font.PLAIN;
-        if (textStyle.isBold()) {
-            style += Font.BOLD;
-        }
-        if (textStyle.isItalic()) {
-            style += Font.ITALIC;
-        }
-        return new Font(fontName, style, textStyle.getSize());
+        g2.setFont(SwingRenderContext.getFont(textStyle));
     }
 
     @Override
-    public TextMetric getTextMetric() {
-        return new TextMetric() {
-            FontMetrics fm = g2.getFontMetrics();
-
-            @Override
-            public int ascent() {
-                return fm.getAscent();
-            }
-
-            @Override
-            public int descent() {
-                return fm.getDescent();
-            }
-
-            @Override
-            public int height() {
-                return fm.getHeight();
-            }
-
-            @Override
-            public int stringWidth(String str) {
-                if (str != null) {
-                    return fm.stringWidth(str);
-                }
-                return 0;
-            }
-        };
+    public RenderContext getRenderContext() {
+        return new SwingRenderContext();
     }
-
-
-    @Override
-    public TextMetric getTextMetric(TextStyle textStyle) {
-        return new TextMetric() {
-            FontMetrics fm = g2.getFontMetrics(getFont(textStyle));
-
-            @Override
-            public int ascent() {
-                return fm.getAscent();
-            }
-
-            @Override
-            public int descent() {
-                return fm.getDescent();
-            }
-
-            @Override
-            public int height() {
-                return fm.getHeight();
-            }
-
-            @Override
-            public int stringWidth(String str) {
-                if (str != null) {
-                    return fm.stringWidth(str);
-                }
-                return 0;
-            }
-        };
-    }
-
 
     @Override
     public void setColor(BColor color) {
@@ -204,10 +131,19 @@ public class SwingCanvas implements BCanvas {
     }
 
     @Override
+    public void drawLine(BLine line) {
+       drawLine(line.x1, line.y1, line.x2, line.y2);
+    }
+
+    @Override
     public void drawRect(int x, int y, int width, int height) {
         g2.drawRect(x, y, width, height);
     }
 
+    @Override
+    public void drawRect(BRectangle rectangle) {
+         drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    }
 
     @Override
     public void fillRect(int x, int y, int width, int height) {

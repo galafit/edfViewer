@@ -1,9 +1,6 @@
 package com.biorecorder.basechart.axis;
 
-import com.biorecorder.basechart.graphics.BCanvas;
-import com.biorecorder.basechart.graphics.BText;
-import com.biorecorder.basechart.graphics.TextAnchor;
-import com.biorecorder.basechart.graphics.TextMetric;
+import com.biorecorder.basechart.graphics.*;
 import com.biorecorder.basechart.scales.Tick;
 
 import java.util.List;
@@ -11,14 +8,14 @@ import java.util.List;
 /**
  * Created by galafit on 29/8/18.
  */
-abstract class HorizontalAxisPainter implements AxisPainter {
+abstract class HorizontalOrientation implements Orientation {
     @Override
     public int labelSizeForWidth(TextMetric tm,  List<Tick> ticks) {
         return tm.height();
     }
 
     @Override
-    public BText tickToLabel(TextMetric tm, int tickPosition, String tickLabel, int start, int end, int tickPixelInterval, AxisConfig config, int interLabelGap, boolean isCategory) {
+    public BText createTickLabel(TextMetric tm, int tickPosition, String tickLabel, int start, int end, int tickPixelInterval, AxisConfig config, int interLabelGap, boolean isCategory) {
         int charSize = tm.stringWidth("0");
         int space = 2;// px
         int charHalfWidth = charSize / 2;
@@ -65,8 +62,8 @@ abstract class HorizontalAxisPainter implements AxisPainter {
     }
 
     @Override
-    public void drawAxisLine(BCanvas canvas, int start, int end) {
-        canvas.drawLine(start, 0, end, 0);
+    public BLine createAxisLine(int start, int end) {
+        return new BLine(start, 0, end, 0);
     }
 
     @Override
